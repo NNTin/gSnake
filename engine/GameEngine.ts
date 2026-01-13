@@ -225,6 +225,9 @@ export class GameEngine {
 
         // Check Obstacles
         if (this.isObstacle({ x: nextX, y: nextY })) return false;
+
+        // Check Food (Food acts as platform)
+        if (this.isFood({ x: nextX, y: nextY })) return false;
     }
     return true;
   }
@@ -232,6 +235,11 @@ export class GameEngine {
   private isObstacle(pos: Position): boolean {
       if (!this.level) return false;
       return this.level.obstacles.some(o => o.x === pos.x && o.y === pos.y);
+  }
+
+  private isFood(pos: Position): boolean {
+      if (!this.level) return false;
+      return this.level.food.some(f => f.x === pos.x && f.y === pos.y);
   }
 
   private checkCollision(head: Position): boolean {
@@ -262,11 +270,8 @@ export class GameEngine {
     if (!this.level) return false;
     
     // Check if head is on exit
-    if (head.x === this.level.exit.x && head.y === this.level.exit.y) {
-        // Must collect all food
-        return this.gameState.foodCollected === this.gameState.totalFood;
-    }
-    return false;
+    // Food collection requirement removed as per T7
+    return head.x === this.level.exit.x && head.y === this.level.exit.y;
   }
 
   private computeGrid(): Grid {
