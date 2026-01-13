@@ -1,0 +1,3 @@
+## gSnake
+
+Gravity Snake is a strategic puzzle game that reimagines the classic Snake experience by introducing gravity physics and turn-based movement. Unlike traditional Snake games that rely on reflexes and continuous movement, Gravity Snake requires players to think ahead about how gravity will affect their position after each deliberate move. The snake only moves when the player acts, and after each action, gravity pulls the snake downward until it hits an obstacle or the floor. This creates a puzzle-like experience where players must navigate through increasingly complex levels with static obstacles and platforms.
