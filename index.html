@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset='utf-8'>
+  <title>Redirecting...</title>
+  <script>
+    fetch('/gSnake/versions.json')
+      .then(res => res.json())
+      .then(data => {
+        if (data.latestVersion) {
+          window.location.href = '/gSnake/' + data.latestVersion + '/';
+        } else {
+           window.location.href = '/gSnake/main/';
+        }
+      })
+      .catch(err => {
+        window.location.href = '/gSnake/main/';
+      });
+  </script>
+</head>
+<body><p>Redirecting...</p></body>
+</html>
