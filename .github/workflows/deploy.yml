@@ -47,9 +47,17 @@ jobs:
         run: |
           TAG_NAME=${GITHUB_REF#refs/tags/}
           VERSION=${TAG_NAME#v}
+          
+          # Determine source branch (branch that contains this tag's commit)
+          SOURCE_BRANCH=$(git branch -r --contains HEAD | grep -v 'HEAD' | head -1 | sed 's/.*origin\///')
+          if [ -z "$SOURCE_BRANCH" ]; then
+            SOURCE_BRANCH="main"  # Fallback to main if detection fails
+          fi
+          
           echo "IS_TAG_DEPLOY=true" >> $GITHUB_ENV
           echo "VERSION_TAG=$TAG_NAME" >> $GITHUB_ENV
           echo "VERSION_NUM=$VERSION" >> $GITHUB_ENV
+          echo "SOURCE_BRANCH=$SOURCE_BRANCH" >> $GITHUB_ENV
 
       # --- Tag Specific Logic: Sync Version & Commit Back ---
       - name: Sync Package Version (Tags)
@@ -58,24 +66,24 @@ jobs:
           # 1. Update version in current workspace (for build artifact)
           npm version ${{ env.VERSION_NUM }} --no-git-tag-version
           
-          # 2. Commit back to main
+          # 2. Commit back to source branch
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           
           # Stash current changes (the version bump) to move branches safely
           git stash
           
-          # Checkout main to update source
-          git checkout main
-          git pull origin main || echo "Warning: Could not pull main, proceeding with checkout state"
+          # Checkout source branch to update
+          git checkout ${{ env.SOURCE_BRANCH }}
+          git pull origin ${{ env.SOURCE_BRANCH }} || echo "Warning: Could not pull ${{ env.SOURCE_BRANCH }}, proceeding with checkout state"
           
-          # Apply version update to main
+          # Apply version update to source branch
           npm version ${{ env.VERSION_NUM }} --no-git-tag-version
           
           # Commit and Push
           git add package*.json
           git commit -m "chore: release ${{ env.VERSION_TAG }}" || echo "No changes to commit"
-          git push origin main
+          git push origin ${{ env.SOURCE_BRANCH }}
           
           # Go back to tag commit for building the artifact
           git checkout -
@@ -225,5 +233,5 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./gh-pages-root
-          keep_files: false # We have fully constructed the desired state in gh-pages-root
+          keep_files: true # Preserve existing version directories
           branch: gh-pages
