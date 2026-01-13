@@ -439,6 +439,7 @@ sequenceDiagram
 - Turn-based (one move at a time)
 - Input blocked during gravity resolution
 - No move queuing or buffering
+- **Opposite direction prevention:** Cannot make 180-degree turns (e.g., cannot move South if currently moving North). This prevents accidental self-collision and maintains game flow.
 
 ### Visual Feedback
 

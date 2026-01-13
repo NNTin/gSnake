@@ -264,19 +264,14 @@ const gameState = writable<GameState>({
 ### Grid Representation
 
 ```typescript
-// Internal grid representation (cached with dirty tracking)
+// Grid type for rendering
 type Grid = CellType[][];  // grid[y][x]
 
-interface GridCache {
-  grid: Grid;
-  dirty: boolean;
-}
-
-// Grid caching strategy:
-// - Grid is cached after computation
-// - Marked dirty when game state changes
-// - Recomputed only when dirty flag is set
-// - Improves performance by avoiding unnecessary recomputation
+// Grid computation strategy:
+// - Computed on-demand in UI components from stores
+// - No caching needed for 15×15 grid (225 cells)
+// - Components derive cell types from snake and level stores
+// - Svelte's reactivity handles efficient re-rendering
 ```
 
 **Coordinate System:**
@@ -391,7 +386,6 @@ class GameEngine {
   private gameState: GameState;
   private isProcessing: boolean;  // Input lock flag
   private listeners: GameEventListener[];
-  private gridCache: GridCache;
   
   // Public API:
   init(levels: Level[]): void
@@ -411,8 +405,7 @@ class GameEngine {
   private canSnakeFall(): boolean  // Check if any segment would collide when falling
   private checkExit(pos: Position): boolean
   private isValidPosition(pos: Position): boolean
-  private computeGrid(): Grid
-  private getGrid(): Grid  // Returns cached or recomputed grid
+  private isOppositeDirection(direction: Direction): boolean  // Prevent 180-degree turns
 }
 ```
 
@@ -423,7 +416,7 @@ class GameEngine {
 - State transitions (playing → game over → level complete)
 - Emits events for state changes (decoupled from UI)
 - Manages input processing lock
-- Caches grid computation for performance
+- Prevents opposite direction moves (180-degree turns)
 
 **Key Methods:**
 
@@ -444,9 +437,8 @@ class GameEngine {
 8. Check collision with obstacles or self → trigger game over if needed
 9. Check exit (if all food collected: foodCollected === totalFood) → trigger level complete
 10. Increment moves counter
-11. Mark grid as dirty
-12. Emit state change events
-13. Set isProcessing = false
+11. Emit state change events
+12. Set isProcessing = false
 
 `applyGravity()`:
 
@@ -501,11 +493,22 @@ if (foodCollected) {
 
 **Movement Order is Critical:**
 
-1. Calculate new head position
-2. Check for food BEFORE modifying snake
-3. Add new head
-4. Conditionally remove tail based on food collection
-5. Then apply gravity to entire snake
+1. Check for opposite direction (prevent 180-degree turns)
+2. Calculate new head position
+3. Check for food BEFORE modifying snake
+4. Add new head
+5. Conditionally remove tail based on food collection
+6. Then apply gravity to entire snake
+
+**Opposite Direction Prevention:**
+
+```typescript
+// Prevent 180-degree turns to avoid instant self-collision
+if (currentDirection === North && newDirection === South) return;
+if (currentDirection === South && newDirection === North) return;
+if (currentDirection === East && newDirection === West) return;
+if (currentDirection === West && newDirection === East) return;
+```
 
 ### Store Definitions
 
