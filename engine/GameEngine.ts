@@ -1,15 +1,18 @@
-import { 
+import type { 
   Level, 
-  Direction, 
   Grid, 
   GameEventListener, 
   Snake, 
   GameState, 
   GameEvent, 
   Position, 
-  CellType, 
-  GameStatus,
   GridCache
+} from '../types';
+
+import { 
+  Direction, 
+  CellType, 
+  GameStatus
 } from '../types';
 
 export class GameEngine {
