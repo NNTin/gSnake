@@ -73,24 +73,21 @@ export class GameEngine {
       this.snake.segments.pop();
     }
 
-    // 2. Apply Gravity
-    this.applyGravity();
-
-    // 3. Check Collisions (Game Over)
-    const finalHead = this.snake.segments[0];
-    if (this.checkCollision(finalHead)) {
+    // 2. Check Immediate Collision
+    if (this.checkCollision(this.snake.segments[0])) {
       this.gameState.status = GameStatus.GameOver;
     } else {
-       // 4. Check Exit (Level Complete)
+      // 3. Apply Gravity (iteratively checked)
+      this.applyGravity();
+    }
+
+    // 4. Check Exit (only if still playing)
+    if (this.gameState.status === GameStatus.Playing) {
+      const finalHead = this.snake.segments[0];
        if (this.checkExit(finalHead)) {
          if (this.currentLevelIndex < this.levels.length - 1) {
-            // Level Complete
-            this.gameState.status = GameStatus.LevelComplete;
-            // Emit state change before transition?
-            // Actually, we can just load the next level immediately as per spec
-            // But let's finish this update cycle first so the UI sees the 'win' state if needed, 
-            // OR just transition. Spec says "Next level loads instantly".
-            // So we'll skip the 'LevelComplete' display state and go straight to next level.
+            // Level Complete -> Next Level
+            // Load next level immediately
             this.loadLevel(this.gameState.currentLevel + 1);
             return; // loadLevel resets state and emits events
          } else {
@@ -209,6 +206,15 @@ export class GameEngine {
     while (this.canSnakeFall()) {
         for (const segment of this.snake.segments) {
             segment.y += 1;
+        }
+
+        // Iterative Collision Check (e.g. falling into hazards)
+        // We check the head mainly, but for general safety we might check bounds/obstacles again
+        // though canSnakeFall protects against obstacles. 
+        // This is primarily for future mechanics where checkCollision returns true but canSnakeFall returns true.
+        if (this.checkCollision(this.snake.segments[0])) {
+            this.gameState.status = GameStatus.GameOver;
+            break;
         }
     }
   }

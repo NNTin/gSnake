@@ -119,8 +119,8 @@ sequenceDiagram
     User->>KeyHandler: Press arrow key
     KeyHandler->>GameEngine: processMove(direction)
     GameEngine->>GameEngine: Move snake head
-    GameEngine->>GameEngine: Apply gravity (iterative)
-    GameEngine->>GameEngine: Check collisions
+    GameEngine->>GameEngine: Check immediate collision
+    GameEngine->>GameEngine: Apply gravity (iterative with checks)
     GameEngine->>GameEngine: Check food/exit
     GameEngine->>Stores: Update state
     Stores->>Components: Reactive update
@@ -433,9 +433,14 @@ class GameEngine {
 6. If no food:
   - Unshift new head
   - Pop tail (maintain length)
-7. Apply gravity: entire snake falls together as unit until any segment hits obstacle
-8. Check collision with obstacles or self → trigger game over if needed
-9. Check exit (if all food collected: foodCollected === totalFood) → trigger level complete
+7. Check collision (Game Over check):
+  - If head collides with obstacle, bounds, or self → trigger game over
+  - If Game Over, skip gravity/exit checks
+8. If not Game Over, Apply gravity:
+  - Loop while snake can fall:
+    - Move all segments down
+    - Check collision again (for hazards/traps) → trigger game over and break if collision
+9. If still Playing, Check exit (if snake head at exit) → trigger level complete
 10. Increment moves counter
 11. Emit state change events
 12. Set isProcessing = false
@@ -445,22 +450,16 @@ class GameEngine {
 ```typescript
 // Entire snake falls together as a unit
 // Falls until ANY segment hits an obstacle or floor
-while (true) {
-  // Check if any segment would collide if moved down
-  let canFall = true;
-  for (const segment of snake.segments) {
-    const nextPos = { x: segment.x, y: segment.y + 1 };
-    if (checkCollision(nextPos)) {
-      canFall = false;
-      break;
-    }
-  }
-  
-  if (!canFall) break;
-  
+while (this.canSnakeFall()) {
   // Move all segments down simultaneously
   for (let i = 0; i < snake.segments.length; i++) {
     snake.segments[i].y += 1;
+  }
+  
+  // Check collision after each fall step (e.g. falling into hazards)
+  if (this.checkCollision(this.snake.segments[0])) {
+      this.gameState.status = GameStatus.GameOver;
+      break;
   }
 }
 ```
@@ -498,7 +497,8 @@ if (foodCollected) {
 3. Check for food BEFORE modifying snake
 4. Add new head
 5. Conditionally remove tail based on food collection
-6. Then apply gravity to entire snake
+6. Check for immediate collision
+7. Then apply gravity (iterative with collision checks)
 
 **Opposite Direction Prevention:**
 
