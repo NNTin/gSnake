@@ -128,7 +128,7 @@ export class GameEngine {
     if (this.level) {
         this.snake = {
             segments: [...this.level.snake],
-            direction: null
+            direction: this.inferInitialDirection(this.level.snake)
         };
         
         this.gameState = {
@@ -272,6 +272,20 @@ export class GameEngine {
     // Check if head is on exit
     // Food collection requirement removed as per T7
     return head.x === this.level.exit.x && head.y === this.level.exit.y;
+  }
+
+  private inferInitialDirection(segments: Position[]): Direction | null {
+    if (segments.length < 2) return null;
+    
+    const head = segments[0];
+    const neck = segments[1];
+    
+    if (head.x > neck.x) return Direction.East;
+    if (head.x < neck.x) return Direction.West;
+    if (head.y > neck.y) return Direction.South;
+    if (head.y < neck.y) return Direction.North;
+    
+    return null;
   }
 
   private computeGrid(): Grid {
