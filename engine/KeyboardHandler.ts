@@ -1,9 +1,12 @@
 import { GameEngine } from './GameEngine';
-import { Direction } from '../types';
+import { Direction, GameStatus } from '../types';
+import { gameState } from '../stores/stores';
 
 export class KeyboardHandler {
   private keyMap: Map<string, Direction>;
   private boundHandler: (event: KeyboardEvent) => void;
+  private currentStatus: GameStatus = GameStatus.Playing;
+  private unsubscribe: () => void;
 
   constructor(private gameEngine: GameEngine) {
     this.keyMap = new Map([
@@ -21,20 +24,83 @@ export class KeyboardHandler {
       ['D', Direction.East],
     ]);
     this.boundHandler = this.handleKeyPress.bind(this);
+    
+    this.unsubscribe = gameState.subscribe(state => {
+      this.currentStatus = state.status;
+    });
   }
   
   handleKeyPress(event: KeyboardEvent): void {
+    // 1. Check Modifiers (Ignore combinations)
+    if (event.ctrlKey || event.altKey || event.shiftKey || event.metaKey) {
+      return;
+    }
+
+    const key = event.key;
+    const lowerKey = key.toLowerCase();
+
+    // 2. Prevent Defaults
+    // Always prevent: Space, Tab, Arrows
+    if ([' ', 'Spacebar', 'Tab', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
+      event.preventDefault();
+    }
+    // Conditionally prevent: 'r', 'q', Escape
+    if (['r', 'q', 'escape', 'esc'].includes(lowerKey)) {
+      event.preventDefault();
+    }
+
+    switch (this.currentStatus) {
+      case GameStatus.Playing:
+        this.handlePlayingState(event, lowerKey);
+        break;
+      case GameStatus.GameOver:
+        this.handleGameOverState(event, lowerKey);
+        break;
+      case GameStatus.AllComplete:
+        this.handleAllCompleteState(event, lowerKey);
+        break;
+    }
+  }
+
+  private handlePlayingState(event: KeyboardEvent, lowerKey: string): void {
+    if (lowerKey === 'r') {
+      this.gameEngine.restartLevel();
+      return;
+    }
+    if (lowerKey === 'q') {
+      this.gameEngine.loadLevel(1);
+      return;
+    }
+    if (lowerKey === 'escape' || lowerKey === 'esc') {
+      // Ignored
+      return;
+    }
+
     const direction = this.keyMap.get(event.key);
-    // Only handle if it's a game key and engine is ready
     if (direction) {
-      if (this.gameEngine.canProcessInput()) {
-        event.preventDefault();
-        this.gameEngine.processMove(direction);
-      } else {
-        // Prevent default scrolling even if input is blocked temporarily, 
-        // providing a smoother experience
-        event.preventDefault();
+      // Prevent default for WASD to avoid typing/scrolling if not handled above
+      if (!event.defaultPrevented) event.preventDefault();
+      
+      this.gameEngine.processMove(direction);
+    }
+  }
+
+  private handleGameOverState(event: KeyboardEvent, lowerKey: string): void {
+    if (lowerKey === 'q' || lowerKey === 'escape' || lowerKey === 'esc') {
+      this.gameEngine.loadLevel(1);
+    } else {
+      // Any other key triggers restart
+      // Ignore keys that are just modifiers
+      const ignoredKeys = ['Control', 'Shift', 'Alt', 'Meta', 'CapsLock'];
+      if (!ignoredKeys.includes(event.key)) {
+        this.gameEngine.restartLevel();
       }
+    }
+  }
+
+  private handleAllCompleteState(event: KeyboardEvent, lowerKey: string): void {
+    if (lowerKey === 'r' || lowerKey === 'q' || lowerKey === 'escape' || lowerKey === 'esc') {
+      this.gameEngine.loadLevel(1);
     }
   }
   
@@ -44,5 +110,8 @@ export class KeyboardHandler {
   
   detach(): void {
     window.removeEventListener('keydown', this.boundHandler);
+    if (this.unsubscribe) {
+      this.unsubscribe();
+    }
   }
 }

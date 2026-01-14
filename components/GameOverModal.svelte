@@ -1,8 +1,13 @@
 <script lang="ts">
-  import { getContext } from 'svelte';
+  import { getContext, onMount } from 'svelte';
   import type { GameEngine } from '../engine/GameEngine';
 
   const gameEngine = getContext<GameEngine>('GAME_ENGINE');
+  let restartButton: HTMLButtonElement;
+
+  onMount(() => {
+    restartButton?.focus();
+  });
 
   function handleRestartLevel() {
     gameEngine.restartLevel();
@@ -16,7 +21,7 @@
 <div class="modal">
   <h2>Game Over</h2>
   <div class="modal-buttons">
-    <button class="modal-btn primary" on:click={handleRestartLevel} data-element-id="restart-level-btn">Restart Level</button>
+    <button class="modal-btn primary" bind:this={restartButton} on:click={handleRestartLevel} data-element-id="restart-level-btn">Restart Level</button>
     <button class="modal-btn secondary" on:click={handleBackToLevel1} data-element-id="back-to-level1-btn">Back to Level 1</button>
   </div>
 </div>
