@@ -1,0 +1,14 @@
+[package]
+name = "gsnake-cli"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+gsnake-core = { path = "../gsnake-core" }
+serde.workspace = true
+serde_json.workspace = true
+# Note: crossterm and ratatui dependencies will be added in T4

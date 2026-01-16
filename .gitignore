@@ -31,3 +31,7 @@ dist-ssr
 .chunkhound.json
 .mcp.json
 .chunkhound/
+
+# Rust
+/target/
+Cargo.lock
