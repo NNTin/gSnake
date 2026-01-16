@@ -51,11 +51,6 @@ export interface GameState {
 
 export type Grid = CellType[][];
 
-export interface GridCache {
-  grid: Grid;
-  dirty: boolean;
-}
-
 export type GameEvent = 
   | { type: 'stateChanged'; state: GameState }
   | { type: 'snakeChanged'; snake: Snake }

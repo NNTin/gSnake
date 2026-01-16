@@ -1,0 +1,15 @@
+[package]
+name = "gsnake-core"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+
+[lib]
+crate-type = ["lib"]

@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store';
 import type { GameState, Snake, Level, GameEvent } from '../types';
 import { GameStatus } from '../types';
-import { GameEngine } from '../engine/GameEngine';
+import { WasmGameEngine } from '../engine/WasmGameEngine';
 
 export const gameState = writable<GameState>({
   status: GameStatus.Playing,
@@ -18,7 +18,7 @@ export const snake = writable<Snake>({
 
 export const level = writable<Level | null>(null);
 
-export function connectGameEngineToStores(engine: GameEngine): void {
+export function connectGameEngineToStores(engine: WasmGameEngine): void {
   engine.addEventListener((event: GameEvent) => {
     switch (event.type) {
       case 'stateChanged':

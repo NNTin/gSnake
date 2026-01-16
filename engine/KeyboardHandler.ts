@@ -1,4 +1,4 @@
-import { GameEngine } from './GameEngine';
+import { WasmGameEngine } from './WasmGameEngine';
 import { Direction, GameStatus } from '../types';
 import { gameState } from '../stores/stores';
 
@@ -8,7 +8,7 @@ export class KeyboardHandler {
   private currentStatus: GameStatus = GameStatus.Playing;
   private unsubscribe: () => void;
 
-  constructor(private gameEngine: GameEngine) {
+  constructor(private gameEngine: WasmGameEngine) {
     this.keyMap = new Map([
       ['ArrowUp', Direction.North],
       ['ArrowDown', Direction.South],
