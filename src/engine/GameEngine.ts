@@ -7,13 +7,13 @@ import type {
   GameEvent, 
   Position, 
   GridCache
-} from '../types';
+} from '../../types';
 
 import { 
   Direction, 
   CellType, 
   GameStatus
-} from '../types';
+} from '../../types';
 
 export class GameEngine {
   private levels: Level[] = [];
