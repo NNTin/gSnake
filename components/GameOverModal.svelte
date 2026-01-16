@@ -1,8 +1,8 @@
 <script lang="ts">
   import { getContext, onMount } from 'svelte';
-  import type { GameEngine } from '../engine/GameEngine';
+  import type { WasmGameEngine } from '../engine/WasmGameEngine';
 
-  const gameEngine = getContext<GameEngine>('GAME_ENGINE');
+  const gameEngine = getContext<WasmGameEngine>('GAME_ENGINE');
   let restartButton: HTMLButtonElement;
 
   onMount(() => {

@@ -1,5 +1,5 @@
-import type { Level, GameEvent, GameEventListener } from '../../types';
-import init, { WasmGameEngine as RustEngine, log } from '../../pkg/gsnake_wasm';
+import type { Level, GameEvent, GameEventListener } from '../types';
+import init, { WasmGameEngine as RustEngine, log } from '../pkg/gsnake_wasm';
 
 /**
  * TypeScript wrapper around the Rust WASM game engine
@@ -26,27 +26,39 @@ export class WasmGameEngine {
     this.currentLevelIndex = startLevel - 1;
 
     // Load the first level
-    await this.loadLevel(this.currentLevelIndex);
+    await this.loadLevelByIndex(this.currentLevelIndex);
 
     this.initialized = true;
   }
 
-  private async loadLevel(levelIndex: number): Promise<void> {
+  // Public interface to match old GameEngine
+  async loadLevel(levelNumber: number): Promise<void> {
+    await this.loadLevelByIndex(levelNumber - 1);
+  }
+
+  async restartLevel(): Promise<void> {
+    await this.resetLevel();
+  }
+
+  private async loadLevelByIndex(levelIndex: number): Promise<void> {
     if (levelIndex < 0 || levelIndex >= this.levels.length) {
       throw new Error(`Invalid level index: ${levelIndex}`);
     }
 
     const level = this.levels[levelIndex];
+    this.currentLevelIndex = levelIndex;
 
     // Convert TypeScript Level to match Rust structure
+    // Note: level.snake in JSON/Types is just Position[] (segments), 
+    // but Rust expects Snake struct { segments, direction }
     const rustLevel = {
       grid_size: {
         width: level.gridSize.width,
         height: level.gridSize.height
       },
       snake: {
-        segments: level.snake.segments.map((seg: any) => ({ x: seg.x, y: seg.y })),
-        direction: level.snake.direction
+        segments: level.snake.map((seg: any) => ({ x: seg.x, y: seg.y })),
+        direction: null
       },
       obstacles: level.obstacles.map((obs: any) => ({ x: obs.x, y: obs.y })),
       food: level.food.map((f: any) => ({ x: f.x, y: f.y })),
@@ -80,31 +92,39 @@ export class WasmGameEngine {
   }
 
   private handleFrameUpdate(frame: any, level: Level): void {
+    // Map Rust status to TS status
+    const statusMap: Record<string, any> = {
+      'Playing': 'PLAYING',
+      'GameOver': 'GAME_OVER',
+      'LevelComplete': 'LEVEL_COMPLETE',
+      'AllComplete': 'ALL_COMPLETE'
+    };
+    
     // Convert Rust frame back to TypeScript format
     const gameState = {
-      status: frame.state.status,
-      currentLevel: frame.state.current_level,
+      status: statusMap[frame.state.status] || frame.state.status,
+      // Rust engine hardcodes level to 1, so we override it with our local tracker
+      currentLevel: this.currentLevelIndex + 1,
       moves: frame.state.moves,
       foodCollected: frame.state.food_collected,
       totalFood: frame.state.total_food
     };
-
+    
     // Emit state changed event
     this.emitEvent({
       type: 'stateChanged',
       state: gameState
     });
 
-    // Calculate snake from level data (WASM doesn't track snake separately)
-    const rustLevel = this.wasmEngine!.getLevel();
+    // Calculate snake from frame data (now included in Frame struct)
     const snake = {
-      segments: rustLevel.snake.segments,
-      direction: rustLevel.snake.direction
+        segments: frame.snake.segments,
+        direction: frame.snake.direction
     };
 
     this.emitEvent({
-      type: 'snakeChanged',
-      snake: snake
+        type: 'snakeChanged',
+        snake: snake
     });
 
     this.emitEvent({
@@ -112,7 +132,7 @@ export class WasmGameEngine {
     });
 
     // Handle level completion
-    if (gameState.status === 'LevelComplete') {
+    if (gameState.status === 'LEVEL_COMPLETE') {
       this.handleLevelComplete();
     }
   }
@@ -135,6 +155,10 @@ export class WasmGameEngine {
 
     // Convert direction to Rust format
     const directionMap: Record<string, string> = {
+      'NORTH': 'North',
+      'SOUTH': 'South',
+      'EAST': 'East',
+      'WEST': 'West',
       'North': 'North',
       'South': 'South',
       'East': 'East',
@@ -156,16 +180,15 @@ export class WasmGameEngine {
 
   async nextLevel(): Promise<void> {
     if (this.currentLevelIndex >= this.levels.length - 1) {
-      console.log('No more levels');
       return;
     }
 
     this.currentLevelIndex++;
-    await this.loadLevel(this.currentLevelIndex);
+    await this.loadLevelByIndex(this.currentLevelIndex);
   }
 
   async resetLevel(): Promise<void> {
-    await this.loadLevel(this.currentLevelIndex);
+    await this.loadLevelByIndex(this.currentLevelIndex);
   }
 
   addEventListener(listener: GameEventListener): void {

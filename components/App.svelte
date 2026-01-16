@@ -1,18 +1,18 @@
 <script lang="ts">
   import { onMount, setContext } from 'svelte';
-  import { GameEngine } from '../engine/GameEngine';
+  import { WasmGameEngine } from '../engine/WasmGameEngine';
   import { KeyboardHandler } from '../engine/KeyboardHandler';
   import { connectGameEngineToStores } from '../stores/stores';
   import GameContainer from './GameContainer.svelte';
   import levelsData from '../data/levels.json';
   import type { Level } from '../types';
 
-  const gameEngine = new GameEngine();
+  const gameEngine = new WasmGameEngine();
   setContext('GAME_ENGINE', gameEngine);
 
   let keyboardHandler: KeyboardHandler;
 
-  onMount(() => {
+  onMount(async () => {
     // Initialize engine with levels
     // Type assertion needed because JSON import is treated as generic object by TS sometimes
     const levels = levelsData as unknown as Level[];
@@ -23,8 +23,9 @@
     
     // Connect stores BEFORE init so we catch the initial events
     connectGameEngineToStores(gameEngine);
-    gameEngine.init(levels, startLevel);
+    await gameEngine.init(levels, startLevel);
 
+    // @ts-ignore - Temporary ignore until KeyboardHandler is updated
     keyboardHandler = new KeyboardHandler(gameEngine);
     keyboardHandler.attach();
 

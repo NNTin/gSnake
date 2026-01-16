@@ -9,7 +9,7 @@
     "build:wasm": "bash -c 'source $HOME/.cargo/env && cd gsnake-wasm && wasm-pack build --target web --out-dir ../pkg'",
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json",
-    "test:e2e": "playwright test",
+    "test:e2e": "playwright test --reporter=list",
     "report": "allure serve allure-results"
   },
   "devDependencies": {

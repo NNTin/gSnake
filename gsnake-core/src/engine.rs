@@ -145,7 +145,7 @@ impl GameEngine {
             }
         }
 
-        Frame::new(grid, self.game_state.clone())
+        Frame::new(grid, self.game_state.clone(), self.level.snake.clone())
     }
 
     /// Applies gravity by continuously falling the snake down

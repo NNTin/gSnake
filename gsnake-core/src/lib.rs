@@ -151,12 +151,13 @@ impl Level {
 pub struct Frame {
     pub grid: Vec<Vec<CellType>>,
     pub state: GameState,
+    pub snake: Snake,
 }
 
 impl Frame {
     #[must_use]
-    pub fn new(grid: Vec<Vec<CellType>>, state: GameState) -> Self {
-        Self { grid, state }
+    pub fn new(grid: Vec<Vec<CellType>>, state: GameState, snake: Snake) -> Self {
+        Self { grid, state, snake }
     }
 }
 
