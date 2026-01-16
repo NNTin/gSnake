@@ -1,16 +1,11 @@
 // CLI interface for gSnake
-// This will be expanded in T4 and T5 with TUI rendering and input handling
+// TUI rendering and input handling implementation
 
-use gsnake_core::{GameState, Position};
+mod ui;
 
 fn main() {
-    println!("gSnake CLI - Coming Soon!");
-    println!("Core library version: {}", env!("CARGO_PKG_VERSION"));
-
-    // Demonstrate that core models are accessible
-    let pos = Position::new(0, 0);
-    let state = GameState::new(1, 5);
-
-    println!("Created initial position: ({}, {})", pos.x, pos.y);
-    println!("Initial game state: level {}, status {:?}", state.current_level, state.status);
+    println!("gSnake CLI");
+    println!("Version: {}", env!("CARGO_PKG_VERSION"));
+    println!("\nFull game implementation coming in T5!");
+    println!("Use 'cargo run --example ui_demo' to see the UI demo.");
 }

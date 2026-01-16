@@ -7,8 +7,18 @@ authors.workspace = true
 [lints]
 workspace = true
 
+[lib]
+name = "gsnake_cli"
+path = "src/lib.rs"
+
+[[bin]]
+name = "gsnake-cli"
+path = "src/main.rs"
+
 [dependencies]
 gsnake-core = { path = "../gsnake-core" }
 serde.workspace = true
 serde_json.workspace = true
-# Note: crossterm and ratatui dependencies will be added in T4
+ratatui = "0.28"
+crossterm = "0.28"
+anyhow = "1.0"
