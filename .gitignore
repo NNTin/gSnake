@@ -26,3 +26,8 @@ dist-ssr
 /allure-results/
 /playwright-report/
 /test-results/
+
+.gemini/
+.chunkhound.json
+.mcp.json
+.chunkhound/
