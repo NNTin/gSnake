@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount, setContext } from 'svelte';
+  import { onMount, onDestroy, setContext } from 'svelte';
   import { WasmGameEngine } from '../engine/WasmGameEngine';
   import { KeyboardHandler } from '../engine/KeyboardHandler';
   import { connectGameEngineToStores } from '../stores/stores';
@@ -28,12 +28,12 @@
     // @ts-ignore - Temporary ignore until KeyboardHandler is updated
     keyboardHandler = new KeyboardHandler(gameEngine);
     keyboardHandler.attach();
+  });
 
-    return () => {
-      if (keyboardHandler) {
-        keyboardHandler.detach();
-      }
-    };
+  onDestroy(() => {
+    if (keyboardHandler) {
+      keyboardHandler.detach();
+    }
   });
 </script>
 
