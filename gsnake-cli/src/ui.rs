@@ -53,9 +53,9 @@ impl UI {
         match frame.state.status {
             GameStatus::GameOver => Self::render_game_over_overlay(f, f.area()),
             GameStatus::LevelComplete | GameStatus::AllComplete => {
-                Self::render_level_complete_overlay(f, f.area(), &frame.state.status)
+                Self::render_level_complete_overlay(f, f.area(), frame.state.status);
             }
-            _ => {}
+            GameStatus::Playing => {}
         }
     }
 
@@ -63,10 +63,7 @@ impl UI {
     fn render_status_bar(f: &mut RatatuiFrame, area: Rect, frame: &Frame) {
         let status_text = format!(
             " Level: {} | Moves: {} | Food: {}/{} ",
-            frame.state.current_level,
-            frame.state.moves,
-            frame.state.food_collected,
-            frame.state.total_food
+            frame.state.current_level, frame.state.moves, frame.state.food_collected, frame.state.total_food
         );
 
         let status = Paragraph::new(status_text)
@@ -97,7 +94,7 @@ impl UI {
         for row in &frame.grid {
             let mut spans = Vec::new();
             for cell in row {
-                let (ch, color) = Self::cell_to_char_color(cell);
+                let (ch, color) = Self::cell_to_char_color(*cell);
                 spans.push(Span::styled(ch, Style::default().fg(color)));
             }
             lines.push(Line::from(spans));
@@ -105,10 +102,7 @@ impl UI {
 
         let block = Block::default()
             .borders(Borders::ALL)
-            .title(format!(
-                " Grid: {}x{} ",
-                grid_width, grid_height
-            ));
+            .title(format!(" Grid: {grid_width}x{grid_height} "));
 
         let paragraph = Paragraph::new(lines)
             .block(block)
@@ -176,7 +170,7 @@ impl UI {
     fn render_level_complete_overlay(
         f: &mut RatatuiFrame,
         area: Rect,
-        status: &GameStatus,
+        status: GameStatus,
     ) {
         let overlay_area = Self::centered_rect(50, 30, area);
 
@@ -192,12 +186,12 @@ impl UI {
             )]),
             Line::from(""),
             Line::from(vec![Span::styled(
-                format!("      {}", title),
+                format!("      {title}"),
                 Style::default().fg(color).add_modifier(Modifier::BOLD),
             )]),
             Line::from(""),
             Line::from(vec![Span::styled(
-                if *status == GameStatus::AllComplete {
+                if status == GameStatus::AllComplete {
                     "    Congratulations!"
                 } else {
                     "  Press any key to continue"
@@ -238,10 +232,7 @@ impl UI {
             )]),
             Line::from(""),
             Line::from(vec![Span::styled(
-                format!(
-                    "Required: {}x{} cells",
-                    required_width, required_height
-                ),
+                format!("Required: {required_width}x{required_height} cells"),
                 Style::default().fg(Color::White),
             )]),
             Line::from(vec![Span::styled(
@@ -273,8 +264,8 @@ impl UI {
         f.render_widget(paragraph, centered_area);
     }
 
-    /// Converts a CellType to a character and color
-    fn cell_to_char_color(cell: &CellType) -> (&'static str, Color) {
+    /// Converts a `CellType` to a character and color
+    fn cell_to_char_color(cell: CellType) -> (&'static str, Color) {
         match cell {
             CellType::Empty => (CHAR_EMPTY, COLOR_EMPTY),
             CellType::SnakeHead => (CHAR_SNAKE_HEAD, COLOR_SNAKE_HEAD),
@@ -315,8 +306,7 @@ pub fn validate_terminal_size(terminal_width: u16, terminal_height: u16, grid_wi
 
     if terminal_width < required_width || terminal_height < required_height {
         Err(format!(
-            "Terminal too small. Required: {}x{}, Current: {}x{}",
-            required_width, required_height, terminal_width, terminal_height
+            "Terminal too small. Required: {required_width}x{required_height}, Current: {terminal_width}x{terminal_height}"
         ))
     } else {
         Ok(())
