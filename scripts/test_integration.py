@@ -8,6 +8,7 @@ def main() -> int:
     repo_root = Path(__file__).resolve().parent.parent
     steps = [
         [sys.executable, str(repo_root / "scripts" / "build_wasm.py")],
+        ["npm", "--prefix", "gsnake-web", "install"],
         ["npm", "run", "test:e2e"],
     ]
     for step in steps:
