@@ -19,7 +19,8 @@ The system transitions from a monolithic flat structure to a nested, workspace-o
 ### 2. gsnake-web (Svelte Frontend)
 - **Role**: Standalone Svelte web application.
 - **Integration**: Consumes the WASM package from `gsnake-core/engine/bindings/wasm/pkg` via a `file:` dependency after `wasm-pack build`. A root script rebuilds the WASM package before dev/test to keep the `file:` target up to date.
-- **Constraint**: Vite/Svelte configs live inside `gsnake-web`. Root Playwright config remains for integration tests.
+- **Constraint**: `gsnake-web` is a git submodule containing all Svelte files; no web app source remains at the repository root. Vite/Svelte configs live inside `gsnake-web`. Root Playwright config remains for integration tests.
+- **Migration Note**: The existing Svelte app is moved into a fresh `gsnake-web` repository (new history) at `git@github.com:NNTin/gsnake-web.git` and reattached to the parent repo as a submodule during the restructure.
 
 ### 3. gsnake-python (Placeholder)
 - **Role**: Placeholder boundary for future Python integration.
@@ -29,6 +30,7 @@ The system transitions from a monolithic flat structure to a nested, workspace-o
 - **Role**: Orchestration, global CI/CD, and cross-module specifications (`epics/`).
 - **State**: Drastically reduced; implementation detail is delegated to sub-modules. Existing GitHub Actions remain at the root for integration testing and Svelte deployment during transition.
 - **Orchestration**: Integration workflows use Python as the orchestration layer. Root `scripts/` provides repeatable build/link/test entrypoints for local dev and CI. Submodules are pinned by SHA in the parent repo, and integration runs are gated on those SHAs.
+  - **Note**: The parent repo must initialize/update the `gsnake-web` submodule before running integration or web workflows.
 
 ## Data Model
 
@@ -101,7 +103,7 @@ gSnake/
 │           │   └── Cargo.toml
 │           └── py/
 │               └── pyproject.toml
-├── gsnake-web/
+├── gsnake-web/                  # Git submodule
 │   ├── package.json
 │   ├── svelte.config.js
 │   ├── vite.config.ts

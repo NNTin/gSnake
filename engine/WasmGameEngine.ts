@@ -1,5 +1,5 @@
 import type { Level, GameEvent, GameEventListener } from '../types';
-import init, { WasmGameEngine as RustEngine, getLevels, log } from '../pkg/gsnake_wasm';
+import init, { WasmGameEngine as RustEngine, getLevels, log } from 'gsnake-wasm';
 
 /**
  * TypeScript wrapper around the Rust WASM game engine

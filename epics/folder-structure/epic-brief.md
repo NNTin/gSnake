@@ -1,7 +1,7 @@
 # Epic Brief: Folder Structure Restructuring
 
 ## Summary
-The current folder structure of the `gSnake` project is fragmented, with files for different components scattered across the root. This Epic aims to reorganize the project into a modular, Git-submodule compatible structure. The project will be divided into self-contained units: `gsnake-core` (Rust engine plus bindings for WASM, CLI, and Python), `gsnake-web` (Svelte), and an empty `gsnake-python` submodule boundary (no implementation yet). The parent repository will focus on integration, project specifications (Epics), and global CI/CD pipelines, while components handle their own logic and data (e.g., moving `data/levels.json` into `gsnake-core`). The WASM package name is `gsnake-wasm`; local file-based linking is required for development.
+The current folder structure of the `gSnake` project is fragmented, with files for different components scattered across the root. This Epic aims to reorganize the project into a modular, Git-submodule compatible structure. The project will be divided into self-contained units: `gsnake-core` (Rust engine plus bindings for WASM, CLI, and Python), `gsnake-web` (Svelte, moved into a git submodule), and an empty `gsnake-python` submodule boundary (no implementation yet). The parent repository will focus on integration, project specifications (Epics), and global CI/CD pipelines, while components handle their own logic and data (e.g., moving `data/levels.json` into `gsnake-core`). The WASM package name is `gsnake-wasm`; local file-based linking is required for development.
 
 ## Context & Problem
 The `gSnake` project consists of several distinct components with diverging deployment needs:
@@ -33,6 +33,10 @@ Currently, these components are co-located, leading to:
 
 -   **Shared Level Access:** Levels are accessed through bindings that expose the same API in core and WASM, so consumers do not need to read `levels.json` directly.
 
+-   **Web Submodule Boundary:** All Svelte web files move into a git submodule named `gsnake-web`, and no web app source remains at the repository root.
+
+-   **Web App Migration:** The existing Svelte app is moved into a fresh `gsnake-web` repository (new history) and added back to the parent as a submodule; root references, scripts, and docs are updated to point at the submodule path. The `gsnake-web` remote is `git@github.com:NNTin/gsnake-web.git`.
+
 ## CI/CD Suggestions (Best Practices)
 
 -   Use Python as the orchestration layer in CI for integration steps.
@@ -49,6 +53,9 @@ Currently, these components are co-located, leading to:
 -   `gsnake-core` can be built and tested in complete isolation from the parent repository.
 
 -   `gsnake-web` can be built and tested in complete isolation, consuming the core engine via local links.
+
+-   `gsnake-web` exists as a git submodule pointer in the parent repository.
+-   All Svelte-related configs live exclusively under `gsnake-web`, while Playwright e2e tests remain in the parent repo.
 
 -   The parent `.github/workflows` runs integration tests and the Svelte web deployment with submodules checked out.
 

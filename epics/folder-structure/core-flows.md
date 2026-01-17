@@ -24,7 +24,7 @@ flowchart LR
       end
     end
 
-    subgraph gsnake_web["gsnake-web (Submodule)"]
+    subgraph gsnake_web["gsnake-web (Git submodule)"]
       Svelte["Svelte Frontend"]
     end
 
@@ -59,7 +59,7 @@ gSnake/                         # Parent repository
 │           └── cli/
 │               └── ...         # CLI bindings
 │
-├── gsnake-web/                 # Submodule
+├── gsnake-web/                 # Git submodule
 │   ├── src/
 │   │   └── ...                 # Svelte frontend
 │   ├── package.json
@@ -70,6 +70,25 @@ gSnake/                         # Parent repository
 │
 └── README.md
 ```
+
+## Flow 0: Web Submodule Migration
+**Description:** The existing Svelte app is moved into the `gsnake-web` repository and reattached to the parent as a submodule.
+**Trigger:** Initiating the folder-structure restructuring for the web frontend.
+```mermaid
+sequenceDiagram
+  participant Maintainer
+  participant Parent as gSnake (parent repo)
+  participant Web as gsnake-web
+  Maintainer->>Web: Create fresh repo and move existing Svelte app files
+  Maintainer->>Parent: Add gsnake-web as submodule
+  Maintainer->>Parent: Update root references/docs/scripts
+```
+**Steps:**
+1. Maintainer creates a fresh `gsnake-web` repository at `git@github.com:NNTin/gsnake-web.git` (new history).
+2. Maintainer moves the existing Svelte app into the new repository and commits.
+3. Maintainer adds `gsnake-web` as a git submodule in the parent repo.
+4. Maintainer updates root references, scripts, and docs to point to the `gsnake-web` submodule path.
+5. Maintainer confirms all Svelte-related configs now live under `gsnake-web`, leaving Playwright e2e tests in the parent repo.
 
 ## Flow 1: Core Engine or Level Update
 **Description:** A developer updates the game logic or adds a new level that should be available across all platforms.
@@ -108,6 +127,7 @@ sequenceDiagram
   Dev->>Web: Commit UI changes
 ```
 **Steps:**
+0. Developer initializes or updates the `gsnake-web` submodule in the parent repo.
 1. Developer runs `wasm-pack build` in `gsnake-core/engine/bindings/wasm` (generates `pkg/`).
 2. Web developer ensures `package.json` uses a `file:` dependency pointing to `../gsnake-core/engine/bindings/wasm/pkg`.
 3. Developer runs the root script that rebuilds the WASM package before dev/test.
