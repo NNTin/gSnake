@@ -1,5 +1,5 @@
 import type { Level, GameEvent, GameEventListener } from '../types';
-import init, { WasmGameEngine as RustEngine, log } from '../pkg/gsnake_wasm';
+import init, { WasmGameEngine as RustEngine, getLevels, log } from '../pkg/gsnake_wasm';
 
 /**
  * TypeScript wrapper around the Rust WASM game engine
@@ -12,7 +12,7 @@ export class WasmGameEngine {
   private levels: Level[] = [];
   private currentLevelIndex = 0;
 
-  async init(levels: Level[], startLevel: number = 1): Promise<void> {
+  async init(levels: Level[] | null = null, startLevel: number = 1): Promise<void> {
     if (this.initialized) {
       console.warn('WasmGameEngine already initialized');
       return;
@@ -22,7 +22,7 @@ export class WasmGameEngine {
     await init();
     log('gSnake WASM engine initialized');
 
-    this.levels = levels;
+    this.levels = levels ?? (getLevels() as unknown as Level[]);
     this.currentLevelIndex = startLevel - 1;
 
     // Load the first level

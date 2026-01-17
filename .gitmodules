@@ -1,0 +1,3 @@
+[submodule "gsnake-python"]
+	path = gsnake-python
+	url = git@github.com:NNTin/gsnake-python.git

@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 pub mod engine;
+pub mod levels;
 
 /// Represents a 2D position on the game grid
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]

@@ -6,11 +6,14 @@
   "scripts": {
     "dev": "vite",
     "build": "npm run build:wasm && vite build",
-    "build:wasm": "bash -c 'source $HOME/.cargo/env && cd gsnake-core/engine/bindings/wasm && wasm-pack build --target web'",
+    "build:wasm": "python3 scripts/build_wasm.py",
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "test:e2e": "playwright test --reporter=list",
     "report": "allure serve allure-results"
+  },
+  "dependencies": {
+    "gsnake-wasm": "file:gsnake-core/engine/bindings/wasm/pkg"
   },
   "devDependencies": {
     "@playwright/test": "^1.41.0",

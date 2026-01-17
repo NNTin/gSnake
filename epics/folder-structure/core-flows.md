@@ -51,7 +51,7 @@ gSnake/                         # Parent repository
 │       │
 │       └── bindings/
 │           ├── wasm/
-│           │   └── ...         # WASM bindings (local npm link)
+│           │   └── ...         # WASM bindings (local file dependency)
 │           │
 │           ├── py/
 │           │   └── ...         # Python bindings (pyproject.toml)

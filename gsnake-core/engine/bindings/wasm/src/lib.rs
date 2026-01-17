@@ -1,4 +1,4 @@
-use gsnake_core::{engine::GameEngine, Direction, Level};
+use gsnake_core::{engine::GameEngine, levels::parse_levels_json, Direction, Level};
 use js_sys::Function;
 use serde_wasm_bindgen::{from_value, to_value};
 use wasm_bindgen::prelude::*;
@@ -6,6 +6,8 @@ use wasm_bindgen::prelude::*;
 // Use wee_alloc as the global allocator for smaller binary size
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+
+const LEVELS_JSON: &str = include_str!("../../../core/data/levels.json");
 
 /// Initialize panic hook for better error messages in the browser console
 #[wasm_bindgen(start)]
@@ -100,6 +102,15 @@ impl WasmGameEngine {
         }
         Ok(())
     }
+}
+
+/// Returns all levels embedded in the WASM package.
+#[wasm_bindgen(js_name = getLevels)]
+pub fn get_levels() -> Result<JsValue, JsValue> {
+    let levels = parse_levels_json(LEVELS_JSON)
+        .map_err(|e| JsValue::from_str(&format!("Failed to parse levels JSON: {}", e)))?;
+    to_value(&levels)
+        .map_err(|e| JsValue::from_str(&format!("Failed to serialize levels: {}", e)))
 }
 
 /// Logs a message to the browser console (for debugging)

@@ -1,64 +1,6 @@
 use anyhow::{Context, Result};
-use gsnake_core::{GridSize, Level, Position, Snake};
-use serde::Deserialize;
+use gsnake_core::{levels::parse_levels_json, Level};
 use std::{fs, path::{Path, PathBuf}};
-
-/// JSON representation of a level with camelCase fields
-#[derive(Debug, Deserialize)]
-struct LevelJson {
-    #[allow(dead_code)]
-    id: u32,
-    #[allow(dead_code)]
-    name: String,
-    #[serde(rename = "gridSize")]
-    grid_size: GridSizeJson,
-    snake: Vec<PositionJson>,
-    obstacles: Vec<PositionJson>,
-    food: Vec<PositionJson>,
-    exit: PositionJson,
-}
-
-/// JSON representation of grid size
-#[derive(Debug, Deserialize)]
-struct GridSizeJson {
-    width: usize,
-    height: usize,
-}
-
-/// JSON representation of a position
-#[derive(Debug, Deserialize)]
-struct PositionJson {
-    x: i32,
-    y: i32,
-}
-
-impl From<PositionJson> for Position {
-    fn from(pos: PositionJson) -> Self {
-        Position::new(pos.x, pos.y)
-    }
-}
-
-impl From<GridSizeJson> for GridSize {
-    fn from(size: GridSizeJson) -> Self {
-        GridSize::new(size.width as i32, size.height as i32)
-    }
-}
-
-impl From<LevelJson> for Level {
-    fn from(level_json: LevelJson) -> Self {
-        let snake_positions: Vec<Position> = level_json.snake.into_iter().map(Into::into).collect();
-        let obstacles: Vec<Position> = level_json.obstacles.into_iter().map(Into::into).collect();
-        let food: Vec<Position> = level_json.food.into_iter().map(Into::into).collect();
-
-        Level::new(
-            level_json.grid_size.into(),
-            Snake::new(snake_positions),
-            obstacles,
-            food,
-            level_json.exit.into(),
-        )
-    }
-}
 
 /// Loads all levels from the levels.json file
 pub fn load_levels<P: AsRef<Path>>(path: P) -> Result<Vec<Level>> {
@@ -66,7 +8,7 @@ pub fn load_levels<P: AsRef<Path>>(path: P) -> Result<Vec<Level>> {
     let contents = fs::read_to_string(path_ref)
         .with_context(|| format!("Failed to read levels file: {}", path_ref.display()))?;
 
-    let levels_json: Vec<LevelJson> = serde_json::from_str(&contents)
+    let levels_json = parse_levels_json(&contents)
         .with_context(|| "Failed to parse levels JSON")?;
 
     Ok(levels_json.into_iter().map(Into::into).collect())
