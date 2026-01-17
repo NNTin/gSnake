@@ -70,7 +70,10 @@ impl WasmGameEngine {
         if let Some(callback) = &self.on_frame_callback {
             callback
                 .call1(&JsValue::NULL, &frame_js)
-                .map_err(|e| contract_error(ContractErrorKind::InternalError, &e.to_string()))?;
+                .map_err(|e| {
+                    let msg = e.as_string().unwrap_or_else(|| format!("{:?}", e));
+                    contract_error(ContractErrorKind::InternalError, &msg)
+                })?;
         }
 
         Ok(frame_js)
@@ -106,7 +109,10 @@ impl WasmGameEngine {
             let frame_js = self.get_frame()?;
             callback
                 .call1(&JsValue::NULL, &frame_js)
-                .map_err(|e| contract_error(ContractErrorKind::InternalError, &e.to_string()))?;
+                .map_err(|e| {
+                    let msg = e.as_string().unwrap_or_else(|| format!("{:?}", e));
+                    contract_error(ContractErrorKind::InternalError, &msg)
+                })?;
         }
         Ok(())
     }

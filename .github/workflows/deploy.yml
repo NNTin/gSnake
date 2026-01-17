@@ -41,6 +41,21 @@ jobs:
         run: python3 scripts/build_wasm.py
       - run: npm --prefix gsnake-web run check
 
+      - name: Run Rust contract tests
+        run: cd gsnake-core && cargo test contract_tests
+
+      - name: Generate contract fixtures
+        run: cd gsnake-core && cargo test generate_contract_fixtures
+
+      - name: Run TypeScript contract tests
+        run: cd gsnake-web && npm test
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E contract tests
+        run: npm run test:e2e
+
   deploy:
     needs: validate
     runs-on: ubuntu-latest

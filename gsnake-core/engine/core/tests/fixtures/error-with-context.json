@@ -1,0 +1,8 @@
+{
+  "kind": "invalidInput",
+  "message": "Invalid direction provided",
+  "context": {
+    "expected": "North|South|East|West",
+    "input": "InvalidDirection"
+  }
+}
