@@ -68,7 +68,9 @@ impl WasmGameEngine {
         let frame_js = serialize_frame(&frame)?;
 
         if let Some(callback) = &self.on_frame_callback {
-            callback.call1(&JsValue::NULL, &frame_js)?;
+            callback
+                .call1(&JsValue::NULL, &frame_js)
+                .map_err(|e| contract_error(ContractErrorKind::InternalError, &e.to_string()))?;
         }
 
         Ok(frame_js)
@@ -102,7 +104,9 @@ impl WasmGameEngine {
     fn emit_frame(&self) -> Result<(), JsValue> {
         if let Some(callback) = &self.on_frame_callback {
             let frame_js = self.get_frame()?;
-            callback.call1(&JsValue::NULL, &frame_js)?;
+            callback
+                .call1(&JsValue::NULL, &frame_js)
+                .map_err(|e| contract_error(ContractErrorKind::InternalError, &e.to_string()))?;
         }
         Ok(())
     }
@@ -135,7 +139,33 @@ fn contract_error(kind: ContractErrorKind, message: &str) -> JsValue {
         context: None,
     };
 
-    to_value(&error).unwrap_or_else(|_| JsValue::from_str(message))
+    match to_value(&error) {
+        Ok(value) => value,
+        Err(_) => {
+            let obj = js_sys::Object::new();
+            let _ = js_sys::Reflect::set(
+                &obj,
+                &JsValue::from_str("kind"),
+                &JsValue::from_str(contract_error_kind_str(kind)),
+            );
+            let _ = js_sys::Reflect::set(
+                &obj,
+                &JsValue::from_str("message"),
+                &JsValue::from_str(message),
+            );
+            obj.into()
+        }
+    }
+}
+
+fn contract_error_kind_str(kind: ContractErrorKind) -> &'static str {
+    match kind {
+        ContractErrorKind::InvalidInput => "invalidInput",
+        ContractErrorKind::InputRejected => "inputRejected",
+        ContractErrorKind::SerializationFailed => "serializationFailed",
+        ContractErrorKind::InitializationFailed => "initializationFailed",
+        ContractErrorKind::InternalError => "internalError",
+    }
 }
 
 #[cfg(test)]
