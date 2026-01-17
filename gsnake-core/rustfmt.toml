@@ -1,0 +1,44 @@
+# Rust formatting configuration for gSnake
+
+# Edition
+edition = "2021"
+
+# Maximum line width
+max_width = 100
+
+# Use tabs for indentation
+hard_tabs = false
+tab_spaces = 4
+
+# Import configuration
+imports_granularity = "Crate"
+group_imports = "StdExternalCrate"
+
+# Function and type formatting
+fn_single_line = false
+where_single_line = false
+
+# Control flow formatting
+control_brace_style = "AlwaysSameLine"
+
+# Comment and documentation
+comment_width = 80
+wrap_comments = true
+normalize_comments = true
+normalize_doc_attributes = true
+
+# Use field initialization shorthand
+use_field_init_shorthand = true
+
+# Trailing comma
+trailing_comma = "Vertical"
+
+# Match formatting
+match_block_trailing_comma = true
+
+# Reorder items
+reorder_imports = true
+reorder_modules = true
+
+# Misc
+newline_style = "Unix"

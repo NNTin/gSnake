@@ -19,7 +19,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run build && npm run preview',
+    command: 'npm --prefix gsnake-web run build && npm --prefix gsnake-web run preview',
     url: 'http://localhost:4173',
     reuseExistingServer: !process.env.CI,
   },
