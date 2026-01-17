@@ -14,21 +14,21 @@ The system transitions from a monolithic flat structure to a nested, workspace-o
     - `wasm/`: Generates WASM bindings for web consumption (package name `gsnake-wasm`).
     - `cli/`: Terminal interface using `ratatui`.
     - `py/`: Python bindings using `pyproject.toml`.
-- **Constraint**: `gsnake-core` will hold the workspace-level `Cargo.toml`. The root retains Rust config needed for integration and end-to-end tests, and must support running Rust commands from the parent directory.
+- **Constraint**: `gsnake-core` holds the workspace-level `Cargo.toml`. Root Rust configs are duplicated into `gsnake-core` (e.g. `rust-toolchain.toml`, lint configs) so `gsnake-core` builds in isolation. Root helper scripts `cd` into `gsnake-core` for commands run from the parent directory.
 
 ### 2. gsnake-web (Svelte Frontend)
 - **Role**: Standalone Svelte web application.
-- **Integration**: Consumes the WASM package from `gsnake-core/engine/bindings/wasm/pkg` via local linking (`wasm-pack build` then `npm link`).
-- **Constraint**: Self-contained configurations for Vite, TypeScript, and Playwright.
+- **Integration**: Consumes the WASM package from `gsnake-core/engine/bindings/wasm/pkg` via a `file:` dependency after `wasm-pack build`. A root script rebuilds the WASM package before dev/test to keep the `file:` target up to date.
+- **Constraint**: Vite/Svelte configs live inside `gsnake-web`. Root Playwright config remains for integration tests.
 
 ### 3. gsnake-python (Placeholder)
 - **Role**: Placeholder boundary for future Python integration.
-- **Structure**: Basic `pyproject.toml` and directory structure only (no implementation in current scope).
+- **Structure**: Git submodule pointer to an empty repository (no implementation in current scope).
 
 ### 4. Root (Integration Layer)
 - **Role**: Orchestration, global CI/CD, and cross-module specifications (`epics/`).
 - **State**: Drastically reduced; implementation detail is delegated to sub-modules. Existing GitHub Actions remain at the root for integration testing and Svelte deployment during transition.
-- **Orchestration**: Integration workflows use Python as the orchestration layer.
+- **Orchestration**: Integration workflows use Python as the orchestration layer. Root `scripts/` provides repeatable build/link/test entrypoints for local dev and CI. Submodules are pinned by SHA in the parent repo, and integration runs are gated on those SHAs.
 
 ## Data Model
 
@@ -47,6 +47,7 @@ The restructuring centralizes game data within the core engine to ensure consist
 
 ### Entity: Shared State (WASM/Core)
 - **Interface**: Data models defined in `gsnake-core/engine/core/src/engine.rs` are serialized via `serde` for cross-boundary communication (Rust <-> TS).
+  - **Constraint**: Levels are exposed through bindings with a uniform API in core and WASM; the web UI reads level/state data through the WASM API only. `levels.json` is embedded in the WASM package during build and exposed through bindings.
 
 ## Component Architecture
 
@@ -68,3 +69,43 @@ The architecture enforces strict boundaries between engine logic, platform bindi
 ### 4. CLI App (gsnake-cli)
 **Responsibility**: Direct-to-terminal gameplay.
 **Integration Point**: Implemented as `gsnake-core/engine/bindings/cli`, linking directly to the engine.
+
+## Folder and File Layout (Target)
+```
+gSnake/
+├── epics/
+│   └── folder-structure/
+│       ├── epic-brief.md
+│       ├── core-flows.md
+│       └── tech-plan.md
+├── scripts/
+│   ├── build_core.py
+│   ├── build_wasm.py
+│   ├── link_web.py
+│   └── test_integration.py
+├── playwright.config.ts          # Root integration tests
+├── rust-toolchain.toml           # Root Rust config only
+├── gsnake-core/
+│   ├── rust-toolchain.toml       # Duplicated Rust config for standalone builds
+│   ├── Cargo.toml                # Workspace root
+│   └── engine/
+│       ├── core/
+│       │   ├── Cargo.toml
+│       │   └── data/
+│       │       └── levels.json
+│       └── bindings/
+│           ├── wasm/
+│           │   ├── Cargo.toml
+│           │   └── pkg/           # Generated (gitignored)
+│           ├── cli/
+│           │   └── Cargo.toml
+│           └── py/
+│               └── pyproject.toml
+├── gsnake-web/
+│   ├── package.json
+│   ├── svelte.config.js
+│   ├── vite.config.ts
+│   ├── tsconfig.json
+│   └── src/
+└── gsnake-python/                 # Submodule pointer (empty repo)
+```

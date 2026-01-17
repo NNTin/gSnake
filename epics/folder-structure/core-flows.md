@@ -29,10 +29,10 @@ flowchart LR
     end
 
     subgraph gsnake_python["gsnake-python (Placeholder)"]
-      PyApp["pyproject.toml only"]
+      PyApp["Empty submodule repo"]
     end
 
-    WASM -.->|"Local link (npm, gsnake-wasm)"| Svelte
+    WASM -.->|"Local file dependency (gsnake-wasm)"| Svelte
     PY -.->|"Local link (pip)"| PyApp
     
   end
@@ -65,8 +65,7 @@ gSnake/                         # Parent repository
 │   ├── package.json
 │   └── ...
 │
-├── gsnake-python/              # Placeholder only (no implementation yet)
-│   ├── pyproject.toml
+├── gsnake-python/              # Placeholder only (empty submodule repo)
 │   └── ...
 │
 └── README.md
@@ -102,16 +101,16 @@ sequenceDiagram
   participant Wasm as gsnake-core/engine/bindings/wasm
   participant Web as gsnake-web
   Dev->>Wasm: wasm-pack build (generates pkg/)
-  Dev->>Web: npm link ../gsnake-core/engine/bindings/wasm/pkg
-  Dev->>Web: Ensure package.json uses link/file alias for gsnake-wasm
+  Dev->>Web: Update package.json to use file:../gsnake-core/engine/bindings/wasm/pkg
+  Dev->>Web: Run root script to rebuild WASM before dev/test
   Dev->>Web: npm install (if needed)
   Dev->>Web: Run dev server and verify
   Dev->>Web: Commit UI changes
 ```
 **Steps:**
 1. Developer runs `wasm-pack build` in `gsnake-core/engine/bindings/wasm` (generates `pkg/`).
-2. Developer runs `npm link ../gsnake-core/engine/bindings/wasm/pkg` to use the local build.
-3. Web developer ensures `package.json` uses the local link/file alias for `gsnake-wasm`.
+2. Web developer ensures `package.json` uses a `file:` dependency pointing to `../gsnake-core/engine/bindings/wasm/pkg`.
+3. Developer runs the root script that rebuilds the WASM package before dev/test.
 4. Developer runs `npm install` if necessary.
 5. Developer runs the Svelte dev server to verify integration.
 6. UI-specific changes are committed to the `gsnake-web` repository.
@@ -145,13 +144,13 @@ sequenceDiagram
   participant CI as Global CI
   participant Web as Svelte deploy
   Maintainer->>Parent: Update epics/ and submodule SHAs
-  CI->>Parent: Run integration builds/tests (Python orchestration)
+  CI->>Parent: Run integration builds/tests (Python orchestration, gated on pinned SHAs)
   CI->>Web: Deploy Svelte web app
 ```
 **Steps:**
 1. Maintainer creates/updates an Epic in `epics/` in the parent repository.
 2. Maintainer updates submodule pointers in the parent repository once individual modules are ready.
-3. Global CI runs integration builds/tests (including Playwright) using Python orchestration and deploys the Svelte web app.
+3. Global CI runs integration builds/tests (including Playwright) using Python orchestration and is gated on pinned submodule SHAs, then deploys the Svelte web app.
 
 ## Best-Practice Suggestions (Flows)
 

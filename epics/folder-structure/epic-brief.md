@@ -1,7 +1,7 @@
 # Epic Brief: Folder Structure Restructuring
 
 ## Summary
-The current folder structure of the `gSnake` project is fragmented, with files for different components scattered across the root. This Epic aims to reorganize the project into a modular, Git-submodule compatible structure. The project will be divided into self-contained units: `gsnake-core` (Rust engine plus bindings for WASM, CLI, and Python), `gsnake-web` (Svelte), and a placeholder `gsnake-python` boundary (no implementation yet). The parent repository will focus on integration, project specifications (Epics), and global CI/CD pipelines, while components handle their own logic and data (e.g., moving `data/levels.json` into `gsnake-core`). The WASM package name is `gsnake-wasm`; local linking is required for development.
+The current folder structure of the `gSnake` project is fragmented, with files for different components scattered across the root. This Epic aims to reorganize the project into a modular, Git-submodule compatible structure. The project will be divided into self-contained units: `gsnake-core` (Rust engine plus bindings for WASM, CLI, and Python), `gsnake-web` (Svelte), and an empty `gsnake-python` submodule boundary (no implementation yet). The parent repository will focus on integration, project specifications (Epics), and global CI/CD pipelines, while components handle their own logic and data (e.g., moving `data/levels.json` into `gsnake-core`). The WASM package name is `gsnake-wasm`; local file-based linking is required for development.
 
 ## Context & Problem
 The `gSnake` project consists of several distinct components with diverging deployment needs:
@@ -9,7 +9,7 @@ The `gSnake` project consists of several distinct components with diverging depl
 -   **Core Backend + Bindings:** The Rust game engine (`gsnake-core`), which will now include `data/levels.json`, plus bindings for WASM, CLI (`ratatui`), and Python.
 -   **WASM Bridge:** Rust bridge for the Web frontend (package name `gsnake-wasm`).
 -   **Python Support:** Bindings live in `gsnake-core/engine/bindings/py` (using `pyproject.toml`).
--   **Python App Boundary:** `gsnake-python` is a placeholder only in the current scope (no implementation yet).
+-   **Python App Boundary:** `gsnake-python` is an empty submodule boundary only in the current scope (no implementation yet).
 
 Currently, these components are co-located, leading to:
 -   **Deployment Complexity:** Mixed dependencies make publishing NPM and PyPI packages brittle.
@@ -22,7 +22,7 @@ Currently, these components are co-located, leading to:
 -   **Versioning:** Each submodule repository adheres to Semantic Versioning (SemVer). Versions are incremented and released manually by a human.
 
 -   **Development Linking:** During development, modules are linked locally (required):
-    -   WASM: `wasm-pack build` then `npm link gsnake-core/engine/bindings/wasm/pkg` (the `pkg/` directory is generated and not committed).
+    -   WASM: `wasm-pack build` then use a `file:` dependency on `gsnake-core/engine/bindings/wasm/pkg` (the `pkg/` directory is generated and not committed). A root script rebuilds the WASM package before dev/test.
     -   Python: `pip install -e gsnake-core/engine/bindings/py` using `pyproject.toml`.
 
 -   **Happy Path Focus:** Initial implementation will prioritize the happy path for integration, with stability improvements addressed iteratively.
@@ -30,6 +30,8 @@ Currently, these components are co-located, leading to:
 -   **Integration Build:** The parent repository can build everything together for integration tests.
 
 -   **Root Rust Config:** The root retains Rust configuration required for building and end-to-end testing, and must support running Rust commands from the parent directory.
+
+-   **Shared Level Access:** Levels are accessed through bindings that expose the same API in core and WASM, so consumers do not need to read `levels.json` directly.
 
 ## CI/CD Suggestions (Best Practices)
 
