@@ -4,7 +4,9 @@ use crossterm::{
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
-use gsnake_core::{engine::GameEngine, Direction, GameStatus, GridSize, Level, Position, Snake};
+use gsnake_core::{
+    engine::GameEngine, Direction, GameStatus, GridSize, LevelDefinition, Position,
+};
 use ratatui::{backend::CrosstermBackend, Terminal};
 use std::{io, time::Duration};
 
@@ -160,10 +162,12 @@ fn run_demo(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>) -> Result<()>
     Ok(())
 }
 
-fn create_test_level() -> Level {
-    Level::new(
+fn create_test_level() -> LevelDefinition {
+    LevelDefinition::new(
+        1,
+        "UI Demo Level".to_string(),
         GridSize::new(20, 12),
-        Snake::new(vec![Position::new(2, 10), Position::new(1, 10), Position::new(0, 10)]),
+        vec![Position::new(2, 10), Position::new(1, 10), Position::new(0, 10)],
         vec![
             // Floor
             Position::new(0, 11),
@@ -200,5 +204,6 @@ fn create_test_level() -> Level {
             Position::new(13, 4),
         ],
         Position::new(18, 10),
+        None,
     )
 }

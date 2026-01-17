@@ -1,4 +1,6 @@
-use gsnake_core::{engine::GameEngine, levels::parse_levels_json, Direction, Level};
+use gsnake_core::{
+    engine::GameEngine, levels::parse_levels_json, Direction, LevelDefinition,
+};
 use js_sys::Function;
 use serde_wasm_bindgen::{from_value, to_value};
 use wasm_bindgen::prelude::*;
@@ -28,7 +30,7 @@ impl WasmGameEngine {
     /// Creates a new WASM game engine from serialized level JSON
     #[wasm_bindgen(constructor)]
     pub fn new(level_json: JsValue) -> Result<WasmGameEngine, JsValue> {
-        let level: Level = from_value(level_json)
+        let level: LevelDefinition = from_value(level_json)
             .map_err(|e| JsValue::from_str(&format!("Failed to parse level: {}", e)))?;
 
         Ok(WasmGameEngine {
@@ -90,7 +92,7 @@ impl WasmGameEngine {
     /// Gets the current level data as a JS object
     #[wasm_bindgen(js_name = getLevel)]
     pub fn get_level(&self) -> Result<JsValue, JsValue> {
-        to_value(self.engine.level())
+        to_value(self.engine.level_definition())
             .map_err(|e| JsValue::from_str(&format!("Failed to serialize level: {}", e)))
     }
 
@@ -122,18 +124,21 @@ pub fn log(s: &str) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use gsnake_core::{GridSize, Position, Snake};
+    use gsnake_core::{GridSize, Position};
 
     #[test]
     fn test_direction_parsing() {
         // Just a basic smoke test for the Rust side
         // Full WASM integration tests would require wasm-bindgen-test
-        let level = Level::new(
+        let level = LevelDefinition::new(
+            1,
+            "Test".to_string(),
             GridSize::new(5, 5),
-            Snake::new(vec![Position::new(2, 2)]),
+            vec![Position::new(2, 2)],
             vec![],
             vec![],
             Position::new(4, 4),
+            None,
         );
 
         let engine = GameEngine::new(level);

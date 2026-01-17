@@ -1,30 +1,4 @@
-use crate::{GridSize, Level, Position, Snake};
-use serde::{Deserialize, Serialize};
-
-/// JSON-facing level definition shared across bindings.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct LevelDefinition {
-    pub id: u32,
-    pub name: String,
-    #[serde(rename = "gridSize")]
-    pub grid_size: GridSize,
-    pub snake: Vec<Position>,
-    pub obstacles: Vec<Position>,
-    pub food: Vec<Position>,
-    pub exit: Position,
-}
-
-impl From<LevelDefinition> for Level {
-    fn from(level: LevelDefinition) -> Self {
-        Level::new(
-            level.grid_size,
-            Snake::new(level.snake),
-            level.obstacles,
-            level.food,
-            level.exit,
-        )
-    }
-}
+use crate::LevelDefinition;
 
 pub fn parse_levels_json(data: &str) -> Result<Vec<LevelDefinition>, serde_json::Error> {
     serde_json::from_str(data)

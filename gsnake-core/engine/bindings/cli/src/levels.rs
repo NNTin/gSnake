@@ -1,9 +1,9 @@
 use anyhow::{Context, Result};
-use gsnake_core::{levels::parse_levels_json, Level};
+use gsnake_core::{levels::parse_levels_json, LevelDefinition};
 use std::{fs, path::{Path, PathBuf}};
 
 /// Loads all levels from the levels.json file
-pub fn load_levels<P: AsRef<Path>>(path: P) -> Result<Vec<Level>> {
+pub fn load_levels<P: AsRef<Path>>(path: P) -> Result<Vec<LevelDefinition>> {
     let path_ref = path.as_ref();
     let contents = fs::read_to_string(path_ref)
         .with_context(|| format!("Failed to read levels file: {}", path_ref.display()))?;
@@ -11,12 +11,12 @@ pub fn load_levels<P: AsRef<Path>>(path: P) -> Result<Vec<Level>> {
     let levels_json = parse_levels_json(&contents)
         .with_context(|| "Failed to parse levels JSON")?;
 
-    Ok(levels_json.into_iter().map(Into::into).collect())
+    Ok(levels_json)
 }
 
 /// Loads a specific level by ID (1-indexed)
 #[allow(dead_code)]
-pub fn load_level_by_id<P: AsRef<Path>>(path: P, level_id: u32) -> Result<Level> {
+pub fn load_level_by_id<P: AsRef<Path>>(path: P, level_id: u32) -> Result<LevelDefinition> {
     let levels = load_levels(path)?;
 
     if level_id == 0 {
@@ -48,7 +48,7 @@ mod tests {
         // Verify first level has expected structure
         assert_eq!(first_level.grid_size.width, 15);
         assert_eq!(first_level.grid_size.height, 15);
-        assert_eq!(first_level.snake.segments.len(), 3);
+        assert_eq!(first_level.snake.len(), 3);
         assert!(!first_level.food.is_empty());
     }
 }

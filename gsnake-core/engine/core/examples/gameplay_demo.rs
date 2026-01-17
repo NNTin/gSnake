@@ -1,5 +1,5 @@
 use gsnake_core::{
-    engine::GameEngine, CellType, Direction, GameStatus, GridSize, Level, Position, Snake,
+    engine::GameEngine, CellType, Direction, GameStatus, GridSize, LevelDefinition, Position,
 };
 
 fn print_frame(engine: &GameEngine) {
@@ -30,9 +30,11 @@ fn main() {
     println!("=== gSnake Core Engine Demo ===\n");
 
     // Create a simple level: snake starts on floor, collects food along the way, reaches exit
-    let level = Level::new(
+    let level = LevelDefinition::new(
+        1,
+        "Demo Level".to_string(),
         GridSize::new(8, 6),
-        Snake::new(vec![Position::new(1, 4)]),
+        vec![Position::new(1, 4)],
         vec![
             // Ground floor at row 5
             Position::new(0, 5),
@@ -46,6 +48,7 @@ fn main() {
         ],
         vec![Position::new(3, 4), Position::new(5, 4)],
         Position::new(7, 4),
+        None,
     );
 
     let mut engine = GameEngine::new(level);

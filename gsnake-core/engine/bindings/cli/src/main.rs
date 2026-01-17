@@ -51,7 +51,7 @@ fn main() -> Result<()> {
 
 fn run_game(
     terminal: &mut Terminal<CrosstermBackend<io::Stdout>>,
-    levels: &[gsnake_core::Level],
+    levels: &[gsnake_core::LevelDefinition],
 ) -> Result<()> {
     let mut current_level_index = 0;
     let mut engine = GameEngine::new(levels[current_level_index].clone());
