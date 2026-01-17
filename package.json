@@ -1,7 +1,7 @@
 {
   "name": "gsnake-root",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.1",
   "scripts": {
     "test:e2e": "playwright test --reporter=list",
     "report": "allure serve allure-results"
