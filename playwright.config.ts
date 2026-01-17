@@ -19,7 +19,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm --prefix gsnake-web run build && npm --prefix gsnake-web run preview',
+    command:
+      './scripts/build_fixture_wasm.sh && rm -rf gsnake-web/node_modules/gsnake-wasm && cp -R e2e/fixtures/gsnake-wasm/pkg gsnake-web/node_modules/gsnake-wasm && npm --prefix gsnake-web run build && npm --prefix gsnake-web run preview',
     url: 'http://localhost:4173',
     reuseExistingServer: !process.env.CI,
   },

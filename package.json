@@ -8,6 +8,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.41.0",
+    "@types/node": "^25.0.9",
     "allure-playwright": "^2.10.0"
   }
 }

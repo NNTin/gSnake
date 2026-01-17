@@ -1,57 +1,76 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Gravity Mechanics', () => {
-  test('Snake falls when walking off a ledge', async ({ page }) => {
-    // 1. Setup: Load "Level 2: The Drop"
-    await page.goto('/?level=2');
-    
-    // Verification: Assert snake head is at start position (2, 2)
-    // The grid is 15x15. Index = y * 15 + x.
-    // Head (2, 2) -> Index 32.
-    await expect(page.locator('[data-element-id="level-display"]')).toHaveText('2');
-    
-    // Get all cells
+const GRID_SIZE = 15;
+
+test.describe('Level Completion Flow', () => {
+  test('Completes level 1 and level 2', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForSelector('.cell');
+
+    const levelDisplay = page.locator('[data-element-id="level-display"]');
+    const movesDisplay = page.locator('[data-element-id="moves-display"]');
+    const lengthDisplay = page.locator('[data-element-id="length-display"]');
     const cells = page.locator('.cell');
-    
-    // Helper to check position
+
     const expectHeadAt = async (x: number, y: number) => {
-      const index = y * 15 + x;
+      const index = y * GRID_SIZE + x;
       await expect(cells.nth(index)).toHaveClass(/snake-head/);
     };
 
+    const pressAndWait = async (key: string) => {
+      const movesText = await movesDisplay.textContent();
+      const moves = Number(movesText ?? '0');
+      await page.keyboard.press(key);
+      await expect(movesDisplay).toHaveText(String(moves + 1));
+    };
+
+    await expect(levelDisplay).toHaveText('1');
+    await expectHeadAt(2, 13);
+
+    for (let i = 0; i < 11; i += 1) {
+      await pressAndWait('ArrowRight');
+    }
+
+    await expectHeadAt(13, 13);
+    await expect(levelDisplay).toHaveText('2', { timeout: 5000 });
     await expectHeadAt(2, 2);
 
-    // 2. Action - Move to Ledge (x=3)
-    // Snake head starts at 2. Ledge ends at 3.
-    // Press Right once: Head moves to 3.
-    await page.keyboard.press('ArrowRight');
-    await expectHeadAt(3, 2); // Still on platform
-    
-    // 3. Action - Walk Off Ledge
-    // We need to move enough steps so the entire body (length 3) clears the support.
-    // Platform is at x=0,1,2,3.
-    // Head at 3. Body at 2, 1.
-    
-    // Move Right (Head 4): Body at 3, 2. Tail (2) supported.
-    await page.keyboard.press('ArrowRight');
-    await expectHeadAt(4, 2);
+    const level2Moves: Array<{
+      key: string;
+      head?: { x: number; y: number };
+      length?: number;
+    }> = [
+      { key: 'ArrowRight' },
+      { key: 'ArrowRight' },
+      { key: 'ArrowRight' },
+      { key: 'ArrowRight', head: { x: 6, y: 5 } },
+      { key: 'ArrowDown', head: { x: 6, y: 6 } },
+      { key: 'ArrowLeft', head: { x: 5, y: 6 }, length: 4 },
+      { key: 'ArrowUp', head: { x: 5, y: 5 } },
+      { key: 'ArrowRight', head: { x: 6, y: 5 } },
+      { key: 'ArrowRight', head: { x: 7, y: 5 } },
+      { key: 'ArrowRight', head: { x: 8, y: 6 } },
+      { key: 'ArrowRight', head: { x: 9, y: 6 } },
+      { key: 'ArrowRight', head: { x: 10, y: 9 } },
+      { key: 'ArrowRight', head: { x: 11, y: 9 } },
+      { key: 'ArrowRight', head: { x: 12, y: 9 } },
+      { key: 'ArrowRight', head: { x: 13, y: 9 } },
+      { key: 'ArrowRight', head: { x: 14, y: 13 } },
+      { key: 'ArrowUp', head: { x: 14, y: 12 } },
+      { key: 'ArrowLeft', head: { x: 13, y: 12 } },
+      { key: 'ArrowDown', head: { x: 13, y: 13 } },
+    ];
 
-    // Move Right (Head 5): Body at 4, 2. Tail (3) supported by obstacle at (3,3).
-    await page.keyboard.press('ArrowRight');
-    await expectHeadAt(5, 2);
-    
-    // Move Right (Head 6): Body at 5, 2. Tail (4) has NO support below (4,3 is empty).
-    // GRAVITY should apply instantly.
-    // The snake falls down until it hits an obstacle, floor, or food.
-    // In Level 2, obstacles are at y=7. Food is at (5, 6).
-    // The snake segment at x=5 will be blocked by the food at (5, 6).
-    // Therefore, the snake stops falling when the segments reach y=5.
-    // Final Head Position: (6, 5).
-    await page.keyboard.press('ArrowRight');
+    for (const move of level2Moves) {
+      await pressAndWait(move.key);
+      if (move.length) {
+        await expect(lengthDisplay).toHaveText(String(move.length));
+      }
+      if (move.head) {
+        await expectHeadAt(move.head.x, move.head.y);
+      }
+    }
 
-    // 5. Validation
-    // Assert Snake Head is NOT at the y-level of the ledge (y=2)
-    // Assert Snake Head has landed on the platform formed by food (y=5)
-    await expectHeadAt(6, 5);
+    await expect(levelDisplay).toHaveText('3', { timeout: 5000 });
   });
 });
