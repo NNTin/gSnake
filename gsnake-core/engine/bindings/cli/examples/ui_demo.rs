@@ -204,6 +204,6 @@ fn create_test_level() -> LevelDefinition {
             Position::new(13, 4),
         ],
         Position::new(18, 10),
-        None,
+        Direction::East,
     )
 }

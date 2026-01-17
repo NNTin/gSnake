@@ -17,7 +17,8 @@ mod tests {
     "snake": [{ "x": 1, "y": 1 }],
     "obstacles": [],
     "food": [{ "x": 2, "y": 2 }],
-    "exit": { "x": 4, "y": 4 }
+    "exit": { "x": 4, "y": 4 },
+    "snakeDirection": "East"
   }
 ]
 "#;

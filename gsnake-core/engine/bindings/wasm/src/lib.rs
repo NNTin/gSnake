@@ -1,5 +1,6 @@
 use gsnake_core::{
-    engine::GameEngine, levels::parse_levels_json, Direction, LevelDefinition,
+    engine::GameEngine, levels::parse_levels_json, ContractError, ContractErrorKind, Direction,
+    Frame, LevelDefinition,
 };
 use js_sys::Function;
 use serde_wasm_bindgen::{from_value, to_value};
@@ -31,7 +32,7 @@ impl WasmGameEngine {
     #[wasm_bindgen(constructor)]
     pub fn new(level_json: JsValue) -> Result<WasmGameEngine, JsValue> {
         let level: LevelDefinition = from_value(level_json)
-            .map_err(|e| JsValue::from_str(&format!("Failed to parse level: {}", e)))?;
+            .map_err(|e| contract_error(ContractErrorKind::InvalidInput, &e.to_string()))?;
 
         Ok(WasmGameEngine {
             engine: GameEngine::new(level),
@@ -44,34 +45,33 @@ impl WasmGameEngine {
     #[wasm_bindgen(js_name = onFrame)]
     pub fn on_frame(&mut self, callback: Function) {
         self.on_frame_callback = Some(callback);
+        let _ = self.emit_frame();
     }
 
     /// Processes a move in the given direction
-    /// Returns true if the move was processed, false if input was locked or invalid
+    /// Returns a Frame on success; failures return a ContractError
     /// Automatically invokes the onFrame callback with the new state
     #[wasm_bindgen(js_name = processMove)]
-    pub fn process_move(&mut self, direction_str: &str) -> Result<bool, JsValue> {
-        let direction = match direction_str {
-            "North" | "north" | "up" => Direction::North,
-            "South" | "south" | "down" => Direction::South,
-            "East" | "east" | "right" => Direction::East,
-            "West" | "west" | "left" => Direction::West,
-            _ => {
-                return Err(JsValue::from_str(&format!(
-                    "Invalid direction: {}",
-                    direction_str
-                )))
-            }
-        };
+    pub fn process_move(&mut self, direction: JsValue) -> Result<JsValue, JsValue> {
+        let direction: Direction = from_value(direction)
+            .map_err(|e| contract_error(ContractErrorKind::InvalidInput, &e.to_string()))?;
 
         let processed = self.engine.process_move(direction);
-
-        // Emit frame after processing move
-        if processed {
-            self.emit_frame()?;
+        if !processed {
+            return Err(contract_error(
+                ContractErrorKind::InputRejected,
+                "Input rejected by engine",
+            ));
         }
 
-        Ok(processed)
+        let frame = self.engine.generate_frame();
+        let frame_js = serialize_frame(&frame)?;
+
+        if let Some(callback) = &self.on_frame_callback {
+            callback.call1(&JsValue::NULL, &frame_js)?;
+        }
+
+        Ok(frame_js)
     }
 
     /// Gets the current game frame (grid + state)
@@ -79,21 +79,23 @@ impl WasmGameEngine {
     #[wasm_bindgen(js_name = getFrame)]
     pub fn get_frame(&self) -> Result<JsValue, JsValue> {
         let frame = self.engine.generate_frame();
-        to_value(&frame).map_err(|e| JsValue::from_str(&format!("Failed to serialize frame: {}", e)))
+        serialize_frame(&frame)
     }
 
     /// Gets the current game state as a JS object
     #[wasm_bindgen(js_name = getGameState)]
     pub fn get_game_state(&self) -> Result<JsValue, JsValue> {
-        to_value(self.engine.game_state())
-            .map_err(|e| JsValue::from_str(&format!("Failed to serialize game state: {}", e)))
+        to_value(self.engine.game_state()).map_err(|e| {
+            contract_error(ContractErrorKind::SerializationFailed, &e.to_string())
+        })
     }
 
     /// Gets the current level data as a JS object
     #[wasm_bindgen(js_name = getLevel)]
     pub fn get_level(&self) -> Result<JsValue, JsValue> {
-        to_value(self.engine.level_definition())
-            .map_err(|e| JsValue::from_str(&format!("Failed to serialize level: {}", e)))
+        to_value(self.engine.level_definition()).map_err(|e| {
+            contract_error(ContractErrorKind::SerializationFailed, &e.to_string())
+        })
     }
 
     /// Emits the current frame to the registered callback
@@ -110,15 +112,30 @@ impl WasmGameEngine {
 #[wasm_bindgen(js_name = getLevels)]
 pub fn get_levels() -> Result<JsValue, JsValue> {
     let levels = parse_levels_json(LEVELS_JSON)
-        .map_err(|e| JsValue::from_str(&format!("Failed to parse levels JSON: {}", e)))?;
+        .map_err(|e| contract_error(ContractErrorKind::InitializationFailed, &e.to_string()))?;
     to_value(&levels)
-        .map_err(|e| JsValue::from_str(&format!("Failed to serialize levels: {}", e)))
+        .map_err(|e| contract_error(ContractErrorKind::SerializationFailed, &e.to_string()))
 }
 
 /// Logs a message to the browser console (for debugging)
 #[wasm_bindgen]
 pub fn log(s: &str) {
     web_sys::console::log_1(&JsValue::from_str(s));
+}
+
+fn serialize_frame(frame: &Frame) -> Result<JsValue, JsValue> {
+    to_value(frame)
+        .map_err(|e| contract_error(ContractErrorKind::SerializationFailed, &e.to_string()))
+}
+
+fn contract_error(kind: ContractErrorKind, message: &str) -> JsValue {
+    let error = ContractError {
+        kind,
+        message: message.to_string(),
+        context: None,
+    };
+
+    to_value(&error).unwrap_or_else(|_| JsValue::from_str(message))
 }
 
 #[cfg(test)]
@@ -138,7 +155,7 @@ mod tests {
             vec![],
             vec![],
             Position::new(4, 4),
-            None,
+            Direction::East,
         );
 
         let engine = GameEngine::new(level);

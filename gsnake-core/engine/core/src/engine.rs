@@ -162,7 +162,7 @@ impl GameEngine {
             }
         }
 
-        Frame::new(grid, self.game_state.clone(), self.level_state.snake.clone())
+        Frame::new(grid, self.game_state.clone())
     }
 
     /// Applies gravity by continuously falling the snake down
@@ -302,7 +302,7 @@ mod tests {
             vec![Position::new(3, 3), Position::new(7, 7)],
             vec![Position::new(5, 3)],
             Position::new(9, 9),
-            None,
+            Direction::East,
         )
     }
 
@@ -341,7 +341,7 @@ mod tests {
     fn test_opposite_direction_blocked() {
         let mut level = create_test_level();
         level.snake = vec![Position::new(5, 5), Position::new(5, 6)];
-        level.snake_direction = Some(Direction::North);
+        level.snake_direction = Direction::North;
 
         let mut engine = GameEngine::new(level);
 
@@ -371,6 +371,7 @@ mod tests {
     fn test_wall_collision() {
         let mut level = create_test_level();
         level.snake = vec![Position::new(0, 5)];
+        level.snake_direction = Direction::North;
 
         let mut engine = GameEngine::new(level);
 
@@ -405,7 +406,7 @@ mod tests {
             Position::new(6, 5),
             Position::new(6, 4),
         ];
-        level.snake_direction = Some(Direction::East);
+        level.snake_direction = Direction::East;
         // Add platform below to prevent falling through
         level.obstacles = vec![Position::new(5, 7), Position::new(6, 7)];
 

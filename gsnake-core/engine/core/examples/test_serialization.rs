@@ -10,8 +10,7 @@ fn main() {
         vec![CellType::Obstacle, CellType::Empty, CellType::Exit],
     ];
     let state = GameState::new(1, 5);
-    let snake = Snake::new(vec![Position::new(1, 0), Position::new(1, 1)]);
-    let mut frame = Frame::new(grid, state, snake);
+    let mut frame = Frame::new(grid, state);
     frame.state.moves = 5;
     frame.state.food_collected = 2;
 

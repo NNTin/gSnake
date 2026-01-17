@@ -48,7 +48,7 @@ fn main() {
         ],
         vec![Position::new(3, 4), Position::new(5, 4)],
         Position::new(7, 4),
-        None,
+        Direction::East,
     );
 
     let mut engine = GameEngine::new(level);

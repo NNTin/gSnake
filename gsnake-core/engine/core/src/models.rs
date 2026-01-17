@@ -130,8 +130,7 @@ pub struct LevelDefinition {
     pub obstacles: Vec<Position>,
     pub food: Vec<Position>,
     pub exit: Position,
-    #[serde(default)]
-    pub snake_direction: Option<Direction>,
+    pub snake_direction: Direction,
 }
 
 impl LevelDefinition {
@@ -144,7 +143,7 @@ impl LevelDefinition {
         obstacles: Vec<Position>,
         food: Vec<Position>,
         exit: Position,
-        snake_direction: Option<Direction>,
+        snake_direction: Direction,
     ) -> Self {
         Self {
             id,
@@ -173,7 +172,7 @@ impl LevelState {
     #[must_use]
     pub fn from_definition(definition: &LevelDefinition) -> Self {
         let mut snake = Snake::new(definition.snake.clone());
-        snake.direction = definition.snake_direction;
+        snake.direction = Some(definition.snake_direction);
 
         Self {
             grid_size: definition.grid_size,
@@ -190,14 +189,44 @@ impl LevelState {
 pub struct Frame {
     pub grid: Vec<Vec<CellType>>,
     pub state: GameState,
-    pub snake: Snake,
 }
 
 impl Frame {
     #[must_use]
-    pub fn new(grid: Vec<Vec<CellType>>, state: GameState, snake: Snake) -> Self {
-        Self { grid, state, snake }
+    pub fn new(grid: Vec<Vec<CellType>>, state: GameState) -> Self {
+        Self { grid, state }
     }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(rename_all = "camelCase")]
+pub struct ContractError {
+    pub kind: ContractErrorKind,
+    pub message: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub context: Option<std::collections::BTreeMap<String, String>>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(rename_all = "camelCase")]
+pub enum ContractErrorKind {
+    #[serde(rename = "invalidInput")]
+    #[ts(rename = "invalidInput")]
+    InvalidInput,
+    #[serde(rename = "inputRejected")]
+    #[ts(rename = "inputRejected")]
+    InputRejected,
+    #[serde(rename = "serializationFailed")]
+    #[ts(rename = "serializationFailed")]
+    SerializationFailed,
+    #[serde(rename = "initializationFailed")]
+    #[ts(rename = "initializationFailed")]
+    InitializationFailed,
+    #[serde(rename = "internalError")]
+    #[ts(rename = "internalError")]
+    InternalError,
 }
 
 #[cfg(test)]
@@ -247,5 +276,29 @@ mod tests {
         let json = serde_json::to_string(&state).unwrap();
         let deserialized: GameState = serde_json::from_str(&json).unwrap();
         assert_eq!(state, deserialized);
+    }
+
+    #[test]
+    fn test_contract_error_serialization() {
+        let error = ContractError {
+            kind: ContractErrorKind::InvalidInput,
+            message: "Invalid direction".to_string(),
+            context: None,
+        };
+
+        let json = serde_json::to_string(&error).unwrap();
+        let deserialized: ContractError = serde_json::from_str(&json).unwrap();
+        assert_eq!(error, deserialized);
+    }
+
+    #[test]
+    fn test_enum_string_values() {
+        assert_eq!(serde_json::to_string(&Direction::North).unwrap(), "\"North\"");
+        assert_eq!(serde_json::to_string(&CellType::SnakeHead).unwrap(), "\"SnakeHead\"");
+        assert_eq!(serde_json::to_string(&GameStatus::LevelComplete).unwrap(), "\"LevelComplete\"");
+        assert_eq!(
+            serde_json::to_string(&ContractErrorKind::InvalidInput).unwrap(),
+            "\"invalidInput\""
+        );
     }
 }
