@@ -1,15 +1,15 @@
 # Epic Brief: Folder Structure Restructuring
 
 ## Summary
-The current folder structure of the `gSnake` project is fragmented, with files for different components scattered across the root. This Epic aims to reorganize the project into a modular, Git-submodule compatible structure. The project will be divided into self-contained units: Web (Svelte), Terminal (Ratatui), Core Backend (Rust), WASM Bridge, and a planned Python wrapper (Maturin). The parent repository will focus solely on integration, project specifications (Epics), and global CI/CD pipelines, while components handle their own logic and data (e.g., moving `data/levels.json` into `gsnake-core`).
+The current folder structure of the `gSnake` project is fragmented, with files for different components scattered across the root. This Epic aims to reorganize the project into a modular, Git-submodule compatible structure. The project will be divided into self-contained units: `gsnake-core` (Rust engine plus bindings for WASM, CLI, and Python), `gsnake-web` (Svelte), and a placeholder `gsnake-python` boundary (no implementation yet). The parent repository will focus on integration, project specifications (Epics), and global CI/CD pipelines, while components handle their own logic and data (e.g., moving `data/levels.json` into `gsnake-core`). The WASM package name is `gsnake-wasm`; local linking is required for development.
 
 ## Context & Problem
 The `gSnake` project consists of several distinct components with diverging deployment needs:
 -   **Web Frontend:** A Svelte-based web application.
--   **Terminal Frontend:** A Rust-based terminal application using `ratatui`.
--   **Core Backend:** The Rust game engine (`gsnake-core`), which will now include `data/levels.json`.
--   **WASM Bridge:** Rust bridge for the Web frontend (`gsnake-wasm`).
--   **Python Support:** Planned via `maturin` as a thin wrapper around `gsnake-core`.
+-   **Core Backend + Bindings:** The Rust game engine (`gsnake-core`), which will now include `data/levels.json`, plus bindings for WASM, CLI (`ratatui`), and Python.
+-   **WASM Bridge:** Rust bridge for the Web frontend (package name `gsnake-wasm`).
+-   **Python Support:** Bindings live in `gsnake-core/engine/bindings/py` (using `pyproject.toml`).
+-   **Python App Boundary:** `gsnake-python` is a placeholder only in the current scope (no implementation yet).
 
 Currently, these components are co-located, leading to:
 -   **Deployment Complexity:** Mixed dependencies make publishing NPM and PyPI packages brittle.
@@ -19,12 +19,27 @@ Currently, these components are co-located, leading to:
 
 ## Requirements
 
--   **Versioning:** All sub-modules must adhere to Semantic Versioning (SemVer).
+-   **Versioning:** Each submodule repository adheres to Semantic Versioning (SemVer). Versions are incremented and released manually by a human.
 
--   **Development Linking:** During development, modules will be linked locally (`npm link` for Web, `pip install -e` for Python) to ensure a tight feedback loop.
+-   **Development Linking:** During development, modules are linked locally (required):
+    -   WASM: `wasm-pack build` then `npm link gsnake-core/engine/bindings/wasm/pkg` (the `pkg/` directory is generated and not committed).
+    -   Python: `pip install -e gsnake-core/engine/bindings/py` using `pyproject.toml`.
 
 -   **Happy Path Focus:** Initial implementation will prioritize the happy path for integration, with stability improvements addressed iteratively.
 
+-   **Integration Build:** The parent repository can build everything together for integration tests.
+
+-   **Root Rust Config:** The root retains Rust configuration required for building and end-to-end testing, and must support running Rust commands from the parent directory.
+
+## CI/CD Suggestions (Best Practices)
+
+-   Use Python as the orchestration layer in CI for integration steps.
+-   Use separate workflows for integration tests and web deployment; keep integration gated on `main` and PRs.
+-   Check out submodules explicitly in CI (pinned SHAs) and cache Rust/Node dependencies per module.
+-   Pin Rust toolchain versions in CI to match root configuration and reduce drift.
+-   Deploy the Svelte web app from the parent workflow after integration tests pass.
+
+**Recommendation:** Start with a single parent workflow that checks out submodules, runs integration builds/tests (including Playwright), and deploys the Svelte web app on `main`. Split into module-specific workflows after submodule isolation is stable.
 
 
 ## Success Criteria
@@ -33,6 +48,8 @@ Currently, these components are co-located, leading to:
 
 -   `gsnake-web` can be built and tested in complete isolation, consuming the core engine via local links.
 
+-   The parent `.github/workflows` runs integration tests and the Svelte web deployment with submodules checked out.
+
 -   The existing Playwright test suite passes at the root level, confirming the engine and web client are communicating correctly.
 
--   The folder structure is ready for conversion to Git submodules.
+-   The folder structure is ready for conversion to Git submodules after migration and proper isolation.
