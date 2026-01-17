@@ -4,7 +4,7 @@
   import { KeyboardHandler } from '../engine/KeyboardHandler';
   import { connectGameEngineToStores } from '../stores/stores';
   import GameContainer from './GameContainer.svelte';
-  import levelsData from '../data/levels.json';
+  import levelsData from '../gsnake-core/engine/core/data/levels.json';
   import type { Level } from '../types';
 
   const gameEngine = new WasmGameEngine();

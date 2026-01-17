@@ -11,7 +11,7 @@ workspace = true
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-gsnake-core = { path = "../gsnake-core" }
+gsnake-core = { path = "../../core" }
 serde.workspace = true
 serde_json.workspace = true
 wasm-bindgen = "0.2"

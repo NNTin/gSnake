@@ -1,7 +1,7 @@
 use anyhow::{Context, Result};
 use gsnake_core::{GridSize, Level, Position, Snake};
 use serde::Deserialize;
-use std::fs;
+use std::{fs, path::{Path, PathBuf}};
 
 /// JSON representation of a level with camelCase fields
 #[derive(Debug, Deserialize)]
@@ -61,9 +61,10 @@ impl From<LevelJson> for Level {
 }
 
 /// Loads all levels from the levels.json file
-pub fn load_levels(path: &str) -> Result<Vec<Level>> {
-    let contents = fs::read_to_string(path)
-        .with_context(|| format!("Failed to read levels file: {path}"))?;
+pub fn load_levels<P: AsRef<Path>>(path: P) -> Result<Vec<Level>> {
+    let path_ref = path.as_ref();
+    let contents = fs::read_to_string(path_ref)
+        .with_context(|| format!("Failed to read levels file: {}", path_ref.display()))?;
 
     let levels_json: Vec<LevelJson> = serde_json::from_str(&contents)
         .with_context(|| "Failed to parse levels JSON")?;
@@ -73,7 +74,7 @@ pub fn load_levels(path: &str) -> Result<Vec<Level>> {
 
 /// Loads a specific level by ID (1-indexed)
 #[allow(dead_code)]
-pub fn load_level_by_id(path: &str, level_id: u32) -> Result<Level> {
+pub fn load_level_by_id<P: AsRef<Path>>(path: P, level_id: u32) -> Result<Level> {
     let levels = load_levels(path)?;
 
     if level_id == 0 {
@@ -92,14 +93,14 @@ mod tests {
 
     #[test]
     fn test_load_levels() {
-        let levels = load_levels("data/levels.json").expect("Failed to load levels");
+        let levels = load_levels(levels_path()).expect("Failed to load levels");
         assert!(!levels.is_empty(), "Should load at least one level");
         assert_eq!(levels.len(), 5, "Should load 5 levels");
     }
 
     #[test]
     fn test_level_structure() {
-        let levels = load_levels("data/levels.json").expect("Failed to load levels");
+        let levels = load_levels(levels_path()).expect("Failed to load levels");
         let first_level = &levels[0];
 
         // Verify first level has expected structure
@@ -108,4 +109,7 @@ mod tests {
         assert_eq!(first_level.snake.segments.len(), 3);
         assert!(!first_level.food.is_empty());
     }
+}
+pub fn levels_path() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../core/data/levels.json")
 }

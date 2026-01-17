@@ -5,6 +5,9 @@ Gravity Snake is a strategic puzzle game that reimagines the classic Snake exper
 ### Rust command reference
 
 ```bash
+# Run these from the gsnake-core workspace root
+cd gsnake-core
+
 # Build CLI binary
 cargo build --package gsnake-cli
 

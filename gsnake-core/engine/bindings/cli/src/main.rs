@@ -12,19 +12,22 @@ mod levels;
 mod ui;
 
 use input::{Action, InputHandler};
-use levels::load_levels;
+use levels::{load_levels, levels_path};
 use ui::UI;
 
-const LEVELS_PATH: &str = "gsnake-cli/data/levels.json";
 const INPUT_POLL_TIMEOUT_MS: u64 = 100;
 
 fn main() -> Result<()> {
     // Load all levels
-    let levels = load_levels(LEVELS_PATH)
-        .context("Failed to load levels. Make sure you're running from the workspace root.")?;
+    let levels_path = levels_path();
+    let levels = load_levels(&levels_path)
+        .with_context(|| format!(
+            "Failed to load levels. Make sure you're running from the workspace root. Path: {}",
+            levels_path.display()
+        ))?;
 
     if levels.is_empty() {
-        anyhow::bail!("No levels found in {LEVELS_PATH}");
+        anyhow::bail!("No levels found in {}", levels_path.display());
     }
 
     // Setup terminal
