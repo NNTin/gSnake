@@ -1,34 +1,35 @@
-## gSnake
+# gSnake
 
-Gravity Snake is a strategic puzzle game that reimagines the classic Snake experience by introducing gravity physics and turn-based movement. Unlike traditional Snake games that rely on reflexes and continuous movement, Gravity Snake requires players to think ahead about how gravity will affect their position after each deliberate move. The snake only moves when the player acts, and after each action, gravity pulls the snake downward until it hits an obstacle or the floor. This creates a puzzle-like experience where players must navigate through increasingly complex levels with static obstacles and platforms.
+[![Deploy](https://github.com/NNTin/gSnake/actions/workflows/deploy.yml/badge.svg)](https://github.com/NNTin/gSnake/actions/workflows/deploy.yml)
+[![License](https://img.shields.io/github/license/NNTin/gSnake)](LICENSE)
 
-### Rust command reference
+**Play now:** [nntin.xyz/gSnake](http://nntin.xyz/gSnake/)
 
-```bash
-# Run these from the gsnake-core workspace root
-cd gsnake-core
+## About
 
-# Build CLI binary
-cargo build --package gsnake-cli
+Gravity Snake reimagines the classic Snake game by introducing gravity physics and strategic, turn-based movement.
 
-# Build optimized release
-cargo build --package gsnake-cli --release
+Unlike traditional Snake games that rely on reflexes, Gravity Snake is a puzzle game where you must think several moves ahead. The snake only moves when you act, and after each move, gravity pulls it downward until it hits an obstacle or the floor.
 
-# Run CLI game
-cargo run --package gsnake-cli
+## How to Play
 
-# Run UI demo
-cargo run --package gsnake-cli --example ui_demo
+- **🎮 Controls:** Use arrow keys or WASD to move
+- **🎯 Goal:** Collect all food, then reach the exit
+- **⚠️ Rules:**
+  - Avoid hitting walls, obstacles, or yourself
+  - You cannot reverse direction (no 180° turns)
+  - Gravity pulls you down after each move
+- **🔄 Restart:** Press `R` to restart the current level
+- **🏠 Menu:** Press `Q` to return to level 1
 
-# Run tests
-cargo test --package gsnake-cli
+## Features
 
-# Run all workspace tests
-cargo test --workspace
+- 🧩 Puzzle-focused gameplay with gravity physics
+- 📊 Progressive difficulty across multiple levels
+- 🎨 Clean, minimalist design
+- 🚀 Built with Rust + WebAssembly for performance
+- ✅ Comprehensive contract testing ensures reliability
 
-# Check code quality
-cargo clippy --package gsnake-cli
+---
 
-# Run with verbose output
-RUST_LOG=debug cargo run --package gsnake-cli
-```
+Built with [Rust](https://www.rust-lang.org/) and [Svelte](https://svelte.dev/)
