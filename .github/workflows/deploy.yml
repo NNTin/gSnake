@@ -19,6 +19,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          # If private submodules fail to fetch, add: ssh-key: ${{ secrets.SUBMODULE_SSH_KEY }}
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -29,10 +32,14 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            gsnake-web/package-lock.json
       - run: npm ci
+      - run: npm --prefix gsnake-web ci
       - name: Build WASM
-        run: npm run build:wasm
-      - run: npm run check
+        run: python3 scripts/build_wasm.py
+      - run: npm --prefix gsnake-web run check
 
   deploy:
     needs: validate
@@ -41,6 +48,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          submodules: recursive
+          # If private submodules fail to fetch, add: ssh-key: ${{ secrets.SUBMODULE_SSH_KEY }}
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -54,8 +63,12 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            gsnake-web/package-lock.json
       
       - run: npm ci
+      - run: npm --prefix gsnake-web ci
 
       # --- Tag Specific Logic: Extract Info ---
       - name: Extract Tag Info
@@ -119,7 +132,7 @@ jobs:
 
       # --- Build ---
       - name: Build
-        run: npm run build
+        run: npm --prefix gsnake-web run build
 
       # --- Prepare gh-pages branch ---
       - name: Checkout gh-pages
@@ -241,7 +254,7 @@ jobs:
           TARGET_DIR="gh-pages-root/${{ env.DEPLOY_DIR }}"
           rm -rf "$TARGET_DIR"
           mkdir -p "$TARGET_DIR"
-          cp -r dist/* "$TARGET_DIR"
+          cp -r gsnake-web/dist/* "$TARGET_DIR"
 
       # --- Deploy ---
       - name: Deploy to GitHub Pages
