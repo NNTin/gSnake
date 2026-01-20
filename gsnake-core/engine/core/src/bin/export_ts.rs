@@ -1,6 +1,6 @@
 use gsnake_core::{
     CellType, ContractError, ContractErrorKind, Direction, Frame, GameState, GameStatus, GridSize,
-    LevelDefinition, Position,
+    LevelDefinition, Position, RejectionReason,
 };
 use std::{fs, path::PathBuf};
 use ts_rs::TS;
@@ -33,6 +33,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     write_type::<GameState>(&mut buffer);
     write_type::<Frame>(&mut buffer);
     write_type::<ContractErrorKind>(&mut buffer);
+    write_type::<RejectionReason>(&mut buffer);
     write_type::<ContractError>(&mut buffer);
 
     fs::write(out_path, buffer)?;
