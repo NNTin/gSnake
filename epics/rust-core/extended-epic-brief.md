@@ -46,6 +46,7 @@ This limitation stems from the small object vocabulary and lack of interactive/d
 
 - Four new object types: floating food, falling food, stones, spikes
 - Enhanced exit with solid/fall-through property
+- Flexible food requirement system (per-level `totalFood` field)
 - Core mechanics implementation in `gsnake-core`
 - Contract extensions (new `CellType` variants, `LevelDefinition` fields)
 - Basic demonstration levels showcasing each new object

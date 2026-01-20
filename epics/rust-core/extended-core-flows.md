@@ -28,16 +28,20 @@ This spec defines the gameplay flows and interactions for the extended game obje
 1. Player presses arrow key (North/South/East/West)
 2. Game validates move (not opposite direction, not blocked push)
 3. Snake moves one cell in the chosen direction
-4. Game checks if snake ate food (any type):
-  - If yes: snake grows, food disappears
+4. Game checks if snake ate food (any type - regular, floating, or falling):
+  - If yes: snake grows, food disappears, food counter increments
   - If no: snake tail shrinks (maintains length)
 5. Snake falls due to gravity until hitting solid object
 6. All falling objects (stones, falling food) fall until hitting solid objects
-7. Game checks collisions:
-  - Spike contact → Game Over
-  - Obstacle/wall contact → Game Over
-  - Self-collision → Game Over
-  - Exit reached (with all food collected) → Level Complete
+  - Falling food that was resting on snake now falls (snake moved away)
+  - Stones fall if support was removed
+7. Game checks collisions (in priority order):
+  - **Death checks (highest priority):**
+    - Spike contact → Game Over
+    - Obstacle/wall contact → Game Over
+    - Self-collision → Game Over
+  - **Success checks:**
+    - Exit reached AND food counter >= totalFood → Level Complete
 8. Grid updates with new positions
 9. Player sees updated game state
 10. Loop continues until game over or level complete
@@ -53,19 +57,14 @@ sequenceDiagram
     participant Player
     participant Game
     participant Grid
-
+    
     Player->>Game: Press arrow key
     Game->>Game: Validate move
     Game->>Grid: Move snake
-    Game->>Game: Check collisions
     Game->>Game: Check food collection
-
-    loop Until no movement
-        Game->>Grid: Apply snake gravity
-        Game->>Grid: Apply object falling
-        Game->>Game: Check collisions
-    end
-
+    Game->>Grid: Apply snake gravity
+    Game->>Grid: Apply object falling
+    Game->>Game: Check collisions
     Game->>Grid: Update display
     Grid->>Player: Show new state
 ```
@@ -81,7 +80,7 @@ sequenceDiagram
 1. Snake head enters cell with floating food (orange)
 2. Food disappears from grid
 3. Snake grows by one segment
-4. Food counter increments
+4. Food counter increments (counts toward level's `totalFood` requirement)
 5. Floating food does not fall or move (remains in original position until collected)
 
 **Visual Feedback:**
@@ -89,6 +88,11 @@ sequenceDiagram
 - Orange cell indicates floating food
 - Food disappears when collected
 - Snake visibly grows
+
+**Key Behavior:**
+
+- Floating food counts toward the `totalFood` requirement for exiting the level
+- Acts as permanent platform for other objects until collected
 
 ## Flow 3: Collecting Falling Food
 
@@ -98,25 +102,35 @@ sequenceDiagram
 
 **Flow:**
 
-1. **Initial State:** Falling food (yellow) sits on a solid object
+1. **Initial State:** Falling food (yellow) sits on a solid object (settled state)
 2. **Scenario A - Direct Collection:**
   - Snake head enters cell with falling food
   - Food disappears, snake grows
-  - Food counter increments
+  - Food counter increments (counts toward level's `totalFood` requirement)
 3. **Scenario B - Support Removed:**
   - Object below falling food is removed (snake eats it, stone pushed away)
-  - Falling food immediately falls until hitting next solid object
+  - Falling food becomes unsettled and falls until hitting next solid object
   - If snake is below, food stops above snake (snake acts as platform)
   - Player can then collect it by moving into it
-4. **Scenario C - Landing on Snake:**
-  - If falling food lands on snake during fall, it stops above snake
-  - Snake can collect it by moving into it
+4. **Scenario C - Resting on Snake:**
+  - Falling food rests on any snake segment (head or body)
+  - Food is in settled state (acts as platform for objects above it)
+  - When snake moves away, space below food becomes empty
+  - Food becomes unsettled and falls during step 6 of Flow 1
+  - Food continues falling until hitting next solid object
 
 **Visual Feedback:**
 
 - Yellow cell indicates falling food
 - Instant position update when falling (no animation)
 - Food stops visibly above solid objects
+
+**Key Behaviors:**
+
+- **Settled state:** Not currently falling; acts as platform for objects above
+- **Unsettled state:** Currently falling; does not act as platform
+- Falling food counts toward the `totalFood` requirement for exiting the level
+- Falls during the "all falling objects fall" phase (step 6 of Flow 1)
 
 ## Flow 4: Pushing Stones (Single)
 
@@ -146,13 +160,20 @@ sequenceDiagram
 - Wall/grid boundary beyond stone
 - Obstacle beyond stone
 - Another stone beyond stone
-- Spike beyond stone
 
-## Flow 5: Pushing Multiple Stones
+**Special Case - Stone Pushed onto Spike:**
 
-**Description:** Player pushes a row of connected stones (Sokoban-style)
+- If space beyond stone contains a spike, push succeeds
+- Stone moves onto spike and is immediately destroyed
+- Stone disappears from grid
+- Snake enters stone's previous cell
+- This can be used strategically to remove stones from the level
 
-**Entry Point:** Snake moves horizontally into cell containing stone that's part of a row
+## Flow 5: Pushing Multiple Stones (Horizontal Row)
+
+**Description:** Player pushes a horizontal row of connected stones (Sokoban-style)
+
+**Entry Point:** Snake moves horizontally into cell containing stone that's part of a horizontal row
 
 **Flow:**
 
@@ -180,31 +201,48 @@ After:  [Empty][Snake][Stone][Stone][Stone]
 Then:   (All stones fall independently)
 ```
 
-## Flow 6: Vertical Stone Movement
+**Important Constraint:**
 
-**Description:** Stones cannot be pushed vertically, only fall
+- Only horizontal rows of stones can be pushed together
+- Vertical stacks cannot be pushed as a group (see Flow 6)
+- When pushing horizontally into a stone that's part of a vertical stack, only the stone at snake's level moves
 
-**Entry Point:** Snake moves vertically (North/South) into cell containing stone
+## Flow 6: Vertical Stone Movement and Stacks
+
+**Description:** Stones cannot be pushed vertically, and vertical stacks have special behavior
+
+**Entry Point:** Snake moves into cell containing stone (vertically or horizontally into a stack)
 
 **Flow:**
 
-1. Snake attempts to move vertically into stone
+**Scenario A - Vertical Push Attempt:**
+
+1. Snake attempts to move vertically (North/South) into stone
 2. Move is rejected (treated as blocked)
 3. Stone does not wiggle (no push attempt feedback)
 4. Snake doesn't move
 5. Grid remains unchanged
 
-**Key Behavior:**
+**Scenario B - Horizontal Push into Vertical Stack:**
+
+1. Snake moves horizontally (East/West) into stone that's part of a vertical stack
+2. Only the stone at snake's level is pushed
+3. Stones above/below in the vertical stack remain in place
+4. After push, the moved stone falls independently
+5. Stones above may fall if they lost support
+
+**Key Behaviors:**
 
 - Stones only respond to horizontal pushes
 - Vertical movement into stone is treated like moving into obstacle
 - Stones fall naturally due to gravity but cannot be pushed down/up
+- Vertical stacks do not move as a unit - only individual stones at snake's level can be pushed
 
 ## Flow 7: Encountering Spikes
 
-**Description:** Player dies on any contact with spikes
+**Description:** Player dies on any contact with spikes; stones are destroyed when pushed onto spikes
 
-**Entry Point:** Snake moves into spike, or falls onto spike
+**Entry Point:** Snake moves into spike, falls onto spike, or stone is pushed onto spike
 
 **Flow:**
 
@@ -224,8 +262,16 @@ Then:   (All stones fall independently)
 **Visual Feedback:**
 
 - Red cell indicates spike
-- Game Over modal with restart options
-- No platform behavior (snake doesn't stop above spike)
+- Game Over modal with restart options (for snake death)
+- Stone disappears when pushed onto spike
+- No platform behavior for snake (snake doesn't stop above spike)
+
+**Key Behaviors:**
+
+- Spikes are deadly to snake on any contact
+- Spikes destroy stones pushed onto them
+- Spikes act as floor for falling objects (stones, falling food) - objects stop above spikes
+- Snake cannot stand on spikes (falls through and dies)
 
 ## Flow 8: Using Solid Exit
 
@@ -236,11 +282,11 @@ Then:   (All stones fall independently)
 **Flow:**
 
 1. Snake moves toward solid exit (green, filled pattern)
-2. **If all food not collected:**
+2. **If food counter < totalFood:**
   - Exit acts as platform (snake stands on it)
   - Level doesn't complete
   - Snake can move away from exit
-3. **If all food collected:**
+3. **If food counter >= totalFood:**
   - Snake enters exit cell
   - Level Complete status triggered
   - Level Complete modal appears
@@ -261,11 +307,11 @@ Then:   (All stones fall independently)
 **Flow:**
 
 1. Snake moves toward fall-through exit (light green, hole/gap pattern)
-2. **If all food not collected:**
+2. **If food counter < totalFood:**
   - Snake falls through exit (no platform behavior)
   - Snake continues falling until hitting solid object below
   - Level doesn't complete
-3. **If all food collected:**
+3. **If food counter >= totalFood:**
   - Snake enters exit cell
   - Level Complete status triggered immediately
   - Level Complete modal appears
@@ -293,9 +339,9 @@ Then:   (All stones fall independently)
 1. Object (stone or falling food) loses support
 2. Object falls one cell at a time until hitting solid object
 3. **Collision with Snake:**
-  - Falling object stops above snake (snake acts as platform)
-  - Object rests on snake
-  - Snake can move away, causing object to fall further
+  - Falling object stops above any snake segment (head or body)
+  - Object rests on snake in settled state
+  - Snake can move away, causing object to become unsettled and fall further
 4. **Collision with Other Objects:**
   - Falling object stops above solid objects (obstacles, stones, floating food, settled falling food)
   - Multiple objects can stack vertically
@@ -345,15 +391,24 @@ Then:   (All stones fall independently)
   "spikes": [{"x": 10, "y": 14}],
   "exit": {"x": 13, "y": 13},
   "exitIsSolid": true,
+  "totalFood": 3,
   "snakeDirection": "East"
 }
 ```
+
+**Field Descriptions:**
+
+- `totalFood`: Number of food items (any type) required to exit the level
+  - Can be 0 (no food required), partial (some food), or total (all food)
+  - Counts regular food + floating food + falling food
+  - Level designer controls this per level for puzzle variety
 
 **Backward Compatibility:**
 
 - Existing levels without new fields work unchanged
 - Missing fields default to empty arrays
 - `exitIsSolid` defaults to `true` (solid exit)
+- `totalFood` defaults to count of all food items in level (maintains current behavior)
 
 ## Discovery & Learning
 
@@ -384,9 +439,22 @@ Players learn object behaviors by:
 
 ### Snake as Platform
 
-- Snake acts as platform for falling objects
-- Objects rest on snake until snake moves
+- Any snake segment (head or body) acts as platform for falling objects
+- Objects rest on snake in settled state until snake moves
+- When snake moves away, objects become unsettled and fall
 - Snake can "carry" objects by staying still
+
+### Stone Destruction on Spikes
+
+- Stones pushed onto spikes are destroyed immediately
+- Can be used strategically to remove blocking stones
+- Useful for puzzle designs requiring stone removal
+
+### Vertical Stack Pushing
+
+- Only horizontal rows of stones can be pushed together
+- Pushing into a vertical stack only moves the stone at snake's level
+- Stones above may fall if they lose support after push
 
 ### Exit Placement Strategy
 
