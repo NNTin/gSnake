@@ -4,7 +4,7 @@
   "version": "0.2.1",
   "scripts": {
     "test:e2e": "playwright test --reporter=list",
-    "report": "allure serve allure-results"
+    "report": "allure serve artifacts/allure-results"
   },
   "devDependencies": {
     "@playwright/test": "^1.41.0",

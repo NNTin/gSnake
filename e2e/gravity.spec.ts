@@ -55,9 +55,10 @@ test.describe('Level Completion Flow', () => {
       { key: 'ArrowRight', head: { x: 11, y: 9 } },
       { key: 'ArrowRight', head: { x: 12, y: 9 } },
       { key: 'ArrowRight', head: { x: 13, y: 9 } },
-      { key: 'ArrowRight', head: { x: 14, y: 13 } },
-      { key: 'ArrowUp', head: { x: 14, y: 12 } },
-      { key: 'ArrowLeft', head: { x: 13, y: 12 } },
+      { key: 'ArrowRight', head: { x: 14, y: 12 } },
+      { key: 'ArrowUp', head: { x: 14, y: 11 } },
+      { key: 'ArrowLeft', head: { x: 13, y: 11 } },
+      { key: 'ArrowDown', head: { x: 13, y: 12 } },
       { key: 'ArrowDown', head: { x: 13, y: 13 } },
     ];
 
