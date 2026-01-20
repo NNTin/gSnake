@@ -16,7 +16,7 @@ test.describe('Contract Payloads', () => {
     for (const classes of cellClasses) {
       expect(classes).toContain('cell');
       const extra = classes.filter(
-        cls => cls !== 'cell' && !cls.startsWith('svelte-')
+        (cls: string) => cls !== 'cell' && !cls.startsWith('svelte-')
       );
       expect(extra.length).toBeLessThanOrEqual(1);
       if (extra.length === 1) {

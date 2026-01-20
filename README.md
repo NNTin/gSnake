@@ -1,7 +1,7 @@
 # gSnake
 
 [![Deploy](https://github.com/NNTin/gSnake/actions/workflows/deploy.yml/badge.svg)](https://github.com/NNTin/gSnake/actions/workflows/deploy.yml)
-[![License](https://img.shields.io/github/license/NNTin/gSnake)](LICENSE)
+[![License](https://img.shields.io/badge/license-All%20Rights%20Reserved-red.svg)](LICENSE)
 
 **Play now:** [nntin.xyz/gSnake](http://nntin.xyz/gSnake/)
 
@@ -29,6 +29,10 @@ Unlike traditional Snake games that rely on reflexes, Gravity Snake is a puzzle 
 - 🎨 Clean, minimalist design
 - 🚀 Built with Rust + WebAssembly for performance
 - ✅ Comprehensive contract testing ensures reliability
+
+## Terminal Demo
+
+![Terminal Demo](gsnake-core/demo.svg)
 
 ---
 
