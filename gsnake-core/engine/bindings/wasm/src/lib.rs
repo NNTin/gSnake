@@ -143,6 +143,7 @@ fn contract_error(kind: ContractErrorKind, message: &str) -> JsValue {
         kind,
         message: message.to_string(),
         context: None,
+        rejection_reason: None,
     };
 
     match to_value(&error) {

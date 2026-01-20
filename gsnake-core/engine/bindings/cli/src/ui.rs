@@ -14,14 +14,22 @@ const COLOR_EMPTY: Color = Color::Black;
 const COLOR_SNAKE_HEAD: Color = Color::Green;
 const COLOR_SNAKE_BODY: Color = Color::LightGreen;
 const COLOR_FOOD: Color = Color::Red;
+const COLOR_FLOATING_FOOD: Color = Color::Rgb(255, 152, 0); // Orange
+const COLOR_FALLING_FOOD: Color = Color::Yellow;
+const COLOR_STONE: Color = Color::Rgb(121, 85, 72); // Brown
+const COLOR_SPIKE: Color = Color::LightRed;
 const COLOR_OBSTACLE: Color = Color::Gray;
-const COLOR_EXIT: Color = Color::Yellow;
+const COLOR_EXIT: Color = Color::Cyan;
 
 /// Characters for different cell types
 const CHAR_EMPTY: &str = "  ";
 const CHAR_SNAKE_HEAD: &str = "●●";
 const CHAR_SNAKE_BODY: &str = "██";
 const CHAR_FOOD: &str = "◆◆";
+const CHAR_FLOATING_FOOD: &str = "◇◇";
+const CHAR_FALLING_FOOD: &str = "◈◈";
+const CHAR_STONE: &str = "■■";
+const CHAR_SPIKE: &str = "▲▲";
 const CHAR_OBSTACLE: &str = "▓▓";
 const CHAR_EXIT: &str = "⚑⚑";
 
@@ -271,6 +279,10 @@ impl UI {
             CellType::SnakeHead => (CHAR_SNAKE_HEAD, COLOR_SNAKE_HEAD),
             CellType::SnakeBody => (CHAR_SNAKE_BODY, COLOR_SNAKE_BODY),
             CellType::Food => (CHAR_FOOD, COLOR_FOOD),
+            CellType::FloatingFood => (CHAR_FLOATING_FOOD, COLOR_FLOATING_FOOD),
+            CellType::FallingFood => (CHAR_FALLING_FOOD, COLOR_FALLING_FOOD),
+            CellType::Stone => (CHAR_STONE, COLOR_STONE),
+            CellType::Spike => (CHAR_SPIKE, COLOR_SPIKE),
             CellType::Obstacle => (CHAR_OBSTACLE, COLOR_OBSTACLE),
             CellType::Exit => (CHAR_EXIT, COLOR_EXIT),
         }

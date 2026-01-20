@@ -188,6 +188,7 @@ fn test_contracterror_without_context() {
         kind: ContractErrorKind::InvalidInput,
         message: "Test error".to_string(),
         context: None,
+        rejection_reason: None,
     };
 
     let json = serde_json::to_string(&error).unwrap();
@@ -211,6 +212,7 @@ fn test_contracterror_with_context() {
         kind: ContractErrorKind::InvalidInput,
         message: "Test error".to_string(),
         context: Some(context),
+        rejection_reason: None,
     };
 
     let json_value = serde_json::to_value(&error).unwrap();
@@ -403,6 +405,7 @@ fn create_error(kind: ContractErrorKind) -> ContractError {
         kind,
         message: message.to_string(),
         context: None,
+        rejection_reason: None,
     }
 }
 
@@ -415,5 +418,6 @@ fn create_error_with_context() -> ContractError {
         kind: ContractErrorKind::InvalidInput,
         message: "Invalid direction provided".to_string(),
         context: Some(context),
+        rejection_reason: None,
     }
 }

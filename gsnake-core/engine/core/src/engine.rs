@@ -1,5 +1,6 @@
 use crate::{
-    CellType, Direction, Frame, GameState, GameStatus, LevelDefinition, LevelState, Position,
+    gravity, stone_mechanics, CellType, Direction, Frame, GameState, GameStatus, LevelDefinition,
+    LevelState, Position,
 };
 
 /// Main game engine that manages game state and processes moves
@@ -15,7 +16,15 @@ impl GameEngine {
     /// Creates a new game engine with the given level definition
     #[must_use]
     pub fn new(level: LevelDefinition) -> Self {
-        let total_food = level.food.len() as u32;
+        // Calculate total food requirement
+        // If total_food is explicitly set (non-zero), use it
+        // Otherwise, count all food items (regular + floating + falling)
+        let total_food = if level.total_food > 0 {
+            level.total_food
+        } else {
+            (level.food.len() + level.floating_food.len() + level.falling_food.len()) as u32
+        };
+
         let current_level = if level.id == 0 { 1 } else { level.id };
         let level_state = LevelState::from_definition(&level);
 
@@ -76,37 +85,58 @@ impl GameEngine {
         let current_head = *self.level_state.snake.segments.first().unwrap();
         let new_head = Self::get_new_head_position(current_head, direction);
 
-        // Check if snake eats food
-        let food_index = self.get_food_index(new_head);
+        // Check if moving into a stone
+        if self.is_stone(new_head) {
+            // Try to push the stone
+            let push_result =
+                stone_mechanics::try_push_stone(new_head, direction, &mut self.level_state);
+
+            match push_result {
+                stone_mechanics::PushResult::Success => {
+                    // Stone was pushed, continue with move
+                }
+                stone_mechanics::PushResult::Blocked(_) | stone_mechanics::PushResult::VerticalPushAttempt => {
+                    // Stone push failed, reject the move
+                    self.input_locked = false;
+                    return false;
+                }
+            }
+        }
+
+        // Check if snake eats any type of food
+        let food_eaten = self.check_and_eat_food(new_head);
 
         // Add new head to front of segments
         self.level_state.snake.segments.insert(0, new_head);
 
-        let _just_ate = if let Some(idx) = food_index {
-            // Remove the eaten food
-            self.level_state.food.remove(idx);
-            self.game_state.food_collected += 1;
-            true
-        } else {
+        if !food_eaten {
             // Remove tail if no food was eaten
             self.level_state.snake.segments.pop();
-            false
-        };
+        }
 
-        // Check for collision immediately after move
+        // Check for collision immediately after move (spikes have highest priority)
         if self.check_collision(self.level_state.snake.segments[0]) {
             self.game_state.status = GameStatus::GameOver;
         } else {
-            // Apply gravity
-            self.apply_gravity();
+            // Apply gravity to snake
+            let hit_spike = gravity::apply_gravity_to_snake(&mut self.level_state);
+            if hit_spike {
+                self.game_state.status = GameStatus::GameOver;
+            } else {
+                // Apply gravity to stones
+                gravity::apply_gravity_to_stones(&mut self.level_state);
 
-            // Check if reached exit (only if not game over and collected all food)
-            if self.game_state.status == GameStatus::Playing {
-                let head = self.level_state.snake.segments[0];
-                if self.check_exit(head)
-                    && self.game_state.food_collected == self.game_state.total_food
-                {
-                    self.game_state.status = GameStatus::LevelComplete;
+                // Apply gravity to falling food
+                gravity::apply_gravity_to_falling_food(&mut self.level_state);
+
+                // Check if reached exit (only if not game over and collected required food)
+                if self.game_state.status == GameStatus::Playing {
+                    let head = self.level_state.snake.segments[0];
+                    if self.check_exit(head)
+                        && self.game_state.food_collected >= self.game_state.total_food
+                    {
+                        self.game_state.status = GameStatus::LevelComplete;
+                    }
                 }
             }
         }
@@ -136,10 +166,38 @@ impl GameEngine {
             }
         }
 
-        // Place food
+        // Place spikes
+        for spike in &self.level_state.spikes {
+            if self.is_within_bounds(*spike) {
+                grid[spike.y as usize][spike.x as usize] = CellType::Spike;
+            }
+        }
+
+        // Place stones
+        for stone in &self.level_state.stones {
+            if self.is_within_bounds(*stone) {
+                grid[stone.y as usize][stone.x as usize] = CellType::Stone;
+            }
+        }
+
+        // Place regular food
         for food in &self.level_state.food {
             if self.is_within_bounds(*food) {
                 grid[food.y as usize][food.x as usize] = CellType::Food;
+            }
+        }
+
+        // Place floating food
+        for food in &self.level_state.floating_food {
+            if self.is_within_bounds(*food) {
+                grid[food.y as usize][food.x as usize] = CellType::FloatingFood;
+            }
+        }
+
+        // Place falling food
+        for food in &self.level_state.falling_food {
+            if self.is_within_bounds(*food) {
+                grid[food.y as usize][food.x as usize] = CellType::FallingFood;
             }
         }
 
@@ -165,50 +223,50 @@ impl GameEngine {
         Frame::new(grid, self.game_state.clone())
     }
 
-    /// Applies gravity by continuously falling the snake down
-    fn apply_gravity(&mut self) {
-        while self.can_snake_fall() {
-            // Move all segments down by 1
-            for segment in &mut self.level_state.snake.segments {
-                segment.y += 1;
-            }
-
-            // Check for collision after each fall
-            if self.check_collision(self.level_state.snake.segments[0]) {
-                self.game_state.status = GameStatus::GameOver;
-                break;
-            }
-        }
-    }
-
-    /// Checks if the snake can fall further (used by gravity)
-    fn can_snake_fall(&self) -> bool {
-        for segment in &self.level_state.snake.segments {
-            let next_y = segment.y + 1;
-
-            // Check floor boundary
-            if next_y >= self.level_state.grid_size.height {
-                return false;
-            }
-
-            let next_pos = Position::new(segment.x, next_y);
-
-            // Check obstacles
-            if self.is_obstacle(next_pos) {
-                return false;
-            }
-
-            // Check food (acts as platform)
-            if self.is_food(next_pos) {
-                return false;
-            }
+    /// Check and eat any type of food at the given position
+    /// Returns true if food was eaten
+    fn check_and_eat_food(&mut self, pos: Position) -> bool {
+        // Check regular food
+        if let Some(idx) = self.get_food_index(pos) {
+            self.level_state.food.remove(idx);
+            self.game_state.food_collected += 1;
+            return true;
         }
 
-        true
+        // Check floating food
+        if let Some(idx) = self
+            .level_state
+            .floating_food
+            .iter()
+            .position(|f| f.x == pos.x && f.y == pos.y)
+        {
+            self.level_state.floating_food.remove(idx);
+            self.game_state.food_collected += 1;
+            return true;
+        }
+
+        // Check falling food
+        if let Some(idx) = self
+            .level_state
+            .falling_food
+            .iter()
+            .position(|f| f.x == pos.x && f.y == pos.y)
+        {
+            self.level_state.falling_food.remove(idx);
+            self.game_state.food_collected += 1;
+            return true;
+        }
+
+        false
     }
 
-    /// Checks if a position has a collision (out of bounds, obstacle, or self)
+    /// Checks if a position has a collision (out of bounds, spike, obstacle, or self)
     fn check_collision(&self, head: Position) -> bool {
+        // Check spikes first (highest priority)
+        if self.is_spike(head) {
+            return true;
+        }
+
         // Check out of bounds
         if !self.is_within_bounds(head) {
             return true;
@@ -251,6 +309,22 @@ impl GameEngine {
             .food
             .iter()
             .any(|f| f.x == pos.x && f.y == pos.y)
+    }
+
+    /// Checks if a position contains a stone
+    fn is_stone(&self, pos: Position) -> bool {
+        self.level_state
+            .stones
+            .iter()
+            .any(|s| s.x == pos.x && s.y == pos.y)
+    }
+
+    /// Checks if a position contains a spike
+    fn is_spike(&self, pos: Position) -> bool {
+        self.level_state
+            .spikes
+            .iter()
+            .any(|s| s.x == pos.x && s.y == pos.y)
     }
 
     /// Checks if the head has reached the exit

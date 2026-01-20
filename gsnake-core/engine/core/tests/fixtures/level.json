@@ -39,5 +39,11 @@
     "x": 4,
     "y": 0
   },
-  "snakeDirection": "North"
+  "snakeDirection": "North",
+  "floatingFood": [],
+  "fallingFood": [],
+  "stones": [],
+  "spikes": [],
+  "exitIsSolid": true,
+  "totalFood": 0
 }

@@ -24,6 +24,10 @@ pub enum CellType {
     Food,
     Obstacle,
     Exit,
+    FloatingFood,
+    FallingFood,
+    Stone,
+    Spike,
 }
 
 /// Represents the current status of the game
@@ -131,6 +135,22 @@ pub struct LevelDefinition {
     pub food: Vec<Position>,
     pub exit: Position,
     pub snake_direction: Direction,
+    #[serde(default)]
+    pub floating_food: Vec<Position>,
+    #[serde(default)]
+    pub falling_food: Vec<Position>,
+    #[serde(default)]
+    pub stones: Vec<Position>,
+    #[serde(default)]
+    pub spikes: Vec<Position>,
+    #[serde(default = "default_exit_is_solid")]
+    pub exit_is_solid: bool,
+    #[serde(default)]
+    pub total_food: u32,
+}
+
+fn default_exit_is_solid() -> bool {
+    true
 }
 
 impl LevelDefinition {
@@ -154,6 +174,12 @@ impl LevelDefinition {
             food,
             exit,
             snake_direction,
+            floating_food: Vec::new(),
+            falling_food: Vec::new(),
+            stones: Vec::new(),
+            spikes: Vec::new(),
+            exit_is_solid: true,
+            total_food: 0,
         }
     }
 }
@@ -166,6 +192,11 @@ pub struct LevelState {
     pub obstacles: Vec<Position>,
     pub food: Vec<Position>,
     pub exit: Position,
+    pub floating_food: Vec<Position>,
+    pub falling_food: Vec<Position>,
+    pub stones: Vec<Position>,
+    pub spikes: Vec<Position>,
+    pub exit_is_solid: bool,
 }
 
 impl LevelState {
@@ -180,6 +211,11 @@ impl LevelState {
             obstacles: definition.obstacles.clone(),
             food: definition.food.clone(),
             exit: definition.exit,
+            floating_food: definition.floating_food.clone(),
+            falling_food: definition.falling_food.clone(),
+            stones: definition.stones.clone(),
+            spikes: definition.spikes.clone(),
+            exit_is_solid: definition.exit_is_solid,
         }
     }
 }
@@ -206,6 +242,17 @@ pub struct ContractError {
     pub message: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub context: Option<std::collections::BTreeMap<String, String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub rejection_reason: Option<RejectionReason>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(rename_all = "camelCase")]
+pub struct RejectionReason {
+    pub reason: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub position: Option<Position>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, TS)]
@@ -284,6 +331,7 @@ mod tests {
             kind: ContractErrorKind::InvalidInput,
             message: "Invalid direction".to_string(),
             context: None,
+            rejection_reason: None,
         };
 
         let json = serde_json::to_string(&error).unwrap();

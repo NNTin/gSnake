@@ -17,6 +17,10 @@ fn print_frame(engine: &GameEngine) {
                 CellType::SnakeHead => "H",
                 CellType::SnakeBody => "B",
                 CellType::Food => "F",
+                CellType::FloatingFood => "O",
+                CellType::FallingFood => "Y",
+                CellType::Stone => "S",
+                CellType::Spike => "X",
                 CellType::Obstacle => "#",
                 CellType::Exit => "E",
             };
