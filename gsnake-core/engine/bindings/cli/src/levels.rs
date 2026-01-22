@@ -14,19 +14,43 @@ pub fn load_levels<P: AsRef<Path>>(path: P) -> Result<Vec<LevelDefinition>> {
     Ok(levels_json)
 }
 
-/// Loads a specific level by ID (1-indexed)
-#[allow(dead_code)]
-pub fn load_level_by_id<P: AsRef<Path>>(path: P, level_id: u32) -> Result<LevelDefinition> {
+/// Loads a specific level by index (1-indexed position in the array)
+pub fn load_level_by_index<P: AsRef<Path>>(path: P, level_index: u32) -> Result<LevelDefinition> {
     let levels = load_levels(path)?;
 
-    if level_id == 0 {
-        return Err(anyhow::anyhow!("Level IDs start at 1"));
+    if level_index == 0 {
+        return Err(anyhow::anyhow!("Level indices start at 1"));
     }
 
     levels
         .into_iter()
-        .nth((level_id - 1) as usize)
-        .ok_or_else(|| anyhow::anyhow!("Level {level_id} not found"))
+        .nth((level_index - 1) as usize)
+        .ok_or_else(|| anyhow::anyhow!("Level index {level_index} not found"))
+}
+
+/// Loads a specific level by JSON id field
+pub fn load_level_by_json_id<P: AsRef<Path>>(path: P, json_id: u32) -> Result<LevelDefinition> {
+    let levels = load_levels(path)?;
+    let mut matches = levels.into_iter().filter(|level| level.id == json_id);
+    let level = matches
+        .next()
+        .ok_or_else(|| anyhow::anyhow!("Level with id {json_id} not found"))?;
+    if matches.next().is_some() {
+        return Err(anyhow::anyhow!(
+            "Multiple levels found with id {json_id}"
+        ));
+    }
+    Ok(level)
+}
+
+/// Loads a single level definition from a JSON file
+pub fn load_level_from_file<P: AsRef<Path>>(path: P) -> Result<LevelDefinition> {
+    let path_ref = path.as_ref();
+    let contents = fs::read_to_string(path_ref)
+        .with_context(|| format!("Failed to read level file: {}", path_ref.display()))?;
+    let level: LevelDefinition = serde_json::from_str(&contents)
+        .with_context(|| "Failed to parse level JSON")?;
+    Ok(level)
 }
 
 #[cfg(test)]

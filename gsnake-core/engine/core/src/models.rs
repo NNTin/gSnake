@@ -129,6 +129,8 @@ impl GridSize {
 pub struct LevelDefinition {
     pub id: u32,
     pub name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub difficulty: Option<String>,
     pub grid_size: GridSize,
     pub snake: Vec<Position>,
     pub obstacles: Vec<Position>,
@@ -168,6 +170,7 @@ impl LevelDefinition {
         Self {
             id,
             name,
+            difficulty: None,
             grid_size,
             snake,
             obstacles,
