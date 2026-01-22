@@ -4,3 +4,9 @@
 [submodule "gsnake-web"]
 	path = gsnake-web
 	url = git@github.com:NNTin/gsnake-web.git
+[submodule "gsnake-specs"]
+	path = gsnake-specs
+	url = git@github.com:NNTin/gsnake-specs.git
+[submodule "gsnake-levels"]
+	path = gsnake-levels
+	url = git@github.com:NNTin/gsnake-levels.git
