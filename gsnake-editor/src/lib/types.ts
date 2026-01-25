@@ -8,6 +8,8 @@ export type EntityType =
   | 'floating-food'
   | 'falling-food';
 
+export type Direction = 'north' | 'south' | 'east' | 'west';
+
 export interface Entity {
   type: EntityType;
   name: string;

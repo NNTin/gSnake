@@ -1,13 +1,14 @@
 <script lang="ts">
   import EntityPalette from './EntityPalette.svelte';
   import GridCanvas from './GridCanvas.svelte';
-  import type { EntityType, GridCell } from './types';
+  import type { EntityType, GridCell, Direction } from './types';
 
   export let gridWidth: number;
   export let gridHeight: number;
 
   let selectedEntity: EntityType = 'snake';
   let snakeSegments: { row: number; col: number }[] = []; // Track snake segments in order (head to tail)
+  let snakeDirection: Direction = 'east'; // Default direction is East
 
   // Initialize grid cells
   $: cells = Array.from({ length: gridHeight }, (_, row) =>
@@ -24,6 +25,7 @@
   interface EditorState {
     cells: GridCell[][];
     snakeSegments: { row: number; col: number }[];
+    direction: Direction;
   }
 
   interface Command {
@@ -38,7 +40,8 @@
   function captureState(): EditorState {
     return {
       cells: cells.map(row => row.map(cell => ({ ...cell }))),
-      snakeSegments: snakeSegments.map(seg => ({ ...seg }))
+      snakeSegments: snakeSegments.map(seg => ({ ...seg })),
+      direction: snakeDirection
     };
   }
 
@@ -46,6 +49,7 @@
   function restoreState(state: EditorState) {
     cells = state.cells.map(row => row.map(cell => ({ ...cell })));
     snakeSegments = state.snakeSegments.map(seg => ({ ...seg }));
+    snakeDirection = state.direction;
   }
 
   // Create a command for cell modification
@@ -238,8 +242,10 @@
     }
   }
 
-  function handleSnakeDirection() {
-    console.log('Snake Direction clicked');
+  function handleDirectionChange(event: Event) {
+    const target = event.target as HTMLSelectElement;
+    snakeDirection = target.value as Direction;
+    console.log('Snake direction changed to:', snakeDirection);
   }
 
   function handleTest() {
@@ -280,7 +286,12 @@
     <button on:click={handleLoad}>Load</button>
     <button on:click={handleUndo} disabled={undoStack.length === 0}>Undo</button>
     <button on:click={handleRedo} disabled={redoStack.length === 0}>Redo</button>
-    <button on:click={handleSnakeDirection}>Snake Direction</button>
+    <select bind:value={snakeDirection} on:change={handleDirectionChange} class="direction-select">
+      <option value="north">North</option>
+      <option value="south">South</option>
+      <option value="east">East</option>
+      <option value="west">West</option>
+    </select>
     <button on:click={handleTest}>Test</button>
     <button on:click={handleSave}>Save</button>
   </div>
@@ -345,6 +356,25 @@
 
   .toolbar button:disabled:hover {
     background-color: #f5f5f5;
+  }
+
+  .toolbar .direction-select {
+    padding: 8px 12px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+  }
+
+  .toolbar .direction-select:hover {
+    background-color: #e8e8e8;
+  }
+
+  .toolbar .direction-select:focus {
+    outline: 2px solid #4caf50;
+    outline-offset: 2px;
   }
 
   .main-content {
