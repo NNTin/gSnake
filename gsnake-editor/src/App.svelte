@@ -1,5 +1,6 @@
 <script lang="ts">
   import LandingPage from './lib/LandingPage.svelte'
+  import GridSizeModal from './lib/GridSizeModal.svelte'
 
   let showGridSizeModal = false;
 
@@ -10,18 +11,23 @@
   function handleLoadExisting(event: CustomEvent<File>) {
     console.log('Load existing level:', event.detail);
   }
+
+  function handleGridSizeCancel() {
+    showGridSizeModal = false;
+  }
+
+  function handleGridSizeCreate(event: CustomEvent<{ width: number; height: number }>) {
+    console.log('Create level with dimensions:', event.detail);
+    showGridSizeModal = false;
+    // TODO: Open editor with specified dimensions (US-004)
+  }
 </script>
 
 <main>
   <LandingPage on:createNew={handleCreateNew} on:loadExisting={handleLoadExisting} />
 
   {#if showGridSizeModal}
-    <div class="modal-overlay">
-      <div class="modal">
-        <p>Grid size modal - to be implemented in US-003</p>
-        <button on:click={() => showGridSizeModal = false}>Close</button>
-      </div>
-    </div>
+    <GridSizeModal on:cancel={handleGridSizeCancel} on:create={handleGridSizeCreate} />
   {/if}
 </main>
 
@@ -29,25 +35,5 @@
   main {
     padding: 0;
     margin: 0;
-  }
-
-  .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-  }
-
-  .modal {
-    background-color: white;
-    padding: 2rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
 </style>
