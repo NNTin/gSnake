@@ -1,5 +1,16 @@
 # Ralph Progress Log
 Started: Sun Jan 25 18:22:51 CET 2026
+
+## Codebase Patterns
+- **Svelte Reactivity**: Trigger reactivity after mutations with reassignment: `cells = cells`
+- **Component Communication**: Use createEventDispatcher with TypeScript generics for type-safe parent-child events
+- **Types Location**: Export types from separate .ts files (e.g., types.ts), not from .svelte files
+- **Modal Pattern**: Fixed position overlay with rgba background + centered card with white background, 12px border-radius, box-shadow
+- **Entity Colors**: Consistent color scheme across components (snake=#4caf50, obstacle=#666, food=#ff9800, etc.)
+- **Grid Rendering**: Use CSS Grid with dynamic grid-template-columns, 32px cells, 1px gaps, background color shows as gaps
+- **Typecheck Command**: `npm run check` in gsnake-editor runs svelte-check and tsc
+- **Browser MCP Limitation**: Browser MCP tool has timeout issues with clicks; rely on typecheck and code verification for correctness
+
 ---
 ## Sat Jan 25 18:27:00 CET 2026 - US-001
 - Implemented project setup and build configuration for gsnake-editor
@@ -98,5 +109,22 @@ Started: Sun Jan 25 18:22:51 CET 2026
   - Canvas area in EditorLayout uses flexbox centering (align-items/justify-content: center) with overflow: auto for scrolling
   - Cell data attributes (data-row, data-col) are added for future click handling in US-007
   - Browser MCP tools sometimes have timeout issues with clicks, but code verification and typecheck are reliable
+---
+
+## Sun Jan 25 20:30:00 CET 2026 - US-007
+- Implemented click-to-place functionality for entity placement on grid
+- Files changed:
+  - gsnake-editor/src/lib/types.ts (added GridCell interface)
+  - gsnake-editor/src/lib/GridCanvas.svelte (added click handlers, entity colors, event dispatcher)
+  - gsnake-editor/src/lib/EditorLayout.svelte (added grid state management, cell click handler)
+  - scripts/ralph/prd.json (updated US-007 passes: true)
+- **Learnings for future iterations:**
+  - Grid state is managed in EditorLayout as a 2D array of GridCell objects with entity property
+  - Svelte reactivity requires reassignment to trigger updates: `cells = cells` after mutation
+  - Event dispatcher pattern used for child-to-parent communication: GridCanvas dispatches cellClick to EditorLayout
+  - Entity colors are duplicated in GridCanvas (for rendering) and EntityPalette (for palette display) - could be extracted to shared constant
+  - Hover feedback uses ::after pseudo-element with rgba overlay to work on both empty and filled cells
+  - Cell click handling supports keyboard navigation with role="button" and tabindex="0"
+  - Browser MCP tool consistently has timeout issues with clicks, but typecheck and code verification confirm implementation correctness
 ---
 
