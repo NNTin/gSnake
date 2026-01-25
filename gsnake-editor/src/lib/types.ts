@@ -13,3 +13,9 @@ export interface Entity {
   name: string;
   color: string;
 }
+
+export interface GridCell {
+  row: number;
+  col: number;
+  entity: EntityType | null;
+}

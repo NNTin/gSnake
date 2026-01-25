@@ -1,16 +1,34 @@
 <script lang="ts">
   import EntityPalette from './EntityPalette.svelte';
   import GridCanvas from './GridCanvas.svelte';
-  import type { EntityType } from './types';
+  import type { EntityType, GridCell } from './types';
 
   export let gridWidth: number;
   export let gridHeight: number;
 
   let selectedEntity: EntityType = 'snake';
 
+  // Initialize grid cells
+  $: cells = Array.from({ length: gridHeight }, (_, row) =>
+    Array.from({ length: gridWidth }, (_, col) => ({
+      row,
+      col,
+      entity: null as EntityType | null
+    }))
+  );
+
   function handleEntitySelect(event: CustomEvent<EntityType>) {
     selectedEntity = event.detail;
     console.log('Selected entity:', selectedEntity);
+  }
+
+  function handleCellClick(event: CustomEvent<{ row: number; col: number }>) {
+    const { row, col } = event.detail;
+    // Place selected entity at clicked cell (replaces existing entity if present)
+    cells[row][col].entity = selectedEntity;
+    // Trigger reactivity
+    cells = cells;
+    console.log(`Placed ${selectedEntity} at (${row}, ${col})`);
   }
 
   function handleNewLevel() {
@@ -64,7 +82,7 @@
 
     <!-- Center canvas area -->
     <div class="canvas-area">
-      <GridCanvas {gridWidth} {gridHeight} />
+      <GridCanvas {gridWidth} {gridHeight} {cells} on:cellClick={handleCellClick} />
     </div>
   </div>
 </div>
