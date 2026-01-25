@@ -9,7 +9,9 @@
   const CELL_SIZE = 32; // 32x32 pixels per cell
   const GRID_GAP = 1; // 1px gap between cells
 
-  const dispatch = createEventDispatcher<{ cellClick: { row: number; col: number } }>();
+  const dispatch = createEventDispatcher<{ cellClick: { row: number; col: number; shiftKey: boolean } }>();
+
+  let isShiftPressed = false;
 
   // Entity color map
   const entityColors: Record<EntityType, string> = {
@@ -27,8 +29,20 @@
   $: totalWidth = gridWidth * CELL_SIZE + (gridWidth - 1) * GRID_GAP;
   $: totalHeight = gridHeight * CELL_SIZE + (gridHeight - 1) * GRID_GAP;
 
-  function handleCellClick(row: number, col: number) {
-    dispatch('cellClick', { row, col });
+  function handleCellClick(row: number, col: number, shiftKey: boolean) {
+    dispatch('cellClick', { row, col, shiftKey });
+  }
+
+  function handleKeyDown(event: KeyboardEvent) {
+    if (event.key === 'Shift') {
+      isShiftPressed = true;
+    }
+  }
+
+  function handleKeyUp(event: KeyboardEvent) {
+    if (event.key === 'Shift') {
+      isShiftPressed = false;
+    }
   }
 
   function getCellBackgroundColor(entity: EntityType | null): string {
@@ -43,7 +57,8 @@
   }
 </script>
 
-<div class="grid-wrapper">
+<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+<div class="grid-wrapper" on:keydown={handleKeyDown} on:keyup={handleKeyUp} role="application" tabindex="-1">
   <div
     class="grid"
     style="
@@ -59,6 +74,7 @@
           class="cell"
           class:has-entity={cell.entity !== null}
           class:is-snake-segment={cell.isSnakeSegment}
+          class:shift-hover={isShiftPressed && cell.entity !== null}
           style="
             width: {CELL_SIZE}px;
             height: {CELL_SIZE}px;
@@ -66,8 +82,8 @@
           "
           data-row={cell.row}
           data-col={cell.col}
-          on:click={() => handleCellClick(cell.row, cell.col)}
-          on:keydown={(e) => e.key === 'Enter' && handleCellClick(cell.row, cell.col)}
+          on:click={(e) => handleCellClick(cell.row, cell.col, e.shiftKey)}
+          on:keydown={(e) => e.key === 'Enter' && handleCellClick(cell.row, cell.col, e.shiftKey)}
           role="button"
           tabindex="0"
         >
@@ -111,6 +127,14 @@
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.1);
     pointer-events: none;
+  }
+
+  .shift-hover {
+    cursor: not-allowed;
+  }
+
+  .shift-hover:hover::after {
+    background-color: rgba(255, 0, 0, 0.3);
   }
 
   .cell:focus {

@@ -33,8 +33,42 @@
     console.log('Selected entity:', selectedEntity);
   }
 
-  function handleCellClick(event: CustomEvent<{ row: number; col: number }>) {
-    const { row, col } = event.detail;
+  function handleCellClick(event: CustomEvent<{ row: number; col: number; shiftKey: boolean }>) {
+    const { row, col, shiftKey } = event.detail;
+
+    // If Shift is pressed, remove entity from the cell
+    if (shiftKey) {
+      if (cells[row][col].entity === null) {
+        console.log(`Cell (${row}, ${col}) is already empty, nothing to remove`);
+        return;
+      }
+
+      // If it's a snake segment, remove it from the segments array
+      if (cells[row][col].isSnakeSegment) {
+        const segmentIndex = snakeSegments.findIndex(
+          seg => seg.row === row && seg.col === col
+        );
+        if (segmentIndex !== -1) {
+          snakeSegments.splice(segmentIndex, 1);
+          // Update all subsequent segment indices
+          for (let i = segmentIndex; i < snakeSegments.length; i++) {
+            const seg = snakeSegments[i];
+            cells[seg.row][seg.col].snakeSegmentIndex = i;
+          }
+          snakeSegments = snakeSegments;
+        }
+      }
+
+      // Clear the cell
+      cells[row][col].entity = null;
+      cells[row][col].isSnakeSegment = false;
+      cells[row][col].snakeSegmentIndex = undefined;
+
+      // Trigger reactivity
+      cells = cells;
+      console.log(`Removed entity from (${row}, ${col})`);
+      return;
+    }
 
     if (selectedEntity === 'snake') {
       // Special handling for snake: add to segments array
