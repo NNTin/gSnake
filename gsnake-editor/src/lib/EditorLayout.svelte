@@ -1,5 +1,6 @@
 <script lang="ts">
   import EntityPalette from './EntityPalette.svelte';
+  import GridCanvas from './GridCanvas.svelte';
   import type { EntityType } from './types';
 
   export let gridWidth: number;
@@ -63,9 +64,7 @@
 
     <!-- Center canvas area -->
     <div class="canvas-area">
-      <div class="grid-container">
-        <p>Grid {gridWidth}x{gridHeight} will render here (US-006)</p>
-      </div>
+      <GridCanvas {gridWidth} {gridHeight} />
     </div>
   </div>
 </div>
@@ -135,13 +134,5 @@
     overflow: auto;
     background-color: #e8e8e8;
     padding: 24px;
-  }
-
-  .grid-container {
-    background-color: white;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 24px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
 </style>
