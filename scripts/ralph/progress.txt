@@ -203,3 +203,18 @@ Started: Sun Jan 25 18:22:51 CET 2026
   - Global keyboard handlers should check for modifier keys and specific key combinations to avoid conflicts
   - handleKeyDown function can call existing handler functions (handleUndo/handleRedo) for code reuse
 ---
+## Sun Jan 25 23:15:00 CET 2026 - US-013
+- Implemented snake direction configuration with dropdown in toolbar
+- Files changed:
+  - gsnake-editor/src/lib/types.ts (added Direction type: 'north' | 'south' | 'east' | 'west')
+  - gsnake-editor/src/lib/EditorLayout.svelte (added snakeDirection state, replaced button with select dropdown, updated EditorState interface)
+  - scripts/ralph/prd.json (updated US-013 passes: true)
+- **Learnings for future iterations:**
+  - Direction dropdown uses bind:value for two-way binding with snakeDirection state variable
+  - Direction state is included in EditorState for undo/redo support (captured and restored)
+  - Select element styling matches toolbar buttons: same padding, border, border-radius, hover effects
+  - Focus styling uses 2px outline with snake green color (#4caf50) for accessibility
+  - Default direction is 'east' as specified in PRD
+  - The direction value is persisted in the level data structure and will be included when saving levels (US-017)
+  - Using bind:value on select triggers reactivity automatically, but on:change handler is still useful for logging/debugging
+---
