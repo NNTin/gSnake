@@ -1,0 +1,380 @@
+{
+  "project": "gSnake Level Editor",
+  "branchName": "ralph/level-editor",
+  "description": "Visual level editor with drag-and-drop interface for creating and editing gSnake levels",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Project Setup and Build Configuration",
+      "description": "As a developer, I need a new gsnake-editor project with Vite + Svelte so the editor can be developed and deployed independently.",
+      "acceptanceCriteria": [
+        "Create gsnake-editor/ directory at repository root",
+        "Initialize Vite + Svelte project with TypeScript support",
+        "Configure build output and dev server",
+        "Add npm scripts for dev, build, preview",
+        "Create .gitignore for node_modules and build artifacts",
+        "Typecheck passes",
+        "Verify dev server starts successfully"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Landing Page with Level Creation Options",
+      "description": "As a user, I want to choose between creating a new level or loading an existing one when I open the editor.",
+      "acceptanceCriteria": [
+        "Implement landing page with centered white card layout",
+        "Create New Level button triggers grid size modal",
+        "Load Existing Level button opens file picker for JSON upload",
+        "Apply styling: white card, shadow, rounded corners",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Grid Size Configuration Modal",
+      "description": "As a user, I want to specify grid dimensions when creating a new level so I can design levels of different sizes.",
+      "acceptanceCriteria": [
+        "Modal appears when Create New Level is clicked",
+        "Width input field (default: 15, min: 5, max: 50)",
+        "Height input field (default: 15, min: 5, max: 50)",
+        "Cancel button returns to landing page",
+        "Create button validates inputs and opens editor",
+        "Modal styling with overlay, centered, shadow",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Editor Interface Layout",
+      "description": "As a user, I need a visual editor interface with toolbar, sidebar, and grid canvas so I can edit levels efficiently.",
+      "acceptanceCriteria": [
+        "Top toolbar with New Level, Load, Undo, Redo, Snake Direction, Test, Save buttons",
+        "Left sidebar (200px) with entity palette",
+        "Center canvas area with scrollable grid container",
+        "Layout responsive to window resizing",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Entity Palette Implementation",
+      "description": "As a user, I want to see all available entities in a sidebar palette so I can select which entity to place.",
+      "acceptanceCriteria": [
+        "Display all 8 entity types: Snake, Obstacle, Food, Exit, Stone, Spike, Floating Food, Falling Food",
+        "Each entity has colored icon matching color scheme (snake=green #4caf50, obstacle=gray #666, food=orange #ff9800, exit=blue #2196f3, stone=gray #9e9e9e, spike=red #f44336, floating food=yellow #ffc107, falling food=deep orange #ff5722)",
+        "Clicking entity selects it with visual highlight (border/background change)",
+        "Snake selected by default on load",
+        "Only one entity can be selected at a time",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "Grid Rendering with Configurable Dimensions",
+      "description": "As a user, I want to see an editable grid that matches my specified dimensions so I can visualize the level layout.",
+      "acceptanceCriteria": [
+        "Grid renders with correct number of rows and columns based on configuration",
+        "Each cell is 32x32 pixels",
+        "Grid has 1px gap between cells using background color",
+        "Grid container has white background, border, rounded corners, shadow",
+        "Grid is centered in editor area",
+        "Grid scrolls if larger than viewport",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Place Entity by Clicking Grid Cells",
+      "description": "As a user, I want to click grid cells to place the selected entity so I can efficiently place multiple instances.",
+      "acceptanceCriteria": [
+        "Clicking empty cell places selected entity",
+        "Clicking occupied cell replaces existing entity without warning",
+        "Selected entity remains active after placement for multiple placements",
+        "Visual feedback on hover (cell background changes)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "Visual Entity Representation on Grid",
+      "description": "As a user, I want to see visual representations of entities on the grid so I understand the level layout at a glance.",
+      "acceptanceCriteria": [
+        "Entities render with colored backgrounds matching palette icons",
+        "Snake segments show as connected green cells",
+        "Each entity type visually distinguishable",
+        "Entity rendering updates immediately on placement",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "Multi-Segment Snake Placement",
+      "description": "As a user, I want to place snake segments in sequence so I can define the snake's initial position and body.",
+      "acceptanceCriteria": [
+        "First click with Snake selected places head",
+        "Subsequent clicks add body segments to array",
+        "Visual indication shows connected segments",
+        "Segments stored in order (head to tail)",
+        "Selecting different entity ends snake placement",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "Remove Entity with Shift+Click",
+      "description": "As a user, I want to remove entities from the grid by Shift+clicking so I can correct mistakes.",
+      "acceptanceCriteria": [
+        "Holding Shift and clicking occupied cell removes entity",
+        "Cell returns to empty state immediately",
+        "Visual feedback on Shift hover (different cursor or highlight)",
+        "Works for all entity types",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-011",
+      "title": "Undo/Redo State Management",
+      "description": "As a user, I want to undo and redo editing actions so I can experiment without fear of mistakes.",
+      "acceptanceCriteria": [
+        "Implement command pattern with action history stack",
+        "Undo button reverses last action (placement or removal)",
+        "Redo button reapplies previously undone action",
+        "Undo/redo buttons disabled when history is empty",
+        "Grid updates immediately to reflect state changes",
+        "History preserved across entity placements/removals",
+        "Typecheck passes"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-012",
+      "title": "Undo/Redo Keyboard Shortcuts",
+      "description": "As a user, I want keyboard shortcuts for undo/redo so I can work efficiently.",
+      "acceptanceCriteria": [
+        "Ctrl+Z (Cmd+Z on Mac) triggers undo",
+        "Ctrl+Y (Cmd+Shift+Z on Mac) triggers redo",
+        "Keyboard shortcuts work when focused anywhere in editor",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-013",
+      "title": "Snake Direction Configuration",
+      "description": "As a user, I want to set the snake's initial direction so levels can start with different snake orientations.",
+      "acceptanceCriteria": [
+        "Direction dropdown in toolbar with options: North, South, East, West",
+        "Default direction is East",
+        "Selecting direction updates level data immediately",
+        "Direction persists when saving level",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-014",
+      "title": "Place Entity by Drag-and-Drop",
+      "description": "As a user, I want to drag entities from the palette to the grid for quick single placements.",
+      "acceptanceCriteria": [
+        "Dragging entity from palette shows entity icon on cursor",
+        "Dropping on grid cell places entity",
+        "Dropping on occupied cell replaces existing entity",
+        "Palette selection unchanged after drag-and-drop",
+        "Visual feedback during drag (cursor shows entity)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 14,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-015",
+      "title": "Load Existing Level from JSON",
+      "description": "As a user, I want to load an existing level JSON file so I can edit previously created levels.",
+      "acceptanceCriteria": [
+        "Load Existing Level button opens browser file picker",
+        "File picker accepts .json files",
+        "Successfully parse valid level JSON",
+        "Grid resizes to match loaded level dimensions",
+        "All entities render at correct positions",
+        "Snake direction updates from JSON",
+        "Error message displays for invalid JSON with explanation",
+        "On error, user returns to landing page",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 15,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-016",
+      "title": "Save Level Modal with Metadata",
+      "description": "As a user, I want to provide level name and difficulty when saving so the exported JSON has complete metadata.",
+      "acceptanceCriteria": [
+        "Save Level button opens save modal",
+        "Modal prompts for level name (text input)",
+        "Modal prompts for difficulty (dropdown: easy/medium/hard)",
+        "Info box states 'Level ID will be auto-generated'",
+        "Cancel button closes modal without saving",
+        "Export button validates inputs (name required, difficulty required)",
+        "Modal styling matches design",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 16,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-017",
+      "title": "Export Level as JSON",
+      "description": "As a user, I want to download the level as a JSON file so I can add it to the gsnake-levels directory.",
+      "acceptanceCriteria": [
+        "Generate unique level ID (timestamp-based or UUID)",
+        "Include user-provided name and difficulty in JSON",
+        "Include all entity positions and types",
+        "Include grid width and height",
+        "Include snake direction",
+        "JSON structure matches existing gsnake-levels format",
+        "Browser downloads file as level-[id].json",
+        "Modal closes after successful export",
+        "Typecheck passes"
+      ],
+      "priority": 17,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-018",
+      "title": "New Level Button in Editor",
+      "description": "As a user, I want to start a new level while in the editor so I don't have to reload the page.",
+      "acceptanceCriteria": [
+        "New Level button in toolbar returns to landing page",
+        "Current work not automatically saved",
+        "Landing page loads with both creation options available",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 18,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-019",
+      "title": "Load Button in Editor Toolbar",
+      "description": "As a user, I want to load a different level while in the editor so I can switch between editing multiple levels.",
+      "acceptanceCriteria": [
+        "Load button in toolbar opens file picker",
+        "File picker accepts .json files",
+        "Successfully loaded level replaces current editor state",
+        "Grid resizes and re-renders with new level data",
+        "Undo/redo history resets on load",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 19,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-020",
+      "title": "Backend Service for Test Level Storage",
+      "description": "As a developer, I need a simple HTTP server to store test levels temporarily so users can test levels seamlessly.",
+      "acceptanceCriteria": [
+        "Create simple Node.js/Express HTTP server in gsnake-editor/",
+        "POST /api/test-level endpoint accepts level JSON",
+        "Store test level in memory (no database needed)",
+        "GET /api/test-level endpoint returns stored test level",
+        "Test level expires after 1 hour or on server restart",
+        "CORS headers configured for localhost development",
+        "Server runs on port 3001",
+        "Typecheck passes"
+      ],
+      "priority": 20,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-021",
+      "title": "Test Level Integration",
+      "description": "As a user, I want to test my level in gsnake-web with one click so I can quickly iterate on designs.",
+      "acceptanceCriteria": [
+        "Test Level button saves current level to backend via POST",
+        "Backend returns success confirmation",
+        "Editor opens gsnake-web in new tab/window with test mode parameter",
+        "Editor tab remains open for further editing",
+        "Error message if backend unavailable",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill (test workflow end-to-end)"
+      ],
+      "priority": 21,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-022",
+      "title": "gsnake-web Test Mode Support",
+      "description": "As a developer, I need gsnake-web to support test mode so users can play editor-created levels.",
+      "acceptanceCriteria": [
+        "gsnake-web detects test mode query parameter (?test=true)",
+        "When in test mode, fetch level from http://localhost:3001/api/test-level",
+        "Load and render fetched test level",
+        "User can play the test level immediately",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 22,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}
