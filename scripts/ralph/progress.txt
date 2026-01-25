@@ -1,0 +1,51 @@
+# Ralph Progress Log
+Started: Sun Jan 25 18:22:51 CET 2026
+---
+## Sat Jan 25 18:27:00 CET 2026 - US-001
+- Implemented project setup and build configuration for gsnake-editor
+- Created gsnake-editor/ directory with Vite + Svelte + TypeScript
+- Files changed:
+  - gsnake-editor/.gitignore (new)
+  - gsnake-editor/package.json (new)
+  - gsnake-editor/vite.config.ts (new)
+  - gsnake-editor/tsconfig.*.json (new)
+  - gsnake-editor/src/* (scaffolded Svelte app)
+  - scripts/ralph/prd.json (new - converted PRD from markdown)
+- **Learnings for future iterations:**
+  - The gsnake project is organized into multiple sub-projects (gsnake-core, gsnake-web, gsnake-levels, gsnake-specs, gsnake-editor)
+  - Vite template scaffolding already includes all necessary configuration (build output, dev server, npm scripts, .gitignore)
+  - TypeScript check script is `npm run check` which runs svelte-check and tsc
+  - Dev server runs on port 5173 by default
+  - The PRD was initially in markdown format at gsnake-specs/tasks/prd-level-editor.md and needed to be converted to JSON format
+---
+
+## Sun Jan 25 18:42:00 CET 2026 - US-002
+- Implemented landing page with level creation options
+- Files changed:
+  - gsnake-editor/src/lib/LandingPage.svelte (new)
+  - gsnake-editor/src/App.svelte (modified)
+  - scripts/ralph/prd.json (updated US-002 passes: true)
+- **Learnings for future iterations:**
+  - The landing page uses Svelte's event dispatcher pattern for component communication
+  - File picker for JSON upload is handled by creating a hidden input element programmatically
+  - Modal overlay pattern: fixed position with rgba background, centered content with flex
+  - Browser testing tools (MCP browser) work well for verifying UI implementations
+  - The gsnake-editor uses a centered white card design pattern with shadow and rounded corners
+  - Event handlers in Svelte use on:eventName syntax, custom events use createEventDispatcher
+---
+
+## Sun Jan 25 18:55:00 CET 2026 - US-003
+- Implemented grid size configuration modal with width/height inputs
+- Files changed:
+  - gsnake-editor/src/lib/GridSizeModal.svelte (new)
+  - gsnake-editor/src/App.svelte (modified - integrated modal)
+  - scripts/ralph/prd.json (updated US-003 passes: true)
+- **Learnings for future iterations:**
+  - Modal components in Svelte follow a consistent pattern: overlay + centered card with createEventDispatcher
+  - Input validation can be done both client-side (min/max attributes) and in event handlers
+  - Number inputs with bind:value work well for numeric configuration
+  - The modal styling is consistent across the app: white background, border-radius: 12px, box-shadow, rgba overlay
+  - Event handlers receive CustomEvent<T> typed parameters when using typed createEventDispatcher
+  - Browser MCP tool had some timeout issues with clicks, but screenshots confirm UI works correctly
+---
+
