@@ -1,6 +1,16 @@
 <script lang="ts">
+  import EntityPalette from './EntityPalette.svelte';
+  import type { EntityType } from './types';
+
   export let gridWidth: number;
   export let gridHeight: number;
+
+  let selectedEntity: EntityType = 'snake';
+
+  function handleEntitySelect(event: CustomEvent<EntityType>) {
+    selectedEntity = event.detail;
+    console.log('Selected entity:', selectedEntity);
+  }
 
   function handleNewLevel() {
     console.log('New Level clicked');
@@ -48,7 +58,7 @@
     <!-- Left sidebar for entity palette -->
     <div class="sidebar">
       <h3>Entity Palette</h3>
-      <p>Entities will go here (US-005)</p>
+      <EntityPalette on:select={handleEntitySelect} />
     </div>
 
     <!-- Center canvas area -->
