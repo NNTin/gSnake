@@ -145,14 +145,10 @@ pub struct LevelDefinition {
     pub stones: Vec<Position>,
     #[serde(default)]
     pub spikes: Vec<Position>,
-    #[serde(default = "default_exit_is_solid")]
-    pub exit_is_solid: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub exit_is_solid: Option<bool>,
     #[serde(default)]
     pub total_food: u32,
-}
-
-fn default_exit_is_solid() -> bool {
-    true
 }
 
 impl LevelDefinition {
@@ -181,7 +177,7 @@ impl LevelDefinition {
             falling_food: Vec::new(),
             stones: Vec::new(),
             spikes: Vec::new(),
-            exit_is_solid: true,
+            exit_is_solid: Some(true),
             total_food: 0,
         }
     }
@@ -218,7 +214,7 @@ impl LevelState {
             falling_food: definition.falling_food.clone(),
             stones: definition.stones.clone(),
             spikes: definition.spikes.clone(),
-            exit_is_solid: definition.exit_is_solid,
+            exit_is_solid: definition.exit_is_solid.unwrap_or(true),
         }
     }
 }

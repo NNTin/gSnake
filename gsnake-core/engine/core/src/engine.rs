@@ -303,14 +303,6 @@ impl GameEngine {
             .any(|o| o.x == pos.x && o.y == pos.y)
     }
 
-    /// Checks if a position contains food
-    fn is_food(&self, pos: Position) -> bool {
-        self.level_state
-            .food
-            .iter()
-            .any(|f| f.x == pos.x && f.y == pos.y)
-    }
-
     /// Checks if a position contains a stone
     fn is_stone(&self, pos: Position) -> bool {
         self.level_state

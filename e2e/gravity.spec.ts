@@ -11,10 +11,19 @@ test.describe('Level Completion Flow', () => {
     const movesDisplay = page.locator('[data-element-id="moves-display"]');
     const lengthDisplay = page.locator('[data-element-id="length-display"]');
     const cells = page.locator('.cell');
+    const levelSelectorButton = page.locator('[data-element-id="level-selector-btn"]');
 
     const expectHeadAt = async (x: number, y: number) => {
       const index = y * GRID_SIZE + x;
       await expect(cells.nth(index)).toHaveClass(/snake-head/);
+    };
+
+    const selectLevel = async (levelId: number) => {
+      await levelSelectorButton.click();
+      const card = page.locator('.level-card', { hasText: `Level ${levelId}` });
+      await expect(card).toBeVisible();
+      await card.click();
+      await expect(levelDisplay).toHaveText(String(levelId));
     };
 
     const pressAndWait = async (key: string) => {
@@ -32,7 +41,8 @@ test.describe('Level Completion Flow', () => {
     }
 
     await expectHeadAt(13, 13);
-    await expect(levelDisplay).toHaveText('2', { timeout: 5000 });
+    await expect(levelDisplay).toHaveText('1', { timeout: 5000 });
+    await selectLevel(2);
     await expectHeadAt(2, 2);
 
     const level2Moves: Array<{
@@ -72,6 +82,6 @@ test.describe('Level Completion Flow', () => {
       }
     }
 
-    await expect(levelDisplay).toHaveText('3', { timeout: 5000 });
+    await expect(levelDisplay).toHaveText('2', { timeout: 5000 });
   });
 });
