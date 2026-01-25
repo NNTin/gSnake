@@ -190,3 +190,16 @@ Started: Sun Jan 25 18:22:51 CET 2026
   - restoreState() helper replaces current state with a previous snapshot
   - executeCommand() helper manages both stacks and triggers reactivity after each operation
 ---
+## Sun Jan 25 22:45:00 CET 2026 - US-012
+- Implemented keyboard shortcuts for undo/redo functionality
+- Files changed:
+  - gsnake-editor/src/lib/EditorLayout.svelte (modified - added keyboard event handler and svelte:window listener)
+  - scripts/ralph/prd.json (updated US-012 passes: true)
+- **Learnings for future iterations:**
+  - Svelte provides `<svelte:window>` element for global window event listeners that auto-cleanup on component destroy
+  - Keyboard shortcuts can be detected using event.ctrlKey (Windows/Linux) or event.metaKey (Mac) properties
+  - Mac uses Cmd+Shift+Z for redo while Windows/Linux uses Ctrl+Y - both conventions should be supported
+  - event.preventDefault() is essential to prevent browser default behavior (e.g., browser undo)
+  - Global keyboard handlers should check for modifier keys and specific key combinations to avoid conflicts
+  - handleKeyDown function can call existing handler functions (handleUndo/handleRedo) for code reuse
+---
