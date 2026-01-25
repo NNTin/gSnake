@@ -18,4 +18,6 @@ export interface GridCell {
   row: number;
   col: number;
   entity: EntityType | null;
+  isSnakeSegment: boolean; // True if this cell is part of the snake
+  snakeSegmentIndex: number | undefined; // Index in the snake array (0 = head)
 }

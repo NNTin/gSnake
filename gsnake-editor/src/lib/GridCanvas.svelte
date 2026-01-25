@@ -34,6 +34,13 @@
   function getCellBackgroundColor(entity: EntityType | null): string {
     return entity ? entityColors[entity] : 'white';
   }
+
+  function getCellLabel(cell: GridCell): string {
+    if (cell.isSnakeSegment && cell.snakeSegmentIndex !== undefined) {
+      return cell.snakeSegmentIndex === 0 ? 'H' : String(cell.snakeSegmentIndex);
+    }
+    return '';
+  }
 </script>
 
 <div class="grid-wrapper">
@@ -51,6 +58,7 @@
         <div
           class="cell"
           class:has-entity={cell.entity !== null}
+          class:is-snake-segment={cell.isSnakeSegment}
           style="
             width: {CELL_SIZE}px;
             height: {CELL_SIZE}px;
@@ -62,7 +70,11 @@
           on:keydown={(e) => e.key === 'Enter' && handleCellClick(cell.row, cell.col)}
           role="button"
           tabindex="0"
-        ></div>
+        >
+          {#if cell.isSnakeSegment}
+            <span class="segment-label">{getCellLabel(cell)}</span>
+          {/if}
+        </div>
       {/each}
     {/each}
   </div>
@@ -104,5 +116,22 @@
   .cell:focus {
     outline: 2px solid #2196f3;
     outline-offset: -2px;
+  }
+
+  .is-snake-segment {
+    box-shadow: inset 0 0 0 2px rgba(76, 175, 80, 0.5);
+  }
+
+  .segment-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+    user-select: none;
+    pointer-events: none;
   }
 </style>
