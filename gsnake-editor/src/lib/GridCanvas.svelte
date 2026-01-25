@@ -9,7 +9,10 @@
   const CELL_SIZE = 32; // 32x32 pixels per cell
   const GRID_GAP = 1; // 1px gap between cells
 
-  const dispatch = createEventDispatcher<{ cellClick: { row: number; col: number; shiftKey: boolean } }>();
+  const dispatch = createEventDispatcher<{
+    cellClick: { row: number; col: number; shiftKey: boolean };
+    cellDrop: { row: number; col: number; entityType: EntityType };
+  }>();
 
   let isShiftPressed = false;
 
@@ -55,6 +58,23 @@
     }
     return '';
   }
+
+  function handleDragOver(event: DragEvent) {
+    event.preventDefault();
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = 'copy';
+    }
+  }
+
+  function handleDrop(event: DragEvent, row: number, col: number) {
+    event.preventDefault();
+    if (event.dataTransfer) {
+      const entityType = event.dataTransfer.getData('entityType') as EntityType;
+      if (entityType) {
+        dispatch('cellDrop', { row, col, entityType });
+      }
+    }
+  }
 </script>
 
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
@@ -84,6 +104,8 @@
           data-col={cell.col}
           on:click={(e) => handleCellClick(cell.row, cell.col, e.shiftKey)}
           on:keydown={(e) => e.key === 'Enter' && handleCellClick(cell.row, cell.col, e.shiftKey)}
+          on:dragover={handleDragOver}
+          on:drop={(e) => handleDrop(e, cell.row, cell.col)}
           role="button"
           tabindex="0"
         >

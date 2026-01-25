@@ -89,6 +89,72 @@
     console.log('Selected entity:', selectedEntity);
   }
 
+  function handleCellDrop(event: CustomEvent<{ row: number; col: number; entityType: EntityType }>) {
+    const { row, col, entityType } = event.detail;
+
+    // Capture state before modification
+    const beforeState = captureState();
+
+    // Place the dragged entity at the dropped cell (without changing the selected entity)
+    if (entityType === 'snake') {
+      // For snake drops, place a single segment (not starting a multi-segment placement)
+      // Check if this cell already has a snake segment
+      const existingSegmentIndex = snakeSegments.findIndex(
+        seg => seg.row === row && seg.col === col
+      );
+
+      if (existingSegmentIndex === -1) {
+        // Clear any non-snake entity at this position
+        if (cells[row][col].entity !== null && cells[row][col].entity !== 'snake') {
+          cells[row][col].entity = null;
+          cells[row][col].isSnakeSegment = false;
+          cells[row][col].snakeSegmentIndex = undefined;
+        }
+
+        // Add to snake segments
+        snakeSegments.push({ row, col });
+        cells[row][col].entity = 'snake';
+        cells[row][col].isSnakeSegment = true;
+        cells[row][col].snakeSegmentIndex = snakeSegments.length - 1;
+
+        // Trigger reactivity
+        cells = cells;
+        snakeSegments = snakeSegments;
+        console.log(`Dropped snake segment at (${row}, ${col}). Total segments: ${snakeSegments.length}`);
+      }
+    } else {
+      // For other entities, clear any snake segments at this position and place entity
+      const segmentIndex = snakeSegments.findIndex(
+        seg => seg.row === row && seg.col === col
+      );
+
+      if (segmentIndex !== -1) {
+        // Remove from snake segments
+        snakeSegments.splice(segmentIndex, 1);
+        // Update all subsequent segment indices
+        for (let i = segmentIndex; i < snakeSegments.length; i++) {
+          const seg = snakeSegments[i];
+          cells[seg.row][seg.col].snakeSegmentIndex = i;
+        }
+        snakeSegments = snakeSegments;
+      }
+
+      // Place dropped entity at cell (replaces existing entity if present)
+      cells[row][col].entity = entityType;
+      cells[row][col].isSnakeSegment = false;
+      cells[row][col].snakeSegmentIndex = undefined;
+
+      // Trigger reactivity
+      cells = cells;
+      console.log(`Dropped ${entityType} at (${row}, ${col})`);
+    }
+
+    // Capture state after modification and create command
+    const afterState = captureState();
+    const command = createCellModificationCommand(beforeState, afterState);
+    executeCommand(command);
+  }
+
   function handleCellClick(event: CustomEvent<{ row: number; col: number; shiftKey: boolean }>) {
     const { row, col, shiftKey } = event.detail;
 
@@ -306,7 +372,7 @@
 
     <!-- Center canvas area -->
     <div class="canvas-area">
-      <GridCanvas {gridWidth} {gridHeight} {cells} on:cellClick={handleCellClick} />
+      <GridCanvas {gridWidth} {gridHeight} {cells} on:cellClick={handleCellClick} on:cellDrop={handleCellDrop} />
     </div>
   </div>
 </div>
