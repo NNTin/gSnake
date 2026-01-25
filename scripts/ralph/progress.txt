@@ -174,3 +174,19 @@ Started: Sun Jan 25 18:22:51 CET 2026
   - Svelte a11y warnings can be suppressed with <!-- svelte-ignore a11y_* --> comments when intentional
   - TypeScript event handler signatures need to be updated across both child (dispatcher) and parent (handler) components
 ---
+## Sun Jan 25 $(date +"%H:%M:%S %Z %Y") - US-011
+- Implemented undo/redo state management using command pattern
+- Files changed:
+  - gsnake-editor/src/lib/EditorLayout.svelte (modified - added command pattern, undo/redo logic, button states)
+  - scripts/ralph/prd.json (updated US-011 passes: true)
+- **Learnings for future iterations:**
+  - Command pattern implementation requires capturing state before and after modifications
+  - Undo stack stores commands that can be reversed, redo stack stores commands that can be reapplied
+  - Clear redo stack on new action to maintain correct history
+  - Svelte reactivity requires reassignment of arrays to trigger updates (undoStack = undoStack)
+  - Disabled button styling uses :disabled pseudo-class with lighter colors and cursor: not-allowed
+  - Command interface has execute() and undo() methods, with state captured using deep copies
+  - captureState() helper creates snapshots of cells and snakeSegments arrays with spread operators
+  - restoreState() helper replaces current state with a previous snapshot
+  - executeCommand() helper manages both stacks and triggers reactivity after each operation
+---
