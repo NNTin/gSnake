@@ -158,3 +158,19 @@ Started: Sun Jan 25 18:22:51 CET 2026
   - Clicking an existing snake segment is ignored to prevent duplicate placement
   - Placing a different entity on a snake segment properly removes it from the segments array and updates indices
 ---
+## Sat Jan 25 22:30:00 CET 2026 - US-010
+- Implemented Shift+click removal functionality for entities
+- Files changed:
+  - gsnake-editor/src/lib/GridCanvas.svelte (added Shift key tracking, visual feedback, event handler updates)
+  - gsnake-editor/src/lib/EditorLayout.svelte (added removal logic in handleCellClick)
+  - scripts/ralph/prd.json (updated US-010 passes: true)
+- **Learnings for future iterations:**
+  - Keyboard event tracking can be done at container level with window event listeners or on the parent component
+  - Event objects in Svelte have native event properties (e.g., e.shiftKey) accessible in click handlers
+  - Visual feedback for modifier keys is achieved with conditional CSS classes based on tracked state
+  - The shift-hover class uses cursor: not-allowed and red overlay (rgba(255, 0, 0, 0.3)) for clear visual indication
+  - Removal logic must handle both regular entities and snake segments, updating the snakeSegments array properly
+  - When removing a snake segment, subsequent segment indices must be recalculated to maintain correct ordering
+  - Svelte a11y warnings can be suppressed with <!-- svelte-ignore a11y_* --> comments when intentional
+  - TypeScript event handler signatures need to be updated across both child (dispatcher) and parent (handler) components
+---
