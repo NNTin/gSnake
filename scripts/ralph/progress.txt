@@ -141,3 +141,20 @@ Started: Sun Jan 25 18:22:51 CET 2026
   - No additional code changes were needed - just verification that the feature works correctly
 ---
 
+## Sun Jan 25 21:00:00 CET 2026 - US-009
+- Implemented multi-segment snake placement with sequential clicking
+- Files changed:
+  - gsnake-editor/src/lib/types.ts (added isSnakeSegment and snakeSegmentIndex fields to GridCell)
+  - gsnake-editor/src/lib/EditorLayout.svelte (added snakeSegments array tracking, special click handling for snake)
+  - gsnake-editor/src/lib/GridCanvas.svelte (added visual labels and styling for snake segments)
+  - scripts/ralph/prd.json (updated US-009 passes: true)
+- **Learnings for future iterations:**
+  - Snake placement requires different logic than other entities - it builds up an array of segments instead of single-cell placement
+  - Visual feedback for multi-segment entities can be achieved with numbered labels (H for head, then 1, 2, 3...)
+  - Inset box-shadow provides good visual distinction for connected segments without interfering with background color
+  - Entity selection change is a good trigger point to finalize/reset complex placement modes
+  - When a type property is optional in initialization, TypeScript requires explicit type annotation: `undefined as number | undefined`
+  - The snakeSegments array maintains the order (head to tail) which will be needed for level export
+  - Clicking an existing snake segment is ignored to prevent duplicate placement
+  - Placing a different entity on a snake segment properly removes it from the segments array and updates indices
+---
