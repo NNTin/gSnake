@@ -249,7 +249,29 @@
   function handleSave() {
     console.log('Save clicked');
   }
+
+  // Keyboard shortcut handler for undo/redo
+  function handleKeyDown(event: KeyboardEvent) {
+    // Check for Ctrl+Z or Cmd+Z (undo)
+    if ((event.ctrlKey || event.metaKey) && event.key === 'z' && !event.shiftKey) {
+      event.preventDefault();
+      handleUndo();
+      return;
+    }
+
+    // Check for Ctrl+Y (Windows/Linux redo) or Cmd+Shift+Z (Mac redo)
+    if (
+      (event.ctrlKey && event.key === 'y') ||
+      (event.metaKey && event.shiftKey && event.key === 'z')
+    ) {
+      event.preventDefault();
+      handleRedo();
+      return;
+    }
+  }
 </script>
+
+<svelte:window on:keydown={handleKeyDown} />
 
 <div class="editor-container">
   <!-- Top toolbar -->
