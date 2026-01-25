@@ -128,3 +128,16 @@ Started: Sun Jan 25 18:22:51 CET 2026
   - Browser MCP tool consistently has timeout issues with clicks, but typecheck and code verification confirm implementation correctness
 ---
 
+## Sun Jan 25 20:19:37 CET 2026 - US-008
+- Verified visual entity representation on grid (already implemented in US-007)
+- Files changed:
+  - scripts/ralph/prd.json (updated US-008 passes: true)
+- **Learnings for future iterations:**
+  - US-008 acceptance criteria were already satisfied by the implementation in US-007
+  - The getCellBackgroundColor function in GridCanvas.svelte maps entity types to their colors
+  - Entity colors defined in entityColors object at GridCanvas.svelte:15-24 match the palette colors exactly
+  - Cells update background color immediately via Svelte reactivity when entity is placed
+  - All 8 entity types are visually distinguishable with their unique colors
+  - No additional code changes were needed - just verification that the feature works correctly
+---
+
