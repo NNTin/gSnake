@@ -66,3 +66,20 @@ Started: Sun Jan 25 18:22:51 CET 2026
   - Taking screenshots is more reliable than waiting for snapshot updates after interactions
 ---
 
+## Sun Jan 25 19:25:00 CET 2026 - US-005
+- Implemented entity palette component with all 8 entity types
+- Files changed:
+  - gsnake-editor/src/lib/EntityPalette.svelte (new)
+  - gsnake-editor/src/lib/types.ts (new)
+  - gsnake-editor/src/lib/EditorLayout.svelte (modified - integrated EntityPalette)
+  - scripts/ralph/prd.json (updated US-005 passes: true)
+- **Learnings for future iterations:**
+  - Svelte doesn't allow exporting types from .svelte files - types must be in separate .ts files
+  - The types.ts file is used to share EntityType and Entity types across components
+  - Entity palette uses a button list with colored icons and selection state
+  - Selected state is shown with a colored border matching the entity's color using CSS custom properties
+  - The createEventDispatcher<{ select: EntityType }> pattern provides type-safe custom events
+  - Snake entity is selected by default on component load
+  - Entity colors from PRD: snake=#4caf50, obstacle=#666, food=#ff9800, exit=#2196f3, stone=#9e9e9e, spike=#f44336, floating-food=#ffc107, falling-food=#ff5722
+---
+
