@@ -20,6 +20,58 @@
     }))
   );
 
+  // Undo/Redo state management using command pattern
+  interface EditorState {
+    cells: GridCell[][];
+    snakeSegments: { row: number; col: number }[];
+  }
+
+  interface Command {
+    execute(): void;
+    undo(): void;
+  }
+
+  let undoStack: Command[] = [];
+  let redoStack: Command[] = [];
+
+  // Helper to capture current state
+  function captureState(): EditorState {
+    return {
+      cells: cells.map(row => row.map(cell => ({ ...cell }))),
+      snakeSegments: snakeSegments.map(seg => ({ ...seg }))
+    };
+  }
+
+  // Helper to restore state
+  function restoreState(state: EditorState) {
+    cells = state.cells.map(row => row.map(cell => ({ ...cell })));
+    snakeSegments = state.snakeSegments.map(seg => ({ ...seg }));
+  }
+
+  // Create a command for cell modification
+  function createCellModificationCommand(
+    beforeState: EditorState,
+    afterState: EditorState
+  ): Command {
+    return {
+      execute() {
+        restoreState(afterState);
+      },
+      undo() {
+        restoreState(beforeState);
+      }
+    };
+  }
+
+  // Execute a command and add to undo history
+  function executeCommand(command: Command) {
+    command.execute();
+    undoStack.push(command);
+    redoStack = []; // Clear redo stack on new action
+    undoStack = undoStack; // Trigger reactivity
+    redoStack = redoStack; // Trigger reactivity
+  }
+
   function handleEntitySelect(event: CustomEvent<EntityType>) {
     const previousEntity = selectedEntity;
     selectedEntity = event.detail;
@@ -35,6 +87,9 @@
 
   function handleCellClick(event: CustomEvent<{ row: number; col: number; shiftKey: boolean }>) {
     const { row, col, shiftKey } = event.detail;
+
+    // Capture state before modification
+    const beforeState = captureState();
 
     // If Shift is pressed, remove entity from the cell
     if (shiftKey) {
@@ -67,6 +122,11 @@
       // Trigger reactivity
       cells = cells;
       console.log(`Removed entity from (${row}, ${col})`);
+
+      // Capture state after modification and create command
+      const afterState = captureState();
+      const command = createCellModificationCommand(beforeState, afterState);
+      executeCommand(command);
       return;
     }
 
@@ -100,6 +160,11 @@
       snakeSegments = snakeSegments;
 
       console.log(`Added snake segment ${snakeSegments.length - 1} at (${row}, ${col}). Total segments: ${snakeSegments.length}`);
+
+      // Capture state after modification and create command
+      const afterState = captureState();
+      const command = createCellModificationCommand(beforeState, afterState);
+      executeCommand(command);
     } else {
       // For other entities, clear any snake segments at this position and place entity
       const segmentIndex = snakeSegments.findIndex(
@@ -125,6 +190,11 @@
       // Trigger reactivity
       cells = cells;
       console.log(`Placed ${selectedEntity} at (${row}, ${col})`);
+
+      // Capture state after modification and create command
+      const afterState = captureState();
+      const command = createCellModificationCommand(beforeState, afterState);
+      executeCommand(command);
     }
   }
 
@@ -137,11 +207,35 @@
   }
 
   function handleUndo() {
-    console.log('Undo clicked');
+    if (undoStack.length === 0) {
+      console.log('Nothing to undo');
+      return;
+    }
+
+    const command = undoStack.pop();
+    if (command) {
+      command.undo();
+      redoStack.push(command);
+      undoStack = undoStack; // Trigger reactivity
+      redoStack = redoStack; // Trigger reactivity
+      console.log('Undo performed');
+    }
   }
 
   function handleRedo() {
-    console.log('Redo clicked');
+    if (redoStack.length === 0) {
+      console.log('Nothing to redo');
+      return;
+    }
+
+    const command = redoStack.pop();
+    if (command) {
+      command.execute();
+      undoStack.push(command);
+      undoStack = undoStack; // Trigger reactivity
+      redoStack = redoStack; // Trigger reactivity
+      console.log('Redo performed');
+    }
   }
 
   function handleSnakeDirection() {
@@ -162,8 +256,8 @@
   <div class="toolbar">
     <button on:click={handleNewLevel}>New Level</button>
     <button on:click={handleLoad}>Load</button>
-    <button on:click={handleUndo}>Undo</button>
-    <button on:click={handleRedo}>Redo</button>
+    <button on:click={handleUndo} disabled={undoStack.length === 0}>Undo</button>
+    <button on:click={handleRedo} disabled={redoStack.length === 0}>Redo</button>
     <button on:click={handleSnakeDirection}>Snake Direction</button>
     <button on:click={handleTest}>Test</button>
     <button on:click={handleSave}>Save</button>
@@ -218,6 +312,17 @@
 
   .toolbar button:active {
     background-color: #d8d8d8;
+  }
+
+  .toolbar button:disabled {
+    background-color: #f5f5f5;
+    color: #aaa;
+    cursor: not-allowed;
+    border-color: #e0e0e0;
+  }
+
+  .toolbar button:disabled:hover {
+    background-color: #f5f5f5;
   }
 
   .main-content {
