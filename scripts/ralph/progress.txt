@@ -107,3 +107,27 @@ Started: Sun Jan 26 12:30:00 CET 2026
   - Title attribute on Help button provides tooltip: "Keyboard Shortcuts"
 ---
 
+## Sun Jan 26 15:00:00 CET 2026 - US-F005
+- Automated backend server startup to run concurrently with frontend dev server
+- Installed concurrently (v9.2.1) as dev dependency
+- Updated package.json scripts:
+  - `npm run dev`: now runs both editor UI (Vite) and backend server simultaneously using concurrently
+  - `npm run dev:editor`: runs only Vite dev server (editor UI)
+  - `npm run dev:server`: runs only backend server (tsx server.ts)
+- Updated README.md with comprehensive development instructions
+  - Documented new `npm run dev` command as primary dev workflow
+  - Added section for individual commands (dev:editor, dev:server)
+  - Clarified that editor runs on :5173 and backend on :3000
+- Files changed:
+  - gsnake-editor/package.json (added concurrently dependency, updated scripts)
+  - gsnake-editor/package-lock.json (lockfile update)
+  - gsnake-editor/README.md (replaced template with project-specific docs)
+- **Learnings for future iterations:**
+  - concurrently package allows running multiple npm scripts in parallel
+  - concurrently syntax: `"dev": "concurrently \"npm run dev:editor\" \"npm run dev:server\""`
+  - Keep the original separate scripts (dev:editor, dev:server) for flexibility when debugging individual services
+  - README.md should document the main workflow (npm run dev) prominently at the top
+  - This setup eliminates the need for developers to remember to run two commands
+  - Both services start with a single `npm run dev` command, improving DX
+---
+
