@@ -285,3 +285,17 @@ Started: Sun Jan 25 18:22:51 CET 2026
   - Snake segments are already tracked in snakeSegments array in correct order (head to tail), making export straightforward
   - Cleanup is important: remove the temporary link element and revoke the object URL after download
 ---
+## Mon Jan 26 08:30:00 CET 2026 - US-018
+- Implemented new level button functionality to return to landing page
+- Files changed:
+  - gsnake-editor/src/lib/EditorLayout.svelte (modified - added event dispatcher, updated handleNewLevel)
+  - gsnake-editor/src/App.svelte (modified - added handleNewLevel handler, wired up newLevel event)
+  - scripts/ralph/prd.json (updated US-018 passes: true)
+- **Learnings for future iterations:**
+  - Event-based navigation pattern: child components dispatch events, parent manages view state
+  - The showEditor boolean flag in App.svelte controls whether editor or landing page is shown
+  - When returning to landing page, clear loadedLevelData to reset state properly
+  - createEventDispatcher supports void events for actions that don't need payload data
+  - Event handlers in Svelte components use on:eventName={handler} syntax
+  - Current work is not saved automatically (user must explicitly save before clicking New Level)
+---
