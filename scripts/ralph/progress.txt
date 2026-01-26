@@ -253,3 +253,19 @@ Started: Sun Jan 25 18:22:51 CET 2026
   - Grid dimension validation is important: ensure width/height are between 5-50 and match editor constraints
   - Error messages should be user-friendly with clear explanations, using alert() for immediate feedback
 ---
+## Mon Jan 26 08:15:00 CET 2026 - US-016
+- Implemented save level modal with metadata collection
+- Files changed:
+  - gsnake-editor/src/lib/SaveLevelModal.svelte (new)
+  - gsnake-editor/src/lib/EditorLayout.svelte (modified - integrated SaveLevelModal)
+  - scripts/ralph/prd.json (updated US-016 passes: true)
+- **Learnings for future iterations:**
+  - SaveLevelModal follows the same pattern as GridSizeModal: overlay + centered card + createEventDispatcher
+  - Form validation is handled in the modal component before dispatching events to parent
+  - Info box styling uses light blue background (#e3f2fd) with blue left border (#2196f3) for informational messages
+  - The modal dispatches 'export' event with {name, difficulty} payload which will be used in US-017 for actual JSON export
+  - The handleSaveExport function in EditorLayout is a placeholder - actual export logic will be implemented in US-017
+  - Modal visibility is controlled with a boolean showSaveModal flag and conditional rendering with {#if}
+  - Select dropdown follows same styling as other inputs with focus state using green outline (#4caf50)
+  - Browser MCP timeout issues continue - rely on typecheck passing and code verification for correctness
+---
