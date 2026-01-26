@@ -19,6 +19,8 @@
   let snakeSegments: { row: number; col: number }[] = []; // Track snake segments in order (head to tail)
   let snakeDirection: Direction = 'east'; // Default direction is East
   let showSaveModal = false; // Control save modal visibility
+  let isTestingLevel = false; // Track test level loading state
+  let isLoadingFile = false; // Track file loading state
 
   // Initialize grid cells
   let cells: GridCell[][] = Array.from({ length: gridHeight }, (_, row) =>
@@ -399,6 +401,8 @@
       const file = target.files?.[0];
       if (!file) return;
 
+      isLoadingFile = true; // Start loading state
+
       try {
         const text = await file.text();
         const data = JSON.parse(text) as LevelData;
@@ -439,6 +443,7 @@
         });
         console.error('Failed to load level:', error);
       } finally{
+        isLoadingFile = false; // End loading state
         // Clean up the input element
         document.body.removeChild(input);
       }
@@ -489,6 +494,8 @@
 
   async function handleTest() {
     console.log('Test clicked - preparing level for testing');
+
+    isTestingLevel = true; // Start loading state
 
     // Generate level data (similar to export)
     const obstacles: Position[] = [];
@@ -596,6 +603,8 @@
         }
       );
       console.error('Failed to test level:', error);
+    } finally {
+      isTestingLevel = false; // End loading state
     }
   }
 
@@ -767,7 +776,13 @@
   <!-- Top toolbar -->
   <div class="toolbar">
     <button on:click={handleNewLevel}>New Level</button>
-    <button on:click={handleLoad}>Load</button>
+    <button on:click={handleLoad} disabled={isLoadingFile}>
+      {#if isLoadingFile}
+        <span class="spinner"></span> Loading...
+      {:else}
+        Load
+      {/if}
+    </button>
     <button on:click={handleUndo} disabled={undoStack.length === 0}>Undo</button>
     <button on:click={handleRedo} disabled={redoStack.length === 0}>Redo</button>
     <select bind:value={snakeDirection} on:change={handleDirectionChange} class="direction-select">
@@ -776,7 +791,13 @@
       <option value="east">East</option>
       <option value="west">West</option>
     </select>
-    <button on:click={handleTest}>Test</button>
+    <button on:click={handleTest} disabled={isTestingLevel}>
+      {#if isTestingLevel}
+        <span class="spinner"></span> Uploading...
+      {:else}
+        Test
+      {/if}
+    </button>
     <button on:click={handleSave}>Save</button>
   </div>
 
@@ -901,5 +922,23 @@
     overflow: auto;
     background-color: #e8e8e8;
     padding: 24px;
+  }
+
+  /* Loading spinner */
+  .spinner {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-left-color: #4caf50;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
   }
 </style>
