@@ -313,3 +313,20 @@ Started: Sun Jan 25 18:22:51 CET 2026
   - File input elements should be cleaned up after use with removeChild in finally block
   - The async/await pattern works well with file reading in event handlers
 ---
+## Mon Jan 26 08:38:00 CET 2026 - US-020
+- Implemented backend service for test level storage
+- Files changed:
+  - gsnake-editor/server.ts (new)
+  - gsnake-editor/package.json (modified - added express, cors, tsx dependencies and server script)
+  - gsnake-editor/package-lock.json (updated)
+  - scripts/ralph/prd.json (updated US-020 passes: true)
+- **Learnings for future iterations:**
+  - Express server with TypeScript requires express, @types/express, and tsx (or ts-node) for execution
+  - CORS configuration should include all possible development ports (5173 for Vite, 3000 for gsnake-web)
+  - In-memory storage pattern: store data with timestamp, check expiration on retrieval
+  - Test level expiration is 1 hour (60 * 60 * 1000 milliseconds)
+  - Server runs on port 3001 to avoid conflicts with frontend dev servers
+  - The "server" script uses tsx to run TypeScript files directly without compilation
+  - Express 5.x is used, which has some API differences from Express 4.x
+  - Server restart automatically clears stored test level (intentional behavior)
+---
