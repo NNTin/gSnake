@@ -1,6 +1,37 @@
-# Svelte + TS + Vite
+# gSnake Level Editor
 
-This template should help get you started developing with Svelte and TypeScript in Vite.
+A level editor for creating custom gSnake levels, built with Svelte + TypeScript + Vite.
+
+## Getting Started
+
+### Development
+
+To start the development server (runs both the editor UI and backend server):
+
+```bash
+npm run dev
+```
+
+This will start:
+- Editor UI on http://localhost:5173
+- Backend server on http://localhost:3000
+
+### Individual Commands
+
+If you need to run services separately:
+
+```bash
+npm run dev:editor  # Start only the editor UI (Vite)
+npm run dev:server  # Start only the backend server
+```
+
+### Other Commands
+
+```bash
+npm run build    # Build for production
+npm run preview  # Preview production build
+npm run check    # Run TypeScript type checking
+```
 
 ## Recommended IDE Setup
 
