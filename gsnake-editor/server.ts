@@ -4,9 +4,19 @@ import cors from 'cors';
 const app = express();
 const PORT = 3001;
 
-// Enable CORS for localhost development
+// Enable CORS for localhost development (allow all localhost ports)
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000'],
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+
+    // Allow all localhost origins
+    if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
+      return callback(null, true);
+    }
+
+    callback(new Error('Not allowed by CORS'));
+  },
   methods: ['GET', 'POST'],
   credentials: true
 }));
