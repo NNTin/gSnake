@@ -83,3 +83,27 @@ Started: Sun Jan 26 12:30:00 CET 2026
   - Use vertical-align: middle to align spinner with button text
 ---
 
+## Sun Jan 26 14:10:00 CET 2026 - US-F004
+- Implemented keyboard shortcuts help modal
+- Created new HelpModal.svelte component following the SaveLevelModal pattern
+- Added Help button (question mark icon) to toolbar in EditorLayout.svelte
+- Styled Help button as circular green button with "?" text
+- Help modal displays all keyboard shortcuts in a clean, organized layout
+- Shortcuts displayed: Ctrl+Z / Cmd+Z (Undo), Ctrl+Y / Cmd+Shift+Z (Redo), Shift+Click (Remove entity), Esc (Close modal/cancel)
+- Added Escape key handler to close help modal
+- Modal styling consistent with SaveLevelModal: fixed overlay, centered card, white background, 12px border-radius
+- Keyboard shortcuts displayed as <kbd> elements with monospace font and key-like styling
+- Close button at bottom of modal
+- Files changed:
+  - gsnake-editor/src/lib/HelpModal.svelte (new file)
+  - gsnake-editor/src/lib/EditorLayout.svelte (added Help button, help modal state, handlers)
+- **Learnings for future iterations:**
+  - Help modal follows same component pattern as SaveLevelModal: createEventDispatcher for close event
+  - Help button styled as circular button: width/height 36px, border-radius 50%, green background (#4caf50)
+  - Used <kbd> HTML element for keyboard shortcut keys with special styling (monospace font, white background, border, box-shadow)
+  - Removed click handlers from modal overlay to avoid accessibility warnings (Escape key and Close button provide exit methods)
+  - Modal has svelte:window keydown handler to catch Escape key globally when modal is open
+  - Help button placed at end of toolbar after Save button
+  - Title attribute on Help button provides tooltip: "Keyboard Shortcuts"
+---
+
