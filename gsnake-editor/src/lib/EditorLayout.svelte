@@ -2,6 +2,7 @@
   import EntityPalette from './EntityPalette.svelte';
   import GridCanvas from './GridCanvas.svelte';
   import SaveLevelModal from './SaveLevelModal.svelte';
+  import HelpModal from './HelpModal.svelte';
   import type { EntityType, GridCell, Direction, LevelData, Position } from './types';
   import { onMount, createEventDispatcher } from 'svelte';
   import toast from 'svelte-5-french-toast';
@@ -19,6 +20,7 @@
   let snakeSegments: { row: number; col: number }[] = []; // Track snake segments in order (head to tail)
   let snakeDirection: Direction = 'east'; // Default direction is East
   let showSaveModal = false; // Control save modal visibility
+  let showHelpModal = false; // Control help modal visibility
   let isTestingLevel = false; // Track test level loading state
   let isLoadingFile = false; // Track file loading state
 
@@ -646,6 +648,16 @@
     showSaveModal = false;
   }
 
+  function handleHelp() {
+    console.log('Help clicked');
+    showHelpModal = true;
+  }
+
+  function handleHelpClose() {
+    console.log('Help closed');
+    showHelpModal = false;
+  }
+
   function handleSaveExport(event: CustomEvent<{ name: string; difficulty: 'easy' | 'medium' | 'hard' }>) {
     const { name, difficulty } = event.detail;
 
@@ -799,6 +811,7 @@
       {/if}
     </button>
     <button on:click={handleSave}>Save</button>
+    <button on:click={handleHelp} class="help-button" title="Keyboard Shortcuts">?</button>
   </div>
 
   <!-- Main content area with sidebar and canvas -->
@@ -825,6 +838,11 @@
     on:cancel={handleSaveCancel}
     on:export={handleSaveExport}
   />
+{/if}
+
+<!-- Help Modal -->
+{#if showHelpModal}
+  <HelpModal on:close={handleHelpClose} />
 {/if}
 
 <style>
@@ -872,6 +890,29 @@
 
   .toolbar button:disabled:hover {
     background-color: #f5f5f5;
+  }
+
+  .toolbar .help-button {
+    font-size: 18px;
+    font-weight: bold;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+  }
+
+  .toolbar .help-button:hover {
+    background-color: #45a049;
+  }
+
+  .toolbar .help-button:active {
+    background-color: #3d8b40;
   }
 
   .toolbar .direction-select {
