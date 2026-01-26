@@ -410,8 +410,97 @@
 
   function handleSaveExport(event: CustomEvent<{ name: string; difficulty: 'easy' | 'medium' | 'hard' }>) {
     const { name, difficulty } = event.detail;
-    console.log('Export level:', name, difficulty);
-    // TODO: Actual export logic will be implemented in US-017
+
+    // Generate unique level ID using timestamp
+    const levelId = Date.now();
+
+    // Convert grid cells to position arrays for each entity type
+    const obstacles: Position[] = [];
+    const food: Position[] = [];
+    const stones: Position[] = [];
+    const spikes: Position[] = [];
+    const floatingFood: Position[] = [];
+    const fallingFood: Position[] = [];
+    let exit: Position | null = null;
+
+    // Iterate through all cells and collect entities by type
+    for (let row = 0; row < gridHeight; row++) {
+      for (let col = 0; col < gridWidth; col++) {
+        const cell = cells[row][col];
+        const position: Position = { x: col, y: row };
+
+        switch (cell.entity) {
+          case 'obstacle':
+            obstacles.push(position);
+            break;
+          case 'food':
+            food.push(position);
+            break;
+          case 'stone':
+            stones.push(position);
+            break;
+          case 'spike':
+            spikes.push(position);
+            break;
+          case 'floating-food':
+            floatingFood.push(position);
+            break;
+          case 'falling-food':
+            fallingFood.push(position);
+            break;
+          case 'exit':
+            exit = position;
+            break;
+          // 'snake' is handled separately via snakeSegments array
+        }
+      }
+    }
+
+    // Convert snake segments to position array
+    const snake: Position[] = snakeSegments.map(seg => ({
+      x: seg.col,
+      y: seg.row
+    }));
+
+    // Capitalize first letter of direction to match format (e.g., "east" -> "East")
+    const snakeDirectionCapitalized =
+      snakeDirection.charAt(0).toUpperCase() + snakeDirection.slice(1);
+
+    // Build level JSON object
+    const levelData = {
+      id: levelId,
+      name: name,
+      difficulty: difficulty,
+      gridSize: {
+        width: gridWidth,
+        height: gridHeight
+      },
+      snake: snake,
+      obstacles: obstacles,
+      food: food,
+      exit: exit,
+      snakeDirection: snakeDirectionCapitalized,
+      floatingFood: floatingFood,
+      fallingFood: fallingFood,
+      stones: stones,
+      spikes: spikes
+    };
+
+    // Convert to JSON string with 2-space indentation for readability
+    const jsonString = JSON.stringify(levelData, null, 2);
+
+    // Create a Blob and trigger browser download
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `level-${levelId}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    console.log('Exported level:', name, difficulty);
     showSaveModal = false;
   }
 
