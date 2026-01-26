@@ -1,17 +1,19 @@
 <script lang="ts">
   import EntityPalette from './EntityPalette.svelte';
   import GridCanvas from './GridCanvas.svelte';
-  import type { EntityType, GridCell, Direction } from './types';
+  import type { EntityType, GridCell, Direction, LevelData, Position } from './types';
+  import { onMount } from 'svelte';
 
   export let gridWidth: number;
   export let gridHeight: number;
+  export let initialLevelData: LevelData | null = null;
 
   let selectedEntity: EntityType = 'snake';
   let snakeSegments: { row: number; col: number }[] = []; // Track snake segments in order (head to tail)
   let snakeDirection: Direction = 'east'; // Default direction is East
 
   // Initialize grid cells
-  $: cells = Array.from({ length: gridHeight }, (_, row) =>
+  let cells: GridCell[][] = Array.from({ length: gridHeight }, (_, row) =>
     Array.from({ length: gridWidth }, (_, col) => ({
       row,
       col,
@@ -20,6 +22,82 @@
       snakeSegmentIndex: undefined as number | undefined
     }))
   );
+
+  // Reactive statement to reinitialize grid when dimensions change
+  $: if (gridWidth || gridHeight) {
+    cells = Array.from({ length: gridHeight }, (_, row) =>
+      Array.from({ length: gridWidth }, (_, col) => ({
+        row,
+        col,
+        entity: null as EntityType | null,
+        isSnakeSegment: false,
+        snakeSegmentIndex: undefined as number | undefined
+      }))
+    );
+  }
+
+  // Helper function to map entity type from position arrays
+  function placeEntitiesFromLevelData(data: LevelData) {
+    // Clear existing state
+    snakeSegments = [];
+    cells = Array.from({ length: gridHeight }, (_, row) =>
+      Array.from({ length: gridWidth }, (_, col) => ({
+        row,
+        col,
+        entity: null as EntityType | null,
+        isSnakeSegment: false,
+        snakeSegmentIndex: undefined as number | undefined
+      }))
+    );
+
+    // Helper to place entities
+    const placeEntity = (positions: Position[], entityType: EntityType) => {
+      positions.forEach(pos => {
+        if (pos.y >= 0 && pos.y < gridHeight && pos.x >= 0 && pos.x < gridWidth) {
+          cells[pos.y][pos.x].entity = entityType;
+        }
+      });
+    };
+
+    // Place snake segments
+    data.snake.forEach((pos, index) => {
+      if (pos.y >= 0 && pos.y < gridHeight && pos.x >= 0 && pos.x < gridWidth) {
+        cells[pos.y][pos.x].entity = 'snake';
+        cells[pos.y][pos.x].isSnakeSegment = true;
+        cells[pos.y][pos.x].snakeSegmentIndex = index;
+        snakeSegments.push({ row: pos.y, col: pos.x });
+      }
+    });
+
+    // Place other entities
+    placeEntity(data.obstacles || [], 'obstacle');
+    placeEntity(data.food || [], 'food');
+    placeEntity(data.stones || [], 'stone');
+    placeEntity(data.spikes || [], 'spike');
+    placeEntity(data.floatingFood || [], 'floating-food');
+    placeEntity(data.fallingFood || [], 'falling-food');
+
+    // Place exit (single entity)
+    if (data.exit && data.exit.y >= 0 && data.exit.y < gridHeight && data.exit.x >= 0 && data.exit.x < gridWidth) {
+      cells[data.exit.y][data.exit.x].entity = 'exit';
+    }
+
+    // Set snake direction (convert from "East" to "east")
+    if (data.snakeDirection) {
+      snakeDirection = data.snakeDirection.toLowerCase() as Direction;
+    }
+
+    // Trigger reactivity
+    cells = cells;
+    snakeSegments = snakeSegments;
+  }
+
+  // Load initial level data if provided
+  onMount(() => {
+    if (initialLevelData) {
+      placeEntitiesFromLevelData(initialLevelData);
+    }
+  });
 
   // Undo/Redo state management using command pattern
   interface EditorState {

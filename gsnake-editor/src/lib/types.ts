@@ -23,3 +23,26 @@ export interface GridCell {
   isSnakeSegment: boolean; // True if this cell is part of the snake
   snakeSegmentIndex: number | undefined; // Index in the snake array (0 = head)
 }
+
+export interface Position {
+  x: number;
+  y: number;
+}
+
+export interface LevelData {
+  id: number;
+  name: string;
+  gridSize: {
+    width: number;
+    height: number;
+  };
+  snake: Position[];
+  obstacles: Position[];
+  food: Position[];
+  exit: Position;
+  snakeDirection: string; // "North", "South", "East", "West"
+  floatingFood: Position[];
+  fallingFood: Position[];
+  stones: Position[];
+  spikes: Position[];
+}
