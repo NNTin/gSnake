@@ -330,3 +330,18 @@ Started: Sun Jan 25 18:22:51 CET 2026
   - Express 5.x is used, which has some API differences from Express 4.x
   - Server restart automatically clears stored test level (intentional behavior)
 ---
+## Mon Jan 26 08:41:00 CET 2026 - US-021
+- Implemented test level integration with backend and gsnake-web
+- Files changed:
+  - gsnake-editor/src/lib/EditorLayout.svelte (modified - implemented handleTest function)
+  - scripts/ralph/prd.json (updated US-021 passes: true)
+- **Learnings for future iterations:**
+  - Test level generation reuses same entity collection logic as export function
+  - Test level uses fixed ID (999999) to distinguish it from regular levels
+  - fetch API with POST method sends JSON to backend server
+  - window.open with '_blank' opens URL in new tab while keeping editor open
+  - Error handling should provide clear instructions (e.g., "Run: npm run server")
+  - The test workflow is: generate level JSON -> POST to backend -> open gsnake-web with ?test=true parameter
+  - CORS must be configured on backend to allow fetch requests from editor origin
+  - Async/await pattern works well for HTTP requests in event handlers
+---
