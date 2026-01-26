@@ -224,6 +224,19 @@
         snakeSegments = snakeSegments;
       }
 
+      // For exit entity, ensure only one exists on the grid
+      if (entityType === 'exit') {
+        // Find and remove existing exit
+        for (let r = 0; r < cells.length; r++) {
+          for (let c = 0; c < cells[r].length; c++) {
+            if (cells[r][c].entity === 'exit' && !(r === row && c === col)) {
+              cells[r][c].entity = null;
+              console.log(`Removed previous exit at (${r}, ${c}) via drag-drop`);
+            }
+          }
+        }
+      }
+
       // Place dropped entity at cell (replaces existing entity if present)
       cells[row][col].entity = entityType;
       cells[row][col].isSnakeSegment = false;
@@ -335,6 +348,19 @@
           cells[seg.row][seg.col].snakeSegmentIndex = i;
         }
         snakeSegments = snakeSegments;
+      }
+
+      // For exit entity, ensure only one exists on the grid
+      if (selectedEntity === 'exit') {
+        // Find and remove existing exit
+        for (let r = 0; r < cells.length; r++) {
+          for (let c = 0; c < cells[r].length; c++) {
+            if (cells[r][c].entity === 'exit' && !(r === row && c === col)) {
+              cells[r][c].entity = null;
+              console.log(`Removed previous exit at (${r}, ${c})`);
+            }
+          }
+        }
       }
 
       // Place selected entity at clicked cell (replaces existing entity if present)
@@ -562,8 +588,36 @@
     }
   }
 
+  let validationData = {
+    snakeCount: 0,
+    foodCount: 0,
+    hasExit: false
+  };
+
   function handleSave() {
     console.log('Save clicked');
+
+    // Calculate validation data
+    let foodCount = 0;
+    let hasExit = false;
+
+    for (let row = 0; row < gridHeight; row++) {
+      for (let col = 0; col < gridWidth; col++) {
+        const cell = cells[row][col];
+        if (cell.entity === 'food') {
+          foodCount++;
+        } else if (cell.entity === 'exit') {
+          hasExit = true;
+        }
+      }
+    }
+
+    validationData = {
+      snakeCount: snakeSegments.length,
+      foodCount,
+      hasExit
+    };
+
     showSaveModal = true;
   }
 
@@ -575,8 +629,10 @@
   function handleSaveExport(event: CustomEvent<{ name: string; difficulty: 'easy' | 'medium' | 'hard' }>) {
     const { name, difficulty } = event.detail;
 
-    // Generate unique level ID using timestamp
-    const levelId = Date.now();
+    // Generate unique level ID using timestamp + random component
+    const timestamp = Date.now();
+    const random = Math.random().toString(36).substring(2, 8);
+    const levelId = `${timestamp}-${random}`;
 
     // Convert grid cells to position arrays for each entity type
     const obstacles: Position[] = [];
@@ -725,7 +781,13 @@
 
 <!-- Save Level Modal -->
 {#if showSaveModal}
-  <SaveLevelModal on:cancel={handleSaveCancel} on:export={handleSaveExport} />
+  <SaveLevelModal
+    snakeCount={validationData.snakeCount}
+    foodCount={validationData.foodCount}
+    hasExit={validationData.hasExit}
+    on:cancel={handleSaveCancel}
+    on:export={handleSaveExport}
+  />
 {/if}
 
 <style>

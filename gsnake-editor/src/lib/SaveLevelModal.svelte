@@ -6,8 +6,21 @@
     export: { name: string; difficulty: 'easy' | 'medium' | 'hard' };
   }>();
 
+  export let snakeCount: number = 0;
+  export let foodCount: number = 0;
+  export let hasExit: boolean = false;
+
   let name = '';
   let difficulty: 'easy' | 'medium' | 'hard' = 'medium';
+
+  // Calculate validation warnings
+  $: warnings = [
+    snakeCount === 0 ? 'No snake placed - level is invalid' : null,
+    foodCount === 0 ? 'No food placed - level may not be completable' : null,
+    !hasExit ? 'No exit placed - level cannot be completed' : null,
+  ].filter(w => w !== null) as string[];
+
+  $: hasWarnings = warnings.length > 0;
 
   function handleCancel() {
     dispatch('cancel');
@@ -63,12 +76,26 @@
       Level ID will be auto-generated
     </div>
 
+    {#if hasWarnings}
+      <div class="warning-box">
+        <span class="warning-icon">⚠️</span>
+        <div class="warning-content">
+          <strong>Validation Warnings:</strong>
+          <ul>
+            {#each warnings as warning}
+              <li>{warning}</li>
+            {/each}
+          </ul>
+        </div>
+      </div>
+    {/if}
+
     <div class="button-group">
       <button class="secondary-button" on:click={handleCancel}>
         Cancel
       </button>
       <button class="primary-button" on:click={handleExport}>
-        Export
+        {hasWarnings ? 'Export Anyway' : 'Export'}
       </button>
     </div>
   </div>
@@ -157,6 +184,47 @@
   .info-icon {
     font-size: 1.1rem;
     flex-shrink: 0;
+  }
+
+  .warning-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background-color: #fff3cd;
+    border-left: 3px solid #ffc107;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    color: #856404;
+    margin-bottom: 1.5rem;
+  }
+
+  .warning-icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+
+  .warning-content {
+    flex: 1;
+  }
+
+  .warning-content strong {
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  .warning-content ul {
+    margin: 0;
+    padding-left: 1.25rem;
+  }
+
+  .warning-content li {
+    margin-bottom: 0.25rem;
+  }
+
+  .warning-content li:last-child {
+    margin-bottom: 0;
   }
 
   .button-group {
