@@ -62,3 +62,24 @@ Started: Sun Jan 26 12:30:00 CET 2026
   - Use toast.success(), toast.error() methods with message and options
 ---
 
+## Sun Jan 26 14:30:00 CET 2026 - US-F003
+- Implemented loading states for async operations in editor
+- Added `isTestingLevel` and `isLoadingFile` state variables to track loading status
+- Updated Test button to show spinner and "Uploading..." text during test level upload
+- Updated Load button to show spinner and "Loading..." text during file loading
+- Both buttons are disabled during their respective operations to prevent double-clicks
+- Created consistent green spinner design with CSS animations (12px, green border-left, 0.6s rotation)
+- Added try/finally blocks to ensure loading states are reset even on errors
+- Files changed:
+  - gsnake-editor/src/lib/EditorLayout.svelte
+- **Learnings for future iterations:**
+  - Use boolean state variables (`isLoading`, `isSaving`, etc.) to track async operation states
+  - Disable buttons during async operations with `disabled={isLoading}` to prevent double-clicks
+  - Use Svelte conditional blocks `{#if isLoading}...{:else}...{/if}` to show different button content
+  - Always use try/finally blocks to ensure loading states are reset, even when errors occur
+  - Spinner CSS: 12px size, 2px border with transparent base + colored border-left, 50% border-radius, CSS animation
+  - Spinner colors should match editor theme (green #4caf50 for this project)
+  - Display inline-block spinner with margin-right: 6px for spacing before text
+  - Use vertical-align: middle to align spinner with button text
+---
+
