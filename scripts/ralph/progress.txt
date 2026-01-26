@@ -269,3 +269,19 @@ Started: Sun Jan 25 18:22:51 CET 2026
   - Select dropdown follows same styling as other inputs with focus state using green outline (#4caf50)
   - Browser MCP timeout issues continue - rely on typecheck passing and code verification for correctness
 ---
+## Mon Jan 26 08:27:00 CET 2026 - US-017
+- Implemented export level as JSON functionality
+- Files changed:
+  - gsnake-editor/src/lib/EditorLayout.svelte (modified - implemented handleSaveExport function)
+  - scripts/ralph/prd.json (updated US-017 passes: true)
+- **Learnings for future iterations:**
+  - Timestamp-based level IDs use Date.now() which returns milliseconds since epoch
+  - JSON export matches existing gsnake-levels format with snake, obstacles, food, exit, stones, spikes, floatingFood, fallingFood arrays
+  - Snake direction needs capitalization: "east" -> "East" to match existing level format
+  - Grid cell coordinates map to Position as {x: col, y: row} - x is column, y is row
+  - Browser download is triggered by creating a Blob, generating a temporary URL with createObjectURL, and programmatically clicking a link element
+  - The difficulty field is included in the export even though existing levels don't have it (PRD requirement)
+  - Exit entity is a single Position object (not an array), so it needs special handling (can be null if not placed)
+  - Snake segments are already tracked in snakeSegments array in correct order (head to tail), making export straightforward
+  - Cleanup is important: remove the temporary link element and revoke the object URL after download
+---
