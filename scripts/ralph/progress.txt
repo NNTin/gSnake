@@ -10,7 +10,7 @@ Started: Sun Jan 26 12:30:00 CET 2026
 - **Grid Rendering**: Use CSS Grid with dynamic grid-template-columns, 32px cells, 1px gaps, background color shows as gaps
 - **Typecheck Command**: `npm run check` in gsnake-editor runs svelte-check and tsc
 - **Browser MCP Testing**: Browser MCP works correctly for verification. Click operations may report "WebSocket response timeout" errors but actions execute successfully - verify with screenshot or snapshot after clicks
-- **Toast Notifications**: Use svelte-french-toast for user feedback instead of alert()
+- **Toast Notifications**: Use svelte-5-french-toast for user feedback instead of alert(). Style with inline style parameter: green (#d4edda/#155724/#4caf50) for success, red (#f8d7da/#721c24/#dc3545) for error, yellow (#fff3cd/#856404/#ffc107) for warning
 - **Loading States**: Disable buttons and show loading indicators during async operations
 
 ---
@@ -33,3 +33,32 @@ Started: Sun Jan 26 12:30:00 CET 2026
   - Export button text can change conditionally based on warning state using ternary in Svelte template
   - Validation warnings display as unordered list with proper semantic markup
 ---
+## Sun Jan 26 13:45:00 CET 2026 - US-F002
+- Replaced all alert() calls with toast notifications using svelte-5-french-toast library
+- Installed svelte-5-french-toast (Svelte 5 compatible version of svelte-french-toast)
+- Added <Toaster /> component to App.svelte
+- Replaced file load error alerts with styled error toasts
+- Replaced test level error alerts with styled error toasts
+- Replaced save validation alerts with styled warning toasts
+- Added success toast when level saved successfully
+- Added success toast when test level uploaded successfully
+- Styled toasts with inline styles to match editor design (green success, red error, yellow warning)
+- All toasts auto-dismiss after 5 seconds
+- Files changed:
+  - gsnake-editor/package.json (added svelte-5-french-toast dependency)
+  - gsnake-editor/src/App.svelte (added Toaster component, replaced alert with toast.error)
+  - gsnake-editor/src/lib/EditorLayout.svelte (replaced alerts with toast.error and toast.success)
+  - gsnake-editor/src/lib/SaveLevelModal.svelte (replaced alerts with toast.error for warnings)
+- **Learnings for future iterations:**
+  - svelte-5-french-toast is the Svelte 5 compatible version of svelte-french-toast
+  - Toast styling is done via inline `style` parameter, not CSS classes
+  - Toast style format: 'background: #color; color: #color; border-left: 4px solid #color; border-radius: 8px; box-shadow: ...'
+  - Success toasts: green (#d4edda background, #155724 text, #4caf50 border)
+  - Error toasts: red (#f8d7da background, #721c24 text, #dc3545 border)
+  - Warning toasts: yellow (#fff3cd background, #856404 text, #ffc107 border)
+  - Toasts auto-dismiss after 5000ms (5 seconds) by default
+  - Import statement: `import toast, { Toaster } from 'svelte-5-french-toast'`
+  - Mount <Toaster /> once at top level of app (App.svelte)
+  - Use toast.success(), toast.error() methods with message and options
+---
+
