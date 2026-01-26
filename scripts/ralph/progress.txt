@@ -9,7 +9,7 @@ Started: Sun Jan 26 12:30:00 CET 2026
 - **Entity Colors**: Consistent color scheme across components (snake=#4caf50, obstacle=#666, food=#ff9800, etc.)
 - **Grid Rendering**: Use CSS Grid with dynamic grid-template-columns, 32px cells, 1px gaps, background color shows as gaps
 - **Typecheck Command**: `npm run check` in gsnake-editor runs svelte-check and tsc
-- **Browser MCP Limitation**: Browser MCP tool has timeout issues with clicks; rely on typecheck and code verification for correctness
+- **Browser MCP Testing**: Browser MCP works correctly for verification. Click operations may report "WebSocket response timeout" errors but actions execute successfully - verify with screenshot or snapshot after clicks
 - **Toast Notifications**: Use svelte-french-toast for user feedback instead of alert()
 - **Loading States**: Disable buttons and show loading indicators during async operations
 
@@ -28,7 +28,8 @@ Started: Sun Jan 26 12:30:00 CET 2026
 - **Learnings for future iterations:**
   - SaveLevelModal accepts validation props passed from parent EditorLayout
   - Svelte reactive statements ($:) work well for computing warnings from props
-  - Warning box follows similar pattern to info-box: flex layout, border-left accent, background color
-  - Browser MCP timeout issues confirmed - typecheck is reliable verification method
-  - Export button text can change conditionally based on warning state
+  - Warning box follows similar pattern to info-box: flex layout, border-left accent, background color (yellow: #fff3cd with #ffc107 border)
+  - Browser MCP successfully verified implementation - click timeouts are benign, use screenshots/snapshots to confirm results
+  - Export button text can change conditionally based on warning state using ternary in Svelte template
+  - Validation warnings display as unordered list with proper semantic markup
 ---
