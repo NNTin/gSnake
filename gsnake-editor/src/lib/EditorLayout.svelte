@@ -1,6 +1,7 @@
 <script lang="ts">
   import EntityPalette from './EntityPalette.svelte';
   import GridCanvas from './GridCanvas.svelte';
+  import SaveLevelModal from './SaveLevelModal.svelte';
   import type { EntityType, GridCell, Direction, LevelData, Position } from './types';
   import { onMount } from 'svelte';
 
@@ -11,6 +12,7 @@
   let selectedEntity: EntityType = 'snake';
   let snakeSegments: { row: number; col: number }[] = []; // Track snake segments in order (head to tail)
   let snakeDirection: Direction = 'east'; // Default direction is East
+  let showSaveModal = false; // Control save modal visibility
 
   // Initialize grid cells
   let cells: GridCell[][] = Array.from({ length: gridHeight }, (_, row) =>
@@ -398,6 +400,19 @@
 
   function handleSave() {
     console.log('Save clicked');
+    showSaveModal = true;
+  }
+
+  function handleSaveCancel() {
+    console.log('Save cancelled');
+    showSaveModal = false;
+  }
+
+  function handleSaveExport(event: CustomEvent<{ name: string; difficulty: 'easy' | 'medium' | 'hard' }>) {
+    const { name, difficulty } = event.detail;
+    console.log('Export level:', name, difficulty);
+    // TODO: Actual export logic will be implemented in US-017
+    showSaveModal = false;
   }
 
   // Keyboard shortcut handler for undo/redo
@@ -454,6 +469,11 @@
     </div>
   </div>
 </div>
+
+<!-- Save Level Modal -->
+{#if showSaveModal}
+  <SaveLevelModal on:cancel={handleSaveCancel} on:export={handleSaveExport} />
+{/if}
 
 <style>
   .editor-container {
