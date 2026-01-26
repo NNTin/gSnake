@@ -7,6 +7,7 @@
 
   const dispatch = createEventDispatcher<{
     newLevel: void;
+    loadLevel: LevelData;
   }>();
 
   export let gridWidth: number;
@@ -357,8 +358,65 @@
     dispatch('newLevel');
   }
 
-  function handleLoad() {
-    console.log('Load clicked');
+  async function handleLoad() {
+    console.log('Load clicked - opening file picker');
+
+    // Create a hidden file input element
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.style.display = 'none';
+
+    input.onchange = async (e) => {
+      const target = e.target as HTMLInputElement;
+      const file = target.files?.[0];
+      if (!file) return;
+
+      try {
+        const text = await file.text();
+        const data = JSON.parse(text) as LevelData;
+
+        // Validate required fields
+        if (!data.gridSize || typeof data.gridSize.width !== 'number' || typeof data.gridSize.height !== 'number') {
+          throw new Error('Invalid level format: missing or invalid gridSize');
+        }
+        if (!Array.isArray(data.snake) || data.snake.length === 0) {
+          throw new Error('Invalid level format: missing or invalid snake');
+        }
+        if (!data.snakeDirection) {
+          throw new Error('Invalid level format: missing snakeDirection');
+        }
+
+        // Validate grid dimensions
+        if (data.gridSize.width < 5 || data.gridSize.width > 50 || data.gridSize.height < 5 || data.gridSize.height > 50) {
+          throw new Error('Invalid grid dimensions: width and height must be between 5 and 50');
+        }
+
+        // Reset undo/redo history
+        undoStack = [];
+        redoStack = [];
+
+        // Update grid dimensions
+        gridWidth = data.gridSize.width;
+        gridHeight = data.gridSize.height;
+
+        // Load the level data
+        placeEntitiesFromLevelData(data);
+
+        console.log('Successfully loaded level:', data.name);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unknown error occurred';
+        alert(`Failed to load level: ${message}\n\nPlease check that the file is a valid gSnake level JSON.`);
+        console.error('Failed to load level:', error);
+      } finally {
+        // Clean up the input element
+        document.body.removeChild(input);
+      }
+    };
+
+    // Add to DOM and trigger click
+    document.body.appendChild(input);
+    input.click();
   }
 
   function handleUndo() {
