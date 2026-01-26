@@ -218,3 +218,38 @@ Started: Sun Jan 25 18:22:51 CET 2026
   - The direction value is persisted in the level data structure and will be included when saving levels (US-017)
   - Using bind:value on select triggers reactivity automatically, but on:change handler is still useful for logging/debugging
 ---
+## Sun Jan 25 20:45:44 CET 2026 - US-014
+- Implemented drag-and-drop functionality for entity placement
+- Files changed:
+  - gsnake-editor/src/lib/EntityPalette.svelte (modified - added draggable attribute, dragstart handler, custom drag image)
+  - gsnake-editor/src/lib/GridCanvas.svelte (modified - added dragover and drop handlers, cellDrop event dispatcher)
+  - gsnake-editor/src/lib/EditorLayout.svelte (modified - added handleCellDrop function to process drop events)
+  - scripts/ralph/prd.json (updated US-014 passes: true)
+- **Learnings for future iterations:**
+  - HTML5 drag-and-drop requires three key handlers: dragstart (source), dragover with preventDefault (target), and drop (target)
+  - dataTransfer.effectAllowed and dropEffect control cursor appearance during drag
+  - Custom drag images can be created programmatically and set with setDragImage(element, offsetX, offsetY)
+  - Drag images must be temporarily added to DOM but positioned off-screen to work properly
+  - The cellDrop event handler reuses the same entity placement logic as cellClick but doesn't change selectedEntity
+  - Drag-and-drop operations integrate seamlessly with undo/redo by using the same command pattern
+  - For snake entities, drops add single segments (not starting multi-segment mode like clicks do)
+  - Browser MCP timeout issues continue - rely on typecheck and code verification for correctness
+---
+## Mon Jan 26 07:56:00 CET 2026 - US-015
+- Implemented load existing level from JSON functionality
+- Files changed:
+  - gsnake-editor/src/App.svelte (modified - added JSON parsing, validation, error handling for level loading)
+  - gsnake-editor/src/lib/EditorLayout.svelte (modified - added initialLevelData prop, placeEntitiesFromLevelData function, onMount hook)
+  - gsnake-editor/src/lib/types.ts (added Position and LevelData interfaces)
+  - scripts/ralph/prd.json (updated US-015 passes: true)
+- **Learnings for future iterations:**
+  - Most of the load logic was already implemented in App.svelte from previous stories - only needed to wire up EditorLayout
+  - LevelData uses Position interface with {x, y} coordinates, which map to grid {col, row} (x=col, y=row)
+  - Level JSON uses capitalized direction strings ("East", "South") which need to be lowercased for the editor's Direction type
+  - onMount is the appropriate lifecycle hook for loading initial data into Svelte components
+  - Changed grid cells from reactive declaration ($:) to regular let with separate reactive statement to avoid conflicts with data loading
+  - Entity arrays in LevelData may be empty arrays or undefined, so use optional chaining (|| [])
+  - Exit is a single Position object, not an array like other entities
+  - Grid dimension validation is important: ensure width/height are between 5-50 and match editor constraints
+  - Error messages should be user-friendly with clear explanations, using alert() for immediate feedback
+---
