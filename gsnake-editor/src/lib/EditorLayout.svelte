@@ -3,7 +3,11 @@
   import GridCanvas from './GridCanvas.svelte';
   import SaveLevelModal from './SaveLevelModal.svelte';
   import type { EntityType, GridCell, Direction, LevelData, Position } from './types';
-  import { onMount } from 'svelte';
+  import { onMount, createEventDispatcher } from 'svelte';
+
+  const dispatch = createEventDispatcher<{
+    newLevel: void;
+  }>();
 
   export let gridWidth: number;
   export let gridHeight: number;
@@ -349,7 +353,8 @@
   }
 
   function handleNewLevel() {
-    console.log('New Level clicked');
+    console.log('New Level clicked - returning to landing page');
+    dispatch('newLevel');
   }
 
   function handleLoad() {

@@ -63,11 +63,17 @@
     showGridSizeModal = false;
     showEditor = true;
   }
+
+  function handleNewLevel() {
+    showEditor = false;
+    loadedLevelData = null; // Clear loaded data
+    console.log('Returned to landing page');
+  }
 </script>
 
 <main>
   {#if showEditor}
-    <EditorLayout {gridWidth} {gridHeight} initialLevelData={loadedLevelData} />
+    <EditorLayout {gridWidth} {gridHeight} initialLevelData={loadedLevelData} on:newLevel={handleNewLevel} />
   {:else}
     <LandingPage on:createNew={handleCreateNew} on:loadExisting={handleLoadExisting} />
 
