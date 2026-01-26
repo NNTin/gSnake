@@ -299,3 +299,17 @@ Started: Sun Jan 25 18:22:51 CET 2026
   - Event handlers in Svelte components use on:eventName={handler} syntax
   - Current work is not saved automatically (user must explicitly save before clicking New Level)
 ---
+## Mon Jan 26 08:33:00 CET 2026 - US-019
+- Implemented load button functionality in editor toolbar
+- Files changed:
+  - gsnake-editor/src/lib/EditorLayout.svelte (modified - implemented handleLoad function, updated event dispatcher)
+  - scripts/ralph/prd.json (updated US-019 passes: true)
+- **Learnings for future iterations:**
+  - Load functionality reuses the same file picker pattern: create hidden input, set accept attribute, trigger click
+  - JSON validation logic should be consistent between landing page load and editor toolbar load
+  - Undo/redo history must be reset when loading a new level (set undoStack = [] and redoStack = [])
+  - Grid dimensions are updated by changing gridWidth/gridHeight props, which triggers reactive statement to reinitialize cells
+  - The placeEntitiesFromLevelData function handles clearing and repopulating the grid with new level data
+  - File input elements should be cleaned up after use with removeChild in finally block
+  - The async/await pattern works well with file reading in event handlers
+---
