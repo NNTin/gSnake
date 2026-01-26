@@ -457,8 +457,109 @@
     console.log('Snake direction changed to:', snakeDirection);
   }
 
-  function handleTest() {
-    console.log('Test clicked');
+  async function handleTest() {
+    console.log('Test clicked - preparing level for testing');
+
+    // Generate level data (similar to export)
+    const obstacles: Position[] = [];
+    const food: Position[] = [];
+    const stones: Position[] = [];
+    const spikes: Position[] = [];
+    const floatingFood: Position[] = [];
+    const fallingFood: Position[] = [];
+    let exit: Position | null = null;
+
+    // Iterate through all cells and collect entities by type
+    for (let row = 0; row < gridHeight; row++) {
+      for (let col = 0; col < gridWidth; col++) {
+        const cell = cells[row][col];
+        const position: Position = { x: col, y: row };
+
+        switch (cell.entity) {
+          case 'obstacle':
+            obstacles.push(position);
+            break;
+          case 'food':
+            food.push(position);
+            break;
+          case 'stone':
+            stones.push(position);
+            break;
+          case 'spike':
+            spikes.push(position);
+            break;
+          case 'floating-food':
+            floatingFood.push(position);
+            break;
+          case 'falling-food':
+            fallingFood.push(position);
+            break;
+          case 'exit':
+            exit = position;
+            break;
+        }
+      }
+    }
+
+    // Convert snake segments to position array
+    const snake: Position[] = snakeSegments.map(seg => ({
+      x: seg.col,
+      y: seg.row
+    }));
+
+    // Capitalize first letter of direction
+    const snakeDirectionCapitalized =
+      snakeDirection.charAt(0).toUpperCase() + snakeDirection.slice(1);
+
+    // Build level JSON object
+    const levelData = {
+      id: 999999, // Test level ID
+      name: 'Test Level',
+      gridSize: {
+        width: gridWidth,
+        height: gridHeight
+      },
+      snake: snake,
+      obstacles: obstacles,
+      food: food,
+      exit: exit,
+      snakeDirection: snakeDirectionCapitalized,
+      floatingFood: floatingFood,
+      fallingFood: fallingFood,
+      stones: stones,
+      spikes: spikes
+    };
+
+    try {
+      // POST level to backend server
+      const response = await fetch('http://localhost:3001/api/test-level', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(levelData)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server responded with status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('Test level stored:', result);
+
+      // Open gsnake-web in new tab with test mode parameter
+      window.open('http://localhost:3000?test=true', '_blank');
+
+      console.log('Opened gsnake-web in new tab for testing');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error occurred';
+      alert(
+        `Failed to test level: ${message}\n\n` +
+        `Make sure the test server is running on port 3001.\n` +
+        `Run: npm run server`
+      );
+      console.error('Failed to test level:', error);
+    }
   }
 
   function handleSave() {
