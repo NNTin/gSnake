@@ -4,6 +4,7 @@
   import SaveLevelModal from './SaveLevelModal.svelte';
   import type { EntityType, GridCell, Direction, LevelData, Position } from './types';
   import { onMount, createEventDispatcher } from 'svelte';
+  import toast from 'svelte-5-french-toast';
 
   const dispatch = createEventDispatcher<{
     newLevel: void;
@@ -432,9 +433,12 @@
         console.log('Successfully loaded level:', data.name);
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error occurred';
-        alert(`Failed to load level: ${message}\n\nPlease check that the file is a valid gSnake level JSON.`);
+        toast.error(`Failed to load level: ${message}. Please check that the file is a valid gSnake level JSON.`, {
+          duration: 5000,
+          style: 'background: #f8d7da; color: #721c24; border-left: 4px solid #dc3545; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);'
+        });
         console.error('Failed to load level:', error);
-      } finally {
+      } finally{
         // Clean up the input element
         document.body.removeChild(input);
       }
@@ -576,13 +580,20 @@
       // Open gsnake-web in new tab with test mode parameter
       window.open('http://localhost:3000?test=true', '_blank');
 
+      toast.success('Test level uploaded successfully! Opening game in new tab...', {
+        duration: 5000,
+        style: 'background: #d4edda; color: #155724; border-left: 4px solid #4caf50; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);'
+      });
+
       console.log('Opened gsnake-web in new tab for testing');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error occurred';
-      alert(
-        `Failed to test level: ${message}\n\n` +
-        `Make sure the test server is running on port 3001.\n` +
-        `Run: npm run server`
+      toast.error(
+        `Failed to test level: ${message}. Make sure the test server is running on port 3001 (npm run server)`,
+        {
+          duration: 5000,
+          style: 'background: #f8d7da; color: #721c24; border-left: 4px solid #dc3545; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);'
+        }
       );
       console.error('Failed to test level:', error);
     }
@@ -719,6 +730,11 @@
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+
+    toast.success(`Level "${name}" saved successfully!`, {
+      duration: 5000,
+      style: 'background: #d4edda; color: #155724; border-left: 4px solid #4caf50; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);'
+    });
 
     console.log('Exported level:', name, difficulty);
     showSaveModal = false;

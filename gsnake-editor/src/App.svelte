@@ -3,6 +3,7 @@
   import GridSizeModal from './lib/GridSizeModal.svelte'
   import EditorLayout from './lib/EditorLayout.svelte'
   import type { LevelData } from './lib/types'
+  import toast, { Toaster } from 'svelte-5-french-toast'
 
   let showGridSizeModal = false;
   let showEditor = false;
@@ -46,7 +47,10 @@
 
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error occurred';
-      alert(`Failed to load level: ${message}\n\nPlease check that the file is a valid gSnake level JSON.`);
+      toast.error(`Failed to load level: ${message}. Please check that the file is a valid gSnake level JSON.`, {
+        duration: 5000,
+        style: 'background: #f8d7da; color: #721c24; border-left: 4px solid #dc3545; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);'
+      });
       console.error('Failed to load level:', error);
       // User returns to landing page (showEditor remains false)
     }
@@ -70,6 +74,8 @@
     console.log('Returned to landing page');
   }
 </script>
+
+<Toaster />
 
 <main>
   {#if showEditor}

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import toast from 'svelte-5-french-toast';
 
   const dispatch = createEventDispatcher<{
     cancel: void;
@@ -29,12 +30,18 @@
   function handleExport() {
     // Validate inputs
     if (!name.trim()) {
-      alert('Level name is required');
+      toast.error('Level name is required', {
+        duration: 5000,
+        style: 'background: #fff3cd; color: #856404; border-left: 4px solid #ffc107; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);'
+      });
       return;
     }
 
     if (!difficulty) {
-      alert('Difficulty is required');
+      toast.error('Difficulty is required', {
+        duration: 5000,
+        style: 'background: #fff3cd; color: #856404; border-left: 4px solid #ffc107; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);'
+      });
       return;
     }
 
