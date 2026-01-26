@@ -345,3 +345,18 @@ Started: Sun Jan 25 18:22:51 CET 2026
   - CORS must be configured on backend to allow fetch requests from editor origin
   - Async/await pattern works well for HTTP requests in event handlers
 ---
+## Mon Jan 26 08:45:00 CET 2026 - US-022
+- Implemented test mode support in gsnake-web
+- Files changed:
+  - gsnake-web/components/App.svelte (modified - added test mode detection and fetchTestLevel function)
+  - scripts/ralph/prd.json (updated US-022 passes: true)
+- **Learnings for future iterations:**
+  - URL query parameters are parsed using URLSearchParams API
+  - Test mode is detected with ?test=true parameter
+  - The fetchTestLevel function fetches from http://localhost:3001/api/test-level
+  - Single test level is wrapped in an array to match the game engine's expected format
+  - Test mode has priority over levelsUrl parameter (checked first in if/else chain)
+  - Error messages provide helpful instructions for users (e.g., "npm run server")
+  - Existing validation functions (isLevelDefinition) can be reused for test levels
+  - gsnake-web is a git submodule, so commits need to be made within the submodule directory
+---
