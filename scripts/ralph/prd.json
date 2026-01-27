@@ -1,0 +1,548 @@
+{
+  "project": "gSnake",
+  "branchName": "ralph/standalone-submodules-build",
+  "description": "Standalone Submodules Build - Enable each submodule to build/test independently via git dependencies while preserving root repo local development",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Document git branch dependency strategy",
+      "description": "As a maintainer, I want documented git dependency strategy so contributors understand how dependencies work in standalone vs root repo modes.",
+      "acceptanceCriteria": [
+        "Create new section 'Dependency Resolution Strategy' in gsnake-specs/tasks/repo-architecture.md",
+        "Document git URL format for Rust: git = 'https://github.com/nntin/gsnake', branch = 'main', package = 'gsnake-core'",
+        "Document git URL format for JavaScript: git+https://github.com/nntin/gsnake.git#main:gsnake-core/engine/bindings/wasm/pkg",
+        "Document branch strategy: all git dependencies target main branch",
+        "Explain auto-detection mechanism: build scripts check for ../<submodule>/.git to detect root repo",
+        "Document root repo versioning (semver in package.json) vs submodule branch tracking",
+        "Include Rust and JavaScript git dependency examples",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Added comprehensive Dependency Resolution Strategy section to repo-architecture.md"
+    },
+    {
+      "id": "US-002",
+      "title": "Add troubleshooting section to architecture docs",
+      "description": "As a developer, I want troubleshooting documentation so I can resolve common dependency issues.",
+      "acceptanceCriteria": [
+        "Add 'Troubleshooting' section to gsnake-specs/tasks/repo-architecture.md",
+        "Document common issue: git dependency not found - check branch name and repo access",
+        "Document common issue: local override not working - verify ../.git detection logic",
+        "Document common issue: WASM build fails - ensure wasm32-unknown-unknown target installed",
+        "Document how to force standalone mode (ignore local overrides) for testing",
+        "Document how to verify which dependency mode is active",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Added comprehensive Troubleshooting section to repo-architecture.md"
+    },
+    {
+      "id": "US-003",
+      "title": "Update architecture diagram for dual dependency modes",
+      "description": "As a maintainer, I want an updated Mermaid diagram showing both git and local path resolution.",
+      "acceptanceCriteria": [
+        "Update Mermaid diagram in gsnake-specs/tasks/repo-architecture.md",
+        "Show conditional dependency resolution: git URLs (standalone) vs local paths (root repo)",
+        "Add visual distinction between standalone mode and root repo mode",
+        "Update pain points: mark 'cannot build alone' issues as resolved",
+        "Add legend explaining dependency resolution modes",
+        "Diagram renders correctly in markdown preview",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "Updated Mermaid diagram showing dual modes with visual distinction and resolved pain points"
+    },
+    {
+      "id": "US-004",
+      "title": "Add gsnake-core standalone build validation",
+      "description": "As a developer, I want to verify gsnake-core builds independently as the foundation for other submodules.",
+      "acceptanceCriteria": [
+        "Verify gsnake-core can be cloned alone (git clone --no-recurse-submodules, then cd gsnake-core)",
+        "cargo build succeeds in standalone gsnake-core",
+        "cargo test succeeds in standalone gsnake-core",
+        "cargo doc --no-deps succeeds in standalone gsnake-core",
+        "wasm-pack build succeeds for wasm target (gsnake-core/engine/bindings/wasm)",
+        "Document any missing dependencies or issues found",
+        "Create gsnake-core/README.md with standalone build instructions if missing",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Add gsnake-core CI workflow",
+      "description": "As a developer, I want gsnake-core CI to validate standalone builds on every push.",
+      "acceptanceCriteria": [
+        "Create gsnake-core/.github/workflows/ci.yml",
+        "Workflow triggers: push to main, pull_request, workflow_dispatch",
+        "Job 'build': checkout submodule only, install Rust, cargo build",
+        "Job 'test': checkout submodule only, install Rust, cargo test",
+        "Job 'wasm': checkout submodule only, install wasm-pack, build WASM target",
+        "Use standard actions: actions/checkout@v4, dtolnay/rust-toolchain@stable",
+        "Workflow runs successfully on GitHub Actions",
+        "Test locally with nektos/act: cd gsnake-core && act -j build",
+        "Document any act limitations in gsnake-core/README.md",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "Update gsnake-levels Cargo.toml with git dependency",
+      "description": "As a developer, I want gsnake-levels to use git dependency for gsnake-core instead of path dependency.",
+      "acceptanceCriteria": [
+        "Update gsnake-levels/Cargo.toml: replace path = '../gsnake-core' with git dependency",
+        "Git dependency format: gsnake-core = { git = 'https://github.com/nntin/gsnake', branch = 'main', package = 'gsnake-core' }",
+        "cargo build succeeds in standalone gsnake-levels (without sibling repos)",
+        "cargo test succeeds in standalone gsnake-levels",
+        "Remove any --manifest-path ../gsnake-core usage from scripts",
+        "cargo check passes with git dependency",
+        "Typecheck passes"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Add local override detection to gsnake-levels",
+      "description": "As a developer in root repo, I want gsnake-levels to auto-detect and use local gsnake-core.",
+      "acceptanceCriteria": [
+        "Create gsnake-levels/build.rs or build script to detect root repo context",
+        "Detection logic: check if ../.git exists AND ../gsnake-core/.git exists",
+        "If root repo detected: create .cargo/config.toml with [patch.crates-io] or use CARGO_PATCH env var",
+        "Patch redirects git dependency to path = '../gsnake-core'",
+        "cargo build succeeds in root repo using local gsnake-core (verify with println! or check build logs)",
+        "cargo build still succeeds in standalone mode",
+        "Document override mechanism in gsnake-levels/README.md",
+        "Typecheck passes"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "Add gsnake-levels CI workflow",
+      "description": "As a developer, I want gsnake-levels CI to validate standalone builds.",
+      "acceptanceCriteria": [
+        "Create gsnake-levels/.github/workflows/ci.yml",
+        "Workflow triggers: push to main, pull_request, workflow_dispatch",
+        "Job 'build': checkout submodule only, install Rust, cargo build",
+        "Job 'test': checkout submodule only, install Rust, cargo test",
+        "Verify workflow uses git dependency (not local path)",
+        "Workflow runs successfully on GitHub Actions",
+        "Test locally with nektos/act: cd gsnake-levels && act -j build",
+        "Typecheck passes"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "Commit WASM artifacts to gsnake-core for standalone builds",
+      "description": "As a developer, I want prebuilt WASM in gsnake-core so gsnake-web can use it in standalone mode.",
+      "acceptanceCriteria": [
+        "Build WASM: cd gsnake-core/engine/bindings/wasm && wasm-pack build",
+        "Verify pkg/ directory contains: package.json, .wasm, .js, .d.ts files",
+        "Remove pkg/ from .gitignore if present (allow committing build artifacts)",
+        "Commit gsnake-core/engine/bindings/wasm/pkg/* to git",
+        "Add note in gsnake-core/README.md: WASM pkg/ is committed for standalone builds",
+        "Verify pkg/package.json has correct name and version",
+        "Push to main branch",
+        "Typecheck passes"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "Update gsnake-web package.json with git dependency",
+      "description": "As a developer, I want gsnake-web to use git dependency for WASM instead of file: path.",
+      "acceptanceCriteria": [
+        "Update gsnake-web/package.json dependencies section",
+        "Replace 'gsnake-core': 'file:../gsnake-core/engine/bindings/wasm/pkg'",
+        "With: 'gsnake-core': 'git+https://github.com/nntin/gsnake.git#main:gsnake-core/engine/bindings/wasm/pkg'",
+        "npm install succeeds in standalone gsnake-web (without sibling repos)",
+        "Verify node_modules/gsnake-core contains WASM files",
+        "npm run build succeeds in standalone mode",
+        "Typecheck passes"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-011",
+      "title": "Create local dependency detection script for gsnake-web",
+      "description": "As a developer in root repo, I want gsnake-web to auto-detect and use local WASM.",
+      "acceptanceCriteria": [
+        "Create gsnake-web/scripts/detect-local-deps.js",
+        "Script checks if ../../gsnake-core/.git exists (root repo context)",
+        "If detected: dynamically update package.json to use file:../gsnake-core/engine/bindings/wasm/pkg",
+        "If not detected: keep git dependency",
+        "Add preinstall script to package.json: node scripts/detect-local-deps.js",
+        "npm install succeeds in root repo using local WASM",
+        "npm install succeeds in standalone mode using git WASM",
+        "Document behavior in gsnake-web/README.md",
+        "Typecheck passes"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-012",
+      "title": "Handle contract test fixtures in gsnake-web",
+      "description": "As a developer, I want gsnake-web contract tests to work in standalone mode.",
+      "acceptanceCriteria": [
+        "Identify contract fixture files needed (from gsnake-core/engine/core/tests/fixtures)",
+        "Copy required fixtures to gsnake-web/tests/fixtures or gsnake-web/src/__tests__/fixtures",
+        "Update test imports to use local fixtures instead of ../../gsnake-core paths",
+        "npm test succeeds in standalone gsnake-web",
+        "npm test succeeds in root repo",
+        "Add comment in fixtures: 'Copied from gsnake-core for standalone builds'",
+        "Document in gsnake-web/README.md: fixtures are duplicated for standalone mode",
+        "Typecheck passes"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-013",
+      "title": "Add gsnake-web CI workflow",
+      "description": "As a developer, I want gsnake-web CI to validate standalone builds.",
+      "acceptanceCriteria": [
+        "Create gsnake-web/.github/workflows/ci.yml",
+        "Workflow triggers: push to main, pull_request, workflow_dispatch",
+        "Job 'install': checkout submodule only, setup Node 20, npm ci",
+        "Job 'build': depends on install, npm run build",
+        "Job 'typecheck': depends on install, npm run check",
+        "Job 'test': depends on install, npm test",
+        "Use standard actions: actions/checkout@v4, actions/setup-node@v4",
+        "Cache node_modules for faster runs",
+        "Workflow runs successfully on GitHub Actions",
+        "Test locally with nektos/act: cd gsnake-web && act -j build",
+        "Typecheck passes"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-014",
+      "title": "Add environment variable for gsnake-editor web URL",
+      "description": "As a developer, I want gsnake-editor to use configurable web URL instead of hardcoded localhost.",
+      "acceptanceCriteria": [
+        "Add GSNAKE_WEB_URL environment variable to gsnake-editor",
+        "Default value: http://localhost:3000",
+        "Update test/integration code to use process.env.GSNAKE_WEB_URL or import.meta.env.VITE_GSNAKE_WEB_URL",
+        "npm run build succeeds without GSNAKE_WEB_URL set (uses default)",
+        "npm run build succeeds with GSNAKE_WEB_URL=https://example.com",
+        "Document in gsnake-editor/README.md: 'Set GSNAKE_WEB_URL to test against different backend'",
+        "Typecheck passes"
+      ],
+      "priority": 14,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-015",
+      "title": "Remove sibling path references from gsnake-editor",
+      "description": "As a developer, I want gsnake-editor to build without depending on ../gsnake-web paths.",
+      "acceptanceCriteria": [
+        "Search gsnake-editor codebase for '../gsnake-web' or similar sibling paths",
+        "Replace any hardcoded paths with environment variable or remove",
+        "npm install succeeds in standalone gsnake-editor",
+        "npm run build succeeds in standalone gsnake-editor",
+        "npm run check succeeds in standalone gsnake-editor",
+        "No import errors or path resolution errors",
+        "Typecheck passes"
+      ],
+      "priority": 15,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-016",
+      "title": "Add gsnake-editor CI workflow",
+      "description": "As a developer, I want gsnake-editor CI to validate standalone builds.",
+      "acceptanceCriteria": [
+        "Create gsnake-editor/.github/workflows/ci.yml",
+        "Workflow triggers: push to main, pull_request, workflow_dispatch",
+        "Job 'install': checkout submodule only, setup Node 20, npm ci",
+        "Job 'build': depends on install, npm run build",
+        "Job 'typecheck': depends on install, npm run check",
+        "Job 'test': depends on install, npm test (unit tests only, skip integration if web unavailable)",
+        "Use standard actions: actions/checkout@v4, actions/setup-node@v4",
+        "Workflow runs successfully on GitHub Actions",
+        "Test locally with nektos/act: cd gsnake-editor && act -j build",
+        "Typecheck passes"
+      ],
+      "priority": 16,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-017",
+      "title": "Verify gsnake-specs builds standalone",
+      "description": "As a maintainer, I want to ensure gsnake-specs builds documentation independently.",
+      "acceptanceCriteria": [
+        "Check gsnake-specs for any ../gsnake-* path references",
+        "Ensure all docs references are relative within gsnake-specs or external URLs",
+        "mkdocs build succeeds in standalone gsnake-specs (if mkdocs.yml exists)",
+        "If Python dependencies needed: create requirements.txt or pyproject.toml",
+        "Document build instructions in gsnake-specs/README.md",
+        "No broken internal links",
+        "Typecheck passes"
+      ],
+      "priority": 17,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-018",
+      "title": "Add gsnake-specs CI workflow",
+      "description": "As a maintainer, I want gsnake-specs CI to validate documentation builds.",
+      "acceptanceCriteria": [
+        "Create gsnake-specs/.github/workflows/ci.yml",
+        "Workflow triggers: push to main, pull_request, workflow_dispatch",
+        "Job 'build': checkout submodule only, setup Python if needed, install dependencies, mkdocs build or markdown lint",
+        "Job 'link-check': verify no broken links in documentation",
+        "Use standard actions: actions/checkout@v4, actions/setup-python@v4 (if needed)",
+        "Workflow runs successfully on GitHub Actions",
+        "Test locally with nektos/act: cd gsnake-specs && act -j build",
+        "Typecheck passes"
+      ],
+      "priority": 18,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-019",
+      "title": "Create root repo context detection script",
+      "description": "As a developer, I want a reusable script to detect root repo context.",
+      "acceptanceCriteria": [
+        "Create scripts/detect-repo-context.sh in root repo",
+        "Script checks if ../.git exists AND ../gsnake-core/.git exists",
+        "Export GSNAKE_ROOT_REPO=true if detected",
+        "Export GSNAKE_CORE_PATH=../gsnake-core (and other submodule paths)",
+        "Script is sourced by other build scripts: source scripts/detect-repo-context.sh",
+        "Add usage example in script header comments",
+        "chmod +x scripts/detect-repo-context.sh",
+        "Document in root README.md",
+        "Typecheck passes"
+      ],
+      "priority": 19,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-020",
+      "title": "Update root repo build scripts to use detection",
+      "description": "As a developer, I want root repo scripts to respect local submodules automatically.",
+      "acceptanceCriteria": [
+        "Update scripts/build_wasm.py to source detect-repo-context.sh or check GSNAKE_ROOT_REPO",
+        "Update scripts/generate_ts_types.py to use detection",
+        "If GSNAKE_ROOT_REPO=true: use local paths; else: use git dependencies",
+        "python3 scripts/build_wasm.py succeeds in root repo with local submodules",
+        "python3 scripts/generate_ts_types.py succeeds in root repo",
+        "Scripts document the auto-detection behavior in comments",
+        "Typecheck passes"
+      ],
+      "priority": 20,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-021",
+      "title": "Verify root repo workflows with submodules",
+      "description": "As a developer, I want to confirm root repo still works correctly with local submodules.",
+      "acceptanceCriteria": [
+        "cd gsnake-web && npm ci succeeds (uses local WASM)",
+        "cd gsnake-web && npm run build succeeds",
+        "cd gsnake-web && npm run check succeeds",
+        "cd gsnake-web && npm test succeeds",
+        "cd gsnake-levels && cargo build succeeds (uses local gsnake-core)",
+        "cd gsnake-levels && cargo test succeeds",
+        "Root repo .github/workflows/deploy.yml runs successfully (no changes needed)",
+        "All E2E tests pass in root repo",
+        "Typecheck passes"
+      ],
+      "priority": 21,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-022",
+      "title": "Document override mechanism in root README",
+      "description": "As a developer, I want root repo documentation explaining local override behavior.",
+      "acceptanceCriteria": [
+        "Add section 'Submodule Dependency Resolution' to root README.md",
+        "Explain two modes: standalone (git) vs root repo (local paths)",
+        "Document auto-detection: checks for ../.git and sibling submodules",
+        "Explain how to force standalone mode for testing (e.g., remove .git temporarily)",
+        "List which submodules support auto-detection",
+        "Add troubleshooting: 'If deps not resolving, check git submodule status'",
+        "Typecheck passes"
+      ],
+      "priority": 22,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-023",
+      "title": "Document nektos/act usage for local CI testing",
+      "description": "As a developer, I want instructions for testing CI workflows locally.",
+      "acceptanceCriteria": [
+        "Add 'Testing CI Locally with nektos/act' section to root README.md",
+        "Document installation: sudo apt install act or brew install act",
+        "Document usage: cd <submodule> && act -j <job-name>",
+        "Document common issues: Docker required, some actions may not work perfectly",
+        "Provide examples for each submodule: act -j build, act -j test",
+        "Mention act uses Docker to simulate GitHub Actions runner",
+        "Add link to nektos/act GitHub repo for more info",
+        "Typecheck passes"
+      ],
+      "priority": 23,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-024",
+      "title": "Add Local Development Overrides section to architecture docs",
+      "description": "As a maintainer, I want architecture docs to explain override mechanism in detail.",
+      "acceptanceCriteria": [
+        "Add 'Local Development Overrides' section to gsnake-specs/tasks/repo-architecture.md",
+        "Explain auto-detection logic with code examples",
+        "Document Rust override: .cargo/config.toml with [patch]",
+        "Document JavaScript override: preinstall script modifying package.json",
+        "Provide troubleshooting: 'Override not working? Check detection script output'",
+        "Link to each submodule's README for specific implementation details",
+        "Typecheck passes"
+      ],
+      "priority": 24,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-025",
+      "title": "Update architecture docs with git dependency examples",
+      "description": "As a contributor, I want concrete examples of git dependencies for Rust and JavaScript.",
+      "acceptanceCriteria": [
+        "Add 'Git Branch Dependencies' section to gsnake-specs/tasks/repo-architecture.md",
+        "Provide Rust Cargo.toml example with full dependency declaration",
+        "Provide JavaScript package.json example with git+https URL",
+        "Explain branch targeting: all dependencies use main branch",
+        "Document how to update to latest: cargo update or npm install",
+        "Include note about versioning: root uses semver, submodules track main",
+        "Typecheck passes"
+      ],
+      "priority": 25,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-026",
+      "title": "Update architecture docs - Building Standalone Submodules",
+      "description": "As a developer, I want step-by-step instructions for building each submodule standalone.",
+      "acceptanceCriteria": [
+        "Add 'Building Standalone Submodules' section to gsnake-specs/tasks/repo-architecture.md",
+        "Document gsnake-core: clone, cargo build, cargo test",
+        "Document gsnake-levels: clone, cargo build, cargo test",
+        "Document gsnake-web: clone, npm install, npm run build, npm test",
+        "Document gsnake-editor: clone, npm install, npm run build (note: integration tests require GSNAKE_WEB_URL)",
+        "Document gsnake-specs: clone, mkdocs build (if applicable)",
+        "Link to each submodule's README for detailed instructions",
+        "Typecheck passes"
+      ],
+      "priority": 26,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-027",
+      "title": "Update architecture docs - CI/CD Strategy",
+      "description": "As a maintainer, I want architecture docs to explain the dual CI approach.",
+      "acceptanceCriteria": [
+        "Add 'CI/CD Strategy' section to gsnake-specs/tasks/repo-architecture.md",
+        "Explain per-submodule CI: validates standalone builds, runs on push/PR",
+        "Explain root repo CI: validates integration, runs E2E tests, deploys",
+        "Document nektos/act compatibility for local testing",
+        "List which workflows exist where (.github/workflows/ci.yml per submodule)",
+        "Explain CI triggers: push to main, pull_request, workflow_dispatch",
+        "Document root CI location: .github/workflows/deploy.yml",
+        "Typecheck passes"
+      ],
+      "priority": 27,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-028",
+      "title": "Mark resolved pain points in architecture docs",
+      "description": "As a maintainer, I want architecture docs to reflect that standalone builds now work.",
+      "acceptanceCriteria": [
+        "Update gsnake-specs/tasks/repo-architecture.md Mermaid diagram",
+        "Remove or strikethrough old pain points: 'WEB cannot build alone', 'LEVELS cannot build alone', 'EDITOR cannot build alone'",
+        "Add new annotations: 'WEB builds standalone via git deps', 'LEVELS builds standalone', etc.",
+        "Update 'Current pain' section or rename to 'Resolved Issues'",
+        "Update 'Future goal' section: mark standalone builds as COMPLETE",
+        "Add new future goals if any (e.g., publish to registries)",
+        "Typecheck passes"
+      ],
+      "priority": 28,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-029",
+      "title": "Create migration validation checklist",
+      "description": "As a developer, I want a final validation checklist to ensure everything works.",
+      "acceptanceCriteria": [
+        "Create gsnake-specs/tasks/standalone-build-validation.md",
+        "Checklist item: Clone each submodule standalone and verify build/test",
+        "Checklist item: Clone root repo with all submodules and verify build/test",
+        "Checklist item: Run each submodule CI with act locally",
+        "Checklist item: Verify all GitHub Actions workflows pass",
+        "Checklist item: Test root repo deploy workflow",
+        "Checklist item: Check for any remaining ../gsnake-* paths",
+        "Checklist item: Verify documentation is accurate and complete",
+        "Include commands for each validation step",
+        "Typecheck passes"
+      ],
+      "priority": 29,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-030",
+      "title": "Run full integration validation",
+      "description": "As a maintainer, I want to execute the validation checklist and document results.",
+      "acceptanceCriteria": [
+        "Execute all items from standalone-build-validation.md checklist",
+        "Document results in gsnake-specs/tasks/validation-results.md",
+        "Report any failures or issues found",
+        "For each submodule: confirm standalone build/test passes",
+        "Confirm root repo with submodules: build/test passes",
+        "Confirm all CI workflows pass (GitHub Actions and act)",
+        "Confirm no ../gsnake-* paths remain in committed files",
+        "Document any known limitations or edge cases",
+        "Typecheck passes"
+      ],
+      "priority": 30,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

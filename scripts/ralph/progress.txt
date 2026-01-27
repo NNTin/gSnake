@@ -1,0 +1,43 @@
+# Ralph Progress Log
+Started: Tue Jan 27 22:11:52 CET 2026
+## Codebase Patterns
+- **Git Dependencies**: Use branch-based git dependencies for submodules (not tags/commits)
+- **Auto-detection**: Build scripts check for ../.git and sibling submodules to detect root repo context
+- **Rust Overrides**: Use .cargo/config.toml with [patch] section to override git deps with local paths
+- **JavaScript Overrides**: Use preinstall scripts to dynamically modify package.json based on detection
+- **CI Strategy**: Per-submodule CI validates standalone builds; root CI validates integration
+- **nektos/act**: Use act for local CI testing - compatible with standard GitHub Actions
+- **Documentation Location**: gsnake-specs/tasks/repo-architecture.md is the central doc for dependency architecture
+- **"Typecheck passes"**: For markdown-only changes, this means ensuring valid markdown syntax (no specific command)
+---
+
+## 2026-01-27 22:15 - US-001
+- Implemented comprehensive "Dependency Resolution Strategy" section in gsnake-specs/tasks/repo-architecture.md
+- Files changed: gsnake-specs/tasks/repo-architecture.md
+- **Learnings for future iterations:**
+  - The repo-architecture.md file is the central documentation for dependency management
+  - Documentation should include both Rust (Cargo.toml) and JavaScript (package.json) examples
+  - Auto-detection mechanism is a key feature: checks for ../.git to determine root repo context
+  - Acceptance criteria "Typecheck passes" refers to ensuring markdown syntax is valid (no specific typecheck command in root)
+---
+
+## 2026-01-27 22:17 - US-002
+- Implemented comprehensive "Troubleshooting" section in gsnake-specs/tasks/repo-architecture.md
+- Files changed: gsnake-specs/tasks/repo-architecture.md
+- **Learnings for future iterations:**
+  - Troubleshooting section covers 5 main categories: git deps not found, local override not working, WASM build fails, forcing standalone mode, verifying dependency mode
+  - Each troubleshooting item includes symptoms, causes/solutions, and verification commands
+  - Important to provide both Rust and JavaScript examples for verification commands
+---
+
+## 2026-01-27 22:20 - US-003
+- Updated architecture Mermaid diagram in gsnake-specs/tasks/repo-architecture.md
+- Files changed: gsnake-specs/tasks/repo-architecture.md
+- **Learnings for future iterations:**
+  - Mermaid diagram now clearly shows two modes: Root Repository (local paths) and Standalone (git deps)
+  - Used emojis (🏠 and 🌐) and color coding to visually distinguish the modes
+  - Removed old "cannot build alone" pain points - now marked as resolved
+  - Added legend explaining dependency types
+  - Diagram is more focused and easier to understand than the previous version
+---
+
