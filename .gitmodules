@@ -10,3 +10,6 @@
 [submodule "gsnake-levels"]
 	path = gsnake-levels
 	url = git@github.com:NNTin/gsnake-levels.git
+[submodule "gsnake-editor"]
+	path = gsnake-editor
+	url = git@github.com:NNTin/gsnake-editor.git
