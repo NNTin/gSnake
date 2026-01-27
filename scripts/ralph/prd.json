@@ -125,8 +125,8 @@
         "Typecheck passes"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Created build.rs with auto-detection. Patches git dependency to use ../gsnake-core/engine/core in root repo. Documented in README.md."
     },
     {
       "id": "US-008",

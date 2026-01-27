@@ -99,3 +99,24 @@ Started: Tue Jan 27 22:11:52 CET 2026
   - Document git dependency configuration and root repo requirements in README.md
 ---
 
+## 2026-01-27 23:15 - US-007
+- Implemented local override detection for gsnake-levels via build.rs
+- Created build.rs that auto-detects root repository context by checking:
+  - ../.git exists (root repo)
+  - ../gsnake-core/Cargo.toml exists (sibling directory, not .git since gsnake-core is not a submodule)
+- Build script generates .cargo/config.toml with [patch] section pointing to ../gsnake-core/engine/core
+- Cargo build succeeds in both modes:
+  - Root repo: Uses local path (verified with "Compiling gsnake-core v0.1.0 (/home/.../gsnake-core/engine/core)")
+  - Standalone: Uses git dependency
+- Documented override mechanism in README.md with detailed explanation
+- Files changed: gsnake-levels/build.rs, gsnake-levels/.cargo/config.toml, gsnake-levels/Cargo.lock, gsnake-levels/README.md
+- **Learnings for future iterations:**
+  - gsnake-core is a **workspace**, not a simple package - must point to engine/core subdirectory
+  - Cargo's [patch."<git-url>"] in .cargo/config.toml is the right way to override git dependencies locally
+  - Need to clean cargo cache (~/.cargo/git) sometimes to see patch take effect
+  - Detection should check for Cargo.toml existence, not .git (gsnake-core is not a submodule)
+  - build.rs warnings are printed during compilation with "cargo:warning=" prefix
+  - The override is transparent - developers don't need to do anything manually
+  - Committed in submodule first, then updated submodule reference in root repo
+---
+
