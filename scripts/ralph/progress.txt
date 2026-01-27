@@ -41,3 +41,22 @@ Started: Tue Jan 27 22:11:52 CET 2026
   - Diagram is more focused and easier to understand than the previous version
 ---
 
+## 2026-01-27 23:00 - US-004
+- Validated gsnake-core standalone build capabilities
+- All build commands tested and passed:
+  - cargo build: successful
+  - cargo test: 62 tests passed
+  - cargo doc --no-deps: documentation generated
+  - wasm-pack build: WASM bindings compiled successfully
+- Updated gsnake-core/README.md with comprehensive standalone build instructions
+- Files changed: gsnake-core/README.md, scripts/ralph/prd.json, scripts/ralph/progress.txt
+- **Learnings for future iterations:**
+  - gsnake-core is a Rust workspace with 3 members (core, cli, wasm)
+  - Profile warnings for non-root packages in workspaces are expected and harmless
+  - WASM build requires wasm-pack and wasm32-unknown-unknown target
+  - WASM output goes to engine/bindings/wasm/pkg/
+  - All tests run in workspace context (62 total tests across all crates)
+  - The README should document prerequisites, build commands, and known issues
+  - gsnake-core has no external git dependencies - all dependencies are from crates.io
+---
+
