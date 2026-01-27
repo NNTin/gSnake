@@ -52,6 +52,40 @@ This package can be imported by JavaScript/TypeScript projects.
 - **Profile Warning**: You may see a warning about profiles being ignored for non-root packages. This is expected in workspace configurations and does not affect the build.
 - **wasm-pack Metadata**: Optional Cargo.toml fields (description, repository, license) are missing from the WASM package. These are recommended for publishing but not required for local builds.
 
+## CI/CD
+
+This repository includes GitHub Actions workflows for continuous integration:
+
+- **Build**: Validates `cargo build` succeeds
+- **Test**: Runs `cargo test` on all workspace crates
+- **WASM**: Builds WASM bindings with `wasm-pack`
+
+### Testing CI Locally with nektos/act
+
+You can test GitHub Actions workflows locally using [nektos/act](https://github.com/nektos/act):
+
+```bash
+# Install act (requires Docker)
+curl -s https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash
+
+# Test individual jobs
+cd gsnake-core
+act -j build   # Test build job
+act -j test    # Test test job
+act -j wasm    # Test WASM build job
+```
+
+#### Known Limitations with act
+
+- **Docker Required**: act requires Docker to be installed and running
+- **Image Download**: First run downloads ~500MB Docker image (medium size)
+- **Cache Actions**: GitHub Actions cache (actions/cache@v4) may not work exactly as on GitHub
+- **Network Access**: Some network operations may behave differently in Docker containers
+- **Performance**: Local runs may be slower than GitHub-hosted runners
+- **Workflow Dispatch**: `workflow_dispatch` trigger cannot be tested locally with act
+
+For full validation, push to GitHub and verify workflows run successfully there.
+
 ## Development
 
 When developing in the root gSnake repository, local path dependencies are automatically detected and used. When building standalone, all dependencies are resolved from crates.io.
