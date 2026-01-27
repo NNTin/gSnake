@@ -83,3 +83,19 @@ Started: Tue Jan 27 22:11:52 CET 2026
   - Added CI/CD section to README.md with act usage instructions and limitations
 ---
 
+## 2026-01-27 23:05 - US-006
+- Updated gsnake-levels/Cargo.toml to use git dependency for gsnake-core
+- Git dependency format: `git = "https://github.com/nntin/gsnake", branch = "main", package = "gsnake-core"`
+- Created .cargo/config.toml with `git-fetch-with-cli = true` to handle SSH submodule authentication
+- Updated render.rs to gracefully handle standalone mode (checks if sibling gsnake-core exists)
+- cargo build, cargo test, and cargo check all pass successfully
+- Files changed: gsnake-levels/Cargo.toml, gsnake-levels/Cargo.lock, gsnake-levels/.cargo/config.toml, gsnake-levels/README.md, gsnake-levels/src/render.rs
+- **Learnings for future iterations:**
+  - gsnake-levels IS a git submodule (unlike gsnake-core) - changes must be committed in submodule, then root
+  - Git dependencies that point to repos with SSH submodules require `git-fetch-with-cli = true` in .cargo/config.toml
+  - The gsnake repo has SSH submodules (git@github.com URLs) which cause cargo authentication issues without git-fetch-with-cli
+  - render.rs `replay` and `render` commands need sibling gsnake-core - updated to check path exists and provide helpful error
+  - Best practice: check for sibling paths at runtime and provide clear error messages for standalone vs root repo contexts
+  - Document git dependency configuration and root repo requirements in README.md
+---
+

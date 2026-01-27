@@ -107,8 +107,8 @@
         "Typecheck passes"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Updated Cargo.toml with git dependency. Added .cargo/config.toml for git-fetch-with-cli. Updated render.rs for graceful standalone handling. Documented in README.md."
     },
     {
       "id": "US-007",
