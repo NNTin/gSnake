@@ -60,3 +60,26 @@ Started: Tue Jan 27 22:11:52 CET 2026
   - gsnake-core has no external git dependencies - all dependencies are from crates.io
 ---
 
+## 2026-01-27 23:00 - US-005
+- Implemented comprehensive CI workflow for gsnake-core
+- Created gsnake-core/.github/workflows/ci.yml with three jobs:
+  - **build**: Validates cargo build with Rust stable
+  - **test**: Runs cargo test on all workspace crates
+  - **wasm**: Builds WASM bindings with wasm-pack
+- All jobs use actions/checkout@v4, dtolnay/rust-toolchain@stable
+- Added caching for cargo registry, index, and build artifacts for faster CI runs
+- Tested workflow syntax validation with nektos/act dryrun
+- Files changed: gsnake-core/.github/workflows/ci.yml, gsnake-core/README.md
+- **Learnings for future iterations:**
+  - gsnake-core is NOT a git submodule - it's a directory in the root repo (no .git file/dir)
+  - Changes must be committed from root repo, not from within gsnake-core directory
+  - nektos/act requires Docker and interactive configuration on first run
+  - act config file location: ~/.config/act/actrc
+  - Use medium-sized image: `ghcr.io/catthehacker/ubuntu:act-latest` (~500MB)
+  - act dryrun is useful for validating workflow syntax without running full jobs
+  - Known act limitations: cache actions may not work exactly as on GitHub, network operations differ
+  - CI workflow should checkout to `path: gsnake-core` to maintain directory structure
+  - workflow_dispatch trigger cannot be tested locally with act
+  - Added CI/CD section to README.md with act usage instructions and limitations
+---
+
