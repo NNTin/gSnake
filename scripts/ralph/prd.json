@@ -1,0 +1,100 @@
+{
+  "project": "gSnake",
+  "branchName": "ralph/level-editor-improvements",
+  "description": "Level Editor Testing & Gap Fixes - Implement identified improvements from testing phase",
+  "userStories": [
+    {
+      "id": "US-F001",
+      "title": "Add Level Validation Warnings",
+      "description": "As a user, I want to receive warnings about potentially invalid levels before saving so that I can create functional levels.",
+      "acceptanceCriteria": [
+        "When clicking 'Save Level', check for common issues",
+        "If no snake segments placed, show warning: 'No snake placed - level is invalid'",
+        "If no food placed, show warning: 'No food placed - level may not be completable'",
+        "If no exit placed, show warning: 'No exit placed - level cannot be completed'",
+        "Display warnings in save modal above export button",
+        "Allow user to export anyway (warnings, not errors)",
+        "Add 'Export Anyway' and 'Cancel' buttons when warnings present",
+        "Typecheck passes",
+        "Verify in browser using Browser MCP"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-F002",
+      "title": "Improve Error Messages with Toast Notifications",
+      "description": "As a user, I want to see helpful, specific error messages when things go wrong so that I can understand and fix issues.",
+      "acceptanceCriteria": [
+        "Replace generic alert() calls with toast notification system",
+        "Install toast library: npm install svelte-french-toast",
+        "Add toast container to App.svelte",
+        "Replace file load error alert with toast error",
+        "Replace test level error alert with toast error",
+        "Replace save validation alert with toast warning",
+        "Add success toast when level saved successfully",
+        "Add success toast when test level uploaded successfully",
+        "Style toasts to match editor design (green success, red error, yellow warning)",
+        "Auto-dismiss toasts after 5 seconds",
+        "Typecheck passes",
+        "Verify in browser using Browser MCP"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-F003",
+      "title": "Add Loading States",
+      "description": "As a user, I want to see loading indicators during async operations so that I know the system is working.",
+      "acceptanceCriteria": [
+        "Add loading spinner to 'Test Level' button while uploading",
+        "Change button text to 'Uploading...' during upload",
+        "Disable button during upload to prevent double-clicks",
+        "Add loading spinner when loading level JSON file",
+        "Add loading indicator when fetching from backend (if applicable)",
+        "Use consistent spinner design across all loading states",
+        "Typecheck passes",
+        "Verify in browser using Browser MCP"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-F004",
+      "title": "Add Keyboard Shortcuts Help",
+      "description": "As a user, I want to see available keyboard shortcuts so that I can work more efficiently.",
+      "acceptanceCriteria": [
+        "Add 'Help' button to toolbar (question mark icon)",
+        "Clicking Help button opens modal with keyboard shortcuts",
+        "Display shortcuts: Ctrl+Z / Cmd+Z: Undo, Ctrl+Y / Cmd+Shift+Z: Redo, Shift+Click: Remove entity, Esc: Close modal/cancel",
+        "Add close button to help modal",
+        "Style modal consistently with other modals",
+        "Typecheck passes",
+        "Verify in browser using Browser MCP"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-F005",
+      "title": "Automate Backend Server Startup",
+      "description": "As a developer, I want the backend server to start automatically with the dev server so that I don't have to run two commands.",
+      "acceptanceCriteria": [
+        "Install concurrently: npm install --save-dev concurrently",
+        "Update package.json dev script to run both vite and server",
+        "Add separate scripts: dev:editor (vite only), dev:server (server only)",
+        "Test npm run dev starts both services",
+        "Update README with new command",
+        "Verify both servers run simultaneously without conflicts",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": ""
+    }
+  ]
+}
