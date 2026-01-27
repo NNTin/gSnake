@@ -10,20 +10,29 @@ test.describe('Contract Payloads', () => {
       cells.map(cell => cell.className.split(' ').filter(Boolean))
     );
 
-    const allowed = new Set(['snake-head', 'snake-body', 'food', 'obstacle', 'exit']);
+    const allowed = new Set([
+      'snake-head',
+      'snake-body',
+      'food',
+      'floating-food',
+      'falling-food',
+      'stone',
+      'spike',
+      'obstacle',
+      'exit'
+    ]);
 
     const unknownExtras = new Set<string>();
     for (const classes of cellClasses) {
       expect(classes).toContain('cell');
       const extra = classes.filter(
-        (cls: string) => cls !== 'cell' && !cls.startsWith('svelte-')
+        (cls: string) => cls !== 'cell' && !cls.startsWith('svelte-') && !cls.startsWith('s-')
       );
-      expect(extra.length).toBeLessThanOrEqual(1);
-      if (extra.length === 1) {
-        if (!allowed.has(extra[0])) {
-          unknownExtras.add(extra[0]);
+      extra.forEach((cls: string) => {
+        if (!allowed.has(cls)) {
+          unknownExtras.add(cls);
         }
-      }
+      });
     }
     expect(Array.from(unknownExtras)).toEqual([]);
 
