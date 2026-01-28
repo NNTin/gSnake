@@ -182,3 +182,25 @@ Started: Tue Jan 27 22:11:52 CET 2026
   - For standalone builds, rely on prebuilt artifacts (committed WASM) rather than rebuild scripts
   - US-011 will add detection script to switch between file: and git dependencies as needed
 ---
+
+## 2026-01-28 17:02 - US-011
+- Created local dependency detection script for gsnake-web
+- Implemented scripts/detect-local-deps.js with automatic root repo detection
+  - Checks for ../.git and ../gsnake-core/Cargo.toml to detect root repository
+  - In root repo: ensures package.json uses file:../gsnake-core/engine/bindings/wasm/pkg
+  - In standalone: validates WASM package exists locally and provides helpful messages
+  - Auto-updates package.json if needed (though in practice it's already correct)
+- Added preinstall script to package.json: runs detection before every npm install
+- Updated README.md with comprehensive Dependency Resolution section
+- npm install, npm run check, and npm test all pass
+- Files changed: gsnake-web/scripts/detect-local-deps.js, gsnake-web/package.json, gsnake-web/README.md
+- **Learnings for future iterations:**
+  - preinstall scripts run BEFORE npm reads package.json dependencies
+  - This allows dynamic dependency configuration based on environment
+  - Detection checks for Cargo.toml instead of .git (gsnake-core is not a submodule)
+  - Script provides clear console output showing detected mode (root vs standalone)
+  - In standalone mode, file: dependencies still work if the path exists locally
+  - The detection script is defensive: verifies WASM pkg exists before proceeding
+  - Exit code 1 from preinstall script aborts npm install (good for validation)
+  - This pattern enables transparent local development without manual configuration
+---

@@ -197,8 +197,8 @@
         "Typecheck passes"
       ],
       "priority": 11,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Created detection script with preinstall hook. Auto-detects root repo and configures dependency path. Documented in README.md."
     },
     {
       "id": "US-012",
