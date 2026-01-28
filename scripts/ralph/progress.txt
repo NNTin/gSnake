@@ -158,3 +158,25 @@ Started: Tue Jan 27 22:11:52 CET 2026
   - The pkg/ name comes from the [package] name in Cargo.toml (gsnake-wasm)
   - This enables gsnake-web to use git+https://github.com/nntin/gsnake.git#main:gsnake-core/engine/bindings/wasm/pkg
 ---
+
+## 2026-01-28 16:42 - US-010
+- Prepared gsnake-web for standalone builds
+- Simplified package.json build script: removed build:types and build:wasm dependencies
+  - These required parent ../scripts which don't exist in standalone mode
+  - WASM is now prebuilt and committed (US-009), so no rebuild needed
+- Fixed WasmGameEngine.ts: replaced non-existent init() with init_panic_hook()
+  - The WASM module auto-initializes via wasm.__wbindgen_start()
+  - init_panic_hook() provides better error messages
+- Kept file: dependency path for gsnake-wasm
+- npm install, npm run check, and npm run build all pass
+- Files changed: gsnake-web/package.json, gsnake-web/engine/WasmGameEngine.ts
+- **Learnings for future iterations:**
+  - npm does NOT support git dependencies for subdirectories (git+https://...#branch:path syntax doesn't work)
+  - npm will clone the entire repo and look for package.json at root, not in subdirectory
+  - For npm git dependencies to work, package needs to be at repo root or in separate repo
+  - wasm-pack auto-initialization doesn't require manual init() call
+  - The init() function was never exported by the WASM package - it was a mistake in WasmGameEngine.ts
+  - Build scripts that reference parent directories (../scripts) won't work in standalone mode
+  - For standalone builds, rely on prebuilt artifacts (committed WASM) rather than rebuild scripts
+  - US-011 will add detection script to switch between file: and git dependencies as needed
+---

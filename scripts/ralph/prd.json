@@ -178,8 +178,8 @@
         "Typecheck passes"
       ],
       "priority": 10,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Simplified build scripts. Fixed WASM init. Kept file: path (npm doesn't support git subdirectory deps). US-011 will add detection."
     },
     {
       "id": "US-011",
