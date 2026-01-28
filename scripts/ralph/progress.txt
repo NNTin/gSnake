@@ -204,3 +204,30 @@ Started: Tue Jan 27 22:11:52 CET 2026
   - Exit code 1 from preinstall script aborts npm install (good for validation)
   - This pattern enables transparent local development without manual configuration
 ---
+
+## 2026-01-28 17:06 - US-012
+- Handled contract test fixtures for standalone gsnake-web builds
+- Copied 8 fixture files from gsnake-core/engine/core/tests/fixtures to gsnake-web/tests/fixtures/
+  - frame.json (sample game frame)
+  - level.json (sample level definition)
+  - error-invalid-input.json
+  - error-input-rejected.json
+  - error-serialization-failed.json
+  - error-initialization-failed.json
+  - error-internal-error.json
+  - error-with-context.json
+- Added "_comment" field to each JSON file identifying them as copies for standalone builds
+- Updated tests/contract/fixtures.test.ts to use local ../fixtures path instead of ../../../gsnake-core
+- All 41 tests pass in both root repo and standalone mode
+- Documented fixture duplication in README.md "Contract Test Fixtures" section
+- Typecheck passes
+- Files changed: gsnake-web/tests/fixtures/* (8 files), gsnake-web/tests/contract/fixtures.test.ts, gsnake-web/README.md
+- **Learnings for future iterations:**
+  - Contract tests validate TypeScript types match Rust-generated JSON structure
+  - JSON doesn't support comments, but can use "_comment" field at top of objects
+  - Fixture duplication is necessary for standalone builds since npm can't fetch subdirectories
+  - The fixtures are small (~2KB total) so duplication is acceptable
+  - Tests use __dirname to resolve fixture paths relative to test file location
+  - All ContractError kinds have dedicated fixture files for comprehensive testing
+  - Fixtures ensure frontend-backend contract stays in sync across development
+---
