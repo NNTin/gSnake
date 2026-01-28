@@ -2,6 +2,7 @@
 Started: Tue Jan 27 22:11:52 CET 2026
 ## Codebase Patterns
 - **Git Dependencies**: Use branch-based git dependencies for submodules (not tags/commits)
+- **npm Git Subdirectory Limitation**: npm does NOT support git dependencies for subdirectories - package.json must be at repo root
 - **Auto-detection**: Build scripts check for ../.git and sibling submodules to detect root repo context
 - **Rust Overrides**: Use .cargo/config.toml with [patch] section to override git deps with local paths
 - **JavaScript Overrides**: Use preinstall scripts to dynamically modify package.json based on detection
@@ -9,6 +10,7 @@ Started: Tue Jan 27 22:11:52 CET 2026
 - **nektos/act**: Use act for local CI testing - compatible with standard GitHub Actions
 - **Documentation Location**: gsnake-specs/tasks/repo-architecture.md is the central doc for dependency architecture
 - **"Typecheck passes"**: For markdown-only changes, this means ensuring valid markdown syntax (no specific command)
+- **Prebuilt WASM**: WASM artifacts are committed to enable standalone builds without requiring wasm-pack locally
 ---
 
 ## 2026-01-27 22:15 - US-001
