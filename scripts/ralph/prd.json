@@ -253,8 +253,8 @@
         "Typecheck passes"
       ],
       "priority": 14,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Added VITE_GSNAKE_WEB_URL with default. Updated EditorLayout.svelte. Created .env.example. Documented in README.md."
     },
     {
       "id": "US-015",

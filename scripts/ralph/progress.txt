@@ -254,3 +254,24 @@ Started: Tue Jan 27 22:11:52 CET 2026
   - nektos/act can test workflows locally but has limitations (cache, network, workflow_dispatch)
   - Following the same pattern as gsnake-core and gsnake-levels for consistency
 ---
+
+## 2026-01-28 17:13 - US-014
+- Added environment variable support for gsnake-editor web URL
+- Implemented VITE_GSNAKE_WEB_URL environment variable
+  - Default value: http://localhost:3000
+  - Used in EditorLayout.svelte test level functionality
+- Updated EditorLayout.svelte to use `import.meta.env.VITE_GSNAKE_WEB_URL || 'http://localhost:3000'`
+- Created .env.example with documentation for the environment variable
+- Updated README.md with Configuration section explaining VITE_GSNAKE_WEB_URL usage
+- npm run build succeeds without env var (uses default)
+- npm run build succeeds with VITE_GSNAKE_WEB_URL=https://example.com  
+- Typecheck passes with 0 errors
+- Files changed: gsnake-editor/.env.example, gsnake-editor/README.md, gsnake-editor/src/lib/EditorLayout.svelte
+- **Learnings for future iterations:**
+  - Vite environment variables must be prefixed with VITE_ to be exposed to client code
+  - Use `import.meta.env.VITE_*` in Svelte/Vite projects (not process.env)
+  - Always provide default values with || operator for optional environment variables
+  - .env.example documents available environment variables for users
+  - The Test button in editor posts level to localhost:3001, then opens web UI for testing
+  - Hardcoded URL found at line 606 in EditorLayout.svelte - now made configurable
+---
