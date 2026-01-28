@@ -231,3 +231,26 @@ Started: Tue Jan 27 22:11:52 CET 2026
   - All ContractError kinds have dedicated fixture files for comprehensive testing
   - Fixtures ensure frontend-backend contract stays in sync across development
 ---
+
+## 2026-01-28 17:09 - US-013
+- Implemented comprehensive CI workflow for gsnake-web
+- Created gsnake-web/.github/workflows/ci.yml with three jobs:
+  - **build**: Validates npm run build (includes npm test via prebuild)
+  - **typecheck**: Runs npm run check (svelte-check)
+  - **test**: Runs npm test (vitest with 41 tests)
+- All jobs use actions/checkout@v4, actions/setup-node@v4
+- Node cache enabled via setup-node action's built-in caching (cache: 'npm')
+- Each job is independent (does own checkout and npm ci) for reliability
+- Workflow validates standalone builds - preinstall script will detect standalone mode in CI
+- Documented CI/CD section in README.md with nektos/act usage and limitations
+- Typecheck passes, all tests pass
+- Files changed: gsnake-web/.github/workflows/ci.yml, gsnake-web/README.md
+- **Learnings for future iterations:**
+  - GitHub Actions jobs run on separate runners, so each needs its own setup
+  - Node setup-node@v4 has built-in npm caching (cache: 'npm' parameter)
+  - Checkout with path: gsnake-web maintains directory structure for submodule CI
+  - Preinstall script will detect standalone mode in CI environment (no ../gsnake-core)
+  - The workflow validates that gsnake-web can build without sibling repositories
+  - nektos/act can test workflows locally but has limitations (cache, network, workflow_dispatch)
+  - Following the same pattern as gsnake-core and gsnake-levels for consistency
+---
