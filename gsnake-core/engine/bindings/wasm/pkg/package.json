@@ -1,0 +1,20 @@
+{
+  "name": "gsnake-wasm",
+  "type": "module",
+  "collaborators": [
+    "Tin Nguyen"
+  ],
+  "version": "0.1.0",
+  "files": [
+    "gsnake_wasm_bg.wasm",
+    "gsnake_wasm.js",
+    "gsnake_wasm_bg.js",
+    "gsnake_wasm.d.ts"
+  ],
+  "main": "gsnake_wasm.js",
+  "types": "gsnake_wasm.d.ts",
+  "sideEffects": [
+    "./gsnake_wasm.js",
+    "./snippets/*"
+  ]
+}

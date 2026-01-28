@@ -47,6 +47,8 @@ engine/bindings/wasm/pkg/
 
 This package can be imported by JavaScript/TypeScript projects.
 
+**Note**: The `pkg/` directory is committed to git (prebuilt WASM artifacts) to enable standalone builds of dependent packages like `gsnake-web`. This allows JavaScript projects to use git dependencies without needing to build WASM locally. When developing in the root repository, you can rebuild WASM as needed, and the changes will be tracked in version control.
+
 ## Known Issues
 
 - **Profile Warning**: You may see a warning about profiles being ignored for non-root packages. This is expected in workspace configurations and does not affect the build.
