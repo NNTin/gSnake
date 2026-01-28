@@ -120,3 +120,22 @@ Started: Tue Jan 27 22:11:52 CET 2026
   - Committed in submodule first, then updated submodule reference in root repo
 ---
 
+
+## 2026-01-28 16:29 - US-008
+- Implemented comprehensive CI workflow for gsnake-levels
+- Created gsnake-levels/.github/workflows/ci.yml with two jobs:
+  - **build**: Validates cargo build with Rust stable
+  - **test**: Runs cargo test
+- All jobs use actions/checkout@v4, dtolnay/rust-toolchain@stable
+- Added caching for cargo registry, index, and build artifacts
+- Workflow validates standalone builds using git dependency (not local path)
+- Documented CI/CD section in README.md with nektos/act usage and limitations
+- Files changed: gsnake-levels/.github/workflows/ci.yml, gsnake-levels/README.md
+- **Learnings for future iterations:**
+  - Follow the same pattern as gsnake-core CI workflow for consistency
+  - gsnake-levels only needs build and test jobs (no WASM job)
+  - nektos/act is not installed locally, but documented for future use
+  - Workflow checkout uses `path: gsnake-levels` to maintain directory structure
+  - CI workflow will use git dependency by default (no build.rs override in CI environment)
+  - Document CI/CD section in README for consistency across submodules
+---
