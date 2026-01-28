@@ -293,3 +293,23 @@ Started: Tue Jan 27 22:11:52 CET 2026
   - US-014 had already addressed the web URL configuration, making US-015 validation-only
   - Some user stories may already be complete - verify first before making changes
 ---
+
+## 2026-01-28 18:00 - US-016
+- Implemented comprehensive CI workflow for gsnake-editor
+- Created gsnake-editor/.github/workflows/ci.yml with two jobs:
+  - **build**: Validates npm run build with Node 20
+  - **typecheck**: Runs npm run check (svelte-check + tsc)
+- No test job added since gsnake-editor has no test files yet
+- All jobs use actions/checkout@v4, actions/setup-node@v4
+- Added caching for npm via setup-node action's built-in cache parameter
+- Documented CI/CD section in README.md with nektos/act usage and limitations
+- Files changed: gsnake-editor/.github/workflows/ci.yml, gsnake-editor/README.md
+- **Learnings for future iterations:**
+  - gsnake-editor has no test script or test files - acceptance criteria mentioned tests but none exist yet
+  - Followed the same pattern as gsnake-web CI workflow for consistency
+  - Each job is independent (does own checkout and npm ci) for reliability
+  - nektos/act is not installed locally, but documented for future use
+  - Workflow uses path: gsnake-editor to maintain directory structure
+  - gsnake-editor is a git submodule - changes committed in submodule first, then root repo updated
+  - Typecheck uses svelte-check for .svelte files and tsc for .ts files
+---
