@@ -57,14 +57,19 @@ The repository supports two working modes:
 1. **Root repository mode** (this repo with submodules): Uses local paths for fast development
 2. **Standalone submodule mode**: Uses git dependencies to build independently
 
-**Auto-detection:**
+#### Auto-Detection Mechanism
 
 Build scripts automatically detect which mode they're running in by checking for `../.git` and `../gsnake-core`.
 
-**Detection script:**
+**Detection Logic:**
+- If `../.git` exists AND `../gsnake-core` exists → Root repository mode
+- Otherwise → Standalone mode
+
+**Available detection script:**
 
 ```bash
-source scripts/detect-repo-context.sh
+# From any submodule, source the detection script
+source ../../scripts/detect-repo-context.sh
 
 if [ "$GSNAKE_ROOT_REPO" = "true" ]; then
   echo "Running in root repo - using local paths"
@@ -72,6 +77,84 @@ if [ "$GSNAKE_ROOT_REPO" = "true" ]; then
 else
   echo "Running standalone - using git dependencies"
 fi
+```
+
+**Exported environment variables (root repo mode):**
+- `GSNAKE_ROOT_REPO=true`
+- `GSNAKE_CORE_PATH=../gsnake-core`
+- `GSNAKE_LEVELS_PATH=../gsnake-levels`
+- `GSNAKE_WEB_PATH=../gsnake-web`
+- `GSNAKE_EDITOR_PATH=../gsnake-editor`
+- `GSNAKE_SPECS_PATH=../gsnake-specs`
+
+#### How Overrides Work
+
+Each submodule automatically switches between git dependencies and local paths:
+
+**Rust submodules (gsnake-levels):**
+- `build.rs` detects root repo and creates `.cargo/config.toml`
+- Uses `[patch]` section to override git dependencies with local paths
+- Example: `git = "https://github.com/nntin/gsnake"` → `path = "../gsnake-core"`
+
+**JavaScript submodules (gsnake-web, gsnake-editor):**
+- `scripts/detect-local-deps.js` runs as preinstall hook
+- Dynamically updates `package.json` before npm install
+- Example: `git+https://...` → `file:../gsnake-core/...`
+
+#### Examples
+
+**Root repository (automatic local paths):**
+```bash
+cd gsnake-web
+npm install  # Automatically uses file:../gsnake-core/...
+npm run build
+
+cd ../gsnake-levels
+cargo build  # Automatically patches to use ../gsnake-core
+```
+
+**Standalone (git dependencies):**
+```bash
+git clone https://github.com/nntin/gsnake-web.git
+cd gsnake-web
+npm install  # Uses git+https://github.com/nntin/gsnake.git#main:...
+npm run build
+```
+
+#### Troubleshooting
+
+**Problem: Local override not working (still using git dependencies)**
+
+Check detection:
+```bash
+cd gsnake-web
+node scripts/detect-local-deps.js
+# Should output: "Root repository detected"
+```
+
+Verify paths:
+```bash
+ls ../.git  # Should exist
+ls ../gsnake-core  # Should exist
+```
+
+Force reinstall:
+```bash
+rm -rf node_modules package-lock.json
+npm install
+```
+
+**Problem: Build fails with "dependency not found"**
+
+Check submodules:
+```bash
+# From root repo
+git submodule update --init --recursive
+```
+
+Verify working directory:
+```bash
+pwd  # Should be inside gSnake/gsnake-web or similar
 ```
 
 For more details, see:
