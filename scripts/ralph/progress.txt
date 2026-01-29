@@ -332,3 +332,25 @@ Started: Tue Jan 27 22:11:52 CET 2026
   - gsnake-specs was already standalone-ready - only needed better documentation
   - Committed in submodule (gsnake-specs main branch), then updated submodule reference in root repo
 ---
+## 2026-01-29 10:52 - US-018
+- Implemented comprehensive CI workflow for gsnake-specs documentation
+- Created gsnake-specs/.github/workflows/ci.yml with three jobs:
+  - **markdown-lint**: Validates Markdown syntax using markdownlint-cli (warnings only, no hard failures)
+  - **link-check**: Checks for broken links using markdown-link-check (tolerant of external link failures)
+  - **validate**: Verifies repository structure - checks all expected directories and README.md exist
+- Created .markdown-link-check.json: Configuration to handle localhost URLs and retries
+- Updated README.md with comprehensive CI/CD section:
+  - GitHub Actions workflow documentation
+  - nektos/act local testing instructions
+  - Manual validation commands
+- Files changed: gsnake-specs/.github/workflows/ci.yml, gsnake-specs/.markdown-link-check.json, gsnake-specs/README.md
+- **Learnings for future iterations:**
+  - gsnake-specs is a documentation-only repository - no build tools needed (no mkdocs, no Python)
+  - CI for docs repos should be tolerant (warnings, not failures) to avoid blocking on minor issues
+  - markdownlint and markdown-link-check are standard tools for Markdown validation
+  - Link checking should ignore localhost URLs and allow retries for external links (rate limits)
+  - The validate job ensures repository structure integrity (all expected directories present)
+  - gsnake-specs contains 66 markdown files across 10 topic directories
+  - nektos/act can test workflows locally but has known limitations with network/cache behavior
+  - Documentation CI is lightweight - no npm install or cargo build needed, just validation tools
+---

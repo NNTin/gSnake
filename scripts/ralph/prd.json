@@ -325,8 +325,8 @@
         "Typecheck passes"
       ],
       "priority": 18,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Created CI workflow with markdown-lint, link-check, and validate jobs. Documented in README.md."
     },
     {
       "id": "US-019",
