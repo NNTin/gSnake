@@ -208,3 +208,24 @@
   - Git dependency syntax for subdirectories: git+https://repo.git#branch:path/to/subdir
 ---
 
+## 2026-01-29 - US-014
+- Configured gsnake-editor for standalone build with proper testing infrastructure
+- All acceptance criteria met:
+  - Environment variable support already existed: VITE_GSNAKE_WEB_URL with default http://localhost:3000
+  - No hardcoded sibling path references to gsnake-web found
+  - Verified all build commands work in standalone mode
+- Files changed:
+  - gsnake-editor/package.json: Added test scripts (test, test:watch, test:ui)
+  - gsnake-editor/package-lock.json: Added Vitest, @vitest/ui, happy-dom dependencies
+  - gsnake-editor/vitest.config.ts: New Vitest configuration with Svelte plugin
+  - gsnake-editor/src/tests/types.test.ts: Basic unit tests
+  - gsnake-editor/src/tests/integration.test.ts: Integration tests with connectivity checks
+- Quality checks: All pass (npm install, build, check, test all succeed)
+- **Learnings for future iterations:**
+  - gsnake-editor already had proper environment variable support via Vite (VITE_ prefix required)
+  - Integration tests should fail gracefully with informative messages when dependencies unavailable
+  - Vitest is well-suited for Svelte projects with happy-dom environment
+  - Unit tests (4/4 pass) verify basic functionality and environment variable access
+  - Integration tests check gsnake-web connectivity and skip gracefully if unreachable with clear warning messages
+  - The .env.example file documents the VITE_GSNAKE_WEB_URL variable
+---
