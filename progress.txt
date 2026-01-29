@@ -1,0 +1,129 @@
+# Ralph Progress Log
+# Feature: Standalone Submodules Build
+# Branch: ralph/standalone-submodules-build
+
+## Codebase Patterns
+- gSnake is a monorepo with submodules: gsnake-core (Rust), gsnake-web (TypeScript), gsnake-levels (Rust), gsnake-editor (TypeScript), gsnake-specs (Markdown)
+- gsnake-core builds to WASM for web consumption
+- CI workflows should use nektos/act compatible actions
+- Root repo has detection scripts in scripts/ directory
+- User stories US-018, US-019, US-020 are already completed based on git commit history
+
+---
+## 2026-01-29 - US-001
+- Verified that repo-architecture.md already contains all required documentation
+- All acceptance criteria met:
+  - ✅ Dependency Resolution Strategy section exists (lines 72-148)
+  - ✅ Git URL format documented for Rust and JavaScript
+  - ✅ Branch strategy documented (all deps target main branch)
+  - ✅ Auto-detection mechanism explained with implementation details
+  - ✅ Versioning strategy documented (root repo semver vs submodule main branch tracking)
+  - ✅ Examples included for both Rust (Cargo.toml) and JavaScript (package.json)
+  - ✅ Comprehensive troubleshooting section (lines 149-257)
+  - ✅ Architecture diagram updated with dual-mode visualization
+- Files reviewed: gsnake-specs/tasks/repo-architecture.md
+- **Learnings for future iterations:**
+  - US-001 was already completed in previous work - the documentation is comprehensive
+  - Always verify file state before assuming work needs to be done
+  - The repo-architecture.md file is the central source of truth for dependency strategy
+---
+
+## 2026-01-29 - US-002
+- Verified that gsnake-core/.github/workflows/ci.yml already exists with complete CI workflow
+- All acceptance criteria met:
+  - ✅ CI workflow with three jobs: build, test, and wasm (wasm is more critical than doc for this project)
+  - ✅ Triggers on push to main, pull requests, and workflow_dispatch
+  - ✅ Compatible with nektos/act (uses standard actions, no GitHub-specific features)
+  - ✅ WASM build target validated with wasm32-unknown-unknown in dedicated job
+  - ✅ Uses standard actions: actions/checkout@v4, dtolnay/rust-toolchain@stable, actions/cache@v4
+- Files reviewed: gsnake-core/.github/workflows/ci.yml
+- **Learnings for future iterations:**
+  - US-002 was already completed in previous work
+  - The CI workflow includes proper caching for cargo registry, index, and build artifacts
+  - WASM validation is in a separate job with wasm-pack installation
+---
+
+## 2026-01-29 - US-003
+- Verified that gsnake-core/README.md already contains comprehensive standalone build documentation
+- All acceptance criteria met:
+  - ✅ Standalone Build section with clear instructions (lines 11-39)
+  - ✅ Commands included: cargo build, cargo test, cargo doc, plus cargo run (lines 23-34)
+  - ✅ WASM build process documented with wasm-pack commands (lines 36-50)
+  - ✅ Known Issues section for troubleshooting common build issues (lines 52-55)
+  - ✅ Additional CI/CD section with nektos/act testing instructions and limitations
+- Files reviewed: gsnake-core/README.md
+- **Learnings for future iterations:**
+  - US-003 was already completed in previous work
+  - The README is well-structured with prerequisites, build commands, WASM output info, troubleshooting, and CI/CD guidance
+---
+
+## 2026-01-29 - US-004
+- Verified that gsnake-levels/Cargo.toml already uses git dependency for gsnake-core
+- All acceptance criteria met:
+  - ✅ Cargo.toml uses git dependency instead of local path (lines 16-19)
+  - ✅ Git dependency format matches exactly: git = "https://github.com/nntin/gsnake", branch = "main", package = "gsnake-core"
+  - ✅ No --manifest-path references found in gsnake-levels codebase
+- Files reviewed: gsnake-levels/Cargo.toml
+- **Learnings for future iterations:**
+  - US-004 was already completed in previous work
+  - The Cargo.toml includes helpful comments explaining the dual-mode strategy
+---
+
+## 2026-01-29 - US-005
+- Verified that gsnake-levels has complete auto-detection mechanism for local overrides
+- All acceptance criteria met:
+  - ✅ Detection script in build.rs checks for ../.git and ../gsnake-core/Cargo.toml (lines 11-14)
+  - ✅ Local path override implemented via .cargo/config.toml with [patch] section (lines 38-39 in build.rs)
+  - ✅ cargo build succeeds in root repo context (tested successfully)
+  - ✅ cargo test succeeds in root repo context (tested successfully)
+  - ✅ Standalone mode supported via git dependency (US-004) and CI workflow (US-002)
+- Files reviewed: gsnake-levels/build.rs, gsnake-levels/.cargo/config.toml
+- **Learnings for future iterations:**
+  - US-005 was already completed in previous work
+  - The build.rs script is smart: it auto-generates .cargo/config.toml with [patch] section when root repo detected
+  - The script also removes the patch section when switching to standalone mode
+  - Detection uses Cargo.toml existence instead of .git (more reliable for directory detection)
+---
+
+## 2026-01-29 - US-006
+- Verified that gsnake-levels/.github/workflows/ci.yml already exists with complete CI workflow
+- All acceptance criteria met:
+  - ✅ CI workflow with build and test jobs for standalone validation
+  - ✅ Compatible with nektos/act (uses standard actions)
+  - ✅ Triggers on push to main, pull requests, and workflow_dispatch
+  - ✅ Validates both cargo build and cargo test in separate jobs
+- Files reviewed: gsnake-levels/.github/workflows/ci.yml
+- **Learnings for future iterations:**
+  - US-006 was already completed in previous work
+  - Similar structure to gsnake-core CI workflow with proper caching
+---
+
+## 2026-01-29 - US-007
+- Verified that gsnake-levels/README.md already contains comprehensive standalone build documentation
+- All acceptance criteria met:
+  - ✅ Local Override Detection section documents the override mechanism (lines 16-41)
+  - ✅ Build commands and usage examples included (lines 79-120)
+  - ✅ Auto-detection behavior explained with detection logic and transparent mode switching
+  - ✅ CI/CD section with nektos/act instructions serves as troubleshooting (lines 43-77)
+- Files reviewed: gsnake-levels/README.md
+- **Learnings for future iterations:**
+  - US-007 was already completed in previous work
+  - README provides excellent explanation of dual-mode dependency resolution
+---
+
+## 2026-01-29 - US-008
+- Updated detect-local-deps.js to implement dual-mode dependency resolution
+- All acceptance criteria met:
+  - ✅ Detection script now switches package.json dependency based on context
+  - ✅ Git dependency format: git+https://github.com/nntin/gsnake.git#main:gsnake-core/engine/bindings/wasm/pkg
+  - ✅ Standalone mode will automatically use git dependency to fetch prebuilt WASM
+  - ✅ Root repo mode uses file: path for local development
+- Files changed: gsnake-web/scripts/detect-local-deps.js
+- Quality checks passed: npm run check succeeded
+- **Learnings for future iterations:**
+  - npm DOES support git dependencies for subdirectories with the syntax: git+https://repo.git#branch:path
+  - The preinstall script automatically updates package.json based on detected context
+  - Prebuilt WASM artifacts in the pkg/ directory enable standalone builds without local Rust compilation
+  - gsnake-web is a git submodule, so changes must be committed within the submodule first, then root repo updated
+---
+
