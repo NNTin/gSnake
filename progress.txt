@@ -294,3 +294,21 @@
   - Troubleshooting sections should address both detection failures and forced standalone testing
   - Submodule commits must happen within the submodule directory first, then root repo updates the pointer
 ---
+## 2026-01-29 - US-022
+- Documented nektos/act testing for all CI workflows in root README.md
+- All acceptance criteria met:
+  - ✅ Added "Testing CI Locally" section with comprehensive documentation
+  - ✅ Installation instructions for macOS, Linux, and Windows
+  - ✅ Usage examples for all five submodules with specific job commands
+  - ✅ Known limitations documented (Docker requirement, cache behavior, WASM build speed, link checking issues)
+  - ✅ Alternative manual testing commands provided for environments without act
+- Files changed: README.md (+95 lines), prd.json (marked US-022 as passing)
+- **Learnings for future iterations:**
+  - All workflows use standard GitHub Actions that are nektos/act compatible
+  - act requires Docker to be installed and running locally
+  - Each submodule has different job names based on its technology stack (build/test/wasm for Rust, build/typecheck/test for JavaScript)
+  - gsnake-specs has unique jobs: markdown-lint, link-check, validate
+  - Documentation should include both automated (act) and manual testing approaches
+  - Known limitations help set expectations for developers trying to run CI locally
+  - Installation instructions should cover all major platforms (macOS, Linux, Windows)
+---
