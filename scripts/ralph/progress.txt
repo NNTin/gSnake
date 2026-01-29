@@ -354,3 +354,29 @@ Started: Tue Jan 27 22:11:52 CET 2026
   - nektos/act can test workflows locally but has known limitations with network/cache behavior
   - Documentation CI is lightweight - no npm install or cargo build needed, just validation tools
 ---
+## 2026-01-29 10:55 - US-019
+- Created root repo context detection script: scripts/detect-repo-context.sh
+- Script detects root repository by checking:
+  - ../.git exists (we're in a submodule or subdirectory)
+  - ../gsnake-core exists (gsnake-core is part of root, not a submodule)
+- Exports environment variables:
+  - GSNAKE_ROOT_REPO=true/false
+  - GSNAKE_CORE_PATH, GSNAKE_LEVELS_PATH, GSNAKE_WEB_PATH, GSNAKE_EDITOR_PATH, GSNAKE_SPECS_PATH (if available)
+- Script provides clear console output showing detected mode
+- Made executable with chmod +x
+- Updated root README.md with Developer Documentation section:
+  - Repository structure overview
+  - Submodule dependency resolution explanation
+  - Auto-detection mechanism usage example
+  - Building instructions for both modes
+- Tested detection from gsnake-web submodule - correctly detects root repo
+- Files changed: scripts/detect-repo-context.sh, README.md
+- **Learnings for future iterations:**
+  - gsnake-core is NOT a submodule - it's part of the root repo (no .git)
+  - Detection should check for ../gsnake-core directory existence, not ../gsnake-core/.git
+  - Actual submodules: gsnake-editor, gsnake-levels, gsnake-web, gsnake-specs, gsnake-python
+  - Script uses set -e for safety and provides informative output for debugging
+  - The script can be sourced from any submodule build script: source ../../scripts/detect-repo-context.sh
+  - Environment variables are exported so they persist in the calling shell
+  - [ -d ] checks for directory existence, [ -e ] checks for any file/directory existence
+---

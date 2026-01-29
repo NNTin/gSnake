@@ -344,8 +344,8 @@
         "Typecheck passes"
       ],
       "priority": 19,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Created detection script. Exports GSNAKE_ROOT_REPO and path variables. Documented in README.md."
     },
     {
       "id": "US-020",
