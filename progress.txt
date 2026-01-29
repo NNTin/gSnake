@@ -229,3 +229,20 @@
   - Integration tests check gsnake-web connectivity and skip gracefully if unreachable with clear warning messages
   - The .env.example file documents the VITE_GSNAKE_WEB_URL variable
 ---
+
+## 2026-01-29 - US-015
+- Added test job to gsnake-editor CI workflow
+- All acceptance criteria met:
+  - ✅ CI workflow with three jobs: build, typecheck, test (unit only)
+  - ✅ Compatible with nektos/act (uses standard actions)
+  - ✅ Workflow runs on: push to main, pull requests, workflow_dispatch
+- CI workflow already existed but was missing the test job
+- Files changed: gsnake-editor/.github/workflows/ci.yml
+- Quality checks passed: npm run build, npm run check, npm test all succeed
+- **Learnings for future iterations:**
+  - The CI workflow was partially complete - needed test job to meet all acceptance criteria
+  - All three jobs (build, typecheck, test) run npm ci independently for parallel execution
+  - Test job runs unit tests only - integration tests gracefully skip when gsnake-web unreachable
+  - gsnake-editor is a git submodule, so changes must be committed within the submodule directory first
+  - Workflow follows same pattern as gsnake-web: checkout to submodule path, cache npm, run commands with working-directory
+---
