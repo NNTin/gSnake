@@ -1,15 +1,15 @@
 [submodule "gsnake-python"]
 	path = gsnake-python
-	url = git@github.com:NNTin/gsnake-python.git
+	url = https://github.com/NNTin/gsnake-python.git
 [submodule "gsnake-web"]
 	path = gsnake-web
-	url = git@github.com:NNTin/gsnake-web.git
+	url = https://github.com/NNTin/gsnake-web.git
 [submodule "gsnake-specs"]
 	path = gsnake-specs
-	url = git@github.com:NNTin/gsnake-specs.git
+	url = https://github.com/NNTin/gsnake-specs.git
 [submodule "gsnake-levels"]
 	path = gsnake-levels
-	url = git@github.com:NNTin/gsnake-levels.git
+	url = https://github.com/NNTin/gsnake-levels.git
 [submodule "gsnake-editor"]
 	path = gsnake-editor
-	url = git@github.com:NNTin/gsnake-editor.git
+	url = https://github.com/NNTin/gsnake-editor.git

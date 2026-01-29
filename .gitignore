@@ -41,3 +41,5 @@ pkg/
 !gsnake-core/engine/bindings/wasm/pkg/
 artifacts/
 TODO.md
+
+scripts/test/tmp_act_results/

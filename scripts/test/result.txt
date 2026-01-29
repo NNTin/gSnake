@@ -1,22 +1,22 @@
 === Act CI Test Results ===
-Started: Thu Jan 29 20:23:01 CET 2026
+Started: Thu Jan 29 20:59:53 CET 2026
 
 ## Summary
 
-- [SUCCESS] .github/workflows/ci.yml::wasm
 - [SUCCESS] .github/workflows/ci.yml::build
 - [SUCCESS] .github/workflows/ci.yml::test
+- [SUCCESS] .github/workflows/ci.yml::wasm
+- [FAILED] gsnake-web/.github/workflows/ci.yml::test
 - [FAILED] gsnake-web/.github/workflows/ci.yml::build
 - [FAILED] gsnake-web/.github/workflows/ci.yml::typecheck
-- [FAILED] gsnake-web/.github/workflows/ci.yml::test
 - [FAILED] gsnake-editor/.github/workflows/ci.yml::build
 - [FAILED] gsnake-editor/.github/workflows/ci.yml::typecheck
 - [FAILED] gsnake-editor/.github/workflows/ci.yml::test
 - [FAILED] gsnake-levels/.github/workflows/ci.yml::test
 - [FAILED] gsnake-levels/.github/workflows/ci.yml::build
+- [FAILED] gsnake-specs/.github/workflows/ci.yml::validate
 - [SUCCESS] gsnake-specs/.github/workflows/ci.yml::markdown-lint
 - [SUCCESS] gsnake-specs/.github/workflows/ci.yml::link-check
-- [FAILED] gsnake-specs/.github/workflows/ci.yml::validate
 
 **Total: 5 passed, 9 failed**
 
@@ -24,126 +24,10 @@ Started: Thu Jan 29 20:23:01 CET 2026
 
 ## Failure Logs
 
-### gsnake-web/.github/workflows/ci.yml::build
-
-```
-time="2026-01-29T20:26:50+01:00" level=info msg="Using docker host 'unix:///var/run/docker.sock', and daemon socket 'unix:///var/run/docker.sock'"
-[CI/Build] ⭐ Run Set up job
-[CI/Build] 🚀  Start image=ghcr.io/catthehacker/ubuntu:act-latest
-[CI/Build]   🐳  docker pull image=ghcr.io/catthehacker/ubuntu:act-latest platform=linux/amd64 username= forcePull=true
-[CI/Build]   🐳  docker create image=ghcr.io/catthehacker/ubuntu:act-latest platform=linux/amd64 entrypoint=["tail" "-f" "/dev/null"] cmd=[] network="host"
-[CI/Build]   🐳  docker run image=ghcr.io/catthehacker/ubuntu:act-latest platform=linux/amd64 entrypoint=["tail" "-f" "/dev/null"] cmd=[] network="host"
-[CI/Build]   🐳  docker exec cmd=[node --no-warnings -e console.log(process.execPath)] user= workdir=
-[CI/Build]   ✅  Success - Set up job
-[CI/Build]   ☁  git clone 'https://github.com/actions/setup-node' # ref=v4
-[CI/Build] ⭐ Run Main Checkout submodule
-[CI/Build]   🐳  docker cp src=/home/nntin/git/gSnake/. dst=/home/nntin/git/gSnake/gsnake-web
-[CI/Build]   ✅  Success - Main Checkout submodule [485.671987ms]
-[CI/Build] ⭐ Run Main Setup Node
-[CI/Build]   🐳  docker cp src=/home/nntin/.cache/act/actions-setup-node@v4/ dst=/var/run/act/actions/actions-setup-node@v4/
-[CI/Build]   🐳  docker exec cmd=[/opt/acttoolcache/node/18.20.8/x64/bin/node /var/run/act/actions/actions-setup-node@v4/dist/setup/index.js] user= workdir=
-[CI/Build]   | Found in cache @ /opt/hostedtoolcache/node/20.20.0/x64
-[CI/Build]   ❓  ::group::Environment details
-[CI/Build]   | node: v20.20.0
-[CI/Build]   | npm: 10.8.2
-[CI/Build]   | yarn: 
-[CI/Build]   ❓  ::endgroup::
-[CI/Build]   | [command]/opt/hostedtoolcache/node/20.20.0/x64/bin/npm config get cache
-[CI/Build]   | /root/.npm
-[CI/Build]   | npm cache is not found
-[CI/Build]   ❓ add-matcher /run/act/actions/actions-setup-node@v4/.github/tsc.json
-[CI/Build]   ❓ add-matcher /run/act/actions/actions-setup-node@v4/.github/eslint-stylish.json
-[CI/Build]   ❓ add-matcher /run/act/actions/actions-setup-node@v4/.github/eslint-compact.json
-[CI/Build]   ✅  Success - Main Setup Node [1.494465291s]
-[CI/Build]   ⚙  ::set-output:: node-version=v20.20.0
-[CI/Build]   ⚙  ::set-output:: cache-hit=false
-[CI/Build]   ⚙  ::add-path:: /opt/hostedtoolcache/node/20.20.0/x64/bin
-[CI/Build] ⭐ Run Main Configure dependencies for standalone mode
-[CI/Build]   🐳  docker exec cmd=[bash -e /var/run/act/workflow/2] user= workdir=gsnake-web
-[CI/Build]   | node:internal/modules/cjs/loader:1210
-[CI/Build]   |   throw err;
-[CI/Build]   |   ^
-[CI/Build]   | 
-[CI/Build]   | Error: Cannot find module '/home/nntin/git/gSnake/gsnake-web/scripts/detect-local-deps.js'
-[CI/Build]   |     at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)
-[CI/Build]   |     at Module._load (node:internal/modules/cjs/loader:1038:27)
-[CI/Build]   |     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12)
-[CI/Build]   |     at node:internal/main/run_main_module:28:49 {
-[CI/Build]   |   code: 'MODULE_NOT_FOUND',
-[CI/Build]   |   requireStack: []
-[CI/Build]   | }
-[CI/Build]   | 
-[CI/Build]   | Node.js v20.20.0
-[CI/Build]   ❌  Failure - Main Configure dependencies for standalone mode [236.266478ms]
-[CI/Build] exitcode '1': failure
-[CI/Build] ⭐ Run Complete job
-[CI/Build]   ✅  Success - Complete job
-[CI/Build] 🏁  Job failed
-Error: Job 'Build' failed
-```
-
-### gsnake-web/.github/workflows/ci.yml::typecheck
-
-```
-time="2026-01-29T20:26:56+01:00" level=info msg="Using docker host 'unix:///var/run/docker.sock', and daemon socket 'unix:///var/run/docker.sock'"
-[CI/Typecheck] ⭐ Run Set up job
-[CI/Typecheck] 🚀  Start image=ghcr.io/catthehacker/ubuntu:act-latest
-[CI/Typecheck]   🐳  docker pull image=ghcr.io/catthehacker/ubuntu:act-latest platform=linux/amd64 username= forcePull=true
-[CI/Typecheck]   🐳  docker create image=ghcr.io/catthehacker/ubuntu:act-latest platform=linux/amd64 entrypoint=["tail" "-f" "/dev/null"] cmd=[] network="host"
-[CI/Typecheck]   🐳  docker run image=ghcr.io/catthehacker/ubuntu:act-latest platform=linux/amd64 entrypoint=["tail" "-f" "/dev/null"] cmd=[] network="host"
-[CI/Typecheck]   🐳  docker exec cmd=[node --no-warnings -e console.log(process.execPath)] user= workdir=
-[CI/Typecheck]   ✅  Success - Set up job
-[CI/Typecheck]   ☁  git clone 'https://github.com/actions/setup-node' # ref=v4
-[CI/Typecheck] ⭐ Run Main Checkout submodule
-[CI/Typecheck]   🐳  docker cp src=/home/nntin/git/gSnake/. dst=/home/nntin/git/gSnake/gsnake-web
-[CI/Typecheck]   ✅  Success - Main Checkout submodule [530.770084ms]
-[CI/Typecheck] ⭐ Run Main Setup Node
-[CI/Typecheck]   🐳  docker cp src=/home/nntin/.cache/act/actions-setup-node@v4/ dst=/var/run/act/actions/actions-setup-node@v4/
-[CI/Typecheck]   🐳  docker exec cmd=[/opt/acttoolcache/node/18.20.8/x64/bin/node /var/run/act/actions/actions-setup-node@v4/dist/setup/index.js] user= workdir=
-[CI/Typecheck]   | Found in cache @ /opt/hostedtoolcache/node/20.20.0/x64
-[CI/Typecheck]   ❓  ::group::Environment details
-[CI/Typecheck]   | node: v20.20.0
-[CI/Typecheck]   | npm: 10.8.2
-[CI/Typecheck]   | yarn: 
-[CI/Typecheck]   ❓  ::endgroup::
-[CI/Typecheck]   | [command]/opt/hostedtoolcache/node/20.20.0/x64/bin/npm config get cache
-[CI/Typecheck]   | /root/.npm
-[CI/Typecheck]   | npm cache is not found
-[CI/Typecheck]   ❓ add-matcher /run/act/actions/actions-setup-node@v4/.github/tsc.json
-[CI/Typecheck]   ❓ add-matcher /run/act/actions/actions-setup-node@v4/.github/eslint-stylish.json
-[CI/Typecheck]   ❓ add-matcher /run/act/actions/actions-setup-node@v4/.github/eslint-compact.json
-[CI/Typecheck]   ✅  Success - Main Setup Node [1.253170957s]
-[CI/Typecheck]   ⚙  ::set-output:: node-version=v20.20.0
-[CI/Typecheck]   ⚙  ::set-output:: cache-hit=false
-[CI/Typecheck]   ⚙  ::add-path:: /opt/hostedtoolcache/node/20.20.0/x64/bin
-[CI/Typecheck] ⭐ Run Main Configure dependencies for standalone mode
-[CI/Typecheck]   🐳  docker exec cmd=[bash -e /var/run/act/workflow/2] user= workdir=gsnake-web
-[CI/Typecheck]   | node:internal/modules/cjs/loader:1210
-[CI/Typecheck]   |   throw err;
-[CI/Typecheck]   |   ^
-[CI/Typecheck]   | 
-[CI/Typecheck]   | Error: Cannot find module '/home/nntin/git/gSnake/gsnake-web/scripts/detect-local-deps.js'
-[CI/Typecheck]   |     at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)
-[CI/Typecheck]   |     at Module._load (node:internal/modules/cjs/loader:1038:27)
-[CI/Typecheck]   |     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12)
-[CI/Typecheck]   |     at node:internal/main/run_main_module:28:49 {
-[CI/Typecheck]   |   code: 'MODULE_NOT_FOUND',
-[CI/Typecheck]   |   requireStack: []
-[CI/Typecheck]   | }
-[CI/Typecheck]   | 
-[CI/Typecheck]   | Node.js v20.20.0
-[CI/Typecheck]   ❌  Failure - Main Configure dependencies for standalone mode [214.955923ms]
-[CI/Typecheck] exitcode '1': failure
-[CI/Typecheck] ⭐ Run Complete job
-[CI/Typecheck]   ✅  Success - Complete job
-[CI/Typecheck] 🏁  Job failed
-Error: Job 'Typecheck' failed
-```
-
 ### gsnake-web/.github/workflows/ci.yml::test
 
 ```
-time="2026-01-29T20:27:02+01:00" level=info msg="Using docker host 'unix:///var/run/docker.sock', and daemon socket 'unix:///var/run/docker.sock'"
+time="2026-01-29T21:04:06+01:00" level=info msg="Using docker host 'unix:///var/run/docker.sock', and daemon socket 'unix:///var/run/docker.sock'"
 [CI/Test] ⭐ Run Set up job
 [CI/Test] 🚀  Start image=ghcr.io/catthehacker/ubuntu:act-latest
 [CI/Test]   🐳  docker pull image=ghcr.io/catthehacker/ubuntu:act-latest platform=linux/amd64 username= forcePull=true
@@ -154,7 +38,7 @@ time="2026-01-29T20:27:02+01:00" level=info msg="Using docker host 'unix:///var/
 [CI/Test]   ☁  git clone 'https://github.com/actions/setup-node' # ref=v4
 [CI/Test] ⭐ Run Main Checkout submodule
 [CI/Test]   🐳  docker cp src=/home/nntin/git/gSnake/. dst=/home/nntin/git/gSnake/gsnake-web
-[CI/Test]   ✅  Success - Main Checkout submodule [526.412554ms]
+[CI/Test]   ✅  Success - Main Checkout submodule [600.926512ms]
 [CI/Test] ⭐ Run Main Setup Node
 [CI/Test]   🐳  docker cp src=/home/nntin/.cache/act/actions-setup-node@v4/ dst=/var/run/act/actions/actions-setup-node@v4/
 [CI/Test]   🐳  docker exec cmd=[/opt/acttoolcache/node/18.20.8/x64/bin/node /var/run/act/actions/actions-setup-node@v4/dist/setup/index.js] user= workdir=
@@ -170,7 +54,7 @@ time="2026-01-29T20:27:02+01:00" level=info msg="Using docker host 'unix:///var/
 [CI/Test]   ❓ add-matcher /run/act/actions/actions-setup-node@v4/.github/tsc.json
 [CI/Test]   ❓ add-matcher /run/act/actions/actions-setup-node@v4/.github/eslint-stylish.json
 [CI/Test]   ❓ add-matcher /run/act/actions/actions-setup-node@v4/.github/eslint-compact.json
-[CI/Test]   ✅  Success - Main Setup Node [1.276906903s]
+[CI/Test]   ✅  Success - Main Setup Node [1.37593461s]
 [CI/Test]   ⚙  ::set-output:: node-version=v20.20.0
 [CI/Test]   ⚙  ::set-output:: cache-hit=false
 [CI/Test]   ⚙  ::add-path:: /opt/hostedtoolcache/node/20.20.0/x64/bin
@@ -190,7 +74,7 @@ time="2026-01-29T20:27:02+01:00" level=info msg="Using docker host 'unix:///var/
 [CI/Test]   | }
 [CI/Test]   | 
 [CI/Test]   | Node.js v20.20.0
-[CI/Test]   ❌  Failure - Main Configure dependencies for standalone mode [230.736512ms]
+[CI/Test]   ❌  Failure - Main Configure dependencies for standalone mode [248.195921ms]
 [CI/Test] exitcode '1': failure
 [CI/Test] ⭐ Run Complete job
 [CI/Test]   ✅  Success - Complete job
@@ -198,10 +82,10 @@ time="2026-01-29T20:27:02+01:00" level=info msg="Using docker host 'unix:///var/
 Error: Job 'Test' failed
 ```
 
-### gsnake-editor/.github/workflows/ci.yml::build
+### gsnake-web/.github/workflows/ci.yml::build
 
 ```
-time="2026-01-29T20:27:10+01:00" level=info msg="Using docker host 'unix:///var/run/docker.sock', and daemon socket 'unix:///var/run/docker.sock'"
+time="2026-01-29T21:04:12+01:00" level=info msg="Using docker host 'unix:///var/run/docker.sock', and daemon socket 'unix:///var/run/docker.sock'"
 [CI/Build] ⭐ Run Set up job
 [CI/Build] 🚀  Start image=ghcr.io/catthehacker/ubuntu:act-latest
 [CI/Build]   🐳  docker pull image=ghcr.io/catthehacker/ubuntu:act-latest platform=linux/amd64 username= forcePull=true
@@ -211,8 +95,8 @@ time="2026-01-29T20:27:10+01:00" level=info msg="Using docker host 'unix:///var/
 [CI/Build]   ✅  Success - Set up job
 [CI/Build]   ☁  git clone 'https://github.com/actions/setup-node' # ref=v4
 [CI/Build] ⭐ Run Main Checkout submodule
-[CI/Build]   🐳  docker cp src=/home/nntin/git/gSnake/. dst=/home/nntin/git/gSnake/gsnake-editor
-[CI/Build]   ✅  Success - Main Checkout submodule [511.333897ms]
+[CI/Build]   🐳  docker cp src=/home/nntin/git/gSnake/. dst=/home/nntin/git/gSnake/gsnake-web
+[CI/Build]   ✅  Success - Main Checkout submodule [502.16561ms]
 [CI/Build] ⭐ Run Main Setup Node
 [CI/Build]   🐳  docker cp src=/home/nntin/.cache/act/actions-setup-node@v4/ dst=/var/run/act/actions/actions-setup-node@v4/
 [CI/Build]   🐳  docker exec cmd=[/opt/acttoolcache/node/18.20.8/x64/bin/node /var/run/act/actions/actions-setup-node@v4/dist/setup/index.js] user= workdir=
@@ -228,7 +112,123 @@ time="2026-01-29T20:27:10+01:00" level=info msg="Using docker host 'unix:///var/
 [CI/Build]   ❓ add-matcher /run/act/actions/actions-setup-node@v4/.github/tsc.json
 [CI/Build]   ❓ add-matcher /run/act/actions/actions-setup-node@v4/.github/eslint-stylish.json
 [CI/Build]   ❓ add-matcher /run/act/actions/actions-setup-node@v4/.github/eslint-compact.json
-[CI/Build]   ✅  Success - Main Setup Node [1.551632964s]
+[CI/Build]   ✅  Success - Main Setup Node [1.482543993s]
+[CI/Build]   ⚙  ::set-output:: node-version=v20.20.0
+[CI/Build]   ⚙  ::set-output:: cache-hit=false
+[CI/Build]   ⚙  ::add-path:: /opt/hostedtoolcache/node/20.20.0/x64/bin
+[CI/Build] ⭐ Run Main Configure dependencies for standalone mode
+[CI/Build]   🐳  docker exec cmd=[bash -e /var/run/act/workflow/2] user= workdir=gsnake-web
+[CI/Build]   | node:internal/modules/cjs/loader:1210
+[CI/Build]   |   throw err;
+[CI/Build]   |   ^
+[CI/Build]   | 
+[CI/Build]   | Error: Cannot find module '/home/nntin/git/gSnake/gsnake-web/scripts/detect-local-deps.js'
+[CI/Build]   |     at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)
+[CI/Build]   |     at Module._load (node:internal/modules/cjs/loader:1038:27)
+[CI/Build]   |     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12)
+[CI/Build]   |     at node:internal/main/run_main_module:28:49 {
+[CI/Build]   |   code: 'MODULE_NOT_FOUND',
+[CI/Build]   |   requireStack: []
+[CI/Build]   | }
+[CI/Build]   | 
+[CI/Build]   | Node.js v20.20.0
+[CI/Build]   ❌  Failure - Main Configure dependencies for standalone mode [246.55936ms]
+[CI/Build] exitcode '1': failure
+[CI/Build] ⭐ Run Complete job
+[CI/Build]   ✅  Success - Complete job
+[CI/Build] 🏁  Job failed
+Error: Job 'Build' failed
+```
+
+### gsnake-web/.github/workflows/ci.yml::typecheck
+
+```
+time="2026-01-29T21:04:18+01:00" level=info msg="Using docker host 'unix:///var/run/docker.sock', and daemon socket 'unix:///var/run/docker.sock'"
+[CI/Typecheck] ⭐ Run Set up job
+[CI/Typecheck] 🚀  Start image=ghcr.io/catthehacker/ubuntu:act-latest
+[CI/Typecheck]   🐳  docker pull image=ghcr.io/catthehacker/ubuntu:act-latest platform=linux/amd64 username= forcePull=true
+[CI/Typecheck]   🐳  docker create image=ghcr.io/catthehacker/ubuntu:act-latest platform=linux/amd64 entrypoint=["tail" "-f" "/dev/null"] cmd=[] network="host"
+[CI/Typecheck]   🐳  docker run image=ghcr.io/catthehacker/ubuntu:act-latest platform=linux/amd64 entrypoint=["tail" "-f" "/dev/null"] cmd=[] network="host"
+[CI/Typecheck]   🐳  docker exec cmd=[node --no-warnings -e console.log(process.execPath)] user= workdir=
+[CI/Typecheck]   ✅  Success - Set up job
+[CI/Typecheck]   ☁  git clone 'https://github.com/actions/setup-node' # ref=v4
+[CI/Typecheck] ⭐ Run Main Checkout submodule
+[CI/Typecheck]   🐳  docker cp src=/home/nntin/git/gSnake/. dst=/home/nntin/git/gSnake/gsnake-web
+[CI/Typecheck]   ✅  Success - Main Checkout submodule [486.263356ms]
+[CI/Typecheck] ⭐ Run Main Setup Node
+[CI/Typecheck]   🐳  docker cp src=/home/nntin/.cache/act/actions-setup-node@v4/ dst=/var/run/act/actions/actions-setup-node@v4/
+[CI/Typecheck]   🐳  docker exec cmd=[/opt/acttoolcache/node/18.20.8/x64/bin/node /var/run/act/actions/actions-setup-node@v4/dist/setup/index.js] user= workdir=
+[CI/Typecheck]   | Found in cache @ /opt/hostedtoolcache/node/20.20.0/x64
+[CI/Typecheck]   ❓  ::group::Environment details
+[CI/Typecheck]   | node: v20.20.0
+[CI/Typecheck]   | npm: 10.8.2
+[CI/Typecheck]   | yarn: 
+[CI/Typecheck]   ❓  ::endgroup::
+[CI/Typecheck]   | [command]/opt/hostedtoolcache/node/20.20.0/x64/bin/npm config get cache
+[CI/Typecheck]   | /root/.npm
+[CI/Typecheck]   | npm cache is not found
+[CI/Typecheck]   ❓ add-matcher /run/act/actions/actions-setup-node@v4/.github/tsc.json
+[CI/Typecheck]   ❓ add-matcher /run/act/actions/actions-setup-node@v4/.github/eslint-stylish.json
+[CI/Typecheck]   ❓ add-matcher /run/act/actions/actions-setup-node@v4/.github/eslint-compact.json
+[CI/Typecheck]   ✅  Success - Main Setup Node [1.257513591s]
+[CI/Typecheck]   ⚙  ::set-output:: node-version=v20.20.0
+[CI/Typecheck]   ⚙  ::set-output:: cache-hit=false
+[CI/Typecheck]   ⚙  ::add-path:: /opt/hostedtoolcache/node/20.20.0/x64/bin
+[CI/Typecheck] ⭐ Run Main Configure dependencies for standalone mode
+[CI/Typecheck]   🐳  docker exec cmd=[bash -e /var/run/act/workflow/2] user= workdir=gsnake-web
+[CI/Typecheck]   | node:internal/modules/cjs/loader:1210
+[CI/Typecheck]   |   throw err;
+[CI/Typecheck]   |   ^
+[CI/Typecheck]   | 
+[CI/Typecheck]   | Error: Cannot find module '/home/nntin/git/gSnake/gsnake-web/scripts/detect-local-deps.js'
+[CI/Typecheck]   |     at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)
+[CI/Typecheck]   |     at Module._load (node:internal/modules/cjs/loader:1038:27)
+[CI/Typecheck]   |     at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12)
+[CI/Typecheck]   |     at node:internal/main/run_main_module:28:49 {
+[CI/Typecheck]   |   code: 'MODULE_NOT_FOUND',
+[CI/Typecheck]   |   requireStack: []
+[CI/Typecheck]   | }
+[CI/Typecheck]   | 
+[CI/Typecheck]   | Node.js v20.20.0
+[CI/Typecheck]   ❌  Failure - Main Configure dependencies for standalone mode [225.701586ms]
+[CI/Typecheck] exitcode '1': failure
+[CI/Typecheck] ⭐ Run Complete job
+[CI/Typecheck]   ✅  Success - Complete job
+[CI/Typecheck] 🏁  Job failed
+Error: Job 'Typecheck' failed
+```
+
+### gsnake-editor/.github/workflows/ci.yml::build
+
+```
+time="2026-01-29T21:04:25+01:00" level=info msg="Using docker host 'unix:///var/run/docker.sock', and daemon socket 'unix:///var/run/docker.sock'"
+[CI/Build] ⭐ Run Set up job
+[CI/Build] 🚀  Start image=ghcr.io/catthehacker/ubuntu:act-latest
+[CI/Build]   🐳  docker pull image=ghcr.io/catthehacker/ubuntu:act-latest platform=linux/amd64 username= forcePull=true
+[CI/Build]   🐳  docker create image=ghcr.io/catthehacker/ubuntu:act-latest platform=linux/amd64 entrypoint=["tail" "-f" "/dev/null"] cmd=[] network="host"
+[CI/Build]   🐳  docker run image=ghcr.io/catthehacker/ubuntu:act-latest platform=linux/amd64 entrypoint=["tail" "-f" "/dev/null"] cmd=[] network="host"
+[CI/Build]   🐳  docker exec cmd=[node --no-warnings -e console.log(process.execPath)] user= workdir=
+[CI/Build]   ✅  Success - Set up job
+[CI/Build]   ☁  git clone 'https://github.com/actions/setup-node' # ref=v4
+[CI/Build] ⭐ Run Main Checkout submodule
+[CI/Build]   🐳  docker cp src=/home/nntin/git/gSnake/. dst=/home/nntin/git/gSnake/gsnake-editor
+[CI/Build]   ✅  Success - Main Checkout submodule [489.964686ms]
+[CI/Build] ⭐ Run Main Setup Node
+[CI/Build]   🐳  docker cp src=/home/nntin/.cache/act/actions-setup-node@v4/ dst=/var/run/act/actions/actions-setup-node@v4/
+[CI/Build]   🐳  docker exec cmd=[/opt/acttoolcache/node/18.20.8/x64/bin/node /var/run/act/actions/actions-setup-node@v4/dist/setup/index.js] user= workdir=
+[CI/Build]   | Found in cache @ /opt/hostedtoolcache/node/20.20.0/x64
+[CI/Build]   ❓  ::group::Environment details
+[CI/Build]   | node: v20.20.0
+[CI/Build]   | npm: 10.8.2
+[CI/Build]   | yarn: 
+[CI/Build]   ❓  ::endgroup::
+[CI/Build]   | [command]/opt/hostedtoolcache/node/20.20.0/x64/bin/npm config get cache
+[CI/Build]   | /root/.npm
+[CI/Build]   | npm cache is not found
+[CI/Build]   ❓ add-matcher /run/act/actions/actions-setup-node@v4/.github/tsc.json
+[CI/Build]   ❓ add-matcher /run/act/actions/actions-setup-node@v4/.github/eslint-stylish.json
+[CI/Build]   ❓ add-matcher /run/act/actions/actions-setup-node@v4/.github/eslint-compact.json
+[CI/Build]   ✅  Success - Main Setup Node [1.218509701s]
 [CI/Build]   ⚙  ::set-output:: node-version=v20.20.0
 [CI/Build]   ⚙  ::set-output:: cache-hit=false
 [CI/Build]   ⚙  ::add-path:: /opt/hostedtoolcache/node/20.20.0/x64/bin
@@ -248,7 +248,7 @@ time="2026-01-29T20:27:10+01:00" level=info msg="Using docker host 'unix:///var/
 [CI/Build]   | }
 [CI/Build]   | 
 [CI/Build]   | Node.js v20.20.0
-[CI/Build]   ❌  Failure - Main Configure dependencies for standalone mode [234.529218ms]
+[CI/Build]   ❌  Failure - Main Configure dependencies for standalone mode [215.303493ms]
 [CI/Build] exitcode '1': failure
 [CI/Build] ⭐ Run Complete job
 [CI/Build]   ✅  Success - Complete job
@@ -259,7 +259,7 @@ Error: Job 'Build' failed
 ### gsnake-editor/.github/workflows/ci.yml::typecheck
 
 ```
-time="2026-01-29T20:27:17+01:00" level=info msg="Using docker host 'unix:///var/run/docker.sock', and daemon socket 'unix:///var/run/docker.sock'"
+time="2026-01-29T21:04:31+01:00" level=info msg="Using docker host 'unix:///var/run/docker.sock', and daemon socket 'unix:///var/run/docker.sock'"
 [CI/Typecheck] ⭐ Run Set up job
 [CI/Typecheck] 🚀  Start image=ghcr.io/catthehacker/ubuntu:act-latest
 [CI/Typecheck]   🐳  docker pull image=ghcr.io/catthehacker/ubuntu:act-latest platform=linux/amd64 username= forcePull=true
@@ -270,7 +270,7 @@ time="2026-01-29T20:27:17+01:00" level=info msg="Using docker host 'unix:///var/
 [CI/Typecheck]   ☁  git clone 'https://github.com/actions/setup-node' # ref=v4
 [CI/Typecheck] ⭐ Run Main Checkout submodule
 [CI/Typecheck]   🐳  docker cp src=/home/nntin/git/gSnake/. dst=/home/nntin/git/gSnake/gsnake-editor
-[CI/Typecheck]   ✅  Success - Main Checkout submodule [544.001074ms]
+[CI/Typecheck]   ✅  Success - Main Checkout submodule [744.559049ms]
 [CI/Typecheck] ⭐ Run Main Setup Node
 [CI/Typecheck]   🐳  docker cp src=/home/nntin/.cache/act/actions-setup-node@v4/ dst=/var/run/act/actions/actions-setup-node@v4/
 [CI/Typecheck]   🐳  docker exec cmd=[/opt/acttoolcache/node/18.20.8/x64/bin/node /var/run/act/actions/actions-setup-node@v4/dist/setup/index.js] user= workdir=
@@ -286,7 +286,7 @@ time="2026-01-29T20:27:17+01:00" level=info msg="Using docker host 'unix:///var/
 [CI/Typecheck]   ❓ add-matcher /run/act/actions/actions-setup-node@v4/.github/tsc.json
 [CI/Typecheck]   ❓ add-matcher /run/act/actions/actions-setup-node@v4/.github/eslint-stylish.json
 [CI/Typecheck]   ❓ add-matcher /run/act/actions/actions-setup-node@v4/.github/eslint-compact.json
-[CI/Typecheck]   ✅  Success - Main Setup Node [1.207351589s]
+[CI/Typecheck]   ✅  Success - Main Setup Node [1.178723284s]
 [CI/Typecheck]   ⚙  ::set-output:: node-version=v20.20.0
 [CI/Typecheck]   ⚙  ::set-output:: cache-hit=false
 [CI/Typecheck]   ⚙  ::add-path:: /opt/hostedtoolcache/node/20.20.0/x64/bin
@@ -306,7 +306,7 @@ time="2026-01-29T20:27:17+01:00" level=info msg="Using docker host 'unix:///var/
 [CI/Typecheck]   | }
 [CI/Typecheck]   | 
 [CI/Typecheck]   | Node.js v20.20.0
-[CI/Typecheck]   ❌  Failure - Main Configure dependencies for standalone mode [229.178033ms]
+[CI/Typecheck]   ❌  Failure - Main Configure dependencies for standalone mode [219.259818ms]
 [CI/Typecheck] exitcode '1': failure
 [CI/Typecheck] ⭐ Run Complete job
 [CI/Typecheck]   ✅  Success - Complete job
@@ -317,7 +317,7 @@ Error: Job 'Typecheck' failed
 ### gsnake-editor/.github/workflows/ci.yml::test
 
 ```
-time="2026-01-29T20:27:23+01:00" level=info msg="Using docker host 'unix:///var/run/docker.sock', and daemon socket 'unix:///var/run/docker.sock'"
+time="2026-01-29T21:04:39+01:00" level=info msg="Using docker host 'unix:///var/run/docker.sock', and daemon socket 'unix:///var/run/docker.sock'"
 [CI/Test] ⭐ Run Set up job
 [CI/Test] 🚀  Start image=ghcr.io/catthehacker/ubuntu:act-latest
 [CI/Test]   🐳  docker pull image=ghcr.io/catthehacker/ubuntu:act-latest platform=linux/amd64 username= forcePull=true
@@ -328,7 +328,7 @@ time="2026-01-29T20:27:23+01:00" level=info msg="Using docker host 'unix:///var/
 [CI/Test]   ☁  git clone 'https://github.com/actions/setup-node' # ref=v4
 [CI/Test] ⭐ Run Main Checkout submodule
 [CI/Test]   🐳  docker cp src=/home/nntin/git/gSnake/. dst=/home/nntin/git/gSnake/gsnake-editor
-[CI/Test]   ✅  Success - Main Checkout submodule [668.249054ms]
+[CI/Test]   ✅  Success - Main Checkout submodule [470.112656ms]
 [CI/Test] ⭐ Run Main Setup Node
 [CI/Test]   🐳  docker cp src=/home/nntin/.cache/act/actions-setup-node@v4/ dst=/var/run/act/actions/actions-setup-node@v4/
 [CI/Test]   🐳  docker exec cmd=[/opt/acttoolcache/node/18.20.8/x64/bin/node /var/run/act/actions/actions-setup-node@v4/dist/setup/index.js] user= workdir=
@@ -344,7 +344,7 @@ time="2026-01-29T20:27:23+01:00" level=info msg="Using docker host 'unix:///var/
 [CI/Test]   ❓ add-matcher /run/act/actions/actions-setup-node@v4/.github/tsc.json
 [CI/Test]   ❓ add-matcher /run/act/actions/actions-setup-node@v4/.github/eslint-stylish.json
 [CI/Test]   ❓ add-matcher /run/act/actions/actions-setup-node@v4/.github/eslint-compact.json
-[CI/Test]   ✅  Success - Main Setup Node [1.430492891s]
+[CI/Test]   ✅  Success - Main Setup Node [1.16091315s]
 [CI/Test]   ⚙  ::set-output:: node-version=v20.20.0
 [CI/Test]   ⚙  ::set-output:: cache-hit=false
 [CI/Test]   ⚙  ::add-path:: /opt/hostedtoolcache/node/20.20.0/x64/bin
@@ -364,7 +364,7 @@ time="2026-01-29T20:27:23+01:00" level=info msg="Using docker host 'unix:///var/
 [CI/Test]   | }
 [CI/Test]   | 
 [CI/Test]   | Node.js v20.20.0
-[CI/Test]   ❌  Failure - Main Configure dependencies for standalone mode [255.655193ms]
+[CI/Test]   ❌  Failure - Main Configure dependencies for standalone mode [217.701614ms]
 [CI/Test] exitcode '1': failure
 [CI/Test] ⭐ Run Complete job
 [CI/Test]   ✅  Success - Complete job
@@ -375,7 +375,7 @@ Error: Job 'Test' failed
 ### gsnake-levels/.github/workflows/ci.yml::test
 
 ```
-time="2026-01-29T20:27:30+01:00" level=info msg="Using docker host 'unix:///var/run/docker.sock', and daemon socket 'unix:///var/run/docker.sock'"
+time="2026-01-29T21:04:46+01:00" level=info msg="Using docker host 'unix:///var/run/docker.sock', and daemon socket 'unix:///var/run/docker.sock'"
 [CI/Test] ⭐ Run Set up job
 [CI/Test] 🚀  Start image=ghcr.io/catthehacker/ubuntu:act-latest
 [CI/Test]   🐳  docker pull image=ghcr.io/catthehacker/ubuntu:act-latest platform=linux/amd64 username= forcePull=true
@@ -385,7 +385,7 @@ time="2026-01-29T20:27:30+01:00" level=info msg="Using docker host 'unix:///var/
 [CI/Test]   ✅  Success - Set up job
 [CI/Test]   ☁  git clone 'https://github.com/dtolnay/rust-toolchain' # ref=stable
 [CI/Test] ⭐ Run Pre Setup Rust
-[CI/Test]   ✅  Success - Pre Setup Rust [102.789226ms]
+[CI/Test]   ✅  Success - Pre Setup Rust [67.685988ms]
 [CI/Test]   ☁  git clone 'https://github.com/actions/cache' # ref=v4
 [CI/Test] Non-terminating error while running 'git clone': some refs were not updated
 [CI/Test]   ☁  git clone 'https://github.com/actions/cache' # ref=v4
@@ -394,7 +394,7 @@ time="2026-01-29T20:27:30+01:00" level=info msg="Using docker host 'unix:///var/
 [CI/Test] Non-terminating error while running 'git clone': some refs were not updated
 [CI/Test] ⭐ Run Main Checkout submodule
 [CI/Test]   🐳  docker cp src=/home/nntin/git/gSnake/. dst=/home/nntin/git/gSnake/gsnake-levels
-[CI/Test]   ✅  Success - Main Checkout submodule [637.043518ms]
+[CI/Test]   ✅  Success - Main Checkout submodule [491.101792ms]
 [CI/Test] ⭐ Run Main Setup Rust
 [CI/Test]   🐳  docker cp src=/home/nntin/.cache/act/dtolnay-rust-toolchain@stable/ dst=/var/run/act/actions/dtolnay-rust-toolchain@stable/
 [CI/Test] ⭐ Run Main : parse toolchain version
@@ -434,7 +434,7 @@ elif [[ $toolchain =~ ^1\.[0-9]+$ ]]; then
 else
   echo "toolchain=$toolchain" >> $GITHUB_OUTPUT
 fi
- [181.75714ms]
+ [142.940144ms]
 [CI/Test]   ⚙  ::set-output:: toolchain=stable
 [CI/Test] ⭐ Run Main : construct rustup command line
 echo "targets=$(for t in ${targets//,/ }; do echo -n ' --target' $t; done)" >> $GITHUB_OUTPUT
@@ -445,16 +445,16 @@ echo "downgrade=" >> $GITHUB_OUTPUT
 echo "targets=$(for t in ${targets//,/ }; do echo -n ' --target' $t; done)" >> $GITHUB_OUTPUT
 echo "components=$(for c in ${components//,/ }; do echo -n ' --component' $c; done)" >> $GITHUB_OUTPUT
 echo "downgrade=" >> $GITHUB_OUTPUT
- [165.759165ms]
+ [146.943457ms]
+[CI/Test]   ⚙  ::set-output:: targets=
 [CI/Test]   ⚙  ::set-output:: components=
 [CI/Test]   ⚙  ::set-output:: downgrade=
-[CI/Test]   ⚙  ::set-output:: targets=
 [CI/Test] ⭐ Run Main : set $CARGO_HOME
 echo CARGO_HOME=${CARGO_HOME:-"$HOME/.cargo"} >> $GITHUB_ENV
 [CI/Test]   🐳  docker exec cmd=[bash --noprofile --norc -e -o pipefail /var/run/act/workflow/1-composite-2.sh] user= workdir=
 [CI/Test]   ✅  Success - Main : set $CARGO_HOME
 echo CARGO_HOME=${CARGO_HOME:-"$HOME/.cargo"} >> $GITHUB_ENV
- [192.01104ms]
+ [148.642738ms]
 [CI/Test]   ⚙  ::set-env:: CARGO_HOME=/root/.cargo
 [CI/Test] ⭐ Run Main : install rustup if needed
 if ! command -v rustup &>/dev/null; then
@@ -486,7 +486,7 @@ if ! command -v rustup &>/dev/null; then
   curl --proto '=https' --tlsv1.2 --retry 10 --retry-connrefused --location --silent --show-error --fail https://sh.rustup.rs | sh -s -- --default-toolchain none -y
   echo "$CARGO_HOME/bin" >> $GITHUB_PATH
 fi
- [3.587729371s]
+ [3.497780354s]
 [CI/Test]   ⚙  ::add-path:: /root/.cargo/bin
 [CI/Test] ⭐ Run Main rustup toolchain install stable
 [CI/Test]   🐳  docker exec cmd=[bash --noprofile --norc -e -o pipefail /var/run/act/workflow/1-composite-5.sh] user= workdir=
@@ -502,7 +502,7 @@ fi
 [CI/Test]   |   stable-x86_64-unknown-linux-gnu installed - rustc 1.93.0 (254b59607 2026-01-19)
 [CI/Test]   | 
 [CI/Test]   | info: default toolchain set to 'stable-x86_64-unknown-linux-gnu'
-[CI/Test]   ✅  Success - Main rustup toolchain install stable [25.255762203s]
+[CI/Test]   ✅  Success - Main rustup toolchain install stable [26.419193664s]
 [CI/Test] ⭐ Run Main rustup default stable
 [CI/Test]   🐳  docker exec cmd=[bash --noprofile --norc -e -o pipefail /var/run/act/workflow/1-composite-6.sh] user= workdir=
 [CI/Test]   | info: using existing install for 'stable-x86_64-unknown-linux-gnu'
@@ -510,7 +510,7 @@ fi
 [CI/Test]   | info: default toolchain set to 'stable-x86_64-unknown-linux-gnu'
 [CI/Test]   |   stable-x86_64-unknown-linux-gnu unchanged - rustc 1.93.0 (254b59607 2026-01-19)
 [CI/Test]   | 
-[CI/Test]   ✅  Success - Main rustup default stable [236.128888ms]
+[CI/Test]   ✅  Success - Main rustup default stable [219.519671ms]
 [CI/Test] ⭐ Run Main : create cachekey
 DATE=$(rustc +stable --version --verbose | sed -ne 's/^commit-date: \(20[0-9][0-9]\)-\([01][0-9]\)-\([0-3][0-9]\)$/\1\2\3/p')
 HASH=$(rustc +stable --version --verbose | sed -ne 's/^commit-hash: //p')
@@ -520,7 +520,7 @@ echo "cachekey=$(echo $DATE$HASH | head -c12)" >> $GITHUB_OUTPUT
 DATE=$(rustc +stable --version --verbose | sed -ne 's/^commit-date: \(20[0-9][0-9]\)-\([01][0-9]\)-\([0-3][0-9]\)$/\1\2\3/p')
 HASH=$(rustc +stable --version --verbose | sed -ne 's/^commit-hash: //p')
 echo "cachekey=$(echo $DATE$HASH | head -c12)" >> $GITHUB_OUTPUT
- [219.780406ms]
+ [250.196228ms]
 [CI/Test]   ⚙  ::set-output:: cachekey=20260119254b
 [CI/Test] ⭐ Run Main : disable incremental compilation
 if [ -z "${CARGO_INCREMENTAL+set}" ]; then
@@ -531,7 +531,7 @@ fi
 if [ -z "${CARGO_INCREMENTAL+set}" ]; then
   echo CARGO_INCREMENTAL=0 >> $GITHUB_ENV
 fi
- [233.300122ms]
+ [220.356969ms]
 [CI/Test]   ⚙  ::set-env:: CARGO_INCREMENTAL=0
 [CI/Test] ⭐ Run Main : enable colors in Cargo output
 if [ -z "${CARGO_TERM_COLOR+set}" ]; then
@@ -542,7 +542,7 @@ fi
 if [ -z "${CARGO_TERM_COLOR+set}" ]; then
   echo CARGO_TERM_COLOR=always >> $GITHUB_ENV
 fi
- [199.911562ms]
+ [234.005295ms]
 [CI/Test]   ⚙  ::set-env:: CARGO_TERM_COLOR=always
 [CI/Test] ⭐ Run Main : enable Cargo sparse registry
 # implemented in 1.66, stabilized in 1.68, made default in 1.70
@@ -567,7 +567,7 @@ if [ -z "${CARGO_REGISTRIES_CRATES_IO_PROTOCOL+set}" -o -f "/tmp"/.implicit_carg
     echo CARGO_REGISTRIES_CRATES_IO_PROTOCOL=git >> $GITHUB_ENV
   fi
 fi
- [232.89466ms]
+ [259.105647ms]
 [CI/Test] ⭐ Run Main : work around spurious network errors in curl 8.0
 # https://rust-lang.zulipchat.com/#narrow/stream/246057-t-cargo/topic/timeout.20investigation
 if rustc +stable --version --verbose | grep -q '^release: 1\.7[01]\.'; then
@@ -579,7 +579,7 @@ fi
 if rustc +stable --version --verbose | grep -q '^release: 1\.7[01]\.'; then
   echo CARGO_HTTP_MULTIPLEXING=false >> $GITHUB_ENV
 fi
- [212.110148ms]
+ [197.20058ms]
 [CI/Test] ⭐ Run Main rustc +stable --version --verbose
 [CI/Test]   🐳  docker exec cmd=[bash --noprofile --norc -e -o pipefail /var/run/act/workflow/1-composite-12.sh] user= workdir=
 [CI/Test]   | rustc 1.93.0 (254b59607 2026-01-19)
@@ -589,50 +589,50 @@ fi
 [CI/Test]   | host: x86_64-unknown-linux-gnu
 [CI/Test]   | release: 1.93.0
 [CI/Test]   | LLVM version: 21.1.8
-[CI/Test]   ✅  Success - Main rustc +stable --version --verbose [223.765683ms]
+[CI/Test]   ✅  Success - Main rustc +stable --version --verbose [216.169574ms]
 [CI/Test]   ⚙  ::set-output:: cachekey=20260119254b
 [CI/Test]   ⚙  ::set-output:: name=stable
-[CI/Test]   ✅  Success - Main Setup Rust [33.219570919s]
+[CI/Test]   ✅  Success - Main Setup Rust [33.971575871s]
 [CI/Test] ⭐ Run Main Configure cargo for CI
 [CI/Test]   🐳  docker exec cmd=[bash -e /var/run/act/workflow/2] user= workdir=gsnake-levels
-[CI/Test]   ✅  Success - Main Configure cargo for CI [188.502839ms]
+[CI/Test]   ✅  Success - Main Configure cargo for CI [195.308643ms]
 [CI/Test] ⭐ Run Main Configure git to use HTTPS for all GitHub repos
 [CI/Test]   🐳  docker exec cmd=[bash -e /var/run/act/workflow/3] user= workdir=
-[CI/Test]   ✅  Success - Main Configure git to use HTTPS for all GitHub repos [178.492972ms]
+[CI/Test]   ✅  Success - Main Configure git to use HTTPS for all GitHub repos [185.194377ms]
 [CI/Test]   🐳  docker exec cmd=[/opt/acttoolcache/node/18.20.8/x64/bin/node /var/run/act/workflow/hashfiles/index.js] user= workdir=
 [CI/Test] ⭐ Run Main Cache cargo registry
 [CI/Test]   🐳  docker cp src=/home/nntin/.cache/act/actions-cache@v4/ dst=/var/run/act/actions/actions-cache@v4/
 [CI/Test]   🐳  docker exec cmd=[/opt/acttoolcache/node/18.20.8/x64/bin/node /var/run/act/actions/actions-cache@v4/dist/restore/index.js] user= workdir=
 [CI/Test]   ⚙  ***
-[CI/Test]   | Cache Size: ~15 MB (15966432 B)
-[CI/Test]   | [command]/usr/bin/tar -xf /tmp/ba8d9329-5a74-4c97-946b-88b4b05948a5/cache.tzst -P -C /home/nntin/git/gSnake --use-compress-program unzstd
+[CI/Test]   | Cache Size: ~15 MB (15966651 B)
+[CI/Test]   | [command]/usr/bin/tar -xf /tmp/b72f0453-7a7a-4aee-8566-44ae699dfe92/cache.tzst -P -C /home/nntin/git/gSnake --use-compress-program unzstd
 [CI/Test]   | Cache restored successfully
-[CI/Test]   | Cache restored from key: linux-cargo-registry-457c03cb9ba28e676cf2fa58d4d997132df03df4e65001685b553813dbc5515f
-[CI/Test]   ✅  Success - Main Cache cargo registry [1.991270351s]
+[CI/Test]   | Cache restored from key: linux-cargo-registry-bae6382c438d36c23650848e3ab4d5b2fee856e3154289afc0608c7fff6aacec
+[CI/Test]   ✅  Success - Main Cache cargo registry [2.078261155s]
 [CI/Test]   ⚙  ::set-output:: cache-hit=true
 [CI/Test]   🐳  docker exec cmd=[/opt/acttoolcache/node/18.20.8/x64/bin/node /var/run/act/workflow/hashfiles/index.js] user= workdir=
 [CI/Test] ⭐ Run Main Cache cargo index
 [CI/Test]   🐳  docker cp src=/home/nntin/.cache/act/actions-cache@v4/ dst=/var/run/act/actions/actions-cache@v4/
 [CI/Test]   🐳  docker exec cmd=[/opt/acttoolcache/node/18.20.8/x64/bin/node /var/run/act/actions/actions-cache@v4/dist/restore/index.js] user= workdir=
-[CI/Test]   | Cache not found for input keys: Linux-cargo-index-457c03cb9ba28e676cf2fa58d4d997132df03df4e65001685b553813dbc5515f
-[CI/Test]   ✅  Success - Main Cache cargo index [561.911748ms]
+[CI/Test]   | Cache not found for input keys: Linux-cargo-index-bae6382c438d36c23650848e3ab4d5b2fee856e3154289afc0608c7fff6aacec
+[CI/Test]   ✅  Success - Main Cache cargo index [625.588284ms]
 [CI/Test]   🐳  docker exec cmd=[/opt/acttoolcache/node/18.20.8/x64/bin/node /var/run/act/workflow/hashfiles/index.js] user= workdir=
 [CI/Test] ⭐ Run Main Cache cargo build
 [CI/Test]   🐳  docker cp src=/home/nntin/.cache/act/actions-cache@v4/ dst=/var/run/act/actions/actions-cache@v4/
 [CI/Test]   🐳  docker exec cmd=[/opt/acttoolcache/node/18.20.8/x64/bin/node /var/run/act/actions/actions-cache@v4/dist/restore/index.js] user= workdir=
-[CI/Test]   | Cache not found for input keys: Linux-cargo-test-457c03cb9ba28e676cf2fa58d4d997132df03df4e65001685b553813dbc5515f
-[CI/Test]   ✅  Success - Main Cache cargo build [582.332801ms]
+[CI/Test]   | Cache not found for input keys: Linux-cargo-test-bae6382c438d36c23650848e3ab4d5b2fee856e3154289afc0608c7fff6aacec
+[CI/Test]   ✅  Success - Main Cache cargo build [649.318219ms]
 [CI/Test] ⭐ Run Main Test
 [CI/Test]   🐳  docker exec cmd=[bash -e /var/run/act/workflow/7] user= workdir=gsnake-levels
 [CI/Test]   | [1m[91merror[0m: could not find `Cargo.toml` in `/home/nntin/git/gSnake/gsnake-levels` or any parent directory
-[CI/Test]   ❌  Failure - Main Test [223.383496ms]
+[CI/Test]   ❌  Failure - Main Test [237.013835ms]
 [CI/Test] exitcode '101': failure
 [CI/Test]   🐳  docker exec cmd=[/opt/acttoolcache/node/18.20.8/x64/bin/node /var/run/act/workflow/hashfiles/index.js] user= workdir=
 [CI/Test]   🐳  docker exec cmd=[/opt/acttoolcache/node/18.20.8/x64/bin/node /var/run/act/workflow/hashfiles/index.js] user= workdir=
 [CI/Test]   🐳  docker exec cmd=[/opt/acttoolcache/node/18.20.8/x64/bin/node /var/run/act/workflow/hashfiles/index.js] user= workdir=
 [CI/Test] ⭐ Run Post Setup Rust
 [CI/Test]   🐳  docker cp src=/home/nntin/.cache/act/dtolnay-rust-toolchain@stable/ dst=/var/run/act/actions/dtolnay-rust-toolchain@stable/
-[CI/Test]   ✅  Success - Post Setup Rust [83.628813ms]
+[CI/Test]   ✅  Success - Post Setup Rust [89.02867ms]
 [CI/Test] ⭐ Run Complete job
 [CI/Test]   ✅  Success - Complete job
 [CI/Test] 🏁  Job failed
@@ -642,7 +642,7 @@ Error: Job 'Test' failed
 ### gsnake-levels/.github/workflows/ci.yml::build
 
 ```
-time="2026-01-29T20:28:23+01:00" level=info msg="Using docker host 'unix:///var/run/docker.sock', and daemon socket 'unix:///var/run/docker.sock'"
+time="2026-01-29T21:05:37+01:00" level=info msg="Using docker host 'unix:///var/run/docker.sock', and daemon socket 'unix:///var/run/docker.sock'"
 [CI/Build] ⭐ Run Set up job
 [CI/Build] 🚀  Start image=ghcr.io/catthehacker/ubuntu:act-latest
 [CI/Build]   🐳  docker pull image=ghcr.io/catthehacker/ubuntu:act-latest platform=linux/amd64 username= forcePull=true
@@ -652,7 +652,7 @@ time="2026-01-29T20:28:23+01:00" level=info msg="Using docker host 'unix:///var/
 [CI/Build]   ✅  Success - Set up job
 [CI/Build]   ☁  git clone 'https://github.com/dtolnay/rust-toolchain' # ref=stable
 [CI/Build] ⭐ Run Pre Setup Rust
-[CI/Build]   ✅  Success - Pre Setup Rust [65.697031ms]
+[CI/Build]   ✅  Success - Pre Setup Rust [66.136805ms]
 [CI/Build]   ☁  git clone 'https://github.com/actions/cache' # ref=v4
 [CI/Build] Non-terminating error while running 'git clone': some refs were not updated
 [CI/Build]   ☁  git clone 'https://github.com/actions/cache' # ref=v4
@@ -661,7 +661,7 @@ time="2026-01-29T20:28:23+01:00" level=info msg="Using docker host 'unix:///var/
 [CI/Build] Non-terminating error while running 'git clone': some refs were not updated
 [CI/Build] ⭐ Run Main Checkout submodule
 [CI/Build]   🐳  docker cp src=/home/nntin/git/gSnake/. dst=/home/nntin/git/gSnake/gsnake-levels
-[CI/Build]   ✅  Success - Main Checkout submodule [520.423252ms]
+[CI/Build]   ✅  Success - Main Checkout submodule [537.261108ms]
 [CI/Build] ⭐ Run Main Setup Rust
 [CI/Build]   🐳  docker cp src=/home/nntin/.cache/act/dtolnay-rust-toolchain@stable/ dst=/var/run/act/actions/dtolnay-rust-toolchain@stable/
 [CI/Build] ⭐ Run Main : parse toolchain version
@@ -701,7 +701,7 @@ elif [[ $toolchain =~ ^1\.[0-9]+$ ]]; then
 else
   echo "toolchain=$toolchain" >> $GITHUB_OUTPUT
 fi
- [213.530987ms]
+ [154.467927ms]
 [CI/Build]   ⚙  ::set-output:: toolchain=stable
 [CI/Build] ⭐ Run Main : construct rustup command line
 echo "targets=$(for t in ${targets//,/ }; do echo -n ' --target' $t; done)" >> $GITHUB_OUTPUT
@@ -712,7 +712,7 @@ echo "downgrade=" >> $GITHUB_OUTPUT
 echo "targets=$(for t in ${targets//,/ }; do echo -n ' --target' $t; done)" >> $GITHUB_OUTPUT
 echo "components=$(for c in ${components//,/ }; do echo -n ' --component' $c; done)" >> $GITHUB_OUTPUT
 echo "downgrade=" >> $GITHUB_OUTPUT
- [167.344658ms]
+ [179.55223ms]
 [CI/Build]   ⚙  ::set-output:: targets=
 [CI/Build]   ⚙  ::set-output:: components=
 [CI/Build]   ⚙  ::set-output:: downgrade=
@@ -721,7 +721,7 @@ echo CARGO_HOME=${CARGO_HOME:-"$HOME/.cargo"} >> $GITHUB_ENV
 [CI/Build]   🐳  docker exec cmd=[bash --noprofile --norc -e -o pipefail /var/run/act/workflow/1-composite-2.sh] user= workdir=
 [CI/Build]   ✅  Success - Main : set $CARGO_HOME
 echo CARGO_HOME=${CARGO_HOME:-"$HOME/.cargo"} >> $GITHUB_ENV
- [229.635712ms]
+ [276.196679ms]
 [CI/Build]   ⚙  ::set-env:: CARGO_HOME=/root/.cargo
 [CI/Build] ⭐ Run Main : install rustup if needed
 if ! command -v rustup &>/dev/null; then
@@ -753,7 +753,7 @@ if ! command -v rustup &>/dev/null; then
   curl --proto '=https' --tlsv1.2 --retry 10 --retry-connrefused --location --silent --show-error --fail https://sh.rustup.rs | sh -s -- --default-toolchain none -y
   echo "$CARGO_HOME/bin" >> $GITHUB_PATH
 fi
- [3.641318514s]
+ [3.630165979s]
 [CI/Build]   ⚙  ::add-path:: /root/.cargo/bin
 [CI/Build] ⭐ Run Main rustup toolchain install stable
 [CI/Build]   🐳  docker exec cmd=[bash --noprofile --norc -e -o pipefail /var/run/act/workflow/1-composite-5.sh] user= workdir=
@@ -769,7 +769,7 @@ fi
 [CI/Build]   |   stable-x86_64-unknown-linux-gnu installed - rustc 1.93.0 (254b59607 2026-01-19)
 [CI/Build]   | 
 [CI/Build]   | info: default toolchain set to 'stable-x86_64-unknown-linux-gnu'
-[CI/Build]   ✅  Success - Main rustup toolchain install stable [27.592847094s]
+[CI/Build]   ✅  Success - Main rustup toolchain install stable [26.879095609s]
 [CI/Build] ⭐ Run Main rustup default stable
 [CI/Build]   🐳  docker exec cmd=[bash --noprofile --norc -e -o pipefail /var/run/act/workflow/1-composite-6.sh] user= workdir=
 [CI/Build]   | info: using existing install for 'stable-x86_64-unknown-linux-gnu'
@@ -777,7 +777,7 @@ fi
 [CI/Build]   | info: default toolchain set to 'stable-x86_64-unknown-linux-gnu'
 [CI/Build]   |   stable-x86_64-unknown-linux-gnu unchanged - rustc 1.93.0 (254b59607 2026-01-19)
 [CI/Build]   | 
-[CI/Build]   ✅  Success - Main rustup default stable [283.357076ms]
+[CI/Build]   ✅  Success - Main rustup default stable [241.37138ms]
 [CI/Build] ⭐ Run Main : create cachekey
 DATE=$(rustc +stable --version --verbose | sed -ne 's/^commit-date: \(20[0-9][0-9]\)-\([01][0-9]\)-\([0-3][0-9]\)$/\1\2\3/p')
 HASH=$(rustc +stable --version --verbose | sed -ne 's/^commit-hash: //p')
@@ -787,7 +787,7 @@ echo "cachekey=$(echo $DATE$HASH | head -c12)" >> $GITHUB_OUTPUT
 DATE=$(rustc +stable --version --verbose | sed -ne 's/^commit-date: \(20[0-9][0-9]\)-\([01][0-9]\)-\([0-3][0-9]\)$/\1\2\3/p')
 HASH=$(rustc +stable --version --verbose | sed -ne 's/^commit-hash: //p')
 echo "cachekey=$(echo $DATE$HASH | head -c12)" >> $GITHUB_OUTPUT
- [360.456578ms]
+ [217.141108ms]
 [CI/Build]   ⚙  ::set-output:: cachekey=20260119254b
 [CI/Build] ⭐ Run Main : disable incremental compilation
 if [ -z "${CARGO_INCREMENTAL+set}" ]; then
@@ -798,7 +798,7 @@ fi
 if [ -z "${CARGO_INCREMENTAL+set}" ]; then
   echo CARGO_INCREMENTAL=0 >> $GITHUB_ENV
 fi
- [211.718779ms]
+ [189.945741ms]
 [CI/Build]   ⚙  ::set-env:: CARGO_INCREMENTAL=0
 [CI/Build] ⭐ Run Main : enable colors in Cargo output
 if [ -z "${CARGO_TERM_COLOR+set}" ]; then
@@ -809,7 +809,7 @@ fi
 if [ -z "${CARGO_TERM_COLOR+set}" ]; then
   echo CARGO_TERM_COLOR=always >> $GITHUB_ENV
 fi
- [205.005135ms]
+ [167.181007ms]
 [CI/Build]   ⚙  ::set-env:: CARGO_TERM_COLOR=always
 [CI/Build] ⭐ Run Main : enable Cargo sparse registry
 # implemented in 1.66, stabilized in 1.68, made default in 1.70
@@ -834,7 +834,7 @@ if [ -z "${CARGO_REGISTRIES_CRATES_IO_PROTOCOL+set}" -o -f "/tmp"/.implicit_carg
     echo CARGO_REGISTRIES_CRATES_IO_PROTOCOL=git >> $GITHUB_ENV
   fi
 fi
- [244.16166ms]
+ [210.702668ms]
 [CI/Build] ⭐ Run Main : work around spurious network errors in curl 8.0
 # https://rust-lang.zulipchat.com/#narrow/stream/246057-t-cargo/topic/timeout.20investigation
 if rustc +stable --version --verbose | grep -q '^release: 1\.7[01]\.'; then
@@ -846,7 +846,7 @@ fi
 if rustc +stable --version --verbose | grep -q '^release: 1\.7[01]\.'; then
   echo CARGO_HTTP_MULTIPLEXING=false >> $GITHUB_ENV
 fi
- [233.125948ms]
+ [222.867233ms]
 [CI/Build] ⭐ Run Main rustc +stable --version --verbose
 [CI/Build]   🐳  docker exec cmd=[bash --noprofile --norc -e -o pipefail /var/run/act/workflow/1-composite-12.sh] user= workdir=
 [CI/Build]   | rustc 1.93.0 (254b59607 2026-01-19)
@@ -856,50 +856,50 @@ fi
 [CI/Build]   | host: x86_64-unknown-linux-gnu
 [CI/Build]   | release: 1.93.0
 [CI/Build]   | LLVM version: 21.1.8
-[CI/Build]   ✅  Success - Main rustc +stable --version --verbose [290.280695ms]
-[CI/Build]   ⚙  ::set-output:: name=stable
+[CI/Build]   ✅  Success - Main rustc +stable --version --verbose [196.802854ms]
 [CI/Build]   ⚙  ::set-output:: cachekey=20260119254b
-[CI/Build]   ✅  Success - Main Setup Rust [36.115696874s]
+[CI/Build]   ⚙  ::set-output:: name=stable
+[CI/Build]   ✅  Success - Main Setup Rust [34.771025256s]
 [CI/Build] ⭐ Run Main Configure cargo for CI
 [CI/Build]   🐳  docker exec cmd=[bash -e /var/run/act/workflow/2] user= workdir=gsnake-levels
-[CI/Build]   ✅  Success - Main Configure cargo for CI [210.151508ms]
+[CI/Build]   ✅  Success - Main Configure cargo for CI [202.026401ms]
 [CI/Build] ⭐ Run Main Configure git to use HTTPS for all GitHub repos
 [CI/Build]   🐳  docker exec cmd=[bash -e /var/run/act/workflow/3] user= workdir=
-[CI/Build]   ✅  Success - Main Configure git to use HTTPS for all GitHub repos [226.872283ms]
+[CI/Build]   ✅  Success - Main Configure git to use HTTPS for all GitHub repos [203.901512ms]
 [CI/Build]   🐳  docker exec cmd=[/opt/acttoolcache/node/18.20.8/x64/bin/node /var/run/act/workflow/hashfiles/index.js] user= workdir=
 [CI/Build] ⭐ Run Main Cache cargo registry
 [CI/Build]   🐳  docker cp src=/home/nntin/.cache/act/actions-cache@v4/ dst=/var/run/act/actions/actions-cache@v4/
 [CI/Build]   🐳  docker exec cmd=[/opt/acttoolcache/node/18.20.8/x64/bin/node /var/run/act/actions/actions-cache@v4/dist/restore/index.js] user= workdir=
 [CI/Build]   ⚙  ***
-[CI/Build]   | Cache Size: ~15 MB (15966432 B)
-[CI/Build]   | [command]/usr/bin/tar -xf /tmp/5f2d310d-7359-4fc5-83ac-02641eb7e10b/cache.tzst -P -C /home/nntin/git/gSnake --use-compress-program unzstd
+[CI/Build]   | Cache Size: ~15 MB (15966651 B)
+[CI/Build]   | [command]/usr/bin/tar -xf /tmp/4854f7f5-505b-4842-b415-3fec9a82a0dd/cache.tzst -P -C /home/nntin/git/gSnake --use-compress-program unzstd
 [CI/Build]   | Cache restored successfully
-[CI/Build]   | Cache restored from key: linux-cargo-registry-457c03cb9ba28e676cf2fa58d4d997132df03df4e65001685b553813dbc5515f
-[CI/Build]   ✅  Success - Main Cache cargo registry [1.858296025s]
+[CI/Build]   | Cache restored from key: linux-cargo-registry-bae6382c438d36c23650848e3ab4d5b2fee856e3154289afc0608c7fff6aacec
+[CI/Build]   ✅  Success - Main Cache cargo registry [1.956494737s]
 [CI/Build]   ⚙  ::set-output:: cache-hit=true
 [CI/Build]   🐳  docker exec cmd=[/opt/acttoolcache/node/18.20.8/x64/bin/node /var/run/act/workflow/hashfiles/index.js] user= workdir=
 [CI/Build] ⭐ Run Main Cache cargo index
 [CI/Build]   🐳  docker cp src=/home/nntin/.cache/act/actions-cache@v4/ dst=/var/run/act/actions/actions-cache@v4/
 [CI/Build]   🐳  docker exec cmd=[/opt/acttoolcache/node/18.20.8/x64/bin/node /var/run/act/actions/actions-cache@v4/dist/restore/index.js] user= workdir=
-[CI/Build]   | Cache not found for input keys: Linux-cargo-index-457c03cb9ba28e676cf2fa58d4d997132df03df4e65001685b553813dbc5515f
-[CI/Build]   ✅  Success - Main Cache cargo index [707.677259ms]
+[CI/Build]   | Cache not found for input keys: Linux-cargo-index-bae6382c438d36c23650848e3ab4d5b2fee856e3154289afc0608c7fff6aacec
+[CI/Build]   ✅  Success - Main Cache cargo index [564.893375ms]
 [CI/Build]   🐳  docker exec cmd=[/opt/acttoolcache/node/18.20.8/x64/bin/node /var/run/act/workflow/hashfiles/index.js] user= workdir=
 [CI/Build] ⭐ Run Main Cache cargo build
 [CI/Build]   🐳  docker cp src=/home/nntin/.cache/act/actions-cache@v4/ dst=/var/run/act/actions/actions-cache@v4/
 [CI/Build]   🐳  docker exec cmd=[/opt/acttoolcache/node/18.20.8/x64/bin/node /var/run/act/actions/actions-cache@v4/dist/restore/index.js] user= workdir=
-[CI/Build]   | Cache not found for input keys: Linux-cargo-build-457c03cb9ba28e676cf2fa58d4d997132df03df4e65001685b553813dbc5515f
-[CI/Build]   ✅  Success - Main Cache cargo build [653.746722ms]
+[CI/Build]   | Cache not found for input keys: Linux-cargo-build-bae6382c438d36c23650848e3ab4d5b2fee856e3154289afc0608c7fff6aacec
+[CI/Build]   ✅  Success - Main Cache cargo build [634.513603ms]
 [CI/Build] ⭐ Run Main Build
 [CI/Build]   🐳  docker exec cmd=[bash -e /var/run/act/workflow/7] user= workdir=gsnake-levels
 [CI/Build]   | [1m[91merror[0m: could not find `Cargo.toml` in `/home/nntin/git/gSnake/gsnake-levels` or any parent directory
-[CI/Build]   ❌  Failure - Main Build [397.186917ms]
+[CI/Build]   ❌  Failure - Main Build [217.742647ms]
 [CI/Build] exitcode '101': failure
 [CI/Build]   🐳  docker exec cmd=[/opt/acttoolcache/node/18.20.8/x64/bin/node /var/run/act/workflow/hashfiles/index.js] user= workdir=
 [CI/Build]   🐳  docker exec cmd=[/opt/acttoolcache/node/18.20.8/x64/bin/node /var/run/act/workflow/hashfiles/index.js] user= workdir=
 [CI/Build]   🐳  docker exec cmd=[/opt/acttoolcache/node/18.20.8/x64/bin/node /var/run/act/workflow/hashfiles/index.js] user= workdir=
 [CI/Build] ⭐ Run Post Setup Rust
 [CI/Build]   🐳  docker cp src=/home/nntin/.cache/act/dtolnay-rust-toolchain@stable/ dst=/var/run/act/actions/dtolnay-rust-toolchain@stable/
-[CI/Build]   ✅  Success - Post Setup Rust [111.057183ms]
+[CI/Build]   ✅  Success - Post Setup Rust [82.102775ms]
 [CI/Build] ⭐ Run Complete job
 [CI/Build]   ✅  Success - Complete job
 [CI/Build] 🏁  Job failed
@@ -909,7 +909,7 @@ Error: Job 'Build' failed
 ### gsnake-specs/.github/workflows/ci.yml::validate
 
 ```
-time="2026-01-29T20:29:59+01:00" level=info msg="Using docker host 'unix:///var/run/docker.sock', and daemon socket 'unix:///var/run/docker.sock'"
+time="2026-01-29T21:06:32+01:00" level=info msg="Using docker host 'unix:///var/run/docker.sock', and daemon socket 'unix:///var/run/docker.sock'"
 [CI/validate] ⭐ Run Set up job
 [CI/validate] 🚀  Start image=ghcr.io/catthehacker/ubuntu:act-latest
 [CI/validate]   🐳  docker pull image=ghcr.io/catthehacker/ubuntu:act-latest platform=linux/amd64 username= forcePull=true
@@ -919,12 +919,12 @@ time="2026-01-29T20:29:59+01:00" level=info msg="Using docker host 'unix:///var/
 [CI/validate]   ✅  Success - Set up job
 [CI/validate] ⭐ Run Main Checkout gsnake-specs
 [CI/validate]   🐳  docker cp src=/home/nntin/git/gSnake/. dst=/home/nntin/git/gSnake/gsnake-specs
-[CI/validate]   ✅  Success - Main Checkout gsnake-specs [655.726853ms]
+[CI/validate]   ✅  Success - Main Checkout gsnake-specs [476.542077ms]
 [CI/validate] ⭐ Run Main Verify repository structure
 [CI/validate]   🐳  docker exec cmd=[bash -e /var/run/act/workflow/1] user= workdir=gsnake-specs
 [CI/validate]   | Verifying gsnake-specs structure...
 [CI/validate]   | ✗ Missing directory: deployment
-[CI/validate]   ❌  Failure - Main Verify repository structure [224.824736ms]
+[CI/validate]   ❌  Failure - Main Verify repository structure [153.05336ms]
 [CI/validate] exitcode '1': failure
 [CI/validate] ⭐ Run Complete job
 [CI/validate]   ✅  Success - Complete job
@@ -934,4 +934,4 @@ Error: Job 'validate' failed
 
 
 ---
-Completed: Thu Jan 29 20:30:02 CET 2026
+Completed: Thu Jan 29 21:07:23 CET 2026
