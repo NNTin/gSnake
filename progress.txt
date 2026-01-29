@@ -312,3 +312,26 @@
   - Known limitations help set expectations for developers trying to run CI locally
   - Installation instructions should cover all major platforms (macOS, Linux, Windows)
 ---
+## 2026-01-29 - US-023
+- Completed comprehensive architecture documentation in gsnake-specs/tasks/repo-architecture.md
+- All acceptance criteria met:
+  - ✅ Two dependency modes already documented (Standalone git URLs, Root repo local paths)
+  - ✅ Mermaid diagram already shows conditional dependency resolution
+  - ✅ Added "Building Standalone Submodules" section with prerequisites and build instructions for all 5 submodules
+  - ✅ Added "CI/CD Strategy" section documenting all workflows, design principles, and nektos/act compatibility
+  - ✅ Added "Status and Milestones" section marking 5 resolved pain points (WEB, LEVELS, EDITOR builds, CI, docs)
+  - ✅ Linked to each submodule's README.md for detailed build instructions
+  - ✅ Documented versioning strategy (root repo semver, submodules track main branch)
+  - ✅ Updated future goals section declaring feature complete
+- Files changed:
+  - gsnake-specs/tasks/repo-architecture.md (+372 lines, now 818 lines total)
+  - Root repo: prd.json (marked US-023 as passing), gsnake-specs submodule pointer
+- **Learnings for future iterations:**
+  - Architecture documentation should be structured: Overview → Strategy → Implementation → Troubleshooting → Status
+  - "Building Standalone Submodules" provides concrete examples for each technology stack (Rust, JavaScript, Markdown)
+  - CI/CD documentation should explain both what each workflow does AND the design principles behind them
+  - Status section with resolved pain points gives clear before/after comparison
+  - Versioning model section clarifies different approaches: root repo (semver) vs submodules (main branch tracking) vs local dev (filesystem)
+  - Future goals should state when features are complete, not just list aspirational items
+  - Documentation file grew from 446 to 818 lines - comprehensive coverage achieved
+---
