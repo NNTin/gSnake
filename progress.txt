@@ -127,3 +127,18 @@
   - gsnake-web is a git submodule, so changes must be committed within the submodule first, then root repo updated
 ---
 
+## 2026-01-29 - US-009
+- Verified that gsnake-web/scripts/detect-local-deps.js already exists with complete auto-detection logic
+- All acceptance criteria met:
+  - ✅ Detection script exists and checks for ../.git and ../gsnake-core/Cargo.toml (lines 22-26)
+  - ✅ Auto-detection implemented: switches to file:../gsnake-core/engine/bindings/wasm/pkg in root repo mode (lines 35-56)
+  - ✅ Integrated into build process via preinstall hook in package.json (line 7)
+- Script tested successfully: correctly detects root repo context and confirms local dependency is configured
+- Files reviewed: gsnake-web/scripts/detect-local-deps.js, gsnake-web/package.json
+- **Learnings for future iterations:**
+  - US-009 was completed as part of US-008 work - the detection script is fully functional
+  - The preinstall hook runs before npm install, ensuring the correct dependency is always configured
+  - Script provides helpful logging to show which mode is detected and what actions are taken
+  - In root repo mode, script validates that WASM pkg exists and exits with error if missing
+---
+

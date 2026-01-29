@@ -130,8 +130,8 @@
         "Integrate detection script into gsnake-web build process (preinstall or custom install script)"
       ],
       "priority": 9,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Detection script exists and is integrated as preinstall hook. Checks for ../.git and ../gsnake-core/Cargo.toml to detect root repo. Automatically switches between local file: path and git dependency."
     },
     {
       "id": "US-010",
