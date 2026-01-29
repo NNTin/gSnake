@@ -172,8 +172,8 @@
         "Workflow runs on: push to main, pull requests, workflow_dispatch"
       ],
       "priority": 12,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "CI workflow exists at gsnake-web/.github/workflows/ci.yml with all required jobs: build, typecheck, test. Uses standard actions (actions/checkout@v4, actions/setup-node@v4) compatible with nektos/act. Includes built-in npm caching via actions/setup-node. Workflow triggers configured correctly. Tested: npm run check and npm test both pass."
     },
     {
       "id": "US-013",

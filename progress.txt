@@ -175,3 +175,21 @@
   - This ensures type safety between WASM backend and TypeScript frontend
 ---
 
+## 2026-01-29 - US-012
+- Verified that gsnake-web/.github/workflows/ci.yml already exists with complete CI workflow
+- All acceptance criteria met:
+  - ✅ CI workflow with three jobs: build, typecheck, test (all jobs include npm ci for install)
+  - ✅ Compatible with nektos/act (uses standard actions: actions/checkout@v4, actions/setup-node@v4)
+  - ✅ Triggers configured: push to main, pull requests, workflow_dispatch (lines 3-8)
+  - ✅ Built-in npm caching via actions/setup-node@v4 (cache-dependency-path: gsnake-web/package-lock.json)
+- Quality checks verified: npm run check (0 errors, 0 warnings), npm test (41 tests passed)
+- Files reviewed: gsnake-web/.github/workflows/ci.yml
+- **Learnings for future iterations:**
+  - US-012 was already completed in previous work (commit 9b94377, though message said US-013)
+  - The CI workflow is designed for standalone mode: preinstall script switches to git dependency automatically
+  - In standalone CI, npm fetches prebuilt WASM artifacts from main branch via git dependency
+  - actions/setup-node@v4 includes built-in npm caching using cache-dependency-path parameter
+  - Each job (build, typecheck, test) runs npm ci independently, ensuring clean install for parallel execution
+  - gsnake-web is a git submodule, so changes must be committed within the submodule directory
+---
+
