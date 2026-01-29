@@ -193,3 +193,18 @@
   - gsnake-web is a git submodule, so changes must be committed within the submodule directory
 ---
 
+## 2026-01-29 - US-013
+- Updated gsnake-web/README.md with comprehensive standalone build instructions
+- All acceptance criteria met:
+  - ✅ Standalone build requirements documented (Node.js 18+, npm, git, prebuilt WASM)
+  - ✅ Auto-detection behavior documented with clear detection logic and mode explanations
+  - ✅ Troubleshooting section added with 7 common issues and solutions
+- Files changed: gsnake-web/README.md
+- Quality checks passed: npm run check succeeded (0 errors, 0 warnings)
+- **Learnings for future iterations:**
+  - README structure should mirror implementation: standalone instructions first, then auto-detection details
+  - Troubleshooting sections should use Problem/Cause/Solution format for clarity
+  - Document both "what happens" (technical behavior) and "how to use" (user commands)
+  - Git dependency syntax for subdirectories: git+https://repo.git#branch:path/to/subdir
+---
+

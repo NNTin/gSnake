@@ -185,8 +185,8 @@
         "Include troubleshooting section"
       ],
       "priority": 13,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "README updated with comprehensive standalone build instructions, auto-detection behavior documentation, and troubleshooting section. Covers requirements, build steps, detection logic, and common issues with solutions."
     },
     {
       "id": "US-014",
