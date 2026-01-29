@@ -246,3 +246,18 @@
   - gsnake-editor is a git submodule, so changes must be committed within the submodule directory first
   - Workflow follows same pattern as gsnake-web: checkout to submodule path, cache npm, run commands with working-directory
 ---
+## 2026-01-29 - US-016
+- Updated gsnake-editor/README.md with comprehensive standalone build documentation
+- All acceptance criteria met:
+  - ✅ Documented standalone build with two testing options: run gsnake-web locally or set VITE_GSNAKE_WEB_URL
+  - ✅ Documented integration test setup with clear examples for both local and remote gsnake-web
+  - ✅ Added troubleshooting section with 4 common issues: integration tests skipped, build failures, dev server issues, type checking failures
+- Files changed: gsnake-editor/README.md (added 111 lines)
+- Quality checks passed: npm run check succeeded (0 errors, 0 warnings)
+- **Learnings for future iterations:**
+  - Standalone build documentation should clearly separate unit tests (always work) from integration tests (require external service)
+  - Integration test documentation should provide both local and remote setup options for flexibility
+  - Troubleshooting sections should use Problem/Cause/Solution format for clarity
+  - README structure should progress from prerequisites → installation → building → testing → troubleshooting
+  - Documentation should explain graceful degradation (unit tests pass even when integration tests are skipped)
+---

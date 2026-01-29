@@ -229,8 +229,8 @@
         "Include troubleshooting section"
       ],
       "priority": 16,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "README updated with comprehensive standalone build instructions: Standalone Build section with prerequisites, Testing section with unit and integration test setup (two options: local gsnake-web or VITE_GSNAKE_WEB_URL), and Troubleshooting section with 4 common issues and solutions."
     },
     {
       "id": "US-017",
