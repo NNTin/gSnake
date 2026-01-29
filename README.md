@@ -36,4 +36,69 @@ Unlike traditional Snake games that rely on reflexes, Gravity Snake is a puzzle 
 
 ---
 
+## Developer Documentation
+
+### Repository Structure
+
+This is a monorepo containing several submodules:
+
+- **gsnake-core** - Rust game engine (part of root repo, not a submodule)
+- **gsnake-web** - Svelte web UI (git submodule)
+- **gsnake-editor** - Level editor (git submodule)
+- **gsnake-levels** - Level definitions and renderer (git submodule)
+- **gsnake-specs** - Documentation and specifications (git submodule)
+
+Each submodule can build and test independently using git branch dependencies.
+
+### Submodule Dependency Resolution
+
+The repository supports two working modes:
+
+1. **Root repository mode** (this repo with submodules): Uses local paths for fast development
+2. **Standalone submodule mode**: Uses git dependencies to build independently
+
+**Auto-detection:**
+
+Build scripts automatically detect which mode they're running in by checking for `../.git` and `../gsnake-core`.
+
+**Detection script:**
+
+```bash
+source scripts/detect-repo-context.sh
+
+if [ "$GSNAKE_ROOT_REPO" = "true" ]; then
+  echo "Running in root repo - using local paths"
+  # GSNAKE_CORE_PATH, GSNAKE_WEB_PATH, etc. are available
+else
+  echo "Running standalone - using git dependencies"
+fi
+```
+
+For more details, see:
+- [Repository Architecture](gsnake-specs/tasks/repo-architecture.md)
+- [Standalone Submodules Build PRD](gsnake-specs/tasks/prd-standalone-submodules-build.md)
+
+### Building
+
+**Root repository:**
+
+```bash
+# Clone with submodules
+git clone --recurse-submodules https://github.com/nntin/gSnake.git
+
+# Build WASM
+python3 scripts/build_wasm.py
+
+# Build web UI
+cd gsnake-web
+npm install
+npm run build
+```
+
+**Standalone submodules:**
+
+Each submodule can be cloned and built independently. See the README.md in each submodule for instructions.
+
+---
+
 Built with [Rust](https://www.rust-lang.org/) and [Svelte](https://svelte.dev/)
