@@ -146,8 +146,8 @@
         "npm run build succeeds in gsnake-web within root repo (using local WASM)"
       ],
       "priority": 10,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Created scripts/build-wasm.js that conditionally builds WASM in root repo mode and skips in standalone mode. Updated prebuild script to run WASM build before tests. All build, check, and test commands verified working in root repo mode. Standalone mode logic verified."
     },
     {
       "id": "US-011",

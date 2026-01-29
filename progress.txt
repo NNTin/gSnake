@@ -142,3 +142,21 @@
   - In root repo mode, script validates that WASM pkg exists and exits with error if missing
 ---
 
+## 2026-01-29 - US-010
+- Created scripts/build-wasm.js to conditionally handle WASM builds
+- All acceptance criteria met:
+  - ✅ Standalone mode: script detects and skips WASM build, expects prebuilt from git dependency
+  - ✅ Root repo mode: script runs python3 ../../scripts/build_wasm.py before build
+  - ✅ npm run build succeeds in root repo (tested with prebuild hook running WASM build + tests)
+  - ✅ npm run check succeeds (0 errors, 0 warnings)
+  - ✅ npm test succeeds (41 tests passed)
+  - ✅ Updated package.json: prebuild now runs "node scripts/build-wasm.js && npm test"
+- Files changed: gsnake-web/scripts/build-wasm.js (new), gsnake-web/package.json
+- Quality checks passed: npm run check, npm test, npm run build all succeed
+- **Learnings for future iterations:**
+  - The prebuild script runs automatically before build, ensuring WASM is always up-to-date
+  - Conditional build logic prevents errors in standalone mode where build scripts don't exist
+  - Using Node.js scripts instead of shell scripts improves cross-platform compatibility
+  - spawnSync with stdio: 'inherit' passes through all output from child processes
+---
+
