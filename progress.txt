@@ -261,3 +261,22 @@
   - README structure should progress from prerequisites → installation → building → testing → troubleshooting
   - Documentation should explain graceful degradation (unit tests pass even when integration tests are skipped)
 ---
+
+## 2026-01-29 - US-017
+- Verified gsnake-specs standalone build status
+- All acceptance criteria met:
+  - ✅ All references to sibling repos are documentation references (explaining how dependency resolution works), not build dependencies
+  - ✅ No mkdocs build (not applicable - pure Markdown documentation)
+  - ✅ No Python dependencies (no requirements.txt or pyproject.toml files)
+  - ✅ CI workflow exists at .github/workflows/ci.yml with three jobs: markdown-lint, link-check, validate
+  - ✅ Repository structure validated: 66 Markdown files, all 11 key directories present
+- Files reviewed: gsnake-specs/README.md, gsnake-specs/.github/workflows/ci.yml, gsnake-specs/.markdown-link-check.json
+- Quality checks: Structure validation passed, all directories exist
+- **Learnings for future iterations:**
+  - gsnake-specs is unique among submodules - it's pure documentation with no build process
+  - The README already documents standalone build status comprehensively
+  - References to `../gsnake-core` and `file:../` in docs are examples explaining other submodules' behavior, not dependencies
+  - gsnake-specs has no npm/cargo/pip dependencies - it's immediately usable after clone
+  - CI workflow validates Markdown quality, link integrity, and repository structure
+  - This was a verification-only story - no code changes needed
+---
