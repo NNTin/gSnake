@@ -182,6 +182,101 @@ npm run build
 
 Each submodule can be cloned and built independently. See the README.md in each submodule for instructions.
 
+### Testing CI Locally
+
+All submodule CI workflows are designed to be compatible with [nektos/act](https://github.com/nektos/act), a tool for running GitHub Actions locally.
+
+#### Installation
+
+**macOS:**
+```bash
+brew install act
+```
+
+**Linux:**
+```bash
+curl -s https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash
+```
+
+**Windows:**
+```powershell
+choco install act-cli
+```
+
+#### Usage
+
+Test individual workflows in any submodule:
+
+**gsnake-core (Rust):**
+```bash
+cd gsnake-core
+act -j build    # Test build job
+act -j test     # Test test job
+act -j wasm     # Test WASM build job
+```
+
+**gsnake-web (TypeScript/Svelte):**
+```bash
+cd gsnake-web
+act -j build      # Test build job
+act -j typecheck  # Test typecheck job
+act -j test       # Test test job
+```
+
+**gsnake-levels (Rust):**
+```bash
+cd gsnake-levels
+act -j build  # Test build job
+act -j test   # Test test job
+```
+
+**gsnake-editor (TypeScript/Svelte):**
+```bash
+cd gsnake-editor
+act -j build      # Test build job
+act -j typecheck  # Test typecheck job
+act -j test       # Test test job
+```
+
+**gsnake-specs (Markdown docs):**
+```bash
+cd gsnake-specs
+act -j markdown-lint  # Test markdown linting
+act -j link-check     # Test link checking
+act -j validate       # Test structure validation
+```
+
+#### Known Limitations
+
+1. **Docker requirement:** `act` requires Docker to be installed and running
+2. **Cache behavior:** actions/cache may behave differently locally than on GitHub
+3. **WASM build:** The WASM job in gsnake-core may be slow due to wasm-pack installation
+4. **Link checking:** The gsnake-specs link-check job may fail due to network issues or rate limits
+
+#### Alternative: Manual Testing
+
+If `act` is not available, you can manually test the same commands that CI runs:
+
+**Rust projects:**
+```bash
+cargo build --verbose
+cargo test --verbose
+```
+
+**JavaScript projects:**
+```bash
+npm ci
+npm run build
+npm run check
+npm test
+```
+
+**gsnake-specs:**
+```bash
+npx markdownlint '**/*.md'
+npx markdown-link-check README.md
+```
+
 ---
 
 Built with [Rust](https://www.rust-lang.org/) and [Svelte](https://svelte.dev/)
