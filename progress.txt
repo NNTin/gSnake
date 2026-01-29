@@ -280,3 +280,17 @@
   - CI workflow validates Markdown quality, link integrity, and repository structure
   - This was a verification-only story - no code changes needed
 ---
+## 2026-01-29 - US-021
+- Documented root repo override mechanism in root README.md
+- Added comprehensive "Local Development Overrides" section to gsnake-specs/tasks/repo-architecture.md
+- Files changed:
+  - README.md: Expanded Submodule Dependency Resolution section (+83 lines)
+  - gsnake-specs/tasks/repo-architecture.md: Added Local Development Overrides section (+190 lines)
+- **Learnings for future iterations:**
+  - The detection mechanism is implemented differently in Rust (build.rs with .cargo/config.toml patch) vs JavaScript (preinstall script modifying package.json)
+  - Root repo detection script at scripts/detect-repo-context.sh exports GSNAKE_ROOT_REPO and path variables
+  - Documentation should explain both "how it works" (implementation) and "how to use" (user perspective)
+  - Include verification commands (cargo tree, npm ls) to help debug which mode is active
+  - Troubleshooting sections should address both detection failures and forced standalone testing
+  - Submodule commits must happen within the submodule directory first, then root repo updates the pointer
+---

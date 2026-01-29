@@ -296,8 +296,8 @@
         "Include examples and troubleshooting"
       ],
       "priority": 21,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Root README.md expanded with detailed auto-detection mechanism, environment variables, override explanations, examples, and troubleshooting. Added comprehensive 'Local Development Overrides' section to repo-architecture.md with detection mechanism details, Rust/JavaScript implementation examples, verification commands, and links to submodule READMEs."
     },
     {
       "id": "US-022",
