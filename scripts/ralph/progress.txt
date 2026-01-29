@@ -380,3 +380,26 @@ Started: Tue Jan 27 22:11:52 CET 2026
   - Environment variables are exported so they persist in the calling shell
   - [ -d ] checks for directory existence, [ -e ] checks for any file/directory existence
 ---
+## 2026-01-29 10:59 - US-020
+- Updated root repo build scripts with context detection documentation
+- Modified scripts/build_wasm.py:
+  - Added comprehensive docstring explaining dependency resolution
+  - Added explicit check for gsnake-core existence (root repo validation)
+  - Added clear error messages if not in root repo context
+  - Added informative output showing build location
+- Modified scripts/generate_ts_types.py:
+  - Added comprehensive docstring explaining dependency resolution
+  - Added explicit check for gsnake-core existence (root repo validation)
+  - Added clear error messages if not in root repo context
+  - Added informative output showing where types are generated from
+- Both scripts tested and working correctly
+- Files changed: scripts/build_wasm.py, scripts/generate_ts_types.py
+- **Learnings for future iterations:**
+  - These scripts inherently work in root repo context only
+  - gsnake-core is part of the root repository (not a submodule), so these scripts don't need conditional git vs local logic
+  - The "detection" is really validation that we're in the correct context
+  - Python scripts use Path(__file__).resolve().parent.parent to find root directory
+  - Added .exists() checks to fail gracefully with helpful messages if gsnake-core not found
+  - Docstrings document that these are root-repo-only scripts
+  - This is different from submodule build scripts which need actual dual-mode detection
+---

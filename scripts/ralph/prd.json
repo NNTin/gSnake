@@ -361,8 +361,8 @@
         "Typecheck passes"
       ],
       "priority": 20,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Updated scripts with docstrings and context checks. Both scripts work in root repo only since gsnake-core is part of root."
     },
     {
       "id": "US-021",
