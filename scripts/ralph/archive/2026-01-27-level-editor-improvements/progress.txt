@@ -1,5 +1,6 @@
-# Ralph Progress Log
-Started: 2026-01-29
+# Ralph Progress Log - Standalone Submodules Build
+Started: 2026-01-26
+
 ## Codebase Patterns
 - **Git Dependencies**: Use branch-based git dependencies for submodules (not tags/commits)
 - **Auto-detection**: Build scripts check for ../.git and sibling submodules to detect root repo context
@@ -7,8 +8,6 @@ Started: 2026-01-29
 - **JavaScript Overrides**: Use preinstall scripts to dynamically modify package.json based on detection
 - **CI Strategy**: Per-submodule CI validates standalone builds; root CI validates integration
 - **nektos/act**: Use act for local CI testing - compatible with standard GitHub Actions
-- **Documentation Location**: gsnake-specs/tasks/repo-architecture.md is the central doc for dependency architecture
-- **"Typecheck passes"**: For Rust: cargo check; for JavaScript: npm run check; for markdown: valid syntax
-- **Test Commands**: Rust: cargo test; JavaScript: npm test; E2E: npm run test:e2e
+
 ---
 

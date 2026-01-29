@@ -37,5 +37,7 @@ dist-ssr
 Cargo.lock
 
 pkg/
+# Exception: commit WASM pkg for standalone builds
+!gsnake-core/engine/bindings/wasm/pkg/
 artifacts/
 TODO.md
