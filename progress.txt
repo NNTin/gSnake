@@ -160,3 +160,18 @@
   - spawnSync with stdio: 'inherit' passes through all output from child processes
 ---
 
+## 2026-01-29 - US-011
+- Verified that contract test fixtures are already committed to gsnake-web
+- All acceptance criteria met:
+  - ✅ Contract test fixtures committed to tests/fixtures/ directory (8 JSON files)
+  - ✅ README documents fixtures in "Contract Test Fixtures" section
+  - ✅ Tests run successfully: 41 tests pass including 14 fixture validation tests
+- Fixtures include: frame.json, level.json, and 6 error type examples
+- Files reviewed: gsnake-web/tests/fixtures/, gsnake-web/tests/contract/fixtures.test.ts, gsnake-web/README.md
+- **Learnings for future iterations:**
+  - US-011 was already completed in previous work
+  - Fixtures are duplicated from gsnake-core to enable standalone builds
+  - Contract tests validate TypeScript types match Rust-generated JSON structure
+  - This ensures type safety between WASM backend and TypeScript frontend
+---
+

@@ -159,8 +159,8 @@
         "Tests can run successfully in standalone mode"
       ],
       "priority": 11,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Contract test fixtures are committed to tests/fixtures/ directory. README documents the fixtures and explains they are duplicated from gsnake-core for standalone builds. All 41 tests pass including contract tests."
     },
     {
       "id": "US-012",
