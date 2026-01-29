@@ -313,3 +313,22 @@ Started: Tue Jan 27 22:11:52 CET 2026
   - gsnake-editor is a git submodule - changes committed in submodule first, then root repo updated
   - Typecheck uses svelte-check for .svelte files and tsc for .ts files
 ---
+## 2026-01-29 10:45 - US-017
+- Verified gsnake-specs builds standalone (no build tools required)
+- Enhanced README.md with comprehensive documentation:
+  - Repository overview and structure
+  - Standalone build status
+  - Documentation references vs build dependencies
+  - Usage instructions and contributing guidelines
+- Verified no broken internal links or external dependencies
+- Files changed: gsnake-specs/README.md
+- **Learnings for future iterations:**
+  - gsnake-specs is pure markdown documentation - no build process exists or is needed
+  - References to `../gsnake-*` in docs are **documentation references** (describing architecture), not build dependencies
+  - No mkdocs.yml, requirements.txt, or pyproject.toml - no Python build tools
+  - No npm/cargo - this is purely a documentation repository
+  - "Typecheck passes" for docs-only repos means verifying markdown syntax is valid
+  - Documentation repositories can reference sibling repos in content without creating build dependencies
+  - gsnake-specs was already standalone-ready - only needed better documentation
+  - Committed in submodule (gsnake-specs main branch), then updated submodule reference in root repo
+---
