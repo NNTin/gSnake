@@ -12,10 +12,8 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout submodule
+      - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          path: gsnake-core
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
@@ -46,10 +44,8 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout submodule
+      - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          path: gsnake-core
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
@@ -80,10 +76,8 @@ jobs:
     name: WASM Build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout submodule
+      - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          path: gsnake-core
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
