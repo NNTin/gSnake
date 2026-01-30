@@ -113,8 +113,8 @@
         "Typecheck passes"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "server.ts refactored to export app. Uses import.meta.url check to conditionally start server only when run directly. Typecheck passes."
     },
     {
       "id": "US-008",

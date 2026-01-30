@@ -472,3 +472,20 @@
   - The gsnake-editor submodule pointer 4c3b7a1 includes commit 50ced21, so US-006 work is already present
 ---
 
+## 2026-01-30 - US-007
+- Verified that gsnake-editor server.ts already exports the Express app for testing
+- All acceptance criteria met:
+  - ✅ server.ts exports the Express app instance (line 77: export { app })
+  - ✅ server.listen() moved to conditional block (lines 81-91)
+  - ✅ Server starts correctly when run directly using import.meta.url check
+  - ✅ Typecheck passes: 0 errors, 0 warnings
+- Files reviewed: gsnake-editor/server.ts
+- Refactoring was already committed in db808ac
+- **Learnings for future iterations:**
+  - The conditional server start uses import.meta.url to detect if module is main entry point
+  - This pattern works with ES modules and TypeScript: `import.meta.url.endsWith(process.argv[1])`
+  - Exporting the app separately from starting the server enables testing with supertest
+  - The app remains fully functional when imported (all routes and middleware configured)
+  - This is the standard pattern for testable Express apps in ES module projects
+---
+
