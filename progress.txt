@@ -671,3 +671,26 @@
   - This is expected behavior, not a workflow bug
 ---
 
+## 2026-01-30 - US-016
+- Added gsnake-core contract test steps to root CI workflow
+- All acceptance criteria met:
+  - ✅ Updated .github/workflows/ci.yml (root workflow)
+  - ✅ Rust already installed with dtolnay/rust-toolchain@stable
+  - ✅ cargo test already runs in gsnake-core workspace root
+  - ✅ Added cargo test --test contract_tests step in gsnake-core/engine/core
+  - ✅ Added cargo test generate_contract_fixtures step in gsnake-core/engine/core
+  - ✅ All 54 tests pass locally (37 unit tests, 16 contract tests, 1 wasm test)
+  - ✅ Typecheck passes
+- Files changed: .github/workflows/ci.yml (+8 lines)
+- Committed to root repo: commit f4e5503
+- **Learnings for future iterations:**
+  - The root workflow uses ci.yml (not test.yml as mentioned in PRD acceptance criteria)
+  - gsnake-core already had comprehensive test coverage in the CI workflow (build, test, wasm jobs)
+  - Contract tests are in tests/contract_tests.rs and verify TypeScript/Rust serialization compatibility
+  - cargo test --test contract_tests runs all 16 contract tests
+  - cargo test generate_contract_fixtures runs the specific fixture generation test
+  - The test job already had Rust installed and cargo test running at workspace root level
+  - Adding the contract test steps extends the test job with more specific test coverage
+  - All tests use --verbose flag for detailed output in CI logs
+  - working-directory parameter allows running tests in subdirectories like gsnake-core/engine/core
+---

@@ -5,7 +5,7 @@
 set -e
 
 # Parse arguments
-TOOL="claude"  # Default to amp for backwards compatibility
+TOOL="claude"  # Default to claude
 MAX_ITERATIONS=10
 
 while [[ $# -gt 0 ]]; do
@@ -38,6 +38,7 @@ PRD_FILE="$SCRIPT_DIR/prd.json"
 PROGRESS_FILE="$SCRIPT_DIR/progress.txt"
 ARCHIVE_DIR="$SCRIPT_DIR/archive"
 LAST_BRANCH_FILE="$SCRIPT_DIR/.last-branch"
+TEST_ACT_SCRIPT="$SCRIPT_DIR/../test/test_act.sh"
 
 # Archive previous run if branch changed
 if [ -f "$PRD_FILE" ] && [ -f "$LAST_BRANCH_FILE" ]; then
@@ -101,6 +102,11 @@ for i in $(seq 1 $MAX_ITERATIONS); do
     echo "Ralph completed all tasks!"
     echo "Completed at iteration $i of $MAX_ITERATIONS"
     exit 0
+  fi
+
+  # Run act tests between iterations; never fail the loop if tests fail.
+  if [ -f "$TEST_ACT_SCRIPT" ]; then
+    bash "$TEST_ACT_SCRIPT" || true
   fi
   
   echo "Iteration $i complete. Continuing..."

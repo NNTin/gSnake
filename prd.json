@@ -265,8 +265,8 @@
         "Typecheck passes"
       ],
       "priority": 16,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Added contract_tests and generate_contract_fixtures test steps to existing test job. All 54 tests pass including 16 contract tests."
     },
     {
       "id": "US-017",
