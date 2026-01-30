@@ -694,3 +694,28 @@
   - All tests use --verbose flag for detailed output in CI logs
   - working-directory parameter allows running tests in subdirectories like gsnake-core/engine/core
 ---
+## 2026-01-30 - US-017
+- Added E2E test infrastructure to root CI workflow at .github/workflows/ci.yml
+- All acceptance criteria met:
+  - ✅ Updated workflow to use actions/checkout@v4 with submodules: recursive
+  - ✅ Workflow installs Node 20 with actions/setup-node@v4 and npm caching
+  - ✅ Workflow installs Rust toolchain with dtolnay/rust-toolchain@stable
+  - ✅ Workflow installs wasm32-unknown-unknown target for WASM building
+  - ✅ Workflow installs wasm-pack via curl installer script
+  - ✅ Workflow includes cargo caching for registry, index, and target
+  - ✅ Workflow runs npm ci to install dependencies (including Playwright)
+  - ✅ Workflow runs npx playwright install --with-deps chromium
+  - ✅ Workflow runs npm run test:e2e
+  - ✅ YAML syntax validated successfully
+- Files changed: .github/workflows/ci.yml (+51 lines)
+- Committed to root repo: commit 1f8abd7
+- **Learnings for future iterations:**
+  - E2E tests require recursive submodule checkout to access gsnake-web, gsnake-editor, and gsnake-core
+  - The playwright.config.ts webServer configuration handles automatic WASM building and server startup
+  - build_fixture_wasm.sh requires wasm-pack to build WASM fixtures with custom levels.json
+  - Playwright install --with-deps chromium installs both the browser and system dependencies (fonts, libraries)
+  - The E2E test job is a comprehensive integration test that validates the entire stack
+  - npm ci in root directory installs all dependencies including @playwright/test from package.json
+  - The e2e-test job reuses cargo caching patterns from other jobs (wasm, build, test)
+  - Recursive submodules checkout is essential for E2E tests that span multiple submodules
+---

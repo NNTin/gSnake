@@ -283,8 +283,8 @@
         "Typecheck passes"
       ],
       "priority": 17,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Added e2e-test job to .github/workflows/ci.yml with recursive submodule checkout, Node 20, Rust stable with wasm32-unknown-unknown target, wasm-pack installation, npm ci, Playwright chromium browser installation with system dependencies, and npm run test:e2e step."
     },
     {
       "id": "US-018",
