@@ -36,3 +36,20 @@ Started: 2026-01-30
 - The typecheck passes, but E2E tests in the validate job are failing (14 failed tests) - this is a separate issue
 - Note: US-002 acceptance criteria is about typecheck passing, not the entire validate job passing
 ---
+## 2026-01-30 22:30 - US-003
+- Fixed gsnake-levels test workflow Cargo.toml path issue
+- Added directory resolution logic to test.yml workflow to handle different checkout scenarios (act vs GitHub Actions)
+- Fixed build.rs to create .cargo directory before writing config.toml
+- Files changed: 
+  - gsnake-levels/.github/workflows/test.yml (added directory resolution step)
+  - gsnake-levels/build.rs (added fs::create_dir_all before writing config)
+- Verified with: act -W gsnake-levels/.github/workflows/test.yml -j test --container-architecture linux/amd64
+- Test results: 17 unit tests passed + 3 integration tests passed
+
+**Learnings for future iterations:**
+- The act tool (nektos/act) handles checkout differently than GitHub Actions - it copies the entire repo instead of just the submodule
+- The ci.yml workflow (which passes) uses a "Resolve directory" pattern that checks multiple candidate paths: ".", "submodule-name", "submodule-name/submodule-name"
+- This pattern sets an env var (LEVELS_DIR) and uses it in all subsequent steps with working-directory: ${{ env.LEVELS_DIR }}
+- Build scripts that write to .cargo/config.toml must create the .cargo directory first with fs::create_dir_all
+- When fixing CI workflows, check if similar workflows already exist (ci.yml) and reuse their patterns
+---
