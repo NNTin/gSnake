@@ -618,3 +618,33 @@
   - Link checking could be made non-blocking with || true if cross-repo links are intentional
   - Consider documenting that repo-architecture.md is meant to be viewed in root repo context
 ---
+## 2026-01-30 - US-014
+- Created GitHub Actions test workflow for gsnake-web at .github/workflows/test.yml
+- All acceptance criteria met:
+  - ✅ Created gsnake-web/.github/workflows/test.yml (57 lines)
+  - ✅ Workflow triggers on push, pull_request, and workflow_dispatch
+  - ✅ Workflow uses ubuntu-latest only
+  - ✅ Workflow installs Node 20 with actions/setup-node@v4
+  - ✅ Workflow installs Rust with dtolnay/rust-toolchain@stable with wasm32-unknown-unknown target
+  - ✅ Workflow installs wasm-pack via curl script
+  - ✅ Workflow checks out gsnake-web into gsnake-web/
+  - ✅ Workflow checks out NNTin/gSnake into gsnake-root/
+  - ✅ Workflow creates symlink gsnake-core -> gsnake-root/gsnake-core
+  - ✅ Workflow creates symlink scripts -> gsnake-root/scripts
+  - ✅ Workflow runs python3 ../scripts/build_wasm.py from working-directory: gsnake-web
+  - ✅ Workflow runs npm ci with working-directory: gsnake-web
+  - ✅ Workflow runs npm test with working-directory: gsnake-web
+  - ✅ Workflow uses only public actions (actions/checkout@v4, actions/setup-node@v4, dtolnay/rust-toolchain@stable)
+  - ✅ All 41 tests pass locally
+- Files changed: gsnake-web/.github/workflows/test.yml (new, 57 lines)
+- Committed to gsnake-web submodule: commit 7afaf96
+- **Learnings for future iterations:**
+  - gsnake-web already had ci.yml for standalone mode, test.yml uses root repo approach
+  - The root repo approach builds WASM from source using symlinks to gsnake-core and scripts
+  - wasm-pack must be installed separately (not included in rust-toolchain action)
+  - The workflow uses cache-dependency-path to cache npm dependencies at gsnake-web/package-lock.json
+  - WASM build must happen before npm ci since preinstall script expects WASM artifacts
+  - The workflow structure mirrors gsnake-levels test.yml but adds WASM build steps
+  - Both ci.yml (standalone git deps) and test.yml (root repo symlinks) are valid testing approaches
+---
+
