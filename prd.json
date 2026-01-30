@@ -99,8 +99,8 @@
         "Typecheck passes"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "UI component tests for LandingPage.svelte created with @testing-library/svelte. All 8 tests passing, typecheck clean."
     },
     {
       "id": "US-007",

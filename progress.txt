@@ -452,3 +452,23 @@
   - jsdom is heavier but more compatible with browser APIs than happy-dom
 ---
 
+## 2026-01-30 - US-006
+- Verified that gsnake-editor UI component tests already exist and pass
+- All acceptance criteria met:
+  - ✅ Test file src/tests/LandingPage.test.ts renders LandingPage.svelte component
+  - ✅ Test imports from @testing-library/svelte (render, screen)
+  - ✅ Test imports @testing-library/jest-dom for assertions
+  - ✅ Test uses screen queries: getByRole, getByText for visible elements
+  - ✅ Test validates heading, description, and both buttons are in the document
+  - ✅ npm test passes: 8 tests total (2 types, 2 integration, 4 LandingPage)
+  - ✅ npm run check passes: 0 errors, 0 warnings
+- Files reviewed: gsnake-editor/src/tests/LandingPage.test.ts, gsnake-editor/src/lib/LandingPage.svelte
+- Test was already committed in 50ced21
+- **Learnings for future iterations:**
+  - LandingPage.test.ts was created in previous iteration, already committed to main branch
+  - Test suite uses @testing-library/svelte with jsdom environment for realistic browser DOM simulation
+  - Screen queries (getByRole, getByText) provide accessible, user-centric test assertions
+  - Integration tests gracefully skip when gsnake-web is unreachable, showing helpful warning messages
+  - The gsnake-editor submodule pointer 4c3b7a1 includes commit 50ced21, so US-006 work is already present
+---
+
