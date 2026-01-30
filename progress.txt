@@ -749,3 +749,29 @@
   - The workflow structure is act-compatible, the issue was in playwright config, not workflow YAML
   - Recursive submodule checkout works correctly with act (submodules: recursive)
 ---
+## 2026-01-30 - US-020
+- Enhanced documentation for running CI locally with act
+- All acceptance criteria met:
+  - ✅ Added section to root README.md about running tests locally with act
+  - ✅ Documented act installation for macOS, Linux, and Windows
+  - ✅ Included example commands for running workflows in each repo (gsnake-core, gsnake-web, gsnake-levels, gsnake-editor, gsnake-specs)
+  - ✅ Added root repository workflow commands with -W flag and job names
+  - ✅ Documented 7 known limitations with workarounds
+  - ✅ Included alternative manual testing commands for environments without act
+- Documentation updates:
+  - Added root repository section with commands for all 5 jobs (build, test, wasm, gsnake-editor-test, e2e-test)
+  - Enhanced known limitations section with 3 new items:
+    - External repo checkouts requiring GITHUB_TOKEN
+    - E2E test duration expectations (5+ minutes)
+    - Cross-repo link checking false positives in standalone mode
+  - Updated WASM build timing to ~30-40s (more precise than previous "slow" description)
+- Files changed: README.md (+18 lines in Testing CI Locally section)
+- **Learnings for future iterations:**
+  - The README already had good act documentation from US-022, needed enhancement for root repo usage
+  - act -W flag specifies workflow file path when running from different directory
+  - act -j flag specifies specific job to run (faster than running all jobs)
+  - Documentation should include timing expectations for long-running jobs
+  - Known limitations should include both problems and workarounds
+  - Alternative manual testing commands help contributors without Docker
+  - The Testing CI Locally section is now comprehensive for all repos and the root repo
+---

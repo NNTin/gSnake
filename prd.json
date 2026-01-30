@@ -329,8 +329,8 @@
         "Typecheck passes"
       ],
       "priority": 20,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Enhanced README.md with comprehensive act documentation: installation, usage for all 5 repos + root repo, 7 known limitations with workarounds, and alternative manual testing commands."
     }
   ]
 }
