@@ -510,3 +510,19 @@
   - Each test is self-contained: stores data if needed, then verifies behavior
 ---
 
+## 2026-01-30 - US-009
+- Added gsnake-editor test job to root CI workflow
+- All acceptance criteria met:
+  - ✅ Added gsnake-editor-test job to .github/workflows/ci.yml
+  - ✅ Job runs npm ci to install dependencies
+  - ✅ Job runs npm test after dependencies installed
+  - ✅ YAML syntax validated successfully
+- Files changed: .github/workflows/ci.yml (added 21 lines)
+- **Learnings for future iterations:**
+  - Root repo uses ci.yml, not test.yml - PRD used "test.yml" generically
+  - GitHub Actions jobs run in parallel by default unless dependencies specified
+  - actions/setup-node@v4 supports built-in npm caching with cache-dependency-path parameter
+  - Working-directory parameter ensures commands run in correct subdirectory
+  - CI workflow now tests both gsnake-core (Rust) and gsnake-editor (TypeScript)
+---
+
