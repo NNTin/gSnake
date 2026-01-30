@@ -174,8 +174,8 @@
         "Typecheck passes"
       ],
       "priority": 11,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Created .mlc.json config that ignores external HTTP/HTTPS links. Relative and internal links are checked. Script verified working."
     },
     {
       "id": "US-012",

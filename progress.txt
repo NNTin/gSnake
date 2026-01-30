@@ -551,3 +551,22 @@
   - npm install warnings about vulnerabilities are acceptable for dev dependencies
 ---
 
+## 2026-01-30 - US-011
+- Added markdown-link-check configuration to gsnake-specs
+- All acceptance criteria met:
+  - ✅ Created gsnake-specs/.mlc.json configuration file
+  - ✅ Config ignores external HTTP and HTTPS links (pattern: "^http://" and "^https://")
+  - ✅ Config allows relative and internal links to be checked (no patterns blocking them)
+  - ✅ npm run check:links executes successfully
+- Files changed:
+  - gsnake-specs/.mlc.json (new, 16 lines)
+- Committed to gsnake-specs submodule: commit 79f40c4
+- **Learnings for future iterations:**
+  - PRD specified .mlc.json (short name) vs existing .markdown-link-check.json (full name)
+  - External HTTP/HTTPS links cause CI flakiness when remote sites are down or slow
+  - Ignoring external links means most docs show "No hyperlinks found!" - expected behavior
+  - Relative links (./file.md, ../dir/file.md) are still checked for broken internal references
+  - Reduced timeout to 5s and retries to 0 since only checking local files
+  - The package.json check:links script references .mlc.json explicitly
+---
+
