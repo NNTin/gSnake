@@ -335,3 +335,26 @@
   - Future goals should state when features are complete, not just list aspirational items
   - Documentation file grew from 446 to 818 lines - comprehensive coverage achieved
 ---
+## 2026-01-30 - US-005
+- Added @testing-library/svelte, @testing-library/jest-dom, jsdom as dev dependencies to gsnake-editor
+- Updated vitest.config.ts to use jsdom environment instead of happy-dom
+- All acceptance criteria met:
+  - ✅ vitest, @testing-library/svelte, @testing-library/jest-dom, jsdom installed as dev dependencies
+  - ✅ Test script already exists in package.json: vitest run
+  - ✅ vitest.config.ts updated with environment: 'jsdom'
+  - ✅ npm install succeeded (64 new packages added)
+  - ✅ npm test runs successfully (4/4 tests passing)
+  - ✅ Typecheck passes (0 errors, 0 warnings)
+- Files changed:
+  - gsnake-editor/package.json (added testing library dependencies)
+  - gsnake-editor/package-lock.json (dependency tree updated)
+  - gsnake-editor/vitest.config.ts (changed environment from happy-dom to jsdom)
+- **Learnings for future iterations:**
+  - gsnake-editor already had test infrastructure with vitest and happy-dom
+  - The PRD required specific testing libraries (@testing-library/svelte, @testing-library/jest-dom) and jsdom environment
+  - Testing library provides better utilities for testing Svelte components than basic vitest
+  - jsdom is the standard DOM implementation for Node.js testing, while happy-dom is a lighter alternative
+  - gsnake-editor is a submodule - changes must be committed in the submodule first, then root repo updates the pointer
+  - The existing test suite already has 4 tests (2 type tests, 2 integration tests that gracefully skip when gsnake-web unreachable)
+---
+

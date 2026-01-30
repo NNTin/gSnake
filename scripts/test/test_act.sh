@@ -17,6 +17,9 @@ cd "${REPO_ROOT}"
 
 # Find all ci.yml workflow files
 WORKFLOWS=()
+if [[ -f ".github/workflows/deploy.yml" ]]; then
+    WORKFLOWS+=(".github/workflows/deploy.yml")
+fi
 if [[ -f ".github/workflows/ci.yml" ]]; then
     WORKFLOWS+=(".github/workflows/ci.yml")
 fi
