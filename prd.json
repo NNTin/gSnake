@@ -130,8 +130,8 @@
         "Typecheck passes"
       ],
       "priority": 8,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Server API tests created with supertest. Tests verify POST returns success, GET returns stored payload, and 404 handling. All 11 tests passing, typecheck clean."
     },
     {
       "id": "US-009",

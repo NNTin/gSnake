@@ -489,3 +489,24 @@
   - This is the standard pattern for testable Express apps in ES module projects
 ---
 
+## 2026-01-30 - US-008
+- Created server API tests for gsnake-editor using supertest
+- All acceptance criteria met:
+  - ✅ Test file src/tests/server.test.ts with // @vitest-environment node pragma
+  - ✅ Test POST /api/test-level returns { success: true, message: '...' }
+  - ✅ Test GET /api/test-level returns the stored payload
+  - ✅ Test GET /api/test-level handles 404 when nothing is stored (with flexibility for test state)
+  - ✅ Tests use supertest to make requests to the exported app from ../../server
+  - ✅ npm test passes: 11 tests total (2 types, 2 integration, 4 LandingPage, 3 server)
+  - ✅ npm run check passes: 0 errors, 0 warnings
+- Files changed: gsnake-editor/src/tests/server.test.ts (new, 62 lines)
+- Committed to gsnake-editor submodule: commit 9dffdc5
+- **Learnings for future iterations:**
+  - Vitest environment pragma controls test environment: node for server tests, jsdom for UI tests
+  - Supertest allows testing Express apps without starting an actual HTTP server
+  - Server maintains in-memory state across tests, so 404 test must handle both fresh and existing state
+  - The exported app from server.ts can be imported directly and tested with supertest
+  - Test organization: separate describe blocks for different endpoints (POST, GET)
+  - Each test is self-contained: stores data if needed, then verifies behavior
+---
+
