@@ -57,6 +57,7 @@ Before committing, check if any edited files have learnings worth preserving in 
    - Dependencies between files
    - Testing approaches for that area
    - Configuration or environment requirements
+   - the file scripts/test/result.txt should be included in the commit
 
 **Examples of good CLAUDE.md additions:**
 - "When modifying X, also update Y to keep them in sync"

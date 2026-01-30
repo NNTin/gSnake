@@ -52,4 +52,5 @@ Started: 2026-01-30
 - This pattern sets an env var (LEVELS_DIR) and uses it in all subsequent steps with working-directory: ${{ env.LEVELS_DIR }}
 - Build scripts that write to .cargo/config.toml must create the .cargo directory first with fs::create_dir_all
 - When fixing CI workflows, check if similar workflows already exist (ci.yml) and reuse their patterns
+- The act tool (nektos/act) checkouts the remote repository. Local unpushed changes are not seen.
 ---

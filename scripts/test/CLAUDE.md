@@ -2,7 +2,8 @@
 
 ## Overview
 
-This directory contains automated testing infrastructure for running GitHub Actions workflows locally using [nektos/act](https://github.com/nektos/act).
+This directory contains automated testing infrastructure for running GitHub Actions workflows locally using [nektos/act](https://github.com/nektos/act).  
+The act tool performs a remote checkout. Local unpushed commits are not seen. Before using the act tool synchronize the repos.
 
 ## Important Rules
 
