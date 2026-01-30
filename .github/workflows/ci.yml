@@ -72,6 +72,14 @@ jobs:
         run: cargo test --verbose
         working-directory: gsnake-core
 
+      - name: Test contract_tests
+        run: cargo test --test contract_tests --verbose
+        working-directory: gsnake-core/engine/core
+
+      - name: Test generate_contract_fixtures
+        run: cargo test generate_contract_fixtures --verbose
+        working-directory: gsnake-core/engine/core
+
   wasm:
     name: WASM Build
     runs-on: ubuntu-latest
@@ -108,3 +116,76 @@ jobs:
       - name: Build WASM
         run: wasm-pack build
         working-directory: gsnake-core/engine/bindings/wasm
+
+  gsnake-editor-test:
+    name: gsnake-editor Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: gsnake-editor/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: gsnake-editor
+
+      - name: Run tests
+        run: npm test
+        working-directory: gsnake-editor
+
+  e2e-test:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository with submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Cache cargo index
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Cache wasm build
+        uses: actions/cache@v4
+        with:
+          path: gsnake-core/target
+          key: ${{ runner.os }}-wasm-e2e-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        run: npm run test:e2e

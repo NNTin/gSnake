@@ -246,12 +246,31 @@ act -j link-check     # Test link checking
 act -j validate       # Test structure validation
 ```
 
+**Root repository (all tests):**
+```bash
+# Run individual jobs from root repo
+act -W .github/workflows/ci.yml -j build              # Test gsnake-core build
+act -W .github/workflows/ci.yml -j test               # Test gsnake-core tests
+act -W .github/workflows/ci.yml -j wasm               # Test WASM build
+act -W .github/workflows/ci.yml -j gsnake-editor-test # Test gsnake-editor
+act -W .github/workflows/ci.yml -j e2e-test           # Test E2E tests (slow)
+
+# Or run all jobs (this will take 15+ minutes):
+act -W .github/workflows/ci.yml
+```
+
 #### Known Limitations
 
 1. **Docker requirement:** `act` requires Docker to be installed and running
 2. **Cache behavior:** actions/cache may behave differently locally than on GitHub
-3. **WASM build:** The WASM job in gsnake-core may be slow due to wasm-pack installation
+3. **WASM build:** The WASM job in gsnake-core may be slow due to wasm-pack installation (~30-40s)
 4. **Link checking:** The gsnake-specs link-check job may fail due to network issues or rate limits
+5. **External repo checkouts:** Submodule test.yml workflows that checkout external repositories (gsnake-levels, gsnake-web) require a GitHub token:
+   ```bash
+   act -W .github/workflows/test.yml --secret GITHUB_TOKEN="your-token"
+   ```
+6. **E2E tests:** The root e2e-test job takes 5+ minutes due to WASM compilation, npm installs, and browser automation
+7. **Cross-repo links:** The gsnake-specs link-check may report false positives for relative links to sibling submodules (../../gsnake-*/README.md) when run in standalone mode
 
 #### Alternative: Manual Testing
 
