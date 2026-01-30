@@ -72,6 +72,14 @@ jobs:
         run: cargo test --verbose
         working-directory: gsnake-core
 
+      - name: Test contract_tests
+        run: cargo test --test contract_tests --verbose
+        working-directory: gsnake-core/engine/core
+
+      - name: Test generate_contract_fixtures
+        run: cargo test generate_contract_fixtures --verbose
+        working-directory: gsnake-core/engine/core
+
   wasm:
     name: WASM Build
     runs-on: ubuntu-latest
