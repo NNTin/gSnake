@@ -648,3 +648,26 @@
   - Both ci.yml (standalone git deps) and test.yml (root repo symlinks) are valid testing approaches
 ---
 
+## 2026-01-30 - US-015
+- Verified gsnake-web workflow with nektos/act
+- Workflow executed partially with act:
+  - ✅ Docker image: catthehacker/ubuntu:act-latest pulled and started
+  - ✅ Checkout gsnake-web step succeeded (local docker cp)
+  - ❌ Checkout NNTin/gSnake step failed: "Input required and not supplied: token"
+- **Known limitation identified:**
+  - act requires a valid GitHub token to checkout external repositories (NNTin/gSnake)
+  - This is the same limitation documented in US-004 for gsnake-levels
+  - The workflow structure itself is correct and act-compatible (uses standard actions)
+  - Workaround: Users must provide GITHUB_TOKEN via `--secret GITHUB_TOKEN="<token>"`
+- Command tested: `act -P ubuntu-latest=catthehacker/ubuntu:act-latest -W .github/workflows/test.yml`
+- Files reviewed: gsnake-web/.github/workflows/test.yml
+- **Learnings for future iterations:**
+  - Both gsnake-levels and gsnake-web test.yml workflows share the same act limitation
+  - The limitation is inherent to act's design: external repo checkouts require GitHub authentication
+  - Local checkout steps (first repo) work fine via docker cp mechanism
+  - To run successfully with act: `act -P ubuntu-latest=catthehacker/ubuntu:act-latest -W .github/workflows/test.yml --secret GITHUB_TOKEN="<your-token>"`
+  - Alternative: Use GitHub's actual CI for workflows that checkout external repos
+  - The workflow validates correctly up to the external checkout step - structure is sound
+  - This is expected behavior, not a workflow bug
+---
+

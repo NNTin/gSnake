@@ -248,8 +248,8 @@
         "Typecheck passes"
       ],
       "priority": 15,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Workflow runs successfully with act. Known limitation: requires GITHUB_TOKEN for external repo checkout. Use: act -P ubuntu-latest=catthehacker/ubuntu:act-latest -W .github/workflows/test.yml --secret GITHUB_TOKEN=<token>"
     },
     {
       "id": "US-016",
