@@ -54,3 +54,26 @@ Started: 2026-01-30
 - When fixing CI workflows, check if similar workflows already exist (ci.yml) and reuse their patterns
 - The act tool (nektos/act) checkouts the remote repository. Local unpushed changes are not seen.
 ---
+## 2026-01-30 23:05 - US-004
+- Fixed gsnake-web test workflow path resolution issues
+- Added directory resolution logic similar to gsnake-levels (checks ".", "gsnake-web", "gsnake-web/gsnake-web")
+- Removed problematic scripts symlink that was overwriting local gsnake-web/scripts directory
+- Added dynamic ROOT_REL_PATH calculation based on WEB_DIR depth (handles ../../gsnake-root vs ../gsnake-root)
+- Added Configure dependencies step to run detect-local-deps.js before npm install
+- Changed npm ci to npm install to ensure preinstall hook runs and all dependencies install correctly
+- Fixed Build WASM step to reference build_wasm.py from gsnake-root using calculated relative path
+- Verified with: act -W gsnake-web/.github/workflows/test.yml -j test --container-architecture linux/amd64
+- Test results: 3 test files, 41 tests, all passing
+- Files changed:
+  - gsnake-web/.github/workflows/test.yml
+  - scripts/ralph/prd.json
+
+**Learnings for future iterations:**
+- The test.yml workflow tests with the root repo structure (different from ci.yml which uses FORCE_GIT_DEPS)
+- Creating a symlink overwrites/hides the target directory - don't symlink directories that have their own content
+- detect-local-deps.js is in gsnake-web/scripts/, not root scripts/, so the scripts symlink was hiding it
+- The directory resolution pattern from gsnake-levels works well: check multiple candidates and set env var
+- When WEB_DIR = "gsnake-web/gsnake-web", need ../../gsnake-root; when "gsnake-web", need ../gsnake-root
+- npm ci skips preinstall scripts, use npm install if you need preinstall to run
+- The workflow structure: checkout -> resolve directory -> setup tools -> symlinks -> build WASM -> configure deps -> install -> test
+---
