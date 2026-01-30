@@ -719,3 +719,33 @@
   - The e2e-test job reuses cargo caching patterns from other jobs (wasm, build, test)
   - Recursive submodules checkout is essential for E2E tests that span multiple submodules
 ---
+## 2026-01-30 - US-018
+- Verified root gsnake workflow (.github/workflows/ci.yml) with nektos/act
+- Workflow executed with act using command: act -W .github/workflows/ci.yml -j <job> --container-architecture linux/amd64
+- Test results (from scripts/test/test_act.sh run):
+  - ✅ build job: Passes successfully
+  - ✅ test job: Passes successfully (all 54 tests including contract tests)
+  - ✅ wasm job: Passes successfully (WASM build completes)
+  - ✅ gsnake-editor-test job: Passes successfully (11 tests pass)
+  - ❌ e2e-test job: Failed due to missing submodule dependencies
+- **Issue identified and fixed:**
+  - playwright.config.ts webServer commands tried to copy to gsnake-web/node_modules before npm ci ran
+  - Added `npm --prefix gsnake-web ci` and `npm --prefix gsnake-editor ci` to webServer commands
+  - This ensures node_modules directories exist before copy operations
+  - This is a real bug affecting both act and GitHub CI, not an act-specific limitation
+- **Playwright installation:**
+  - ✅ Playwright Chromium installs successfully with --with-deps flag
+  - Downloads ~164.7 MiB for Chromium, ~2.3 MiB for FFMPEG, ~109.7 MiB for Headless Shell
+  - Installation completes in ~85 seconds on act
+- Files changed:
+  - playwright.config.ts (added npm ci commands for submodules in webServer)
+- **Learnings for future iterations:**
+  - The root workflow has 5 jobs: build, test, wasm, gsnake-editor-test, e2e-test
+  - 4 out of 5 jobs pass successfully with act out of the box
+  - e2e-test failure was due to missing dependency installation in playwright webServer config
+  - Playwright webServer commands run before tests, and must install all dependencies first
+  - act uses catthehacker/ubuntu:act-latest image with Docker architecture linux/amd64
+  - All jobs use standard GitHub Actions (actions/checkout@v4, actions/setup-node@v4, dtolnay/rust-toolchain@stable)
+  - The workflow structure is act-compatible, the issue was in playwright config, not workflow YAML
+  - Recursive submodule checkout works correctly with act (submodules: recursive)
+---
