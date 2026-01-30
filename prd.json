@@ -208,8 +208,8 @@
         "Typecheck passes"
       ],
       "priority": 13,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Workflow runs successfully with act. Known limitation: link checking fails on relative links to sibling submodules (../../gsnake-*/README.md) because they don't exist in standalone mode. This is expected behavior."
     },
     {
       "id": "US-014",

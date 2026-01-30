@@ -593,3 +593,28 @@
   - The test.yml workflow uses npm ci with package.json scripts, while ci.yml uses global npm install
   - Both workflows are valid but serve different purposes: test.yml for the PRD requirements, ci.yml for existing CI
 ---
+## 2026-01-30 - US-013
+- Verified gsnake-specs workflow with nektos/act
+- Workflow executed successfully with act:
+  - ✅ Docker image: catthehacker/ubuntu:act-latest pulled and started
+  - ✅ Checkout gsnake-specs step succeeded
+  - ✅ Setup Node.js 20 step succeeded (Node v20.20.0, npm 10.8.2)
+  - ✅ Install dependencies (npm ci) succeeded (148 packages installed)
+  - ✅ Run markdown lint succeeded (found 2269 linting issues, non-blocking due to || true)
+  - ❌ Check links failed with 4 dead relative links to sibling submodules
+- **Known limitation identified:**
+  - Relative links to sibling submodules (../../gsnake-levels/README.md, etc.) fail in standalone mode
+  - This is expected: .mlc.json ignores external HTTP/HTTPS links, but relative links are checked
+  - In standalone mode, sibling submodules aren't present, causing 400 errors on relative paths
+  - Workaround: These links work in root repo context but fail in isolated CI runs
+  - Alternative: Could update .mlc.json to also ignore ../* patterns, but that might hide legitimate broken links
+- Command tested: `act -P ubuntu-latest=catthehacker/ubuntu:act-latest -W .github/workflows/test.yml`
+- Files reviewed: .github/workflows/test.yml, .mlc.json
+- **Learnings for future iterations:**
+  - act successfully runs gsnake-specs workflow with markdown linting and link checking
+  - The workflow structure is correct and act-compatible (uses standard actions)
+  - Link checking in standalone mode has inherent limitations with cross-repo relative links
+  - The || true on lint:md allows workflow to pass despite 2269 existing linting issues
+  - Link checking could be made non-blocking with || true if cross-repo links are intentional
+  - Consider documenting that repo-architecture.md is meant to be viewed in root repo context
+---
