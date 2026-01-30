@@ -1,6 +1,5 @@
 # Ralph Progress Log
 Started: 2026-01-30
-Branch: ralph/fix-ci-pipeline-errors
 ---
 ## Codebase Patterns
 - CI results stored in scripts/test/result.txt (scripts/test/test_act.sh automatically run each iteration)
@@ -23,4 +22,17 @@ Branch: ralph/fix-ci-pipeline-errors
 - Generated/vendored code (like WASM bindings) should be excluded from TypeScript checking
 - JSDoc type annotations are sufficient for fixing implicit 'any' errors in JavaScript files
 - The repository structure has gsnake-web as a git submodule, so changes need to be committed in the submodule first, then the submodule reference updated in the root repo
+---
+## 2026-01-30 21:25 - US-002
+- Verified typecheck now passes in deploy workflow validate job
+- Fix from US-001 (gsnake-web TypeScript type annotations) resolved this issue
+- Tested with: act -W .github/workflows/deploy.yml -j validate --container-architecture linux/amd64
+- Typecheck step output: "svelte-check found 0 errors and 0 warnings"
+- Files changed: scripts/ralph/prd.json (marked US-002 as passing)
+
+**Learnings for future iterations:**
+- Deploy workflow validate job runs the same typecheck as gsnake-web CI: `npm --prefix gsnake-web run check`
+- The validate job includes multiple steps: typecheck, Rust contract tests, TypeScript contract tests, E2E contract tests
+- The typecheck passes, but E2E tests in the validate job are failing (14 failed tests) - this is a separate issue
+- Note: US-002 acceptance criteria is about typecheck passing, not the entire validate job passing
 ---

@@ -49,6 +49,17 @@ if [[ -f "gsnake-web/.github/workflows/ci.yml" ]]; then
     WORKFLOWS+=("gsnake-web/.github/workflows/ci.yml")
 fi
 
+# TODO: Uncomment to run all workflows recursively
+# Find all GitHub Actions workflow files recursively
+# mapfile -t WORKFLOWS < <(
+#   find . -type f \
+#     -path "*/.github/workflows/*.yml" -o \
+#     -path "*/.github/workflows/*.yaml"
+# )
+
+# Normalize paths (remove leading ./)
+# WORKFLOWS=("${WORKFLOWS[@]#./}")
+
 if [[ ${#WORKFLOWS[@]} -eq 0 ]]; then
     echo "No workflows found. Exiting."
     exit 1
