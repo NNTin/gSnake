@@ -25,18 +25,33 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  webServer: [
-    {
-      command: 'npm --prefix gsnake-web run preview -- --port 3000 --strictPort',
-      url: 'http://localhost:3000',
-      reuseExistingServer: !process.env.CI,
-      timeout: 120000,
-    },
-    {
-      command: 'npm --prefix gsnake-editor run dev',
-      url: 'http://localhost:3003',
-      reuseExistingServer: !process.env.CI,
-      timeout: 120000,
-    },
-  ],
+  webServer: process.env.CI
+    ? [
+        // In CI, servers are started in workflow steps
+        {
+          url: 'http://localhost:3000',
+          reuseExistingServer: true,
+          timeout: 120000,
+        },
+        {
+          url: 'http://localhost:3003',
+          reuseExistingServer: true,
+          timeout: 120000,
+        },
+      ]
+    : [
+        // Local development: start servers automatically
+        {
+          command: 'npm --prefix gsnake-web run preview -- --port 3000 --strictPort',
+          url: 'http://localhost:3000',
+          reuseExistingServer: true,
+          timeout: 120000,
+        },
+        {
+          command: 'npm --prefix gsnake-editor run dev',
+          url: 'http://localhost:3003',
+          reuseExistingServer: true,
+          timeout: 120000,
+        },
+      ],
 });

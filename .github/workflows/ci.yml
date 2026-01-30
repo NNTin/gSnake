@@ -201,5 +201,19 @@ jobs:
         run: |
           npm --prefix gsnake-editor ci
 
+      - name: Start web preview server
+        run: |
+          npm --prefix gsnake-web run preview -- --port 3000 --strictPort &
+          sleep 5
+          curl --retry 10 --retry-delay 2 --retry-connrefused http://localhost:3000
+
+      - name: Start editor dev server
+        run: |
+          npm --prefix gsnake-editor run dev &
+          sleep 5
+          curl --retry 10 --retry-delay 2 --retry-connrefused http://localhost:3003
+
       - name: Run E2E tests
+        env:
+          CI: true
         run: npm run test:e2e
