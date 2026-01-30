@@ -77,3 +77,23 @@ Started: 2026-01-30
 - npm ci skips preinstall scripts, use npm install if you need preinstall to run
 - The workflow structure: checkout -> resolve directory -> setup tools -> symlinks -> build WASM -> configure deps -> install -> test
 ---
+## 2026-01-30 23:10 - US-005
+- Fixed gsnake-specs test workflow directory resolution
+- Added directory resolution logic similar to gsnake-web and gsnake-levels
+- Changed candidate check order to prioritize gsnake-specs/gsnake-specs over gsnake-specs
+- Added .mlc.json file check to distinguish gsnake-specs package.json from root package.json
+- The root repo has its own package.json without lint:md and check:links scripts
+- Updated all working-directory references to use SPECS_DIR environment variable
+- Verified with: act -W gsnake-specs/.github/workflows/test.yml -j test --container-architecture linux/amd64
+- Both markdown lint and link check now pass successfully
+- Files changed:
+  - gsnake-specs/.github/workflows/test.yml
+  - scripts/ralph/prd.json
+
+**Learnings for future iterations:**
+- When multiple package.json files exist (root and submodule), need a unique file to distinguish them
+- Used .mlc.json (markdown-link-check config) as the unique identifier for gsnake-specs
+- The order of candidates matters - check the most nested path first to avoid matching the wrong file
+- Pattern: for candidate in "path/path" "path" "." ensures we find the deepest match first
+- Root repo package.json has test:e2e and report scripts, not markdown validation scripts
+---
