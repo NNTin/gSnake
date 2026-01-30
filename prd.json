@@ -298,8 +298,8 @@
         "Typecheck passes"
       ],
       "priority": 18,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Root workflow tested with act. 4/5 jobs pass out of the box. E2E test issue fixed by adding npm ci for submodules in playwright.config.ts webServer commands. Playwright installs successfully (~85s for chromium + deps)."
     },
     {
       "id": "US-019",
@@ -314,8 +314,8 @@
         "Typecheck passes"
       ],
       "priority": 19,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "All 54 gsnake-core tests pass (37 unit + 16 contract + 1 wasm). No failures found. Contract tests validate TypeScript/Rust serialization compatibility."
     },
     {
       "id": "US-020",
