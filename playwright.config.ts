@@ -27,14 +27,13 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command:
-        './scripts/build_fixture_wasm.sh && npm --prefix gsnake-web ci && rm -rf gsnake-web/node_modules/gsnake-wasm && cp -R e2e/fixtures/gsnake-wasm/pkg gsnake-web/node_modules/gsnake-wasm && npm --prefix gsnake-web run build && npm --prefix gsnake-web run preview -- --port 3000 --strictPort',
+      command: 'npm --prefix gsnake-web run preview -- --port 3000 --strictPort',
       url: 'http://localhost:3000',
       reuseExistingServer: !process.env.CI,
       timeout: 120000,
     },
     {
-      command: 'npm --prefix gsnake-editor ci && npm --prefix gsnake-editor run dev',
+      command: 'npm --prefix gsnake-editor run dev',
       url: 'http://localhost:3003',
       reuseExistingServer: !process.env.CI,
       timeout: 120000,

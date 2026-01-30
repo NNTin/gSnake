@@ -187,5 +187,19 @@ jobs:
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
 
+      - name: Build fixture WASM
+        run: ./scripts/build_fixture_wasm.sh
+
+      - name: Setup gsnake-web for E2E
+        run: |
+          npm --prefix gsnake-web ci
+          rm -rf gsnake-web/node_modules/gsnake-wasm
+          cp -R e2e/fixtures/gsnake-wasm/pkg gsnake-web/node_modules/gsnake-wasm
+          npm --prefix gsnake-web run build
+
+      - name: Setup gsnake-editor for E2E
+        run: |
+          npm --prefix gsnake-editor ci
+
       - name: Run E2E tests
         run: npm run test:e2e
