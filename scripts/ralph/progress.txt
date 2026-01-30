@@ -71,3 +71,42 @@ Started: Thu Jan 29 20:50:45 CET 2026
   - The test job uses cargo test --verbose which automatically runs all unit tests (in src/) and integration tests (in tests/)
   - Cargo automatically discovers and runs tests in both locations without additional configuration
 ---
+## 2026-01-30 - US-006
+- Implemented UI component test for LandingPage.svelte in gsnake-editor
+- Added 4 comprehensive tests in src/tests/LandingPage.test.ts:
+  - Renders page title "gSnake Level Editor"
+  - Renders description text "Create and edit levels for gSnake"
+  - Renders "Create New Level" button
+  - Renders "Load Existing Level" button
+- Updated vitest.config.ts for Svelte 5 compatibility:
+  - Changed test environment from jsdom to happy-dom
+  - Added compilerOptions with runes: true for Svelte 5
+  - Added resolve.conditions: ['browser'] for proper module resolution
+- Files changed: 
+  - gsnake-editor/src/tests/LandingPage.test.ts (new)
+  - gsnake-editor/vitest.config.ts (updated)
+- Quality checks: npm test passed (8 tests: 2 unit + 2 integration + 4 UI), npm run check passed
+- **Learnings for future iterations:**
+  - gsnake-editor is a git submodule, so changes must be committed within the submodule directory first, then the root repo must be updated to reflect the submodule change
+  - @testing-library/jest-dom must be imported in test files to use matchers like toBeInTheDocument()
+  - Svelte 5 requires happy-dom environment instead of jsdom for proper component rendering in tests
+  - Test files already exist in src/tests/ directory following the pattern of types.test.ts and integration.test.ts
+  - vitest.config.ts needs svelte({ hot: !process.env.VITEST }) to disable HMR during tests
+  - UI tests use @testing-library/svelte's render() and screen methods to test component output
+---
+## 2026-01-30 - US-007
+- Refactored gsnake-editor server.ts to export app for testing
+- Separated app creation from server.listen() to enable testing without starting a real server
+- Files changed: gsnake-editor/server.ts
+  - Added export { app } to make Express app available for import
+  - Wrapped app.listen() in conditional check to only start server when run directly
+  - Used isMainModule pattern to detect if file is main entry point vs imported module
+- Quality checks: npm run check passed (typecheck passed), npm run dev behavior preserved
+- **Learnings for future iterations:**
+  - Express apps should export the app instance separately from server.listen() to enable testing
+  - Use import.meta.url and process.argv[1] to detect if module is run directly vs imported
+  - The pattern `import.meta.url.endsWith(process.argv[1]) || import.meta.url === \`file://\${process.argv[1]}\`` works reliably with tsx
+  - This refactor enables supertest to import and test the app without starting a real server
+  - npm run dev uses tsx server.ts which triggers the isMainModule condition and starts the server normally
+  - gsnake-editor is a git submodule, so changes must be committed in the submodule first, then root repo updated
+---
