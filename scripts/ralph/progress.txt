@@ -97,3 +97,35 @@ Started: 2026-01-30
 - Pattern: for candidate in "path/path" "path" "." ensures we find the deepest match first
 - Root repo package.json has test:e2e and report scripts, not markdown validation scripts
 ---
+## 2026-01-31 01:30 - US-006
+- Investigated E2E test failures - 14 tests timing out waiting for page elements (.cell)
+- Root cause: Playwright webServer configuration was too complex and fragile
+- vite build was hanging/failing silently after printing "/index.css doesn't exist", preventing preview server from starting
+- Solution attempt 1: Moved build steps from webServer command to CI workflow steps
+  - Added separate workflow steps for: Build fixture WASM, Setup gsnake-web (npm ci, build), Setup gsnake-editor (npm ci)
+  - Simplified webServer config to just run preview/dev commands
+- Solution attempt 2: Started servers in workflow background jobs instead of Playwright webServer
+  - Added workflow steps to start servers with & and verify with curl --retry
+  - Configure Playwright to reuse existing servers in CI mode (reuseExistingServer: true)
+  - Servers now start successfully: localhost:3000 (vite preview) and localhost:3003 (editor dev)
+- Current status: PARTIALLY RESOLVED
+  - ✅ Web servers now start correctly in CI
+  - ✅ Workflow build steps work (WASM builds, npm tests pass, vite builds successfully)
+  - ❌ Tests still fail with .cell timeout - page loads but game doesn't render
+  - ❌ Editor API server on port 3001 not starting properly (ECONNREFUSED errors)
+- Files changed:
+  - .github/workflows/ci.yml (added build steps, server startup)
+  - playwright.config.ts (simplified webServer config, CI mode detection)
+  - scripts/test/result.txt (test results)
+
+**Learnings for future iterations:**
+- Playwright webServer command has issues in CI/Docker environments with complex chained commands
+- Long && chains can fail silently if any step hangs (vite build was hanging after index.css warning)
+- Better approach: Run build/setup in workflow steps, start servers in background, use Playwright's reuseExistingServer
+- The webServer command chain './scripts/build_fixture_wasm.sh && npm ci && npm build && npm preview' was too fragile
+- Starting servers in workflow with `command &` works, but need to ensure they're fully ready before tests run
+- curl --retry --retry-connrefused is good for verifying HTTP server readiness
+- E2E tests still require deeper debugging: page loads but WASM/JS doesn't initialize game properly
+- This is likely a different issue from server startup - possibly WASM loading failure or JS runtime error in CI environment
+- The fact that API tests pass (complete-workflow.spec.ts) confirms servers start, but UI rendering fails
+---

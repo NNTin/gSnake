@@ -90,7 +90,7 @@
       ],
       "priority": 6,
       "passes": false,
-      "notes": ""
+      "notes": "PARTIALLY RESOLVED: Web servers now start correctly, but tests still fail because game UI doesn't render (WASM/JS initialization issue). Server startup issue fixed by moving build steps to workflow and starting servers in background. Remaining issue: page loads but .cell elements don't appear - needs investigation into WASM loading or JS runtime errors in CI environment."
     },
     {
       "id": "US-007",
