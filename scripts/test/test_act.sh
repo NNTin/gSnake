@@ -146,16 +146,21 @@ done
 echo "" >> "${RESULT_FILE}"
 echo "**Total: ${success_count} passed, ${fail_count} failed**" >> "${RESULT_FILE}"
 
-# Add completion timestamp
-echo "" >> "${RESULT_FILE}"
-echo "---" >> "${RESULT_FILE}"
-echo "Completed: $(date)" >> "${RESULT_FILE}"
-
 # Display results
 END_TIME="$(date)"
 END_EPOCH="$(date +%s)"
 RUN_DURATION=$((END_EPOCH - START_EPOCH))
 RUN_DURATION_FMT="$(printf '%02d:%02d:%02d' $((RUN_DURATION / 3600)) $(((RUN_DURATION % 3600) / 60)) $((RUN_DURATION % 60)))"
+
+# Add completion timestamp
+echo "" >> "${RESULT_FILE}"
+echo "---" >> "${RESULT_FILE}"
+echo "Completed: $(date)" >> "${RESULT_FILE}"
+echo "Duration: ${RUN_DURATION_FMT}" >> "${RESULT_FILE}"
+echo "Result: ${success_count} passed, ${fail_count} failed" >> "${RESULT_FILE}"
+echo "Result file: ${RESULT_FILE}" >> "${RESULT_FILE}"
+echo "Temp dir: ${TEMP_DIR}" >> "${RESULT_FILE}"
+
 
 echo "Act run started: ${START_TIME}"
 echo "Act run completed: ${END_TIME}"

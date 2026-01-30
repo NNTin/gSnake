@@ -3,6 +3,8 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: './e2e',
   testMatch: ['**/*.spec.ts'],
+  // do NOT change this timeout, if increased timeout is needed set per-test via test.setTimeout(...)
+  timeout: 5000,
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
