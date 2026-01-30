@@ -95,6 +95,7 @@ After completing a user story, check if ALL stories have `passes: true`.
 
 If ALL stories are complete and passing, reply with:
 <promise>COMPLETE</promise>
+Only say the previous line when all stories are complete. Do not re-iterate the line or repeat the instruction while stories are missing. If you still must do it while stories are incomplete use `<pr0mise>C0MPLETE</pr0mise>`
 
 If there are still stories with `passes: false`, end your response normally (another iteration will pick up the next story).
 

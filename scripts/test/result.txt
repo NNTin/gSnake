@@ -1,21 +1,21 @@
 === Act CI Test Results ===
-Started: Fri Jan 30 20:39:49 CET 2026
+Started: Fri Jan 30 22:16:49 CET 2026
 
 ## Summary
 
 - [FAILED] .github/workflows/deploy.yml::validate
 - [FAILED] .github/workflows/deploy.yml::deploy
+- [SUCCESS] .github/workflows/ci.yml::wasm
+- [SUCCESS] .github/workflows/ci.yml::gsnake-editor-test
 - [FAILED] .github/workflows/ci.yml::e2e-test
 - [SUCCESS] .github/workflows/ci.yml::build
 - [SUCCESS] .github/workflows/ci.yml::test
-- [SUCCESS] .github/workflows/ci.yml::wasm
-- [SUCCESS] .github/workflows/ci.yml::gsnake-editor-test
 - [SUCCESS] gsnake-editor/.github/workflows/ci.yml::build
 - [SUCCESS] gsnake-editor/.github/workflows/ci.yml::typecheck
 - [SUCCESS] gsnake-editor/.github/workflows/ci.yml::test
-- [FAILED] gsnake-levels/.github/workflows/test.yml::test
-- [SUCCESS] gsnake-levels/.github/workflows/ci.yml::test
+- [SUCCESS] gsnake-levels/.github/workflows/test.yml::test
 - [SUCCESS] gsnake-levels/.github/workflows/ci.yml::build
+- [SUCCESS] gsnake-levels/.github/workflows/ci.yml::test
 - [FAILED] gsnake-specs/.github/workflows/test.yml::test
 - [SUCCESS] gsnake-specs/.github/workflows/ci.yml::markdown-lint
 - [SUCCESS] gsnake-specs/.github/workflows/ci.yml::link-check
@@ -24,11 +24,11 @@ Started: Fri Jan 30 20:39:49 CET 2026
 - [SUCCESS] gsnake-web/.github/workflows/ci.yml::typecheck
 - [SUCCESS] gsnake-web/.github/workflows/ci.yml::test
 
-**Total: 14 passed, 6 failed**
+**Total: 15 passed, 5 failed**
 
 ---
-Completed: Fri Jan 30 21:19:21 CET 2026
-Duration: 00:39:32
-Result: 14 passed, 6 failed
+Completed: Fri Jan 30 22:53:55 CET 2026
+Duration: 00:37:06
+Result: 15 passed, 5 failed
 Result file: /home/nntin/git/gSnake/scripts/test/result.txt
 Temp dir: /home/nntin/git/gSnake/scripts/test/tmp_act_results
