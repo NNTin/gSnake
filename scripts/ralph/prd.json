@@ -1,285 +1,124 @@
 {
   "project": "gSnake",
-  "branchName": "ralph/ci-tests-and-workflows",
-  "description": "CI Test Workflows Across gSnake Repos - Add GitHub Actions workflows to run tests in each repo and add missing test suites",
+  "branchName": "ralph/fix-ci-pipeline-errors",
+  "description": "Fix CI Pipeline Errors - Resolve 7 failing CI workflow jobs to achieve 100% pass rate with nektos/act",
   "userStories": [
     {
       "id": "US-001",
-      "title": "Add Rust unit tests for gsnake-levels resolve_playback_path",
-      "description": "As a maintainer, I want unit tests for resolve_playback_path function so level path resolution remains correct.",
+      "title": "Fix TypeScript type errors in gsnake-web detect-local-deps.js",
+      "description": "As a developer, I need the gsnake-web typecheck job to pass so that TypeScript validation succeeds in CI.",
       "acceptanceCriteria": [
-        "Add tests in gsnake-levels/tests/ or src/ with #[cfg(test)] module",
-        "Test resolve_playback_path with valid level paths (easy/level_001.json)",
-        "Test error cases: missing directory, invalid level number format",
-        "Tests use fixtures from levels/ directory (read-only)",
-        "cargo test passes",
+        "Add explicit type annotations to parameters in gsnake-web/scripts/detect-local-deps.js:77",
+        "Fix implicit 'any' type errors for 'targetDependency' and 'label' parameters",
+        "Verify typecheck passes: act -W gsnake-web/.github/workflows/ci.yml -j typecheck --container-architecture linux/amd64",
+        "Verify no new TypeScript errors introduced",
         "Typecheck passes"
       ],
       "priority": 1,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-002",
-      "title": "Add Rust unit tests for gsnake-levels load_playback_directions",
-      "description": "As a maintainer, I want unit tests for load_playback_directions so playback loading remains correct.",
+      "title": "Fix root deploy workflow validation typecheck",
+      "description": "As a developer, I need the root deploy workflow validation to pass so that deployment preparation succeeds.",
       "acceptanceCriteria": [
-        "Add tests for load_playback_directions function",
-        "Test loading valid playback JSON from playbacks/easy/level_001.json",
-        "Test error cases: missing file, invalid JSON, wrong schema",
-        "Tests use fixtures from playbacks/ directory (read-only)",
-        "cargo test passes",
+        "Verify US-001 fix resolves this issue (same file: gsnake-web/scripts/detect-local-deps.js)",
+        "Verify validate job passes: act -W .github/workflows/deploy.yml -j validate --container-architecture linux/amd64",
+        "Confirm no additional TypeScript errors in deploy workflow",
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-003",
-      "title": "Add gsnake-levels integration test for verify_level",
-      "description": "As a maintainer, I want integration test that verify_level succeeds for valid level+playback pairs.",
+      "title": "Fix gsnake-levels test workflow Cargo.toml path issue",
+      "description": "As a developer, I need the gsnake-levels test job to find Cargo.toml so that Rust tests can run.",
       "acceptanceCriteria": [
-        "Add integration test in gsnake-levels/tests/integration_test.rs",
-        "Test verifies levels/easy/level_001.json + playbacks/easy/level_001.json succeeds",
-        "Test does not mutate files in levels/ or playbacks/",
-        "cargo test passes",
+        "Read gsnake-levels/.github/workflows/test.yml and identify path issue",
+        "Fix working directory or checkout path to resolve: 'could not find Cargo.toml in /home/nntin/git/gSnake/gsnake-levels'",
+        "Ensure workflow correctly handles submodule structure",
+        "Verify test job passes: act -W gsnake-levels/.github/workflows/test.yml -j test --container-architecture linux/amd64",
         "Typecheck passes"
       ],
       "priority": 3,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-004",
-      "title": "Update gsnake-levels CI workflow to run cargo test",
-      "description": "As a maintainer, I want gsnake-levels CI to run the new tests.",
+      "title": "Fix gsnake-web test workflow",
+      "description": "As a developer, I need the gsnake-web test workflow to pass so that web application tests validate correctly.",
       "acceptanceCriteria": [
-        "Update gsnake-levels/.github/workflows/ci.yml to include test job if missing",
-        "Test job runs cargo test with all new unit and integration tests",
-        "Workflow passes on GitHub Actions",
+        "Check failure log: scripts/test/tmp_act_results/gsnake-web_.github_workflows_test.yml_test.log",
+        "Identify root cause of test failure (likely path or dependency related)",
+        "Fix identified issues in gsnake-web/.github/workflows/test.yml",
+        "Verify test job passes: act -W gsnake-web/.github/workflows/test.yml -j test --container-architecture linux/amd64",
         "Typecheck passes"
       ],
       "priority": 4,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-005",
-      "title": "Add vitest dependencies to gsnake-editor",
-      "description": "As a maintainer, I want test infrastructure in gsnake-editor so UI and server logic can be verified.",
+      "title": "Fix gsnake-specs test workflow",
+      "description": "As a developer, I need the gsnake-specs test workflow to pass so that documentation validation succeeds.",
       "acceptanceCriteria": [
-        "Add vitest, @testing-library/svelte, @testing-library/jest-dom, jsdom as dev dependencies",
-        "Add test script to package.json: vitest run",
-        "Add vitest.config.ts with environment: 'jsdom' default",
-        "npm install succeeds",
-        "npm test runs (may have 0 tests initially)",
+        "Check failure log: scripts/test/tmp_act_results/gsnake-specs_.github_workflows_test.yml_test.log",
+        "Identify root cause of test failure (likely markdown validation or structure)",
+        "Fix identified issues in gsnake-specs/.github/workflows/test.yml",
+        "Verify test job passes: act -W gsnake-specs/.github/workflows/test.yml -j test --container-architecture linux/amd64",
         "Typecheck passes"
       ],
       "priority": 5,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-006",
-      "title": "Add gsnake-editor UI component test",
-      "description": "As a maintainer, I want a UI test for gsnake-editor so component rendering is verified.",
+      "title": "Fix E2E test timeout/failure in root CI workflow",
+      "description": "As a developer, I need the E2E tests to complete successfully so that integration testing validates the full application.",
       "acceptanceCriteria": [
-        "Add test file for LandingPage.svelte or GridSizeModal.svelte",
-        "Test renders component and asserts on visible label or button text",
-        "Test uses @testing-library/svelte render and screen",
-        "npm test passes with at least 1 UI test passing",
+        "Check failure log: scripts/test/tmp_act_results/.github_workflows_ci.yml_e2e-test.log",
+        "Identify why E2E tests fail or timeout (known issue: tests run too long)",
+        "Fix timeout issues by adjusting timeouts, optimizing tests, or fixing test logic",
+        "Verify e2e-test job passes: act -W .github/workflows/ci.yml -j e2e-test --container-architecture linux/amd64",
         "Typecheck passes"
       ],
       "priority": 6,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-007",
-      "title": "Refactor gsnake-editor server.ts to export app",
-      "description": "As a maintainer, I want server.ts to export the Express app so it can be tested without starting a real server.",
+      "title": "Fix deployment workflow deploy job",
+      "description": "As a developer, I need the deploy job to succeed so that the application can be deployed.",
       "acceptanceCriteria": [
-        "Refactor server.ts: separate app creation from server.listen()",
-        "Export app for testing: export { app }",
-        "Keep existing server startup behavior when run directly",
-        "npm run dev still works",
+        "Verify validate job passes first (dependency on US-002)",
+        "Check failure log: scripts/test/tmp_act_results/.github_workflows_deploy.yml_deploy.log",
+        "Identify and fix any issues preventing deployment",
+        "Verify deploy job passes: act -W .github/workflows/deploy.yml -j deploy --container-architecture linux/amd64",
         "Typecheck passes"
       ],
       "priority": 7,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-008",
-      "title": "Add gsnake-editor server tests with supertest",
-      "description": "As a maintainer, I want server API tests for gsnake-editor so backend logic is verified.",
+      "title": "Verify full test suite passes",
+      "description": "As a developer, I need all 20 CI jobs to pass so that the entire test suite is green.",
       "acceptanceCriteria": [
-        "Add supertest as dev dependency",
-        "Add server test file with // @vitest-environment node pragma",
-        "Test POST /api/test-level with JSON returns { success: true }",
-        "Test GET /api/test-level returns the stored payload",
-        "Test GET /api/test-level returns 404 when nothing is stored",
-        "npm test passes with server tests passing",
+        "Run full test suite: scripts/test/test_act.sh (takes 30+ minutes so increase timeout to 60 minutes) or enter next ralph loop (test is automatically run between loops)",
+        "Verify scripts/test/result.txt shows: Total: 20 passed, 0 failed",
+        "Document any known limitations or warnings in nektos/act vs GitHub Actions",
+        "Confirm all 7 previously failing jobs now pass",
         "Typecheck passes"
       ],
       "priority": 8,
-      "passes": false,
-      "notes": ""
-    },
-    {
-      "id": "US-009",
-      "title": "Update root workflow to run gsnake-editor tests",
-      "description": "As a maintainer, I want root CI to run gsnake-editor tests.",
-      "acceptanceCriteria": [
-        "Update .github/workflows/ci.yml (or test.yml) in root repo",
-        "Add step to run npm --prefix gsnake-editor test",
-        "Root workflow passes with editor tests",
-        "Typecheck passes"
-      ],
-      "priority": 9,
-      "passes": false,
-      "notes": ""
-    },
-    {
-      "id": "US-010",
-      "title": "Add package.json to gsnake-specs with lint:md script",
-      "description": "As a maintainer, I want markdown linting for gsnake-specs so docs quality is maintained.",
-      "acceptanceCriteria": [
-        "Create gsnake-specs/package.json with name, version, scripts section",
-        "Add lint:md script: markdownlint-cli2 \"**/*.md\" \"!**/node_modules/**\"",
-        "Add markdownlint-cli2 as dev dependency",
-        "npm ci succeeds",
-        "npm run lint:md runs successfully",
-        "Typecheck passes"
-      ],
-      "priority": 10,
-      "passes": false,
-      "notes": ""
-    },
-    {
-      "id": "US-011",
-      "title": "Add link checking script to gsnake-specs",
-      "description": "As a maintainer, I want link validation for gsnake-specs so broken links are caught.",
-      "acceptanceCriteria": [
-        "Add check:links script to package.json: markdown-link-check -c .mlc.json \"**/*.md\"",
-        "Add markdown-link-check as dev dependency",
-        "Create .mlc.json that ignores external HTTP/HTTPS links (avoid CI flakiness)",
-        "npm run check:links runs successfully",
-        "Typecheck passes"
-      ],
-      "priority": 11,
-      "passes": false,
-      "notes": ""
-    },
-    {
-      "id": "US-012",
-      "title": "Update gsnake-specs CI workflow to run lint and link checks",
-      "description": "As a maintainer, I want gsnake-specs CI to validate markdown quality.",
-      "acceptanceCriteria": [
-        "Update gsnake-specs/.github/workflows/ci.yml",
-        "Add job or steps to run npm ci, npm run lint:md, npm run check:links",
-        "Workflow passes on GitHub Actions",
-        "Typecheck passes"
-      ],
-      "priority": 12,
-      "passes": false,
-      "notes": ""
-    },
-    {
-      "id": "US-013",
-      "title": "Add root repo E2E test workflow setup",
-      "description": "As a maintainer, I want root CI to run Playwright E2E tests.",
-      "acceptanceCriteria": [
-        "Create or update .github/workflows/test.yml in root repo",
-        "Workflow uses actions/checkout with submodules: recursive",
-        "Workflow uses actions/setup-node@v4 with node-version: 20",
-        "Workflow installs Rust toolchain with dtolnay/rust-toolchain@stable",
-        "Workflow installs wasm-pack",
-        "Workflow runs npm ci",
-        "Typecheck passes"
-      ],
-      "priority": 13,
-      "passes": false,
-      "notes": ""
-    },
-    {
-      "id": "US-014",
-      "title": "Add Playwright installation to root E2E workflow",
-      "description": "As a maintainer, I want Playwright installed in root CI for E2E tests.",
-      "acceptanceCriteria": [
-        "Add step: npx playwright install --with-deps chromium",
-        "Add step: npm run test:e2e",
-        "Workflow passes on GitHub Actions",
-        "Playwright installs successfully in GitHub Actions",
-        "Typecheck passes"
-      ],
-      "priority": 14,
-      "passes": false,
-      "notes": ""
-    },
-    {
-      "id": "US-015",
-      "title": "Run gsnake-core contract tests in root workflow",
-      "description": "As a maintainer, I want root CI to run gsnake-core contract tests and fixture generation.",
-      "acceptanceCriteria": [
-        "Update root .github/workflows/test.yml or ci.yml",
-        "Add job or steps for gsnake-core tests",
-        "Run cargo test in gsnake-core workspace",
-        "Run cargo test contract_tests in gsnake-core/engine/core",
-        "Run cargo test generate_contract_fixtures in gsnake-core/engine/core",
-        "All Rust tests pass in CI",
-        "Typecheck passes"
-      ],
-      "priority": 15,
-      "passes": false,
-      "notes": ""
-    },
-    {
-      "id": "US-016",
-      "title": "Verify all workflows work locally with act",
-      "description": "As a contributor, I want to run CI locally with act to debug without pushing.",
-      "acceptanceCriteria": [
-        "Test root workflow: act -P ubuntu-latest=catthehacker/ubuntu:act-latest -W .github/workflows/test.yml",
-        "Test gsnake-levels: cd gsnake-levels && act -W .github/workflows/ci.yml",
-        "Test gsnake-web: cd gsnake-web && act -W .github/workflows/ci.yml",
-        "Test gsnake-specs: cd gsnake-specs && act -W .github/workflows/ci.yml",
-        "Document any act limitations in repo READMEs",
-        "Typecheck passes"
-      ],
-      "priority": 16,
-      "passes": false,
-      "notes": ""
-    },
-    {
-      "id": "US-017",
-      "title": "Fix any test failures in gsnake-core",
-      "description": "As a maintainer, I want all gsnake-core tests passing so CI is green.",
-      "acceptanceCriteria": [
-        "Run cargo test in gsnake-core and identify failures",
-        "Fix any failing unit tests",
-        "Fix any failing contract tests",
-        "Ensure generate_contract_fixtures test passes (fixtures up to date)",
-        "All tests pass locally and in CI",
-        "Typecheck passes"
-      ],
-      "priority": 17,
-      "passes": false,
-      "notes": ""
-    },
-    {
-      "id": "US-018",
-      "title": "Document CI testing strategy in root README",
-      "description": "As a developer, I want documentation explaining the CI structure.",
-      "acceptanceCriteria": [
-        "Add 'CI/CD Testing' section to root README.md",
-        "Explain per-repo test workflows (gsnake-levels, gsnake-web, gsnake-specs)",
-        "Explain root repo E2E tests and integration testing",
-        "Document how to run tests locally (cargo test, npm test, etc.)",
-        "Document nektos/act usage for local CI testing",
-        "Typecheck passes"
-      ],
-      "priority": 18,
       "passes": false,
       "notes": ""
     }
