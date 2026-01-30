@@ -430,3 +430,25 @@
   - The test.yml workflow differs from ci.yml: test.yml uses root repo approach, ci.yml uses standalone git dependencies
 ---
 
+## 2026-01-30 - US-005 (continued)
+- Completed final acceptance criteria for US-005
+- Added missing dependencies:
+  - ✅ supertest and @types/supertest for server API testing
+- Updated vitest.config.ts:
+  - ✅ Changed environment from 'happy-dom' to 'jsdom' (as specified in PRD)
+- Files changed:
+  - gsnake-editor/package.json (added supertest dependencies)
+  - gsnake-editor/package-lock.json (dependency tree updated)
+  - gsnake-editor/vitest.config.ts (environment: 'jsdom')
+- Quality checks passed:
+  - ✅ npm test: 8 tests passing
+  - ✅ npm run check: 0 errors, 0 warnings
+- Committed to gsnake-editor submodule: commit 4c3b7a1
+- **Learnings for future iterations:**
+  - PRD specified jsdom explicitly, while previous iteration used happy-dom
+  - supertest is essential for testing Express server endpoints without starting a real server
+  - @types/supertest provides TypeScript type definitions for supertest
+  - All acceptance criteria from PRD must be verified, even if similar work was done previously
+  - jsdom is heavier but more compatible with browser APIs than happy-dom
+---
+
