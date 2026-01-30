@@ -11,3 +11,16 @@ Branch: ralph/fix-ci-pipeline-errors
 - Full test suite runs with scripts/test/test_act.sh (30+ minutes)
 - the full test suite runs using pushed code on remote, so unpushed code are not reflected in the run. git push after committing.
 ---
+## 2026-01-30 20:25 - US-001
+- Fixed TypeScript type errors in gsnake-web/scripts/detect-local-deps.js
+- Added JSDoc type annotations for `targetDependency` and `label` parameters in updateDependency function
+- Excluded vendor directory from tsconfig.json to prevent type errors in generated WASM files
+- Verified typecheck passes with: cd gsnake-web && npm run check
+- Files changed: gsnake-web/scripts/detect-local-deps.js, gsnake-web/tsconfig.json
+
+**Learnings for future iterations:**
+- The gsnake-web typecheck uses `npm run check` which runs `svelte-check --tsconfig ./tsconfig.json`
+- Generated/vendored code (like WASM bindings) should be excluded from TypeScript checking
+- JSDoc type annotations are sufficient for fixing implicit 'any' errors in JavaScript files
+- The repository structure has gsnake-web as a git submodule, so changes need to be committed in the submodule first, then the submodule reference updated in the root repo
+---
