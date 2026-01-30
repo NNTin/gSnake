@@ -1,13 +1,17 @@
 # Ralph Progress Log
-# Feature: Standalone Submodules Build
-# Branch: ralph/standalone-submodules-build
+# Feature: CI Test Workflows Across gSnake Repos
+# Branch: ralph/ci-tests-and-workflows
 
 ## Codebase Patterns
 - gSnake is a monorepo with submodules: gsnake-core (Rust), gsnake-web (TypeScript), gsnake-levels (Rust), gsnake-editor (TypeScript), gsnake-specs (Markdown)
 - gsnake-core builds to WASM for web consumption
 - CI workflows should use nektos/act compatible actions
 - Root repo has detection scripts in scripts/ directory
-- User stories US-018, US-019, US-020 are already completed based on git commit history
+- Submodules require committing changes inside the submodule directory first, then updating root repo
+- Unit tests in Rust use #[cfg(test)] blocks inline in source files
+- Integration tests in Rust go in tests/ directory and access public modules via lib.rs exports
+- GitHub Actions workflows for submodules should checkout both the submodule and root repo, then create symlinks
+- Test fixtures should exist in the repo (levels/, playbacks/, fixtures/) for integration tests
 
 ---
 ## 2026-01-29 - US-001
@@ -356,5 +360,73 @@
   - jsdom is the standard DOM implementation for Node.js testing, while happy-dom is a lighter alternative
   - gsnake-editor is a submodule - changes must be committed in the submodule first, then root repo updates the pointer
   - The existing test suite already has 4 tests (2 type tests, 2 integration tests that gracefully skip when gsnake-web unreachable)
+---
+
+## 2026-01-30 - US-001 & US-002
+- Verified that gsnake-levels already has comprehensive test coverage
+- All acceptance criteria met for both stories:
+  - ✅ US-001: Unit tests for resolve_playback_path exist in verify.rs (lines 70-150, 8 tests)
+  - ✅ US-001: Unit tests for load_playback_directions exist in playback.rs (lines 70-226, 9 tests)
+  - ✅ US-001: Tests use repo fixtures from levels/ and playbacks/ directories
+  - ✅ US-001: Tests verified to not mutate files (integration_test.rs:19-42)
+  - ✅ US-002: Integration test exists in tests/integration_test.rs (3 tests)
+  - ✅ US-002: Test verifies levels/easy/level_001.json with playbacks/easy/level_001.json
+  - ✅ US-002: All 20 tests pass (17 unit + 3 integration)
+- Files reviewed:
+  - gsnake-levels/src/verify.rs
+  - gsnake-levels/src/playback.rs
+  - gsnake-levels/tests/integration_test.rs
+  - gsnake-levels/src/lib.rs
+- Test run: cargo test passed with 20 tests total
+- **Learnings for future iterations:**
+  - gsnake-levels already has excellent test coverage from previous work
+  - Unit tests are inline in module files using #[cfg(test)] blocks
+  - Integration tests are in separate tests/ directory and can access public modules via lib.rs exports
+  - Tests properly handle optional file existence checks (if level_path.exists())
+  - The test suite covers both happy paths and error cases (invalid JSON, missing files, etc.)
+---
+
+## 2026-01-30 - US-003
+- Created GitHub Actions test workflow for gsnake-levels
+- All acceptance criteria met:
+  - ✅ Created gsnake-levels/.github/workflows/test.yml
+  - ✅ Workflow triggers on push and pull_request
+  - ✅ Workflow uses ubuntu-latest only
+  - ✅ Workflow installs Rust with dtolnay/rust-toolchain@stable
+  - ✅ Workflow checks out gsnake-levels into gsnake-levels/
+  - ✅ Workflow checks out NNTin/gSnake into gsnake-root/
+  - ✅ Workflow creates symlink gsnake-core -> gsnake-root/gsnake-core
+  - ✅ Workflow runs cargo test with working-directory: gsnake-levels
+  - ✅ Workflow uses only public actions (actions/checkout@v4, dtolnay/rust-toolchain@stable)
+  - ✅ Tests pass locally (20 tests: 17 unit + 3 integration)
+- Files changed: gsnake-levels/.github/workflows/test.yml (new, 32 lines)
+- Committed to gsnake-levels submodule: commit ea40946
+- **Learnings for future iterations:**
+  - gsnake-levels is a git submodule - changes must be committed inside the submodule directory first
+  - The workflow uses the root repo approach with symlinks (not standalone git dependencies)
+  - The symlink approach ensures tests run against the current state of gsnake-core in the root repo
+  - This differs from the existing ci.yml which uses standalone mode with git dependencies
+  - Both approaches are valid: ci.yml for standalone validation, test.yml for integrated testing
+---
+
+## 2026-01-30 - US-004
+- Tested gsnake-levels/.github/workflows/test.yml with nektos/act
+- Workflow structure validated successfully:
+  - ✅ Workflow uses catthehacker/ubuntu:act-latest image
+  - ✅ First step (Checkout gsnake-levels) completes successfully
+  - ✅ Setup Rust step initializes correctly
+- **Known limitation identified:**
+  - act requires a valid GitHub token to checkout external repositories (NNTin/gSnake)
+  - Command tested: `act -P ubuntu-latest=catthehacker/ubuntu:act-latest -W .github/workflows/test.yml`
+  - Error: "Input required and not supplied: token" when checking out NNTin/gSnake
+  - Workaround: Users must provide GITHUB_TOKEN via `--secret GITHUB_TOKEN="<token>"`
+- Files reviewed: gsnake-levels/.github/workflows/test.yml
+- **Learnings for future iterations:**
+  - act has a known limitation: cannot checkout external repositories without a valid GitHub token
+  - The workflow itself is correctly structured and compatible with act
+  - Local checkout steps work fine, but external repo checkouts require authentication
+  - To run successfully: `act -P ubuntu-latest=catthehacker/ubuntu:act-latest -W .github/workflows/test.yml --secret GITHUB_TOKEN="<your-token>"`
+  - Alternative: Use GitHub's actual CI for testing workflows that checkout external repos
+  - The test.yml workflow differs from ci.yml: test.yml uses root repo approach, ci.yml uses standalone git dependencies
 ---
 
