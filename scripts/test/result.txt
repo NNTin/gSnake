@@ -1,5 +1,5 @@
 === Act CI Test Results ===
-Started: Sat Jan 31 18:50:37 CET 2026
+Started: Sat Jan 31 21:59:59 CET 2026
 
 ## Summary
 
@@ -7,33 +7,26 @@ Started: Sat Jan 31 18:50:37 CET 2026
 - [SUCCESS] ./gsnake-levels/.github/workflows/ci.yml::build
 - [SUCCESS] ./gsnake-levels/.github/workflows/ci.yml::test
 - [SUCCESS] ./gsnake-web/.github/workflows/test.yml::test
-- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::build
 - [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::typecheck
 - [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::test
+- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::build
 - [SUCCESS] ./gsnake-specs/.github/workflows/test.yml::test
 - [SUCCESS] ./gsnake-specs/.github/workflows/ci.yml::markdown-lint
 - [SUCCESS] ./gsnake-specs/.github/workflows/ci.yml::link-check
-- [FAILED] ./gsnake-specs/node_modules/markdown-link-extractor/.github/workflows/ci.yml::test
-- [SUCCESS] ./gsnake-specs/node_modules/ast-types/.github/workflows/main.yml::test
-- [FAILED] ./gsnake-specs/node_modules/reusify/.github/workflows/ci.yml::types
-- [FAILED] ./gsnake-specs/node_modules/reusify/.github/workflows/ci.yml::lint
-- [FAILED] ./gsnake-specs/node_modules/reusify/.github/workflows/ci.yml::legacy
-- [FAILED] ./gsnake-specs/node_modules/reusify/.github/workflows/ci.yml::test
-- [FAILED] ./gsnake-specs/node_modules/needle/.github/workflows/nodejs.yml::build
+- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::test
 - [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::build
 - [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::typecheck
-- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::test
-- [SUCCESS] ./.github/workflows/ci.yml::gsnake-editor-test
-- [SUCCESS] ./.github/workflows/ci.yml::e2e-test
+- [FAILED] ./.github/workflows/ci.yml::e2e-test
 - [SUCCESS] ./.github/workflows/ci.yml::build
 - [SUCCESS] ./.github/workflows/ci.yml::test
 - [SUCCESS] ./.github/workflows/ci.yml::wasm
+- [SUCCESS] ./.github/workflows/ci.yml::gsnake-editor-test
 
-**Total: 19 passed, 6 failed**
+**Total: 17 passed, 1 failed**
 
 ---
-Completed: Sat Jan 31 19:14:34 CET 2026
-Duration: 00:23:57
-Result: 19 passed, 6 failed
+Completed: Sat Jan 31 22:16:48 CET 2026
+Duration: 00:16:49
+Result: 17 passed, 1 failed
 Result file: /home/nntin/git/gSnake/scripts/test/result.txt
 Temp dir: /home/nntin/git/gSnake/scripts/test/tmp_act_results
