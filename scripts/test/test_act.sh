@@ -23,7 +23,8 @@ cd "${REPO_ROOT}"
 mapfile -t WORKFLOWS < <(
   find . -type f \
     \( -path "*/.github/workflows/*.yml" -o -path "*/.github/workflows/*.yaml" \) \
-    -not -path "*/.github/workflows/deploy.yml"
+    -not -path "*/.github/workflows/deploy.yml" \
+    -not -path "*/node_modules/*"
 )
 
 # Normalize paths (remove leading ./)
