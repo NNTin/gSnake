@@ -62,3 +62,21 @@ Started: Sat Jan 31 19:53:02 CET 2026
   - Browser evaluation can check computed styles to verify exact pixel dimensions
   - Screenshots are saved to .playwright-mcp/ first, then copied to gsnake-specs/test-results/
 ---
+
+## Sat Jan 31 22:30:00 CET 2026 - US-T004
+- Tested Entity Palette Selection with Browser MCP
+- Verified Snake entity selected by default with green border and "selected" class
+- Clicked all 8 entity types in sequence: Snake, Obstacle, Food, Exit, Stone, Spike, Floating Food, Falling Food
+- Verified each selection changes visual state correctly (previous deselected, new activated)
+- Console logs confirm correct entity selection on each click
+- Files changed:
+  - gsnake-specs/test-results/entity-palette-selection.png (screenshot added)
+  - scripts/ralph/prd.json (US-T004 marked as passes: true)
+- **Learnings for future iterations:**
+  - Entity palette buttons have class "entity-item" and gain "selected" class when active
+  - Selected entity has green border (rgb(76, 175, 80) = #4caf50) and gray background (rgb(245, 245, 245))
+  - Non-selected entities have white background and transparent border
+  - Selection changes are logged to console from EditorLayout.svelte:214
+  - Browser evaluation can filter buttons by text content to verify state
+  - Each entity click properly deselects previous and activates new selection
+---
