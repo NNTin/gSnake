@@ -169,3 +169,28 @@ Started: 2026-01-30
 - Other tests that reused contexts or had different timing resolved to IPv6 and failed
 - Port 3001 API server is critical for tests: snake-bugs.spec.ts, workflow.spec.ts, and editor workflow tests
 ---
+## 2026-01-31 15:30 - US-008
+- Fixed background server process termination with nohup in CI workflows
+- Root cause: Background processes started with `&` in workflow steps were killed when the step's shell exited
+- Solution: Used `nohup` with output redirection to keep processes alive across workflow steps
+- Improved test pass rate from ~15 to 17 out of 20 jobs (8 E2E tests now pass vs 5-6 before)
+- Files changed:
+  - .github/workflows/ci.yml (added nohup for server processes)
+  - .github/workflows/deploy.yml (added nohup for server processes)
+  - scripts/ralph/progress.txt (this entry)
+- Current status: 17 passed, 3 failed (deploy::validate, deploy::deploy, ci::e2e-test)
+- Remaining issue: 14 E2E tests still fail waiting for UI grid rendering (.cell elements / __gsnakeContract.frame)
+
+**Learnings for future iterations:**
+- GitHub Actions/act: Each `run:` block executes in a NEW shell session
+- Background processes with `&` are killed when the shell exits unless properly daemonized
+- Use `nohup command > /tmp/log 2>&1 &` to keep processes alive across workflow steps
+- The nohup fix resolved all ECONNREFUSED ::1:3001 errors - servers now stay alive for tests
+- API tests (complete-workflow, editor-integration, level-validation, snake-bugs, workflow) all pass
+- UI rendering tests (contract.spec.ts, gravity.spec.ts) still fail despite WasmGameEngine.ts fix being in place
+- The WasmGameEngine fix (lines 79-80: getFrame() + handleFrameUpdate()) is confirmed in built code
+- Playwright error-context.md shows Level/Moves/Buttons render but no .cell grid elements
+- This indicates `levelChanged` event fires but `frameChanged` event does not
+- The getFrame() method exists in WASM bindings (gsnake_wasm.d.ts) and is properly exported
+- Further debugging needed: browser console logs, Playwright debug mode, or manual testing
+---
