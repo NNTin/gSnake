@@ -19,43 +19,12 @@ mkdir -p "${TEMP_DIR}"
 
 cd "${REPO_ROOT}"
 
-# Find all ci.yml workflow files
-WORKFLOWS=()
-if [[ -f ".github/workflows/deploy.yml" ]]; then
-    WORKFLOWS+=(".github/workflows/deploy.yml")
-fi
-if [[ -f ".github/workflows/ci.yml" ]]; then
-    WORKFLOWS+=(".github/workflows/ci.yml")
-fi
-if [[ -f "gsnake-editor/.github/workflows/ci.yml" ]]; then
-    WORKFLOWS+=("gsnake-editor/.github/workflows/ci.yml")
-fi
-if [[ -f "gsnake-levels/.github/workflows/test.yml" ]]; then
-    WORKFLOWS+=("gsnake-levels/.github/workflows/test.yml")
-fi
-if [[ -f "gsnake-levels/.github/workflows/ci.yml" ]]; then
-    WORKFLOWS+=("gsnake-levels/.github/workflows/ci.yml")
-fi
-if [[ -f "gsnake-specs/.github/workflows/test.yml" ]]; then
-    WORKFLOWS+=("gsnake-specs/.github/workflows/test.yml")
-fi
-if [[ -f "gsnake-specs/.github/workflows/ci.yml" ]]; then
-    WORKFLOWS+=("gsnake-specs/.github/workflows/ci.yml")
-fi
-if [[ -f "gsnake-web/.github/workflows/test.yml" ]]; then
-    WORKFLOWS+=("gsnake-web/.github/workflows/test.yml")
-fi
-if [[ -f "gsnake-web/.github/workflows/ci.yml" ]]; then
-    WORKFLOWS+=("gsnake-web/.github/workflows/ci.yml")
-fi
-
-# TODO: Uncomment to run all workflows recursively
 # Find all GitHub Actions workflow files recursively
-# mapfile -t WORKFLOWS < <(
-#   find . -type f \
-#     -path "*/.github/workflows/*.yml" -o \
-#     -path "*/.github/workflows/*.yaml"
-# )
+mapfile -t WORKFLOWS < <(
+  find . -type f \
+    \( -path "*/.github/workflows/*.yml" -o -path "*/.github/workflows/*.yaml" \) \
+    -not -path "*/.github/workflows/deploy.yml"
+)
 
 # Normalize paths (remove leading ./)
 # WORKFLOWS=("${WORKFLOWS[@]#./}")
