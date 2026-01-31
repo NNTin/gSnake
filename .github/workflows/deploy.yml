@@ -66,11 +66,17 @@ jobs:
 
       - name: Clean up existing server processes
         run: |
-          # Kill any processes using ports 3000, 3001, 3003
-          lsof -ti:3000 | xargs -r kill -9 || true
-          lsof -ti:3001 | xargs -r kill -9 || true
-          lsof -ti:3003 | xargs -r kill -9 || true
-          sleep 1
+          # Kill any Node.js server processes
+          pkill -f "vite preview" || true
+          pkill -f "vite.*--port 3000" || true
+          pkill -f "npm.*run.*dev" || true
+          pkill -f "tsx server.ts" || true
+          pkill -f "gsnake-editor" || true
+          # Also try to kill by port if lsof/fuser available
+          fuser -k 3000/tcp || true
+          fuser -k 3001/tcp || true
+          fuser -k 3003/tcp || true
+          sleep 2
 
       - name: Start web preview server
         run: |
