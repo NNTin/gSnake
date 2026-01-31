@@ -80,3 +80,22 @@ Started: Sat Jan 31 19:53:02 CET 2026
   - Browser evaluation can filter buttons by text content to verify state
   - Each entity click properly deselects previous and activates new selection
 ---
+## Sun Feb 1 00:05:00 CET 2026 - US-T005
+- Tested Entity Placement - Click Mode with Browser MCP
+- Verified obstacle placed with correct color: rgb(102, 102, 102) = #666
+- Verified entity replacement: Food replaced obstacle at same position
+- Successfully placed all 8 entity types: Snake, Obstacle, Food, Exit, Stone, Spike, Floating Food, Falling Food
+- Console logs confirm correct placement for each entity type
+- Files changed:
+  - gsnake-specs/test-results/entity-placement-click-mode.png (screenshot added)
+  - scripts/ralph/prd.json (US-T005 marked as passes: true)
+- **Learnings for future iterations:**
+  - Click-to-place works for all entity types with correct console logging
+  - Entity replacement happens automatically when placing on occupied cell
+  - Grid cells show visual feedback (active state) when clicked
+  - Obstacle color is rgb(102, 102, 102) = #666
+  - Food color is rgb(255, 152, 0) = #ff9800
+  - Snake placement shows "H" label for head with green background
+  - Undo button becomes enabled after placing entities
+---
+
