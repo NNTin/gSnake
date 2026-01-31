@@ -104,8 +104,8 @@
         "Typecheck passes"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "RESOLVED: Fixed E2E and deploy workflows by starting editor API server separately. The issue was that 'npm run dev' uses concurrently which doesn't daemonize properly with '&'. Split into 'dev:editor' (port 3003) and 'dev:server' (port 3001). Also fixed IPv6 binding issue by binding Express server to 0.0.0.0 instead of defaulting to localhost."
     },
     {
       "id": "US-008",

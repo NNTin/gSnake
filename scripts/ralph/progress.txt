@@ -147,3 +147,25 @@ Started: 2026-01-30
 - The error context showed buttons and stats rendering but no .cell elements, indicating partial initialization
 - The WasmGameEngine TypeScript wrapper exposes getFrame(), getGameState(), and getLevel() methods for accessing current state
 ---
+## 2026-01-31 11:30 - US-007
+- Fixed E2E and deployment workflow failures caused by editor API server (port 3001) not starting
+- Root cause 1: 'npm run dev' uses concurrently which doesn't properly daemonize with background '&' operator
+- Root cause 2: Express server binding defaulted to localhost which in Docker/CI environments resolves to IPv4 only, but Playwright requests used IPv6 (::1)
+- Solution 1: Split workflow steps to run 'dev:editor' and 'dev:server' separately instead of 'dev'
+- Solution 2: Updated gsnake-editor/server.ts to explicitly bind to '0.0.0.0' to listen on all interfaces
+- Files changed:
+  - .github/workflows/ci.yml (split editor server startup into two steps)
+  - .github/workflows/deploy.yml (split editor server startup into two steps)
+  - gsnake-editor/server.ts (bind to 0.0.0.0 for IPv6 support)
+  - scripts/ralph/prd.json (marked US-007 as passing)
+
+**Learnings for future iterations:**
+- Concurrently doesn't work properly with background '&' operator in GitHub Actions/act - commands run but don't stay alive
+- When running multiple servers, start them as separate workflow steps with individual background processes
+- In Docker/CI environments, Node.js may prefer IPv6 (::1) over IPv4 (127.0.0.1) when resolving 'localhost'
+- Express app.listen(PORT) defaults to binding only the interface Node resolves for the hostname (usually IPv4)
+- Use app.listen(PORT, '0.0.0.0') to bind to all interfaces and support both IPv4 and IPv6 connections
+- The complete-workflow.spec.ts test passed because it created a fresh request context that resolved to IPv4
+- Other tests that reused contexts or had different timing resolved to IPv6 and failed
+- Port 3001 API server is critical for tests: snake-bugs.spec.ts, workflow.spec.ts, and editor workflow tests
+---
