@@ -120,7 +120,7 @@
       ],
       "priority": 8,
       "passes": false,
-      "notes": ""
+      "notes": "IN PROGRESS: 17/20 jobs passing. Fixes applied: nohup for background processes, IPv6 binding, directory resolution, typecheck errors. Remaining 3 failures (e2e-test, deploy::validate, deploy::deploy) all due to UI grid rendering issue in act environment. WASM getFrame() code appears correct but .cell elements don't render in Docker containers. Known act limitations documented. May pass in actual GitHub Actions. Needs verification in real GHA or local browser debugging to diagnose WASM initialization issue."
     }
   ]
 }
