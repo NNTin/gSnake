@@ -99,3 +99,22 @@ Started: Sat Jan 31 19:53:02 CET 2026
   - Undo button becomes enabled after placing entities
 ---
 
+## Sun Feb 1 00:10:00 CET 2026 - US-T006
+- Tested Snake Placement with Browser MCP
+- Verified Snake entity selected by default with green border and "selected" class
+- Verified first click shows 'H' label (head) with green color: rgb(76, 175, 80) = #4caf50
+- Verified subsequent clicks show numbered labels: 1, 2, 3
+- Verified all segments have same green background color (#4caf50)
+- Verified selecting different entity (Food) finalizes snake and deselects segments
+- Console logs confirm snake segment addition with correct indices
+- Files changed:
+  - gsnake-specs/test-results/snake-placement-multi-segment.png (screenshot added)
+  - scripts/ralph/prd.json (US-T006 marked as passes: true)
+- **Learnings for future iterations:**
+  - Snake placement is multi-step: each click adds a new segment
+  - All snake segments share the same green background (#4caf50)
+  - Head is labeled "H", body segments numbered starting from 1
+  - Selecting a different entity finalizes the snake and removes active state from last segment
+  - Console logs show "Added snake segment X at (y, z). Total segments: N"
+---
+
