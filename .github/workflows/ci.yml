@@ -223,9 +223,15 @@ jobs:
 
       - name: Start editor dev server
         run: |
-          npm --prefix gsnake-editor run dev &
+          npm --prefix gsnake-editor run dev:editor &
           sleep 5
           curl --retry 10 --retry-delay 2 --retry-connrefused http://localhost:3003
+
+      - name: Start editor API server
+        run: |
+          npm --prefix gsnake-editor run dev:server &
+          sleep 5
+          curl --retry 10 --retry-delay 2 --retry-connrefused http://localhost:3001
 
       - name: Run E2E tests
         env:
