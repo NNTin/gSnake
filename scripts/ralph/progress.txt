@@ -45,3 +45,20 @@ Started: Sat Jan 31 19:53:02 CET 2026
   - Grid cells are rendered as buttons in the application region
   - New Level button in toolbar returns to landing page
 ---
+
+## Sat Jan 31 22:20:00 CET 2026 - US-T003
+- Tested Editor Interface Layout with Browser MCP
+- Verified all toolbar buttons present: New Level, Load, Undo, Redo, Direction dropdown, Test, Save, and Help (?)
+- Verified entity palette displays all 8 entity types with colored icons
+- Verified grid cells are 32x32px with 1px gaps (box-sizing: border-box)
+- Verified Direction dropdown has all options: North, South, East, West
+- Files changed:
+  - gsnake-specs/test-results/editor-interface-layout.png (screenshot added)
+- **Learnings for future iterations:**
+  - Grid cells use box-sizing: border-box, so the 1px border is included in the 32px size
+  - The grid is rendered inside a div with role="application" containing multiple .cell buttons
+  - Direction dropdown defaults to "East" selection
+  - The Help button (?) was added as an additional feature beyond the basic requirements
+  - Browser evaluation can check computed styles to verify exact pixel dimensions
+  - Screenshots are saved to .playwright-mcp/ first, then copied to gsnake-specs/test-results/
+---
