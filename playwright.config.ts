@@ -26,24 +26,7 @@ export default defineConfig({
     },
   ],
   webServer: process.env.CI
-    ? [
-        // In CI, servers are started in workflow steps
-        {
-          url: 'http://localhost:3000',
-          reuseExistingServer: true,
-          timeout: 120000,
-        },
-        {
-          url: 'http://localhost:3003',
-          reuseExistingServer: true,
-          timeout: 120000,
-        },
-        {
-          url: 'http://localhost:3001',
-          reuseExistingServer: true,
-          timeout: 120000,
-        },
-      ]
+    ? undefined // In CI, servers are started in workflow steps
     : [
         // Local development: start servers automatically
         {
