@@ -217,19 +217,19 @@ jobs:
 
       - name: Start web preview server
         run: |
-          npm --prefix gsnake-web run preview -- --port 3000 --strictPort &
+          nohup npm --prefix gsnake-web run preview -- --port 3000 --strictPort > /tmp/web-server.log 2>&1 &
           sleep 5
           curl --retry 10 --retry-delay 2 --retry-connrefused http://localhost:3000
 
       - name: Start editor dev server
         run: |
-          npm --prefix gsnake-editor run dev:editor &
+          nohup npm --prefix gsnake-editor run dev:editor > /tmp/editor-dev.log 2>&1 &
           sleep 5
           curl --retry 10 --retry-delay 2 --retry-connrefused http://localhost:3003
 
       - name: Start editor API server
         run: |
-          npm --prefix gsnake-editor run dev:server &
+          nohup npm --prefix gsnake-editor run dev:server > /tmp/editor-api.log 2>&1 &
           sleep 5
           curl --retry 10 --retry-delay 2 --retry-connrefused http://localhost:3001
 
