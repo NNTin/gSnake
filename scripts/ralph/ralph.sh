@@ -38,6 +38,9 @@ PRD_FILE="$SCRIPT_DIR/prd.json"
 PROGRESS_FILE="$SCRIPT_DIR/progress.txt"
 ARCHIVE_DIR="$SCRIPT_DIR/archive"
 TEST_ACT_SCRIPT="$SCRIPT_DIR/../test/test_act.sh"
+ITERATION_TIMEOUT="${ITERATION_TIMEOUT:-1800}"
+
+mkdir -p "$ARCHIVE_DIR"
 
 # Initialize progress file if it doesn't exist
 if [ ! -f "$PROGRESS_FILE" ]; then
@@ -54,12 +57,32 @@ for i in $(seq 1 $MAX_ITERATIONS); do
   echo "  Ralph Iteration $i of $MAX_ITERATIONS ($TOOL)"
   echo "==============================================================="
 
+  OUTPUT_FILE="$ARCHIVE_DIR/iteration_${i}_$(date +%Y%m%d_%H%M%S).log"
+  TIMEOUT_CMD=()
+  if command -v timeout >/dev/null 2>&1; then
+    TIMEOUT_CMD=(timeout "$ITERATION_TIMEOUT")
+  fi
+
   # Run the selected tool with the ralph prompt
+  set +e
   if [[ "$TOOL" == "amp" ]]; then
-    OUTPUT=$(cat "$SCRIPT_DIR/prompt.md" | amp --dangerously-allow-all 2>&1 | tee /dev/stderr) || true
+    if [[ ! -f "$SCRIPT_DIR/prompt.md" ]]; then
+      echo "Error: Missing prompt file at $SCRIPT_DIR/prompt.md"
+      exit 1
+    fi
+    "${TIMEOUT_CMD[@]}" amp --dangerously-allow-all < "$SCRIPT_DIR/prompt.md" 2>&1 | tee "$OUTPUT_FILE"
   else
     # Claude Code: use --dangerously-skip-permissions for autonomous operation, --print for output
-    OUTPUT=$(claude --dangerously-skip-permissions --print < "$SCRIPT_DIR/CLAUDE.md" 2>&1 | tee /dev/stderr) || true
+    PROMPT_CONTENT="$(cat "$SCRIPT_DIR/CLAUDE.md")"
+    "${TIMEOUT_CMD[@]}" claude --dangerously-skip-permissions --no-session-persistence --print "$PROMPT_CONTENT" 2>&1 | tee "$OUTPUT_FILE"
+  fi
+  CMD_STATUS=${PIPESTATUS[0]}
+  set -e
+  OUTPUT="$(cat "$OUTPUT_FILE")"
+
+  if [[ "$CMD_STATUS" -eq 124 || "$CMD_STATUS" -eq 137 ]]; then
+    echo ""
+    echo "Warning: iteration $i timed out after ${ITERATION_TIMEOUT}s"
   fi
   
   # Check for completion signal
