@@ -118,3 +118,25 @@ Started: Sat Jan 31 19:53:02 CET 2026
   - Console logs show "Added snake segment X at (y, z). Total segments: N"
 ---
 
+## Sun Feb 1 00:53:00 CET 2026 - US-T007
+- Tested Entity Placement - Drag and Drop with Browser MCP
+- Verified Stone entity dragged to empty cell shows correct color: rgb(158, 158, 158) = #9e9e9e
+- Verified Spike entity replaced Stone at same position with correct color: rgb(244, 67, 54) = #f44336
+- Tested drag-and-drop for multiple entity types: Food, Exit, Floating Food
+- Verified palette selection remains unchanged after drag-drop operations (Snake stayed selected)
+- Console logs confirm dropped entity placement: "Dropped {entityType} at (row, col)"
+- Files changed:
+  - gsnake-specs/test-results/drag-drop-entity-placement.png (screenshot added)
+  - scripts/ralph/prd.json (US-T007 marked as passes: true)
+  - scripts/test/result.txt (CI results)
+- **Learnings for future iterations:**
+  - Drag-and-drop is fully implemented: EntityPalette.svelte handles dragstart, GridCanvas.svelte handles dragover/drop
+  - Dragged entities use dataTransfer.setData('entityType') to pass entity type
+  - Drag-and-drop does NOT change the selected entity in the palette (only click does)
+  - The "active" state shown in browser snapshot is just CSS pseudo-class during drag, not actual selection
+  - Entity replacement works same way for drag-drop as for click placement
+  - gsnake-specs is a git submodule and must be committed separately before the main repo
+  - Screenshots in .playwright-mcp/ are gitignored, must copy to gsnake-specs/test-results/
+  - Always include scripts/test/result.txt in commits per Ralph instructions
+---
+
