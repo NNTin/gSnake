@@ -44,3 +44,5 @@ TODO.md
 
 scripts/test/tmp_act_results/
 scripts/ralph/archive/
+
+.playwright-mcp/

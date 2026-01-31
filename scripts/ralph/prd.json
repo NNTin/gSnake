@@ -1,126 +1,402 @@
 {
   "project": "gSnake",
-  "branchName": "ralph/fix-ci-pipeline-errors",
-  "description": "Fix CI Pipeline Errors - Resolve 7 failing CI workflow jobs to achieve 100% pass rate with nektos/act",
+  "branchName": "ralph/level-editor-testing-and-fixes",
+  "description": "Level Editor Testing & Gap Fixes - Validate implementation against specification and fix identified gaps",
   "userStories": [
     {
-      "id": "US-001",
-      "title": "Fix TypeScript type errors in gsnake-web detect-local-deps.js",
-      "description": "As a developer, I need the gsnake-web typecheck job to pass so that TypeScript validation succeeds in CI.",
+      "id": "US-T001",
+      "title": "Test Landing Page",
+      "description": "As a tester, I want to verify the landing page displays correctly and functions as specified so that users can start creating or loading levels.",
       "acceptanceCriteria": [
-        "Add explicit type annotations to parameters in gsnake-web/scripts/detect-local-deps.js:77",
-        "Fix implicit 'any' type errors for 'targetDependency' and 'label' parameters",
-        "Verify typecheck passes: act -W gsnake-web/.github/workflows/ci.yml -j typecheck --container-architecture linux/amd64",
-        "Verify no new TypeScript errors introduced",
+        "Navigate to http://localhost:5173 using Browser MCP",
+        "Verify page title is 'gSnake Level Editor'",
+        "Verify 'Create New Level' button visible and styled (green primary button)",
+        "Verify 'Load Existing Level' button visible and styled (secondary button)",
+        "Verify centered card layout with proper spacing",
+        "Take screenshot and save to gsnake-specs/test-results/landing-page.png",
         "Typecheck passes"
       ],
       "priority": 1,
       "passes": true,
-      "notes": ""
+      "notes": "Fixed page title in index.html and vite config port to match test expectations"
     },
     {
-      "id": "US-002",
-      "title": "Fix root deploy workflow validation typecheck",
-      "description": "As a developer, I need the root deploy workflow validation to pass so that deployment preparation succeeds.",
+      "id": "US-T002",
+      "title": "Test Create New Level Flow",
+      "description": "As a tester, I want to verify the 'Create New Level' flow works correctly so that users can configure grid dimensions.",
       "acceptanceCriteria": [
-        "Verify US-001 fix resolves this issue (same file: gsnake-web/scripts/detect-local-deps.js)",
-        "Verify validate job passes: act -W .github/workflows/deploy.yml -j validate --container-architecture linux/amd64",
-        "Confirm no additional TypeScript errors in deploy workflow",
+        "Click 'Create New Level' button using Browser MCP",
+        "Verify grid size modal appears with default values (15x15, min 5, max 50)",
+        "Test invalid input (width=3) shows error",
+        "Test valid input (width=20, height=20) loads editor with 20x20 grid",
+        "Test Cancel button returns to landing page",
+        "Take screenshots of modal and editor states",
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
-      "id": "US-003",
-      "title": "Fix gsnake-levels test workflow Cargo.toml path issue",
-      "description": "As a developer, I need the gsnake-levels test job to find Cargo.toml so that Rust tests can run.",
+      "id": "US-T003",
+      "title": "Test Editor Interface Layout",
+      "description": "As a tester, I want to verify the editor interface displays all required components correctly.",
       "acceptanceCriteria": [
-        "Read gsnake-levels/.github/workflows/test.yml and identify path issue",
-        "Fix working directory or checkout path to resolve: 'could not find Cargo.toml in /home/nntin/git/gSnake/gsnake-levels'",
-        "Ensure workflow correctly handles submodule structure",
-        "Verify test job passes: act -W gsnake-levels/.github/workflows/test.yml -j test --container-architecture linux/amd64",
+        "Verify toolbar contains all buttons: New Level, Load, Undo, Redo, Direction, Test Level, Save Level",
+        "Verify entity palette sidebar shows all 8 entity types with colored icons",
+        "Verify grid canvas is centered with 32x32px cells and 1px gaps",
+        "Verify Direction dropdown has options: North, South, East, West",
+        "Take full-page screenshot",
         "Typecheck passes"
       ],
       "priority": 3,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
-      "id": "US-004",
-      "title": "Fix gsnake-web test workflow",
-      "description": "As a developer, I need the gsnake-web test workflow to pass so that web application tests validate correctly.",
+      "id": "US-T004",
+      "title": "Test Entity Palette Selection",
+      "description": "As a tester, I want to verify entity selection works correctly so that users can choose which entity to place.",
       "acceptanceCriteria": [
-        "Check failure log: scripts/test/tmp_act_results/gsnake-web_.github_workflows_test.yml_test.log",
-        "Identify root cause of test failure (likely path or dependency related)",
-        "Fix identified issues in gsnake-web/.github/workflows/test.yml",
-        "Verify test job passes: act -W gsnake-web/.github/workflows/test.yml -j test --container-architecture linux/amd64",
+        "Verify Snake entity is selected by default (highlighted)",
+        "Click each of the 8 entity types in sequence using Browser MCP",
+        "Verify each selection updates visual state (highlight changes)",
+        "Verify previous selection is deselected when new entity selected",
+        "Take screenshot showing selected entity",
         "Typecheck passes"
       ],
       "priority": 4,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
-      "id": "US-005",
-      "title": "Fix gsnake-specs test workflow",
-      "description": "As a developer, I need the gsnake-specs test workflow to pass so that documentation validation succeeds.",
+      "id": "US-T005",
+      "title": "Test Entity Placement - Click Mode",
+      "description": "As a tester, I want to verify click-to-place entity placement works correctly.",
       "acceptanceCriteria": [
-        "Check failure log: scripts/test/tmp_act_results/gsnake-specs_.github_workflows_test.yml_test.log",
-        "Identify root cause of test failure (likely markdown validation or structure)",
-        "Fix identified issues in gsnake-specs/.github/workflows/test.yml",
-        "Verify test job passes: act -W gsnake-specs/.github/workflows/test.yml -j test --container-architecture linux/amd64",
+        "Select 'Obstacle' entity and click on empty grid cells",
+        "Verify obstacles appear with correct color (#666)",
+        "Test entity replacement: place food on cell with obstacle",
+        "Verify food replaces obstacle (entity replacement behavior)",
+        "Test all 8 entity types can be placed",
+        "Take screenshot of grid with multiple entities",
         "Typecheck passes"
       ],
       "priority": 5,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
-      "id": "US-006",
-      "title": "Fix E2E test timeout/failure in root CI workflow",
-      "description": "As a developer, I need the E2E tests to complete successfully so that integration testing validates the full application.",
+      "id": "US-T006",
+      "title": "Test Snake Placement",
+      "description": "As a tester, I want to verify multi-segment snake placement works correctly.",
       "acceptanceCriteria": [
-        "Check failure log: scripts/test/tmp_act_results/.github_workflows_ci.yml_e2e-test.log",
-        "Identify why E2E tests fail or timeout (known issue: tests run too long)",
-        "Fix timeout issues by adjusting timeouts, optimizing tests, or fixing test logic",
-        "Verify e2e-test job passes: act -W .github/workflows/ci.yml -j e2e-test --container-architecture linux/amd64",
+        "Select 'Snake' entity and click on grid cells",
+        "Verify first cell shows 'H' label (head) with green color (#4caf50)",
+        "Verify subsequent cells show numbered labels (1, 2, 3, 4)",
+        "Verify all segments are visually connected/highlighted",
+        "Select different entity to finalize snake",
+        "Take screenshot of multi-segment snake",
         "Typecheck passes"
       ],
       "priority": 6,
-      "passes": true,
-      "notes": "RESOLVED: Fixed missing initial frame emission in WASM engine. The onFrame callback only fires on processMove(), not initialization. Added getFrame() call after engine creation to emit initial frame and render game grid. This fixed all .cell element timeout errors."
+      "passes": false,
+      "notes": ""
     },
     {
-      "id": "US-007",
-      "title": "Fix deployment workflow deploy job",
-      "description": "As a developer, I need the deploy job to succeed so that the application can be deployed.",
+      "id": "US-T007",
+      "title": "Test Entity Placement - Drag and Drop",
+      "description": "As a tester, I want to verify drag-and-drop entity placement works correctly.",
       "acceptanceCriteria": [
-        "Verify validate job passes first (dependency on US-002)",
-        "Check failure log: scripts/test/tmp_act_results/.github_workflows_deploy.yml_deploy.log",
-        "Identify and fix any issues preventing deployment",
-        "Verify deploy job passes: act -W .github/workflows/deploy.yml -j deploy --container-architecture linux/amd64",
+        "Drag 'Stone' entity from palette to empty grid cell using Browser MCP",
+        "Verify stone appears with correct color (#9e9e9e)",
+        "Drag 'Spike' entity to cell with stone",
+        "Verify spike replaces stone (entity replacement)",
+        "Test drag-and-drop for multiple entity types",
+        "Verify drag-drop does not change selected entity in palette",
+        "Take screenshot showing drag operation",
         "Typecheck passes"
       ],
       "priority": 7,
-      "passes": true,
-      "notes": "RESOLVED: Fixed E2E and deploy workflows by starting editor API server separately. The issue was that 'npm run dev' uses concurrently which doesn't daemonize properly with '&'. Split into 'dev:editor' (port 3003) and 'dev:server' (port 3001). Also fixed IPv6 binding issue by binding Express server to 0.0.0.0 instead of defaulting to localhost."
+      "passes": false,
+      "notes": ""
     },
     {
-      "id": "US-008",
-      "title": "Verify full test suite passes",
-      "description": "As a developer, I need all 20 CI jobs to pass so that the entire test suite is green.",
+      "id": "US-T008",
+      "title": "Test Entity Removal",
+      "description": "As a tester, I want to verify entity removal (Shift+Click) works correctly.",
       "acceptanceCriteria": [
-        "Run full test suite: scripts/test/test_act.sh (takes 30+ minutes so increase timeout to 60 minutes) or enter next ralph loop (test is automatically run between loops)",
-        "Verify scripts/test/result.txt shows: Total: 20 passed, 0 failed",
-        "Document any known limitations or warnings in nektos/act vs GitHub Actions",
-        "Confirm all 7 previously failing jobs now pass",
+        "Place obstacle on grid, then Shift+Click to remove it",
+        "Verify obstacle is removed (cell becomes empty)",
+        "Place snake segments (H, 1, 2), then Shift+Click segment 1",
+        "Verify segment is removed and remaining segments update indices",
+        "Verify red overlay appears on hover when Shift is pressed",
+        "Take screenshot of removal operation",
         "Typecheck passes"
       ],
       "priority": 8,
-      "passes": true,
-      "notes": "RESOLVED: 19/20 jobs passing. Fixed WASM initialization bug - module exports were used before init_wasm() was called. Added await init_wasm() before any WASM function calls. All E2E tests now pass. Only deploy::deploy fails due to act limitation (missing GitHub token for peaceiris/actions-gh-pages action). This would work in real GitHub Actions."
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-T009",
+      "title": "Test Undo/Redo Functionality",
+      "description": "As a tester, I want to verify undo/redo works correctly so that users can recover from mistakes.",
+      "acceptanceCriteria": [
+        "Place 3 different entities, then click 'Undo' button",
+        "Verify last entity is removed",
+        "Click 'Redo' button and verify entity reappears",
+        "Test keyboard shortcuts: Ctrl+Z (undo) and Ctrl+Y (redo)",
+        "Place new entity after undo and verify redo stack is cleared",
+        "Verify undo/redo buttons disable when stacks are empty",
+        "Take screenshot showing undo/redo in action",
+        "Typecheck passes"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-T010",
+      "title": "Test Snake Direction Configuration",
+      "description": "As a tester, I want to verify snake direction dropdown works correctly.",
+      "acceptanceCriteria": [
+        "Verify default selection is 'East'",
+        "Click dropdown to open and verify options: North, South, East, West",
+        "Select 'North' and verify dropdown shows 'North'",
+        "Test all 4 directions",
+        "Verify selection persists when editing level",
+        "Take screenshot of dropdown open",
+        "Typecheck passes"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-T011",
+      "title": "Test Level Save Functionality",
+      "description": "As a tester, I want to verify level saving works correctly so that users can export levels as JSON.",
+      "acceptanceCriteria": [
+        "Create level with multiple entities and set snake direction to 'West'",
+        "Click 'Save Level' button and verify save modal appears",
+        "Test validation: empty name and empty difficulty show errors",
+        "Enter name 'Test Level Alpha', difficulty 'medium', click 'Export JSON'",
+        "Verify JSON file downloads with correct data: name, difficulty, gridSize, entities",
+        "Verify level ID format matches 'timestamp-random' pattern",
+        "Verify all entity positions use {x, y} format",
+        "Take screenshots of save modal and downloaded JSON",
+        "Typecheck passes"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-T012",
+      "title": "Test Level Load Functionality",
+      "description": "As a tester, I want to verify level loading works correctly so that users can edit existing levels.",
+      "acceptanceCriteria": [
+        "Click 'Load Existing Level' and verify file picker appears",
+        "Test cancel returns to landing page gracefully",
+        "Select valid level JSON from gsnake-levels/levels/",
+        "Verify editor loads with correct grid dimensions and all entities at correct positions",
+        "Test loading invalid JSON file shows error and returns to landing page",
+        "Test loading JSON with invalid gridSize (width=100) shows validation error",
+        "Test loading JSON with missing required field shows validation error",
+        "Take screenshots of loaded level",
+        "Typecheck passes"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-T013",
+      "title": "Test Level Testing Integration",
+      "description": "As a tester, I want to verify the test level workflow works end-to-end with gsnake-web.",
+      "acceptanceCriteria": [
+        "Verify backend server running: curl http://localhost:3001/api/test-level",
+        "Create simple test level and click 'Test Level' button",
+        "Verify POST request to backend succeeds (check network tab)",
+        "Verify new browser tab opens with URL http://localhost:3000?test=true",
+        "Verify test level appears in gsnake-web and is playable",
+        "Modify level, test again, verify updated level loads",
+        "Test with backend NOT running shows helpful error",
+        "Take screenshots of test workflow",
+        "Typecheck passes"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-T014",
+      "title": "Test New Level from Editor",
+      "description": "As a tester, I want to verify 'New Level' button works correctly for starting fresh.",
+      "acceptanceCriteria": [
+        "Create and edit a level with multiple entities",
+        "Click 'New Level' button in toolbar",
+        "Verify returns to landing page",
+        "Verify previous level data is cleared",
+        "Verify can create new level or load existing",
+        "Take screenshot of workflow",
+        "Typecheck passes"
+      ],
+      "priority": 14,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-T015",
+      "title": "Test Load from Editor Toolbar",
+      "description": "As a tester, I want to verify 'Load' button in toolbar works correctly for switching levels.",
+      "acceptanceCriteria": [
+        "Create and edit a level",
+        "Click 'Load' button in toolbar and verify file picker appears",
+        "Select valid level JSON and verify new level loads",
+        "Test cancel leaves current level unchanged",
+        "Verify no unsaved changes warning (per spec)",
+        "Take screenshot",
+        "Typecheck passes"
+      ],
+      "priority": 15,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-T016",
+      "title": "Test Grid Responsiveness",
+      "description": "As a tester, I want to verify the grid displays correctly at different sizes.",
+      "acceptanceCriteria": [
+        "Create grid with dimensions 5x5 (minimum) and verify correct rendering",
+        "Create grid with dimensions 50x50 (maximum) and verify scrolling available",
+        "Create grid with non-square dimensions (10x30) and verify correct rendering",
+        "Resize browser window to 1024px width and verify layout adapts",
+        "Take screenshots of different grid sizes",
+        "Typecheck passes"
+      ],
+      "priority": 16,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-T017",
+      "title": "Test Exit Entity Uniqueness",
+      "description": "As a tester, I want to verify that only one exit entity can exist on the grid.",
+      "acceptanceCriteria": [
+        "Place exit entity at position (5, 5) with blue color (#2196f3)",
+        "Place exit entity at position (10, 10)",
+        "Verify previous exit at (5, 5) is automatically removed",
+        "Test with drag-and-drop and verify same behavior",
+        "Save level and verify JSON exit object contains only one position",
+        "Take screenshot showing single exit enforcement",
+        "Typecheck passes"
+      ],
+      "priority": 17,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-T018",
+      "title": "Test Level ID Uniqueness",
+      "description": "As a tester, I want to verify level IDs are unique to prevent collisions.",
+      "acceptanceCriteria": [
+        "Create and save level with name 'Level A', note generated ID",
+        "Immediately create and save level with name 'Level B', note generated ID",
+        "Verify IDs are different",
+        "Verify ID format matches 'timestamp-random' pattern (e.g., 1234567890-a1b2c3)",
+        "Take screenshots of both JSON files showing unique IDs",
+        "Typecheck passes"
+      ],
+      "priority": 18,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-F001",
+      "title": "Add Level Validation Warnings",
+      "description": "As a user, I want to receive warnings about potentially invalid levels before saving.",
+      "acceptanceCriteria": [
+        "When clicking 'Save Level', check for: no snake, no food, no exit",
+        "Display warnings in save modal above export button",
+        "Show 'Export Anyway' and 'Cancel' buttons when warnings present",
+        "Allow user to export anyway (warnings, not errors)",
+        "Typecheck passes",
+        "Verify in browser using Browser MCP"
+      ],
+      "priority": 19,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-F002",
+      "title": "Improve Error Messages with Toast Notifications",
+      "description": "As a user, I want to see helpful, specific error messages using toast notifications.",
+      "acceptanceCriteria": [
+        "Install svelte-french-toast: npm install svelte-french-toast",
+        "Add toast container to App.svelte",
+        "Replace alert() calls with toast notifications (error, warning, success)",
+        "Add success toast when level saved successfully",
+        "Add success toast when test level uploaded successfully",
+        "Style toasts to match editor design (green success, red error, yellow warning)",
+        "Auto-dismiss toasts after 5 seconds",
+        "Typecheck passes",
+        "Verify in browser using Browser MCP"
+      ],
+      "priority": 20,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-F003",
+      "title": "Add Loading States",
+      "description": "As a user, I want to see loading indicators during async operations.",
+      "acceptanceCriteria": [
+        "Add loading spinner to 'Test Level' button while uploading",
+        "Change button text to 'Uploading...' during upload",
+        "Disable button during upload to prevent double-clicks",
+        "Add loading spinner when loading level JSON file",
+        "Use consistent spinner design across all loading states",
+        "Typecheck passes",
+        "Verify in browser using Browser MCP"
+      ],
+      "priority": 21,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-F004",
+      "title": "Add Keyboard Shortcuts Help Modal",
+      "description": "As a user, I want to see available keyboard shortcuts so that I can work more efficiently.",
+      "acceptanceCriteria": [
+        "Add 'Help' button to toolbar (question mark icon)",
+        "Clicking Help opens modal showing keyboard shortcuts: Ctrl+Z (Undo), Ctrl+Y (Redo), Shift+Click (Remove), Esc (Close)",
+        "Add close button to help modal",
+        "Style modal consistently with other modals",
+        "Typecheck passes",
+        "Verify in browser using Browser MCP"
+      ],
+      "priority": 22,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-F005",
+      "title": "Automate Backend Server Startup",
+      "description": "As a developer, I want the backend server to start automatically with the dev server.",
+      "acceptanceCriteria": [
+        "Install concurrently: npm install --save-dev concurrently",
+        "Update package.json dev script to run both vite and server",
+        "Add separate scripts: dev:editor (vite only), dev:server (server only)",
+        "Test npm run dev starts both services",
+        "Update README with new command",
+        "Verify both servers run simultaneously without conflicts",
+        "Typecheck passes"
+      ],
+      "priority": 23,
+      "passes": false,
+      "notes": ""
     }
   ]
 }
