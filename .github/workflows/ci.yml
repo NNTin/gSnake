@@ -201,6 +201,14 @@ jobs:
         run: |
           npm --prefix gsnake-editor ci
 
+      - name: Clean up existing server processes
+        run: |
+          # Kill any processes using ports 3000, 3001, 3003
+          lsof -ti:3000 | xargs -r kill -9 || true
+          lsof -ti:3001 | xargs -r kill -9 || true
+          lsof -ti:3003 | xargs -r kill -9 || true
+          sleep 1
+
       - name: Start web preview server
         run: |
           npm --prefix gsnake-web run preview -- --port 3000 --strictPort &
