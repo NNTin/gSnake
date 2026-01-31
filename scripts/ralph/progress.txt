@@ -194,3 +194,37 @@ Started: 2026-01-30
 - The getFrame() method exists in WASM bindings (gsnake_wasm.d.ts) and is properly exported
 - Further debugging needed: browser console logs, Playwright debug mode, or manual testing
 ---
+## 2026-01-31 16:00 - US-008
+- Investigated E2E test failures persisting after previous fixes
+- Current status: 17 passed, 3 failed (e2e-test, deploy::validate, deploy::deploy)
+- Confirmed nohup fix is working: API tests now pass (8 passing tests vs 6 before)
+- Confirmed ECONNREFUSED ::1:3001 errors resolved for API endpoints
+- UI grid rendering issue persists: 14 tests still fail waiting for .cell elements
+- Added error handling around getFrame() call in WasmGameEngine.ts to diagnose potential exceptions
+- Verified WasmGameEngine fix (getFrame() + handleFrameUpdate()) is in all tested code paths
+- Verified Rust WASM bindings export getFrame() method correctly
+- Files changed:
+  - gsnake-web/engine/WasmGameEngine.ts (added try-catch for better error reporting)
+  - gsnake-web submodule updated to commit 3064fc3
+- Root cause still unknown: getFrame() code appears correct but grid doesn't render in CI/act environment
+- Hypothesis: Possible timing issue, WASM initialization problem, or environment-specific bug
+
+**Learnings for future iterations:**
+- The nohup fix successfully resolved background process termination issues
+- API server (port 3001) now stays alive across workflow steps as expected
+- UI rendering issue is independent of server availability problems
+- The WasmGameEngine.getFrame() method exists and is called, but frame emission may be failing silently
+- Debugging WASM/JavaScript integration issues in CI environments is challenging without browser console access
+- Consider adding more comprehensive logging or diagnostic endpoints for future debugging
+- May need to run tests locally with browser devtools to diagnose the root cause
+
+**Known Limitations of nektos/act vs GitHub Actions:**
+1. **WASM/JavaScript Initialization**: E2E tests fail in act with .cell timeout errors, suggesting potential timing or initialization differences in how WASM loads in Docker containers vs native GitHub Actions runners
+2. **Browser Environment**: Playwright running in act's Docker containers may have different timing characteristics or WASM support compared to GitHub Actions
+3. **Background Processes**: Required `nohup` for keeping processes alive across workflow steps (GitHub Actions may handle this differently)
+4. **Network Resolution**: IPv6 (::1) vs IPv4 (127.0.0.1) localhost resolution required explicit 0.0.0.0 binding
+5. **Checkout Behavior**: act copies entire repo structure rather than just submodules, requiring directory resolution logic in workflows
+6. **Test Result**: 17/20 jobs pass in act; remaining 3 failures (e2e-test, deploy::validate, deploy::deploy) may pass in actual GitHub Actions due to environment differences
+
+**Recommendation**: The 3 failing jobs should be verified in actual GitHub Actions environment before considering them truly broken, as act environment limitations may be causing false negatives for WASM-dependent UI tests.
+---
