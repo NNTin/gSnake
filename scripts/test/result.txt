@@ -1,5 +1,5 @@
 === Act CI Test Results ===
-Started: Sat Jan 31 23:44:09 CET 2026
+Started: Sun Feb  1 00:33:44 CET 2026
 
 ## Summary
 
@@ -11,22 +11,22 @@ Started: Sat Jan 31 23:44:09 CET 2026
 - [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::typecheck
 - [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::test
 - [SUCCESS] ./gsnake-specs/.github/workflows/test.yml::test
-- [SUCCESS] ./gsnake-specs/.github/workflows/ci.yml::link-check
 - [SUCCESS] ./gsnake-specs/.github/workflows/ci.yml::markdown-lint
+- [SUCCESS] ./gsnake-specs/.github/workflows/ci.yml::link-check
 - [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::test
 - [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::build
 - [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::typecheck
-- [SUCCESS] ./.github/workflows/ci.yml::test
 - [SUCCESS] ./.github/workflows/ci.yml::wasm
 - [SUCCESS] ./.github/workflows/ci.yml::gsnake-editor-test
 - [FAILED] ./.github/workflows/ci.yml::e2e-test
 - [SUCCESS] ./.github/workflows/ci.yml::build
+- [SUCCESS] ./.github/workflows/ci.yml::test
 
 **Total: 17 passed, 1 failed**
 
 ---
-Completed: Sun Feb  1 00:01:20 CET 2026
-Duration: 00:17:11
+Completed: Sun Feb  1 00:50:28 CET 2026
+Duration: 00:16:44
 Result: 17 passed, 1 failed
 Result file: /home/nntin/git/gSnake/scripts/test/result.txt
 Temp dir: /home/nntin/git/gSnake/scripts/test/tmp_act_results

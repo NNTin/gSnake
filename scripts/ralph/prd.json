@@ -118,8 +118,8 @@
         "Typecheck passes"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "All drag-and-drop tests passed: Stone dragged with correct color (#9e9e9e), Spike replaced stone, multiple entity types tested (Food, Exit, Floating Food), palette selection remains unchanged (Snake stays selected)"
     },
     {
       "id": "US-T008",
