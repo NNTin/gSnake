@@ -89,8 +89,8 @@
         "Typecheck passes"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": "PARTIALLY RESOLVED: Web servers now start correctly, but tests still fail because game UI doesn't render (WASM/JS initialization issue). Server startup issue fixed by moving build steps to workflow and starting servers in background. Remaining issue: page loads but .cell elements don't appear - needs investigation into WASM loading or JS runtime errors in CI environment."
+      "passes": true,
+      "notes": "RESOLVED: Fixed missing initial frame emission in WASM engine. The onFrame callback only fires on processMove(), not initialization. Added getFrame() call after engine creation to emit initial frame and render game grid. This fixed all .cell element timeout errors."
     },
     {
       "id": "US-007",

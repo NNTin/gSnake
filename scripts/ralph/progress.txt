@@ -129,3 +129,21 @@ Started: 2026-01-30
 - This is likely a different issue from server startup - possibly WASM loading failure or JS runtime error in CI environment
 - The fact that API tests pass (complete-workflow.spec.ts) confirms servers start, but UI rendering fails
 ---
+## 2026-01-31 09:05 - US-006
+- Fixed E2E test failures where game grid (.cell elements) wasn't rendering
+- Root cause: WASM engine's onFrame callback only fires when processMove() is called, NOT during initialization
+- The initial frame was never emitted, so the Svelte frame store remained empty and no cells rendered
+- Solution: Added explicit getFrame() call after creating the WASM engine in loadLevelByIndex()
+- Files changed:
+  - gsnake-web/engine/WasmGameEngine.ts (added getFrame() call and emit initial frame)
+  - scripts/ralph/prd.json (marked US-006 as passing)
+  
+**Learnings for future iterations:**
+- WASM bindings: The WasmGameEngine.onFrame(callback) only fires when processMove() is called
+- Initial state must be explicitly fetched using getFrame() and emitted as a 'frameChanged' event
+- The page header/UI can load successfully (showing Level, Length, Moves from 'levelChanged' event) but grid won't render without 'frameChanged' event
+- Svelte reactive statements ($: grid = $frame?.grid ?? []) depend on the frame store being populated
+- When debugging "element not found" E2E errors, check Playwright's error-context.md files for page snapshots - they show what elements exist vs. what's missing
+- The error context showed buttons and stats rendering but no .cell elements, indicating partial initialization
+- The WasmGameEngine TypeScript wrapper exposes getFrame(), getGameState(), and getLevel() methods for accessing current state
+---
