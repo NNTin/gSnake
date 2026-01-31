@@ -6,6 +6,9 @@ Started: Sat Jan 31 19:53:02 CET 2026
 - Browser MCP screenshots must use relative paths, saved to .playwright-mcp/ then copied to test-results/
 - The gsnake-editor uses Svelte 5 and TypeScript with svelte-check for type checking
 - Test results are saved in gsnake-specs/test-results/ directory
+- Grid size validation: min 5, max 50 for both width and height
+- Modal validation uses browser alert() for error messages
+- Default grid size is 15x15
 
 ---
 
@@ -23,4 +26,22 @@ Started: Sat Jan 31 19:53:02 CET 2026
   - Page title is in index.html and needs to match acceptance criteria exactly
   - To start dev server: `cd gsnake-editor && npm run dev:editor` (or use dev for both editor+server)
   - Typecheck command: `npm run check` (runs svelte-check + tsc)
+---
+
+## Sat Jan 31 20:15:00 CET 2026 - US-T002
+- Tested Create New Level flow with Browser MCP
+- Verified modal appears with default 15x15 values
+- Tested invalid input (width=3) shows alert error
+- Tested valid input creates editor with correct grid size
+- Tested Cancel button returns to landing page
+- Files changed:
+  - gsnake-specs/test-results/create-new-level-modal.png (screenshot added)
+  - gsnake-specs/test-results/editor-15x15-grid.png (screenshot added)
+- **Learnings for future iterations:**
+  - Grid validation shows browser alert() with message "Width and height must be between 5 and 50"
+  - Dialog must be accepted with browser_handle_dialog tool
+  - Default grid dimensions are 15x15
+  - Entity Palette shows Snake selected by default (green highlight)
+  - Grid cells are rendered as buttons in the application region
+  - New Level button in toolbar returns to landing page
 ---
