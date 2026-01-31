@@ -53,9 +53,33 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
+      - name: Build fixture WASM
+        run: ./scripts/build_fixture_wasm.sh
+
+      - name: Setup gsnake-web for E2E
+        run: |
+          rm -rf gsnake-web/node_modules/gsnake-wasm
+          cp -R e2e/fixtures/gsnake-wasm/pkg gsnake-web/node_modules/gsnake-wasm
+          npm --prefix gsnake-web run build
+
       - run: npm --prefix gsnake-editor ci
 
+      - name: Start web preview server
+        run: |
+          npm --prefix gsnake-web run preview -- --port 3000 --strictPort &
+          sleep 5
+          curl --retry 10 --retry-delay 2 --retry-connrefused http://localhost:3000
+
+      - name: Start editor dev server
+        run: |
+          npm --prefix gsnake-editor run dev &
+          sleep 5
+          curl --retry 10 --retry-delay 2 --retry-connrefused http://localhost:3003
+          curl --retry 10 --retry-delay 2 --retry-connrefused http://localhost:3001
+
       - name: Run E2E contract tests
+        env:
+          CI: true
         run: npm run test:e2e
 
   deploy:

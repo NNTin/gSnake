@@ -38,6 +38,11 @@ export default defineConfig({
           reuseExistingServer: true,
           timeout: 120000,
         },
+        {
+          url: 'http://localhost:3001',
+          reuseExistingServer: true,
+          timeout: 120000,
+        },
       ]
     : [
         // Local development: start servers automatically
