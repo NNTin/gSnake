@@ -42,9 +42,9 @@ impl UI {
         let chunks = Layout::default()
             .direction(Direction::Vertical)
             .constraints([
-                Constraint::Length(3),           // Status bar
-                Constraint::Min(0),               // Game grid
-                Constraint::Length(1),            // Footer/help
+                Constraint::Length(3), // Status bar
+                Constraint::Min(0),    // Game grid
+                Constraint::Length(1), // Footer/help
             ])
             .split(f.area());
 
@@ -62,8 +62,8 @@ impl UI {
             GameStatus::GameOver => Self::render_game_over_overlay(f, f.area()),
             GameStatus::LevelComplete | GameStatus::AllComplete => {
                 Self::render_level_complete_overlay(f, f.area(), frame.state.status);
-            }
-            GameStatus::Playing => {}
+            },
+            GameStatus::Playing => {},
         }
     }
 
@@ -71,7 +71,10 @@ impl UI {
     fn render_status_bar(f: &mut RatatuiFrame, area: Rect, frame: &Frame) {
         let status_text = format!(
             " Level: {} | Moves: {} | Food: {}/{} ",
-            frame.state.current_level, frame.state.moves, frame.state.food_collected, frame.state.total_food
+            frame.state.current_level,
+            frame.state.moves,
+            frame.state.food_collected,
+            frame.state.total_food
         );
 
         let status = Paragraph::new(status_text)
@@ -141,9 +144,7 @@ impl UI {
             Line::from(""),
             Line::from(vec![Span::styled(
                 "        GAME OVER",
-                Style::default()
-                    .fg(Color::Red)
-                    .add_modifier(Modifier::BOLD),
+                Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
             )]),
             Line::from(""),
             Line::from(vec![Span::styled(
@@ -175,11 +176,7 @@ impl UI {
     }
 
     /// Renders level complete overlay
-    fn render_level_complete_overlay(
-        f: &mut RatatuiFrame,
-        area: Rect,
-        status: GameStatus,
-    ) {
+    fn render_level_complete_overlay(f: &mut RatatuiFrame, area: Rect, status: GameStatus) {
         let overlay_area = Self::centered_rect(50, 30, area);
 
         let (title, color) = match status {
@@ -227,16 +224,18 @@ impl UI {
     }
 
     /// Renders "Terminal too small" warning
-    pub fn render_terminal_too_small(f: &mut RatatuiFrame, required_width: u16, required_height: u16) {
+    pub fn render_terminal_too_small(
+        f: &mut RatatuiFrame,
+        required_width: u16,
+        required_height: u16,
+    ) {
         let area = f.area();
 
         let lines = vec![
             Line::from(""),
             Line::from(vec![Span::styled(
                 "Terminal Too Small",
-                Style::default()
-                    .fg(Color::Red)
-                    .add_modifier(Modifier::BOLD),
+                Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
             )]),
             Line::from(""),
             Line::from(vec![Span::styled(
@@ -311,7 +310,12 @@ impl UI {
 }
 
 /// Validates if the terminal is large enough for the game
-pub fn validate_terminal_size(terminal_width: u16, terminal_height: u16, grid_width: usize, grid_height: usize) -> Result<(), String> {
+pub fn validate_terminal_size(
+    terminal_width: u16,
+    terminal_height: u16,
+    grid_width: usize,
+    grid_height: usize,
+) -> Result<(), String> {
     // Each cell takes 2 characters width
     let required_width = (grid_width as u16 * 2) + 4; // +4 for borders
     let required_height = grid_height as u16 + 6; // +6 for status bar, borders, footer

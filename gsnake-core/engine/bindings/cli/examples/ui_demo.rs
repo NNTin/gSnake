@@ -4,9 +4,7 @@ use crossterm::{
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
-use gsnake_core::{
-    engine::GameEngine, Direction, GameStatus, GridSize, LevelDefinition, Position,
-};
+use gsnake_core::{engine::GameEngine, Direction, GameStatus, GridSize, LevelDefinition, Position};
 use ratatui::{backend::CrosstermBackend, Terminal};
 use std::{io, time::Duration};
 
@@ -73,7 +71,7 @@ fn run_demo(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>) -> Result<()>
                     Ok(_) => {
                         // Render normal UI
                         UI::render(f, &frame);
-                    }
+                    },
                     Err(_) => {
                         // Terminal is actually too small
                         UI::render_terminal_too_small(
@@ -81,7 +79,7 @@ fn run_demo(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>) -> Result<()>
                             (grid_width * 2 + 4) as u16,
                             (grid_height + 6) as u16,
                         );
-                    }
+                    },
                 }
             }
         })?;
@@ -92,7 +90,7 @@ fn run_demo(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>) -> Result<()>
                 match key.code {
                     KeyCode::Char('q') | KeyCode::Char('Q') => {
                         break;
-                    }
+                    },
                     KeyCode::Char(' ') => {
                         demo_state = (demo_state + 1) % 5;
 
@@ -104,12 +102,12 @@ fn run_demo(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>) -> Result<()>
                         match demo_state {
                             0 => {
                                 // Normal state
-                            }
+                            },
                             1 => {
                                 // After collecting food
                                 engine.process_move(Direction::East);
                                 frame = engine.generate_frame();
-                            }
+                            },
                             2 => {
                                 // Game Over - move into wall
                                 for _ in 0..20 {
@@ -117,43 +115,43 @@ fn run_demo(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>) -> Result<()>
                                 }
                                 frame = engine.generate_frame();
                                 frame.state.status = GameStatus::GameOver;
-                            }
+                            },
                             3 => {
                                 // Level Complete
                                 frame.state.status = GameStatus::LevelComplete;
                                 frame.state.food_collected = frame.state.total_food;
-                            }
+                            },
                             4 => {
                                 // Terminal too small (simulated)
-                            }
-                            _ => {}
+                            },
+                            _ => {},
                         }
-                    }
+                    },
                     KeyCode::Up | KeyCode::Char('w') | KeyCode::Char('W') => {
                         if demo_state == 0 || demo_state == 1 {
                             engine.process_move(Direction::North);
                             frame = engine.generate_frame();
                         }
-                    }
+                    },
                     KeyCode::Down | KeyCode::Char('s') | KeyCode::Char('S') => {
                         if demo_state == 0 || demo_state == 1 {
                             engine.process_move(Direction::South);
                             frame = engine.generate_frame();
                         }
-                    }
+                    },
                     KeyCode::Left | KeyCode::Char('a') | KeyCode::Char('A') => {
                         if demo_state == 0 || demo_state == 1 {
                             engine.process_move(Direction::West);
                             frame = engine.generate_frame();
                         }
-                    }
+                    },
                     KeyCode::Right | KeyCode::Char('d') | KeyCode::Char('D') => {
                         if demo_state == 0 || demo_state == 1 {
                             engine.process_move(Direction::East);
                             frame = engine.generate_frame();
                         }
-                    }
-                    _ => {}
+                    },
+                    _ => {},
                 }
             }
         }
@@ -167,7 +165,11 @@ fn create_test_level() -> LevelDefinition {
         1,
         "UI Demo Level".to_string(),
         GridSize::new(20, 12),
-        vec![Position::new(2, 10), Position::new(1, 10), Position::new(0, 10)],
+        vec![
+            Position::new(2, 10),
+            Position::new(1, 10),
+            Position::new(0, 10),
+        ],
         vec![
             // Floor
             Position::new(0, 11),

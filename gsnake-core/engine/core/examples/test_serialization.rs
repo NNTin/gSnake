@@ -21,11 +21,18 @@ fn main() {
     // Test 2: Deserialize the JSON back
     let deserialized: Frame = serde_json::from_str(&json).expect("Failed to deserialize");
     println!("✅ Successfully deserialized Frame!");
-    println!("Grid dimensions: {}x{}", deserialized.grid.len(), deserialized.grid[0].len());
+    println!(
+        "Grid dimensions: {}x{}",
+        deserialized.grid.len(),
+        deserialized.grid[0].len()
+    );
     println!("Game status: {:?}", deserialized.state.status);
     println!("Level: {}", deserialized.state.current_level);
     println!("Moves: {}", deserialized.state.moves);
-    println!("Food: {}/{}\n", deserialized.state.food_collected, deserialized.state.total_food);
+    println!(
+        "Food: {}/{}\n",
+        deserialized.state.food_collected, deserialized.state.total_food
+    );
 
     // Test 3: Test all enum serialization
     println!("=== Testing Enum Serialization ===");

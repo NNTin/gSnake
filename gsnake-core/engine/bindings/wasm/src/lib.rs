@@ -18,7 +18,7 @@ pub fn init_panic_hook() {
     console_error_panic_hook::set_once();
 }
 
-/// WASM wrapper around the Rust GameEngine
+/// WASM wrapper around the Rust `GameEngine`
 /// Provides JS-friendly interface for the web frontend
 #[wasm_bindgen]
 pub struct WasmGameEngine {
@@ -49,7 +49,7 @@ impl WasmGameEngine {
     }
 
     /// Processes a move in the given direction
-    /// Returns a Frame on success; failures return a ContractError
+    /// Returns a Frame on success; failures return a `ContractError`
     /// Automatically invokes the onFrame callback with the new state
     #[wasm_bindgen(js_name = processMove)]
     pub fn process_move(&mut self, direction: JsValue) -> Result<JsValue, JsValue> {
@@ -68,12 +68,10 @@ impl WasmGameEngine {
         let frame_js = serialize_frame(&frame)?;
 
         if let Some(callback) = &self.on_frame_callback {
-            callback
-                .call1(&JsValue::NULL, &frame_js)
-                .map_err(|e| {
-                    let msg = e.as_string().unwrap_or_else(|| format!("{:?}", e));
-                    contract_error(ContractErrorKind::InternalError, &msg)
-                })?;
+            callback.call1(&JsValue::NULL, &frame_js).map_err(|e| {
+                let msg = e.as_string().unwrap_or_else(|| format!("{e:?}"));
+                contract_error(ContractErrorKind::InternalError, &msg)
+            })?;
         }
 
         Ok(frame_js)
@@ -90,29 +88,25 @@ impl WasmGameEngine {
     /// Gets the current game state as a JS object
     #[wasm_bindgen(js_name = getGameState)]
     pub fn get_game_state(&self) -> Result<JsValue, JsValue> {
-        to_value(self.engine.game_state()).map_err(|e| {
-            contract_error(ContractErrorKind::SerializationFailed, &e.to_string())
-        })
+        to_value(self.engine.game_state())
+            .map_err(|e| contract_error(ContractErrorKind::SerializationFailed, &e.to_string()))
     }
 
     /// Gets the current level data as a JS object
     #[wasm_bindgen(js_name = getLevel)]
     pub fn get_level(&self) -> Result<JsValue, JsValue> {
-        to_value(self.engine.level_definition()).map_err(|e| {
-            contract_error(ContractErrorKind::SerializationFailed, &e.to_string())
-        })
+        to_value(self.engine.level_definition())
+            .map_err(|e| contract_error(ContractErrorKind::SerializationFailed, &e.to_string()))
     }
 
     /// Emits the current frame to the registered callback
     fn emit_frame(&self) -> Result<(), JsValue> {
         if let Some(callback) = &self.on_frame_callback {
             let frame_js = self.get_frame()?;
-            callback
-                .call1(&JsValue::NULL, &frame_js)
-                .map_err(|e| {
-                    let msg = e.as_string().unwrap_or_else(|| format!("{:?}", e));
-                    contract_error(ContractErrorKind::InternalError, &msg)
-                })?;
+            callback.call1(&JsValue::NULL, &frame_js).map_err(|e| {
+                let msg = e.as_string().unwrap_or_else(|| format!("{e:?}"));
+                contract_error(ContractErrorKind::InternalError, &msg)
+            })?;
         }
         Ok(())
     }
@@ -146,22 +140,21 @@ fn contract_error(kind: ContractErrorKind, message: &str) -> JsValue {
         rejection_reason: None,
     };
 
-    match to_value(&error) {
-        Ok(value) => value,
-        Err(_) => {
-            let obj = js_sys::Object::new();
-            let _ = js_sys::Reflect::set(
-                &obj,
-                &JsValue::from_str("kind"),
-                &JsValue::from_str(contract_error_kind_str(kind)),
-            );
-            let _ = js_sys::Reflect::set(
-                &obj,
-                &JsValue::from_str("message"),
-                &JsValue::from_str(message),
-            );
-            obj.into()
-        }
+    if let Ok(value) = to_value(&error) {
+        value
+    } else {
+        let obj = js_sys::Object::new();
+        let _ = js_sys::Reflect::set(
+            &obj,
+            &JsValue::from_str("kind"),
+            &JsValue::from_str(contract_error_kind_str(kind)),
+        );
+        let _ = js_sys::Reflect::set(
+            &obj,
+            &JsValue::from_str("message"),
+            &JsValue::from_str(message),
+        );
+        obj.into()
     }
 }
 

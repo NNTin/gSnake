@@ -1,6 +1,6 @@
 use gsnake_core::{
-    CellType, ContractError, ContractErrorKind, Direction, Frame, GameState, GameStatus,
-    GridSize, LevelDefinition, Position,
+    CellType, ContractError, ContractErrorKind, Direction, Frame, GameState, GameStatus, GridSize,
+    LevelDefinition, Position,
 };
 use std::collections::BTreeMap;
 use std::fs;
@@ -20,14 +20,8 @@ fn test_direction_serialization() {
         serde_json::to_string(&Direction::South).unwrap(),
         "\"South\""
     );
-    assert_eq!(
-        serde_json::to_string(&Direction::East).unwrap(),
-        "\"East\""
-    );
-    assert_eq!(
-        serde_json::to_string(&Direction::West).unwrap(),
-        "\"West\""
-    );
+    assert_eq!(serde_json::to_string(&Direction::East).unwrap(), "\"East\"");
+    assert_eq!(serde_json::to_string(&Direction::West).unwrap(), "\"West\"");
 }
 
 #[test]
@@ -44,18 +38,12 @@ fn test_celltype_serialization() {
         serde_json::to_string(&CellType::SnakeBody).unwrap(),
         "\"SnakeBody\""
     );
-    assert_eq!(
-        serde_json::to_string(&CellType::Food).unwrap(),
-        "\"Food\""
-    );
+    assert_eq!(serde_json::to_string(&CellType::Food).unwrap(), "\"Food\"");
     assert_eq!(
         serde_json::to_string(&CellType::Obstacle).unwrap(),
         "\"Obstacle\""
     );
-    assert_eq!(
-        serde_json::to_string(&CellType::Exit).unwrap(),
-        "\"Exit\""
-    );
+    assert_eq!(serde_json::to_string(&CellType::Exit).unwrap(), "\"Exit\"");
 }
 
 #[test]
@@ -114,10 +102,7 @@ fn test_frame_field_names() {
 
     let json = serde_json::to_value(&frame).unwrap();
     assert!(json.get("grid").is_some(), "Frame must have 'grid' field");
-    assert!(
-        json.get("state").is_some(),
-        "Frame must have 'state' field"
-    );
+    assert!(json.get("state").is_some(), "Frame must have 'state' field");
     assert!(
         json.get("snake_grid").is_none(),
         "Frame must not use snake_case field names"

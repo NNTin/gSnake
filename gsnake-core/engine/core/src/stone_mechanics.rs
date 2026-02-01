@@ -209,7 +209,11 @@ mod tests {
     #[test]
     fn test_multiple_stone_push() {
         let mut state = create_test_level_state();
-        state.stones = vec![Position::new(3, 5), Position::new(4, 5), Position::new(5, 5)];
+        state.stones = vec![
+            Position::new(3, 5),
+            Position::new(4, 5),
+            Position::new(5, 5),
+        ];
 
         let result = try_push_stone(Position::new(3, 5), Direction::East, &mut state);
 

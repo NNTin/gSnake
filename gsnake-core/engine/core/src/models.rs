@@ -153,6 +153,7 @@ pub struct LevelDefinition {
 
 impl LevelDefinition {
     #[must_use]
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         id: u32,
         name: String,
@@ -340,9 +341,18 @@ mod tests {
 
     #[test]
     fn test_enum_string_values() {
-        assert_eq!(serde_json::to_string(&Direction::North).unwrap(), "\"North\"");
-        assert_eq!(serde_json::to_string(&CellType::SnakeHead).unwrap(), "\"SnakeHead\"");
-        assert_eq!(serde_json::to_string(&GameStatus::LevelComplete).unwrap(), "\"LevelComplete\"");
+        assert_eq!(
+            serde_json::to_string(&Direction::North).unwrap(),
+            "\"North\""
+        );
+        assert_eq!(
+            serde_json::to_string(&CellType::SnakeHead).unwrap(),
+            "\"SnakeHead\""
+        );
+        assert_eq!(
+            serde_json::to_string(&GameStatus::LevelComplete).unwrap(),
+            "\"LevelComplete\""
+        );
         assert_eq!(
             serde_json::to_string(&ContractErrorKind::InvalidInput).unwrap(),
             "\"invalidInput\""

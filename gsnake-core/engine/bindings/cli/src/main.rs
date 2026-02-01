@@ -6,7 +6,12 @@ use crossterm::{
 };
 use gsnake_core::{engine::GameEngine, Direction, GameStatus};
 use ratatui::{backend::CrosstermBackend, Terminal};
-use std::{io, path::PathBuf, process::Command, time::{Duration, Instant}};
+use std::{
+    io,
+    path::PathBuf,
+    process::Command,
+    time::{Duration, Instant},
+};
 
 mod input;
 mod levels;
@@ -14,7 +19,9 @@ mod playback;
 mod ui;
 
 use input::{Action, InputHandler};
-use levels::{load_level_by_index, load_level_by_json_id, load_level_from_file, load_levels, levels_path};
+use levels::{
+    levels_path, load_level_by_index, load_level_by_json_id, load_level_from_file, load_levels,
+};
 use playback::{Playback, PlaybackStep};
 use ui::UI;
 
@@ -93,7 +100,13 @@ fn main() -> Result<()> {
         (Some(_), Some(_)) => unreachable!("clap enforces mutually exclusive input options"),
     };
 
-    let result = run_game(&mut terminal, &levels, playback, single_level_mode, args.record);
+    let result = run_game(
+        &mut terminal,
+        &levels,
+        playback,
+        single_level_mode,
+        args.record,
+    );
 
     // Cleanup terminal
     disable_raw_mode().context("Failed to disable raw mode")?;
@@ -130,7 +143,9 @@ fn run_game(
                 terminal_size.height,
                 grid_width,
                 grid_height,
-            ).is_ok() {
+            )
+            .is_ok()
+            {
                 UI::render(f, &frame);
             } else {
                 let required_width = (grid_width * 2 + 4) as u16;
@@ -179,8 +194,7 @@ fn run_game(
                     &mut current_level_index,
                     levels,
                     single_level_mode,
-                )
-                {
+                ) {
                     return finalize_exit(frame.state.status, single_level_mode);
                 }
             }
@@ -205,11 +219,11 @@ fn apply_action(
     match action {
         Action::Quit => {
             return false;
-        }
+        },
         Action::Reset => {
             *engine = GameEngine::new(levels[*current_level_index].clone());
             *frame = engine.generate_frame();
-        }
+        },
         Action::Continue => {
             // Only advance on level complete
             if frame.state.status == GameStatus::LevelComplete && !single_level_mode {
@@ -228,31 +242,31 @@ fn apply_action(
                 *engine = GameEngine::new(levels[*current_level_index].clone());
                 *frame = engine.generate_frame();
             }
-        }
+        },
         Action::MoveNorth => {
             if frame.state.status == GameStatus::Playing {
                 engine.process_move(Direction::North);
                 *frame = engine.generate_frame();
             }
-        }
+        },
         Action::MoveSouth => {
             if frame.state.status == GameStatus::Playing {
                 engine.process_move(Direction::South);
                 *frame = engine.generate_frame();
             }
-        }
+        },
         Action::MoveEast => {
             if frame.state.status == GameStatus::Playing {
                 engine.process_move(Direction::East);
                 *frame = engine.generate_frame();
             }
-        }
+        },
         Action::MoveWest => {
             if frame.state.status == GameStatus::Playing {
                 engine.process_move(Direction::West);
                 *frame = engine.generate_frame();
             }
-        }
+        },
     }
 
     true

@@ -137,7 +137,7 @@ fn can_object_fall(pos: Position, level_state: &LevelState, object_type: ObjectT
             {
                 return false;
             }
-        }
+        },
     }
 
     true

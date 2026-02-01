@@ -41,8 +41,8 @@ impl Playback {
     pub fn from_input_file(path: &Path) -> Result<Self> {
         let contents = fs::read_to_string(path)
             .with_context(|| format!("Failed to read input file: {}", path.display()))?;
-        let raw_steps: Vec<PlaybackFileStep> = serde_json::from_str(&contents)
-            .with_context(|| "Failed to parse playback JSON")?;
+        let raw_steps: Vec<PlaybackFileStep> =
+            serde_json::from_str(&contents).with_context(|| "Failed to parse playback JSON")?;
 
         if raw_steps.is_empty() {
             bail!("Playback input file is empty");
@@ -91,9 +91,7 @@ fn parse_key(key: &str) -> Result<Action> {
         "up" | "north" => Ok(Action::MoveNorth),
         "q" | "quit" => Ok(Action::Quit),
         "r" | "reset" => Ok(Action::Reset),
-        _ => bail!(
-            "Invalid key '{key}'. Use Right/Left/Up/Down (or R/L/U/D), Q/Quit, or R/Reset."
-        ),
+        _ => bail!("Invalid key '{key}'. Use Right/Left/Up/Down (or R/L/U/D), Q/Quit, or R/Reset."),
     }
 }
 

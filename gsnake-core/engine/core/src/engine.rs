@@ -94,12 +94,13 @@ impl GameEngine {
             match push_result {
                 stone_mechanics::PushResult::Success => {
                     // Stone was pushed, continue with move
-                }
-                stone_mechanics::PushResult::Blocked(_) | stone_mechanics::PushResult::VerticalPushAttempt => {
+                },
+                stone_mechanics::PushResult::Blocked(_)
+                | stone_mechanics::PushResult::VerticalPushAttempt => {
                     // Stone push failed, reject the move
                     self.input_locked = false;
                     return false;
-                }
+                },
             }
         }
 
@@ -396,10 +397,7 @@ mod tests {
         let result = engine.process_move(Direction::North);
         assert!(result);
         // After moving north and applying gravity, snake falls back to platform
-        assert_eq!(
-            engine.level_state().snake.segments[0],
-            Position::new(5, 5)
-        );
+        assert_eq!(engine.level_state().snake.segments[0], Position::new(5, 5));
         assert_eq!(engine.game_state().moves, 1);
     }
 
@@ -496,10 +494,7 @@ mod tests {
         engine.process_move(Direction::East);
 
         // Snake should fall to y=4 (one above obstacle at (6, 5))
-        assert_eq!(
-            engine.level_state().snake.segments[0],
-            Position::new(6, 4)
-        );
+        assert_eq!(engine.level_state().snake.segments[0], Position::new(6, 4));
     }
 
     #[test]
@@ -514,10 +509,7 @@ mod tests {
         engine.process_move(Direction::East);
 
         // Snake should stop at y=2 (food at (6, 3) acts as platform below)
-        assert_eq!(
-            engine.level_state().snake.segments[0],
-            Position::new(6, 2)
-        );
+        assert_eq!(engine.level_state().snake.segments[0], Position::new(6, 2));
     }
 
     #[test]

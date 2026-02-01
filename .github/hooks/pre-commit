@@ -1,0 +1,36 @@
+#!/bin/sh
+set -e
+
+# Pre-commit hook for parent gSnake project
+# This hook validates the gsnake-core Rust workspace only
+# It does NOT recurse into submodules or run tests for speed
+
+echo "Running pre-commit checks for gsnake-core workspace..."
+
+# Change to gsnake-core directory
+cd gsnake-core
+
+# Check code formatting
+echo "Checking Rust formatting..."
+cargo fmt --all -- --check
+
+# Run clippy with warnings as errors (allow some pedantic style issues)
+echo "Running clippy..."
+cargo clippy --all-targets -- -D warnings \
+    -A clippy::uninlined-format-args \
+    -A clippy::ptr-arg \
+    -A clippy::wildcard-imports \
+    -A clippy::unnested-or-patterns \
+    -A clippy::too-many-lines \
+    -A clippy::ignored-unit-patterns \
+    -A clippy::match-same-arms
+
+# Run cargo check
+echo "Running cargo check..."
+cargo check
+
+# Run build (but not tests for speed)
+echo "Running cargo build..."
+cargo build
+
+echo "✓ All pre-commit checks passed for gsnake-core!"
