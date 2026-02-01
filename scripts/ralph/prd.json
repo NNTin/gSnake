@@ -378,8 +378,8 @@
         "Verify in browser using Browser MCP"
       ],
       "priority": 22,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Feature was already fully implemented. Help button (?) in toolbar opens modal with all required keyboard shortcuts: Ctrl+Z/Cmd+Z (Undo), Ctrl+Y/Cmd+Shift+Z (Redo), Shift+Click (Remove), Esc (Close). Modal styled consistently with other modals using green primary button. Esc key closes modal. HelpModal.svelte component already created with complete implementation. Typecheck passed with 0 errors. Browser verification confirmed all acceptance criteria met."
     },
     {
       "id": "US-F005",

@@ -482,3 +482,33 @@ Started: Sat Jan 31 19:53:02 CET 2026
   - Browser MCP can verify button states and text content with page.evaluate() to check implementation
   - All async operations (test level upload, file loading) have proper loading indicators
 ---
+
+## Sun Feb 1 09:50:00 CET 2026 - US-F004
+- Verified Add Keyboard Shortcuts Help Modal feature already fully implemented
+- No code changes required - all acceptance criteria already met:
+  - Help button (?) in toolbar at position 6 (EditorLayout.svelte:669-677)
+  - Clicking Help opens modal with all keyboard shortcuts:
+    - Ctrl+Z / Cmd+Z: Undo last action
+    - Ctrl+Y / Cmd+Shift+Z: Redo last action
+    - Shift+Click: Remove entity from cell
+    - Esc: Close modal/cancel
+  - Close button present and functional (HelpModal.svelte:46-48)
+  - Esc key handler properly closes modal (HelpModal.svelte:21-26)
+  - Modal styled consistently with other modals (same overlay, card, button styles)
+- Typecheck passed with 0 errors and 0 warnings
+- Browser verification confirmed all features work correctly
+- Files verified:
+  - gsnake-editor/src/lib/HelpModal.svelte (complete implementation)
+  - gsnake-editor/src/lib/EditorLayout.svelte (Help button integration)
+  - gsnake-specs/test-results/us-f004-help-modal.png (screenshot added)
+  - scripts/ralph/prd.json (US-F004 marked as passes: true)
+  - scripts/test/result.txt (CI results)
+- **Learnings for future iterations:**
+  - HelpModal component already created with complete keyboard shortcuts UI
+  - Shortcuts displayed in clean, accessible format with <kbd> tags for visual clarity
+  - Modal uses same overlay pattern as SaveLevelModal and GridSizeModal
+  - Esc key handler attached to svelte:window for global keyboard listening
+  - Help button styled with "?" icon and positioned in toolbar after Save button
+  - Modal displays 4 primary shortcuts relevant to level editor workflow
+  - Close button uses consistent green primary button styling (#4caf50)
+---
