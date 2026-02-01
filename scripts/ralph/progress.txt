@@ -204,3 +204,30 @@ Started: Sat Jan 31 19:53:02 CET 2026
   - Can use browser evaluation to directly check dropdown value for verification
 ---
 
+## Sun Feb 1 03:45:00 CET 2026 - US-T011
+- Tested Level Save Functionality with Browser MCP
+- Created level with multi-segment snake (H, 1, 2), food, obstacle, and exit
+- Set snake direction to 'West' before saving
+- Verified save modal appears with correct fields: Level Name, Difficulty dropdown (default: Medium)
+- Tested validation: clicking Export with empty name shows error "Level name is required"
+- Entered valid data (name: "Test Level Alpha", difficulty: "medium") and exported successfully
+- Verified downloaded JSON file has correct structure:
+  - Level ID format: "1769913677463-dw897i" (matches timestamp-random pattern)
+  - All required fields present: id, name, difficulty, gridSize, snake, obstacles, food, exit, snakeDirection
+  - All entity positions use {x, y} format correctly
+  - Snake direction saved as "West" (capitalized)
+  - Total snake segments: 3 (head + 2 body segments)
+- Typecheck passed with 0 errors and 0 warnings
+- Files changed:
+  - scripts/ralph/prd.json (US-T011 marked as passes: true)
+  - scripts/test/result.txt (CI results)
+- **Learnings for future iterations:**
+  - Save modal uses browser alert for validation errors (displayed in status area)
+  - Level ID generation follows pattern: timestamp-randomstring (e.g., "1769913677463-dw897i")
+  - Downloaded filename format: level-{id}.json
+  - JSON export includes all entity types even if empty (floatingFood: [], fallingFood: [], etc.)
+  - Snake direction is capitalized in JSON ("West" not "west")
+  - Browser download events can be captured with page.waitForEvent('download')
+  - Export button triggers download and closes modal on success
+---
+
