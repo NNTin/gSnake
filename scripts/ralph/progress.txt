@@ -1,0 +1,27 @@
+# Ralph Progress Log
+Started: Sun Feb  1 18:25:00 CET 2026
+---
+
+## Codebase Patterns
+- The gSnake project uses npm scripts for format/lint in TypeScript/Svelte submodules
+- Format checks use prettier with `--check` flag for validation, `--write` for fixing
+- Svelte 5 projects require ESLint flat config with typescript-eslint and eslint-plugin-svelte
+- When adding ESLint to Svelte projects, fix common issues: add keys to {#each} blocks, avoid `any` types, remove unused variables
+- Pre-commit hooks in submodules follow pattern: format check → lint → typecheck → build (NO tests)
+---
+
+## Sun Feb  1 18:35:00 CET 2026 - US-001
+- Implemented format and lint scripts for gsnake-editor
+- Files changed:
+  - package.json (added format, format:check, lint scripts)
+  - package-lock.json (installed prettier, eslint, eslint-plugin-svelte, @eslint/js, typescript-eslint, globals)
+  - Created .prettierrc, .prettierignore, eslint.config.js
+  - Fixed linting issues in server.ts, integration.test.ts, and Svelte components (added keys to each blocks)
+- **Learnings for future iterations:**
+  - Prettier and ESLint configs should be created from scratch for Svelte 5 projects (no legacy configs exist)
+  - ESLint 9+ requires flat config format (eslint.config.js) not the old .eslintrc format
+  - Svelte {#each} blocks require keys - use unique identifiers like `(entity.type)` or `(`${row}-${col}`)`
+  - Replace `any` types with `unknown` for better type safety
+  - The format script should have both `--write` for fixing and `--check` for CI/validation
+  - After installing prettier, always run it to format the codebase before linting
+---
