@@ -231,3 +231,32 @@ Started: Sat Jan 31 19:53:02 CET 2026
   - Export button triggers download and closes modal on success
 ---
 
+## Sun Feb 1 04:15:00 CET 2026 - US-T012
+- Tested Level Load Functionality with Browser MCP
+- Verified file picker appears when clicking "Load Existing Level" from landing page
+- Verified cancel returns to landing page gracefully (no errors)
+- Loaded valid level JSON from gsnake-levels/levels/medium/level_001.json
+- Verified editor loads with correct grid dimensions (15x15 = 225 cells)
+- Verified all entities load at correct positions: snake (H, 1, 2), obstacles (bottom row), food (3 items), exit (blue), stones (2 items)
+- Verified snake direction loads correctly as "East"
+- Tested invalid JSON file (non-JSON content) shows error: "Failed to load level: Unexpected token... is not valid JSON"
+- Tested JSON with invalid gridSize (width=100) shows validation error: "Invalid grid dimensions: width and height must be between 5 and 50"
+- Tested JSON with missing required field (snake) shows validation error: "Invalid level format: missing or invalid snake"
+- All error cases return to landing page gracefully
+- Typecheck passed with 0 errors and 0 warnings
+- Files changed:
+  - scripts/ralph/prd.json (US-T012 marked as passes: true)
+  - gsnake-specs/test-results/level-load-valid.png (screenshot added)
+  - gsnake-specs/test-results/level-load-error.png (screenshot added)
+  - scripts/test/result.txt (CI results)
+- **Learnings for future iterations:**
+  - Level load functionality is fully implemented in App.svelte with comprehensive error handling
+  - File picker uses browser's native file input (type="file", accept=".json")
+  - All validation errors display in the status area and return to landing page gracefully
+  - Valid level JSON loads the editor with all entities: snake segments numbered (H, 1, 2...), obstacles, food, exit, stones, spikes, floating/falling food
+  - Grid validation enforces 5-50 range for both width and height
+  - Required fields validation checks for snake (must be array with at least 1 segment)
+  - Error messages are user-friendly and include instructions to check the JSON file
+  - Browser file upload tool requires files to be within allowed project roots
+---
+
