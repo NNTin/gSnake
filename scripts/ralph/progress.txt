@@ -292,3 +292,50 @@ Started: Sat Jan 31 19:53:02 CET 2026
   - Backend uses Express with CORS enabled for all localhost origins
 ---
 
+## Sun Feb 1 05:16:00 CET 2026 - US-T014
+- Tested New Level from Editor workflow with Browser MCP
+- Created level with multiple entities: 3-segment snake (H, 1, 2), 2 food items, 1 obstacle
+- Clicked "New Level" button in toolbar and verified return to landing page
+- Verified previous level data is cleared: created new level and checked grid is empty (0 entities)
+- Verified landing page functionality: both "Create New Level" and "Load Existing Level" buttons visible and functional
+- Typecheck passed with 0 errors and 0 warnings
+- Files changed:
+  - scripts/ralph/prd.json (US-T014 marked as passes: true)
+  - gsnake-specs/test-results/us-t014-editor-with-entities.png (screenshot added)
+  - gsnake-specs/test-results/us-t014-new-level-cleared.png (screenshot added)
+  - gsnake-specs/test-results/us-t014-landing-page.png (screenshot added)
+  - scripts/test/result.txt (CI results)
+- **Learnings for future iterations:**
+  - New Level button successfully returns to landing page from editor (App.svelte:92)
+  - Console logs confirm "New Level clicked - returning to landing page" (EditorLayout.svelte:443)
+  - Previous level data is properly cleared when creating new level
+  - Grid verification: can use browser evaluation to count cells with content to verify empty state
+  - Screenshots show workflow: editor with entities → New Level click → landing page → new level with empty grid
+  - All acceptance criteria met: workflow tested, data cleared, landing page functional, typecheck passed
+---
+
+## Sun Feb 1 06:00:00 CET 2026 - US-T015
+- Tested Load from Editor Toolbar workflow with Browser MCP
+- Created level and placed snake head entity
+- Clicked "Load" button in toolbar and verified file picker appears
+- Tested cancel: file picker dismissed and current level remained unchanged (snake head still present)
+- Tested valid level load: selected level_001.json from gsnake-levels/levels/medium/
+- Verified new level loaded successfully with correct entities: snake (H, 1, 2), food (3 items), stones (2 items), exit (blue)
+- Verified snake direction loaded as "East"
+- Verified Undo and Redo buttons disabled after load (fresh state, no history)
+- Console logs confirm: "Load clicked - opening file picker" and "Successfully loaded level: Stone Run"
+- No unsaved changes warning shown (per spec - not implemented by design)
+- Typecheck passed with 0 errors and 0 warnings
+- Files changed:
+  - scripts/ralph/prd.json (US-T015 marked as passes: true)
+  - scripts/test/result.txt (CI results)
+- **Learnings for future iterations:**
+  - Load button in toolbar (ref e27) successfully triggers file picker for level switching
+  - File picker cancel functionality works correctly - dismisses picker and preserves current level state
+  - Level loading from toolbar uses same logic as landing page load functionality
+  - Loaded level replaces entire grid state: all entities, grid size, and snake direction
+  - No unsaved changes warning is shown per specification (feature not implemented by design)
+  - Undo/Redo stacks are cleared when loading a new level (both buttons disabled after load)
+  - Console logging helps verify operations: EditorLayout.svelte:448 for Load click, :501 for successful load
+---
+

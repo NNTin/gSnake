@@ -261,8 +261,8 @@
         "Typecheck passes"
       ],
       "priority": 15,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "All Load from toolbar tests passed: file picker appears, valid level loads successfully (level_001.json with snake, food, stones, exit), cancel leaves current level unchanged, no unsaved changes warning (as per spec), typecheck passed with 0 errors"
     },
     {
       "id": "US-T016",
