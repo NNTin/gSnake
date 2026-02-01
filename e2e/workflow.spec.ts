@@ -72,7 +72,7 @@ test.describe('Level Editor Workflow (API)', () => {
     });
 
     await test.step('CORS allows other localhost ports', async () => {
-      const testPorts = [3000, 3003, 5173, 5178];
+      const testPorts = [3000, 3003];
 
       for (const port of testPorts) {
         const response = await request.get('http://localhost:3001/api/test-level', {

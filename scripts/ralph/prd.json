@@ -1,402 +1,171 @@
 {
   "project": "gSnake",
-  "branchName": "ralph/level-editor-testing-and-fixes",
-  "description": "Level Editor Testing & Gap Fixes - Validate implementation against specification and fix identified gaps",
+  "branchName": "ralph/pre-commit-hooks",
+  "description": "Pre-Commit Hooks for gSnake Submodules - Add opt-in pre-commit hooks for format, lint, typecheck, and build checks",
   "userStories": [
     {
-      "id": "US-T001",
-      "title": "Test Landing Page",
-      "description": "As a tester, I want to verify the landing page displays correctly and functions as specified so that users can start creating or loading levels.",
+      "id": "US-001",
+      "title": "Create shared hooks README for gsnake-levels",
+      "description": "As a maintainer, I want to enable shared hooks from `.github/hooks` so I can run consistent checks before committing.",
       "acceptanceCriteria": [
-        "Navigate to http://localhost:5173 using Browser MCP",
-        "Verify page title is 'gSnake Level Editor'",
-        "Verify 'Create New Level' button visible and styled (green primary button)",
-        "Verify 'Load Existing Level' button visible and styled (secondary button)",
-        "Verify centered card layout with proper spacing",
-        "Take screenshot and save to gsnake-specs/test-results/landing-page.png",
+        "Create gsnake-levels/.github/hooks/ directory",
+        "Add gsnake-levels/.github/hooks/README.md explaining how to enable hooks with `git config core.hooksPath .github/hooks`",
+        "README includes verification step: `git config core.hooksPath` should show `.github/hooks`",
+        "README includes disable step: `git config --unset core.hooksPath`",
         "Typecheck passes"
       ],
       "priority": 1,
-      "passes": true,
-      "notes": "Fixed page title in index.html and vite config port to match test expectations"
+      "passes": false,
+      "notes": ""
     },
     {
-      "id": "US-T002",
-      "title": "Test Create New Level Flow",
-      "description": "As a tester, I want to verify the 'Create New Level' flow works correctly so that users can configure grid dimensions.",
+      "id": "US-002",
+      "title": "Add pre-commit hook for gsnake-levels",
+      "description": "As a maintainer, I want a pre-commit hook for `gsnake-levels` that runs format, lint, typecheck, and build without tests.",
       "acceptanceCriteria": [
-        "Click 'Create New Level' button using Browser MCP",
-        "Verify grid size modal appears with default values (15x15, min 5, max 50)",
-        "Test invalid input (width=3) shows error",
-        "Test valid input (width=20, height=20) loads editor with 20x20 grid",
-        "Test Cancel button returns to landing page",
-        "Take screenshots of modal and editor states",
+        "Create gsnake-levels/.github/hooks/pre-commit executable shell script",
+        "Hook runs `cargo fmt --all -- --check` and fails on formatting issues",
+        "Hook runs `cargo clippy --all-targets -- -D warnings` and fails on warnings",
+        "Hook runs `cargo check` and fails on typecheck errors",
+        "Hook runs `cargo build` and fails on build errors",
+        "Hook does NOT run `cargo test`",
+        "Script includes comments explaining it avoids tests for speed",
+        "Script exits immediately on first failure (set -e)",
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": true,
-      "notes": "All flows tested successfully - validation, creation, and cancellation"
+      "passes": false,
+      "notes": ""
     },
     {
-      "id": "US-T003",
-      "title": "Test Editor Interface Layout",
-      "description": "As a tester, I want to verify the editor interface displays all required components correctly.",
+      "id": "US-003",
+      "title": "Create shared hooks README for gsnake-web",
+      "description": "As a maintainer, I want to enable shared hooks from `.github/hooks` so I can run consistent checks before committing.",
       "acceptanceCriteria": [
-        "Verify toolbar contains all buttons: New Level, Load, Undo, Redo, Direction, Test Level, Save Level",
-        "Verify entity palette sidebar shows all 8 entity types with colored icons",
-        "Verify grid canvas is centered with 32x32px cells and 1px gaps",
-        "Verify Direction dropdown has options: North, South, East, West",
-        "Take full-page screenshot",
+        "Create gsnake-web/.github/hooks/ directory",
+        "Add gsnake-web/.github/hooks/README.md explaining how to enable hooks with `git config core.hooksPath .github/hooks`",
+        "README includes verification step: `git config core.hooksPath` should show `.github/hooks`",
+        "README includes disable step: `git config --unset core.hooksPath`",
         "Typecheck passes"
       ],
       "priority": 3,
-      "passes": true,
-      "notes": "All interface components verified: toolbar buttons, entity palette, grid with correct cell size, direction dropdown"
+      "passes": false,
+      "notes": ""
     },
     {
-      "id": "US-T004",
-      "title": "Test Entity Palette Selection",
-      "description": "As a tester, I want to verify entity selection works correctly so that users can choose which entity to place.",
+      "id": "US-004",
+      "title": "Add build:hook script to gsnake-web package.json",
+      "description": "As a maintainer, I need a build command that skips tests for pre-commit hooks.",
       "acceptanceCriteria": [
-        "Verify Snake entity is selected by default (highlighted)",
-        "Click each of the 8 entity types in sequence using Browser MCP",
-        "Verify each selection updates visual state (highlight changes)",
-        "Verify previous selection is deselected when new entity selected",
-        "Take screenshot showing selected entity",
+        "Add `build:hook` script to gsnake-web/package.json",
+        "Script runs build without triggering prebuild tests",
+        "Script uses `vite build` or equivalent that does NOT run vitest/playwright",
+        "Running `npm run build:hook` completes successfully without tests",
         "Typecheck passes"
       ],
       "priority": 4,
-      "passes": true,
-      "notes": "All entity selection tests passed: Snake selected by default, all 8 entities clickable with proper visual feedback, selection changes correctly"
+      "passes": false,
+      "notes": ""
     },
     {
-      "id": "US-T005",
-      "title": "Test Entity Placement - Click Mode",
-      "description": "As a tester, I want to verify click-to-place entity placement works correctly.",
+      "id": "US-005",
+      "title": "Add pre-commit hook for gsnake-web",
+      "description": "As a maintainer, I want a pre-commit hook for `gsnake-web` that runs format, lint, typecheck, and build without tests.",
       "acceptanceCriteria": [
-        "Select 'Obstacle' entity and click on empty grid cells",
-        "Verify obstacles appear with correct color (#666)",
-        "Test entity replacement: place food on cell with obstacle",
-        "Verify food replaces obstacle (entity replacement behavior)",
-        "Test all 8 entity types can be placed",
-        "Take screenshot of grid with multiple entities",
+        "Create gsnake-web/.github/hooks/pre-commit executable shell script",
+        "Hook runs `npm run format:check` (or `npx prettier --check .`) and fails on formatting issues",
+        "Hook runs `npm run lint` (or `npx eslint .`) and fails on lint errors",
+        "Hook runs `npm run check` (svelte-check) and fails on typecheck errors",
+        "Hook runs `npm run build:hook` and fails on build errors",
+        "Hook does NOT run `npm test`, `vitest`, or `playwright`",
+        "Script includes comments explaining it avoids tests for speed",
+        "Script exits immediately on first failure (set -e)",
         "Typecheck passes"
       ],
       "priority": 5,
-      "passes": true,
-      "notes": "All entity placement tests passed: Obstacle placed with correct color (#666), Food replaced obstacle, all 8 entity types successfully placed"
+      "passes": false,
+      "notes": ""
     },
     {
-      "id": "US-T006",
-      "title": "Test Snake Placement",
-      "description": "As a tester, I want to verify multi-segment snake placement works correctly.",
+      "id": "US-006",
+      "title": "Create shared hooks README for gsnake-specs",
+      "description": "As a maintainer, I want to enable shared hooks from `.github/hooks` so I can run consistent checks before committing.",
       "acceptanceCriteria": [
-        "Select 'Snake' entity and click on grid cells",
-        "Verify first cell shows 'H' label (head) with green color (#4caf50)",
-        "Verify subsequent cells show numbered labels (1, 2, 3, 4)",
-        "Verify all segments are visually connected/highlighted",
-        "Select different entity to finalize snake",
-        "Take screenshot of multi-segment snake",
+        "Create gsnake-specs/.github/hooks/ directory",
+        "Add gsnake-specs/.github/hooks/README.md explaining how to enable hooks with `git config core.hooksPath .github/hooks`",
+        "README includes verification step: `git config core.hooksPath` should show `.github/hooks`",
+        "README includes disable step: `git config --unset core.hooksPath`",
         "Typecheck passes"
       ],
       "priority": 6,
-      "passes": true,
-      "notes": "All snake placement tests passed: Snake entity selected by default, head shows 'H' label with green color (#4caf50), segments numbered 1-4, all segments have same green background"
+      "passes": false,
+      "notes": ""
     },
     {
-      "id": "US-T007",
-      "title": "Test Entity Placement - Drag and Drop",
-      "description": "As a tester, I want to verify drag-and-drop entity placement works correctly.",
+      "id": "US-007",
+      "title": "Add Python tooling config for gsnake-specs",
+      "description": "As a maintainer, I want Python-based Markdown tooling configured so hooks can format and lint Markdown files.",
       "acceptanceCriteria": [
-        "Drag 'Stone' entity from palette to empty grid cell using Browser MCP",
-        "Verify stone appears with correct color (#9e9e9e)",
-        "Drag 'Spike' entity to cell with stone",
-        "Verify spike replaces stone (entity replacement)",
-        "Test drag-and-drop for multiple entity types",
-        "Verify drag-drop does not change selected entity in palette",
-        "Take screenshot showing drag operation",
+        "Create gsnake-specs/pyproject.toml with mdformat and markdownlint dependencies",
+        "Add mdformat to [tool.mdformat] configuration if needed",
+        "Add basic markdownlint config if needed (or use defaults)",
+        "Document in README or pyproject.toml how to install: `pip install -e .` or similar",
         "Typecheck passes"
       ],
       "priority": 7,
-      "passes": true,
-      "notes": "All drag-and-drop tests passed: Stone dragged with correct color (#9e9e9e), Spike replaced stone, multiple entity types tested (Food, Exit, Floating Food), palette selection remains unchanged (Snake stays selected)"
+      "passes": false,
+      "notes": ""
     },
     {
-      "id": "US-T008",
-      "title": "Test Entity Removal",
-      "description": "As a tester, I want to verify entity removal (Shift+Click) works correctly.",
+      "id": "US-008",
+      "title": "Add pre-commit hook for gsnake-specs",
+      "description": "As a maintainer, I want a pre-commit hook for `gsnake-specs` that formats and lints Markdown using Python tooling.",
       "acceptanceCriteria": [
-        "Place obstacle on grid, then Shift+Click to remove it",
-        "Verify obstacle is removed (cell becomes empty)",
-        "Place snake segments (H, 1, 2), then Shift+Click segment 1",
-        "Verify segment is removed and remaining segments update indices",
-        "Verify red overlay appears on hover when Shift is pressed",
-        "Take screenshot of removal operation",
+        "Create gsnake-specs/.github/hooks/pre-commit executable shell script",
+        "Hook checks if Python/pip is available, exits with helpful message if not",
+        "Hook runs `mdformat --check .` and fails on formatting issues",
+        "Hook runs markdownlint or equivalent on Markdown files and fails on lint errors",
+        "Hook does NOT run tests",
+        "Script includes comments explaining it formats/lints Markdown only",
+        "Script exits immediately on first failure (set -e)",
         "Typecheck passes"
       ],
       "priority": 8,
-      "passes": true,
-      "notes": "All entity removal tests passed: Obstacle removed with Shift+Click, snake segment removed with proper index renumbering (segment 1 removed, segments 2->1, 3->2), shift-hover class applied correctly"
+      "passes": false,
+      "notes": ""
     },
     {
-      "id": "US-T009",
-      "title": "Test Undo/Redo Functionality",
-      "description": "As a tester, I want to verify undo/redo works correctly so that users can recover from mistakes.",
+      "id": "US-009",
+      "title": "Document hook commands in all READMEs",
+      "description": "As a maintainer, I want clarity on which checks are run and that tests are excluded.",
       "acceptanceCriteria": [
-        "Place 3 different entities, then click 'Undo' button",
-        "Verify last entity is removed",
-        "Click 'Redo' button and verify entity reappears",
-        "Test keyboard shortcuts: Ctrl+Z (undo) and Ctrl+Y (redo)",
-        "Place new entity after undo and verify redo stack is cleared",
-        "Verify undo/redo buttons disable when stacks are empty",
-        "Take screenshot showing undo/redo in action",
+        "Update gsnake-levels/.github/hooks/README.md to list exact commands run by pre-commit hook",
+        "Update gsnake-web/.github/hooks/README.md to list exact commands run by pre-commit hook",
+        "Update gsnake-specs/.github/hooks/README.md to list exact commands run by pre-commit hook",
+        "Each README explicitly states: 'Tests are NOT run in pre-commit hooks for speed'",
         "Typecheck passes"
       ],
       "priority": 9,
-      "passes": true,
-      "notes": "All undo/redo tests passed: button clicks work, keyboard shortcuts (Ctrl+Z, Ctrl+Y) work, redo stack cleared after new action, buttons properly disable when stacks empty"
+      "passes": false,
+      "notes": ""
     },
     {
-      "id": "US-T010",
-      "title": "Test Snake Direction Configuration",
-      "description": "As a tester, I want to verify snake direction dropdown works correctly.",
+      "id": "US-010",
+      "title": "Test all hooks end-to-end",
+      "description": "As a maintainer, I want to verify all hooks work correctly before deploying.",
       "acceptanceCriteria": [
-        "Verify default selection is 'East'",
-        "Click dropdown to open and verify options: North, South, East, West",
-        "Select 'North' and verify dropdown shows 'North'",
-        "Test all 4 directions",
-        "Verify selection persists when editing level",
-        "Take screenshot of dropdown open",
+        "Enable hooks in gsnake-levels: `cd gsnake-levels && git config core.hooksPath .github/hooks`",
+        "Enable hooks in gsnake-web: `cd gsnake-web && git config core.hooksPath .github/hooks`",
+        "Enable hooks in gsnake-specs: `cd gsnake-specs && git config core.hooksPath .github/hooks`",
+        "Run pre-commit hook manually in each submodule: `.github/hooks/pre-commit`",
+        "Verify all hooks pass on clean repos",
+        "Introduce a formatting error in each submodule and verify hook catches it",
+        "Document test results in progress.txt",
         "Typecheck passes"
       ],
       "priority": 10,
-      "passes": true,
-      "notes": "All snake direction tests passed: Default is 'East', all 4 options (North, South, East, West) available and selectable, selection persists during level editing"
-    },
-    {
-      "id": "US-T011",
-      "title": "Test Level Save Functionality",
-      "description": "As a tester, I want to verify level saving works correctly so that users can export levels as JSON.",
-      "acceptanceCriteria": [
-        "Create level with multiple entities and set snake direction to 'West'",
-        "Click 'Save Level' button and verify save modal appears",
-        "Test validation: empty name and empty difficulty show errors",
-        "Enter name 'Test Level Alpha', difficulty 'medium', click 'Export JSON'",
-        "Verify JSON file downloads with correct data: name, difficulty, gridSize, entities",
-        "Verify level ID format matches 'timestamp-random' pattern",
-        "Verify all entity positions use {x, y} format",
-        "Take screenshots of save modal and downloaded JSON",
-        "Typecheck passes"
-      ],
-      "priority": 11,
-      "passes": true,
-      "notes": "All save functionality tests passed: modal appears, validation works (empty name shows error), valid export creates proper JSON with correct format (timestamp-random ID pattern), all entity positions use {x,y} format, snake direction correctly saved as 'West'"
-    },
-    {
-      "id": "US-T012",
-      "title": "Test Level Load Functionality",
-      "description": "As a tester, I want to verify level loading works correctly so that users can edit existing levels.",
-      "acceptanceCriteria": [
-        "Click 'Load Existing Level' and verify file picker appears",
-        "Test cancel returns to landing page gracefully",
-        "Select valid level JSON from gsnake-levels/levels/",
-        "Verify editor loads with correct grid dimensions and all entities at correct positions",
-        "Test loading invalid JSON file shows error and returns to landing page",
-        "Test loading JSON with invalid gridSize (width=100) shows validation error",
-        "Test loading JSON with missing required field shows validation error",
-        "Take screenshots of loaded level",
-        "Typecheck passes"
-      ],
-      "priority": 12,
-      "passes": true,
-      "notes": "All level load functionality tests passed: file picker appears, cancel returns gracefully, valid level loads with correct grid (15x15) and entities, invalid JSON shows error, invalid gridSize (width=100) shows validation error, missing required field (snake) shows validation error, typecheck passed with 0 errors"
-    },
-    {
-      "id": "US-T013",
-      "title": "Test Level Testing Integration",
-      "description": "As a tester, I want to verify the test level workflow works end-to-end with gsnake-web.",
-      "acceptanceCriteria": [
-        "Verify backend server running: curl http://localhost:3001/api/test-level",
-        "Create simple test level and click 'Test Level' button",
-        "Verify POST request to backend succeeds (check network tab)",
-        "Verify new browser tab opens with URL http://localhost:3000?test=true",
-        "Verify test level appears in gsnake-web and is playable",
-        "Modify level, test again, verify updated level loads",
-        "Test with backend NOT running shows helpful error",
-        "Take screenshots of test workflow",
-        "Typecheck passes"
-      ],
-      "priority": 13,
-      "passes": true,
-      "notes": "All test level integration tests passed: backend server verified, test level workflow works end-to-end, POST request succeeds, new tab opens with correct URL (http://localhost:3000?test=true), level appears in gsnake-web and is playable, modified level updates correctly when re-testing, error toast displays when backend is not running, typecheck passed with 0 errors"
-    },
-    {
-      "id": "US-T014",
-      "title": "Test New Level from Editor",
-      "description": "As a tester, I want to verify 'New Level' button works correctly for starting fresh.",
-      "acceptanceCriteria": [
-        "Create and edit a level with multiple entities",
-        "Click 'New Level' button in toolbar",
-        "Verify returns to landing page",
-        "Verify previous level data is cleared",
-        "Verify can create new level or load existing",
-        "Take screenshot of workflow",
-        "Typecheck passes"
-      ],
-      "priority": 14,
-      "passes": true,
-      "notes": "All New Level workflow tests passed: created level with multiple entities (snake, food, obstacle), clicked New Level button, verified return to landing page, verified grid cleared (0 entities), verified can create new level or load existing from landing page, typecheck passed with 0 errors"
-    },
-    {
-      "id": "US-T015",
-      "title": "Test Load from Editor Toolbar",
-      "description": "As a tester, I want to verify 'Load' button in toolbar works correctly for switching levels.",
-      "acceptanceCriteria": [
-        "Create and edit a level",
-        "Click 'Load' button in toolbar and verify file picker appears",
-        "Select valid level JSON and verify new level loads",
-        "Test cancel leaves current level unchanged",
-        "Verify no unsaved changes warning (per spec)",
-        "Take screenshot",
-        "Typecheck passes"
-      ],
-      "priority": 15,
-      "passes": true,
-      "notes": "All Load from toolbar tests passed: file picker appears, valid level loads successfully (level_001.json with snake, food, stones, exit), cancel leaves current level unchanged, no unsaved changes warning (as per spec), typecheck passed with 0 errors"
-    },
-    {
-      "id": "US-T016",
-      "title": "Test Grid Responsiveness",
-      "description": "As a tester, I want to verify the grid displays correctly at different sizes.",
-      "acceptanceCriteria": [
-        "Create grid with dimensions 5x5 (minimum) and verify correct rendering",
-        "Create grid with dimensions 50x50 (maximum) and verify scrolling available",
-        "Create grid with non-square dimensions (10x30) and verify correct rendering",
-        "Resize browser window to 1024px width and verify layout adapts",
-        "Take screenshots of different grid sizes",
-        "Typecheck passes"
-      ],
-      "priority": 16,
-      "passes": true,
-      "notes": "All grid responsiveness tests passed: 5x5 grid renders correctly (25 cells), 50x50 grid renders with scrolling available (2500 cells, parent container has overflow), 10x30 non-square grid renders correctly (300 cells), browser resize to 1024px width adapts layout properly, typecheck passed with 0 errors"
-    },
-    {
-      "id": "US-T017",
-      "title": "Test Exit Entity Uniqueness",
-      "description": "As a tester, I want to verify that only one exit entity can exist on the grid.",
-      "acceptanceCriteria": [
-        "Place exit entity at position (5, 5) with blue color (#2196f3)",
-        "Place exit entity at position (10, 10)",
-        "Verify previous exit at (5, 5) is automatically removed",
-        "Test with drag-and-drop and verify same behavior",
-        "Save level and verify JSON exit object contains only one position",
-        "Take screenshot showing single exit enforcement",
-        "Typecheck passes"
-      ],
-      "priority": 17,
-      "passes": true,
-      "notes": "All exit entity uniqueness tests passed: placed exit at (5, 5) with correct blue color (#2196f3), placed second exit at (10, 10) and verified first exit automatically removed, tested drag-and-drop with same behavior (console logs confirm 'Removed previous exit' messages), verified JSON export uses single Position object (not array), typecheck passed with 0 errors"
-    },
-    {
-      "id": "US-T018",
-      "title": "Test Level ID Uniqueness",
-      "description": "As a tester, I want to verify level IDs are unique to prevent collisions.",
-      "acceptanceCriteria": [
-        "Create and save level with name 'Level A', note generated ID",
-        "Immediately create and save level with name 'Level B', note generated ID",
-        "Verify IDs are different",
-        "Verify ID format matches 'timestamp-random' pattern (e.g., 1234567890-a1b2c3)",
-        "Take screenshots of both JSON files showing unique IDs",
-        "Typecheck passes"
-      ],
-      "priority": 18,
-      "passes": true,
-      "notes": "All level ID uniqueness tests passed: Level A ID (1769926145765-ply2bd) and Level B ID (1769926174156-sf1bz3) are different, both match timestamp-random pattern, timestamps differ by 28.391 seconds ensuring uniqueness, typecheck passed with 0 errors"
-    },
-    {
-      "id": "US-F001",
-      "title": "Add Level Validation Warnings",
-      "description": "As a user, I want to receive warnings about potentially invalid levels before saving.",
-      "acceptanceCriteria": [
-        "When clicking 'Save Level', check for: no snake, no food, no exit",
-        "Display warnings in save modal above export button",
-        "Show 'Export Anyway' and 'Cancel' buttons when warnings present",
-        "Allow user to export anyway (warnings, not errors)",
-        "Typecheck passes",
-        "Verify in browser using Browser MCP"
-      ],
-      "priority": 19,
-      "passes": true,
-      "notes": "Feature was already implemented in SaveLevelModal.svelte. Verified all acceptance criteria: validation checks for no snake/food/exit, warnings displayed in modal with warning-box styling, 'Export Anyway' button text when warnings present, Cancel button available, export functionality works with warnings, typecheck passed with 0 errors, browser testing confirmed all three warnings appear when no entities placed, partial warnings appear when some entities missing (tested with snake present but no food/exit)"
-    },
-    {
-      "id": "US-F002",
-      "title": "Improve Error Messages with Toast Notifications",
-      "description": "As a user, I want to see helpful, specific error messages using toast notifications.",
-      "acceptanceCriteria": [
-        "Install svelte-french-toast: npm install svelte-french-toast",
-        "Add toast container to App.svelte",
-        "Replace alert() calls with toast notifications (error, warning, success)",
-        "Add success toast when level saved successfully",
-        "Add success toast when test level uploaded successfully",
-        "Style toasts to match editor design (green success, red error, yellow warning)",
-        "Auto-dismiss toasts after 5 seconds",
-        "Typecheck passes",
-        "Verify in browser using Browser MCP"
-      ],
-      "priority": 20,
-      "passes": true,
-      "notes": "Toast notification system fully implemented. svelte-5-french-toast already installed, Toaster component in App.svelte (line 78), replaced alert() in GridSizeModal.svelte with toast.error, success toasts already implemented for level save (EditorLayout:777) and test level upload (EditorLayout:610), error toasts already implemented for validation errors in SaveLevelModal and level loading, all toasts styled with 5-second duration and custom styling (green success with checkmark icon, red error with X icon), typecheck passed with 0 errors, browser testing confirmed error toast appears on grid validation and success toast appears on level save with proper icons and styling"
-    },
-    {
-      "id": "US-F003",
-      "title": "Add Loading States",
-      "description": "As a user, I want to see loading indicators during async operations.",
-      "acceptanceCriteria": [
-        "Add loading spinner to 'Test Level' button while uploading",
-        "Change button text to 'Uploading...' during upload",
-        "Disable button during upload to prevent double-clicks",
-        "Add loading spinner when loading level JSON file",
-        "Use consistent spinner design across all loading states",
-        "Typecheck passes",
-        "Verify in browser using Browser MCP"
-      ],
-      "priority": 21,
-      "passes": true,
-      "notes": "Feature was already fully implemented. Loading spinners with 'Uploading...' and 'Loading...' text already present for Test Level and Load buttons (EditorLayout.svelte:813-819, 828-832). Buttons properly disabled during async operations. Consistent spinner design with green animation. Typecheck passed with 0 errors. Browser verification confirmed all acceptance criteria met."
-    },
-    {
-      "id": "US-F004",
-      "title": "Add Keyboard Shortcuts Help Modal",
-      "description": "As a user, I want to see available keyboard shortcuts so that I can work more efficiently.",
-      "acceptanceCriteria": [
-        "Add 'Help' button to toolbar (question mark icon)",
-        "Clicking Help opens modal showing keyboard shortcuts: Ctrl+Z (Undo), Ctrl+Y (Redo), Shift+Click (Remove), Esc (Close)",
-        "Add close button to help modal",
-        "Style modal consistently with other modals",
-        "Typecheck passes",
-        "Verify in browser using Browser MCP"
-      ],
-      "priority": 22,
-      "passes": true,
-      "notes": "Feature was already fully implemented. Help button (?) in toolbar opens modal with all required keyboard shortcuts: Ctrl+Z/Cmd+Z (Undo), Ctrl+Y/Cmd+Shift+Z (Redo), Shift+Click (Remove), Esc (Close). Modal styled consistently with other modals using green primary button. Esc key closes modal. HelpModal.svelte component already created with complete implementation. Typecheck passed with 0 errors. Browser verification confirmed all acceptance criteria met."
-    },
-    {
-      "id": "US-F005",
-      "title": "Automate Backend Server Startup",
-      "description": "As a developer, I want the backend server to start automatically with the dev server.",
-      "acceptanceCriteria": [
-        "Install concurrently: npm install --save-dev concurrently",
-        "Update package.json dev script to run both vite and server",
-        "Add separate scripts: dev:editor (vite only), dev:server (server only)",
-        "Test npm run dev starts both services",
-        "Update README with new command",
-        "Verify both servers run simultaneously without conflicts",
-        "Typecheck passes"
-      ],
-      "priority": 23,
-      "passes": true,
-      "notes": "Feature was already fully implemented. concurrently package already installed (package.json:26), dev script already configured to run both vite and server concurrently (package.json:7), separate scripts dev:editor and dev:server already exist (package.json:8-9). Updated README to correct backend server port from 3000 to 3001 (lines 55, 145). Typecheck passed with 0 errors."
+      "passes": false,
+      "notes": ""
     }
   ]
 }

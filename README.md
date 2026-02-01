@@ -50,6 +50,12 @@ This is a monorepo containing several submodules:
 
 Each submodule can build and test independently using git branch dependencies.
 
+### Local Development Ports
+
+- **gsnake-web (Vite dev server):** http://localhost:3000
+- **gsnake-editor (Vite dev server):** http://localhost:3003
+- **gsnake-editor test-level API (Express):** http://localhost:3001 (`/api/test-level`)
+
 ### Submodule Dependency Resolution
 
 The repository supports two working modes:
