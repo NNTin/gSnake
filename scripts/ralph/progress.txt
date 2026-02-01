@@ -363,3 +363,26 @@ Started: Sat Jan 31 19:53:02 CET 2026
   - Screenshots are saved in .playwright-mcp/ directory, then copied to gsnake-specs/test-results/
 ---
 
+## Sun Feb 1 07:00:00 CET 2026 - US-T017
+- Tested Exit Entity Uniqueness with Browser MCP
+- Verified exit placed at (5, 5) with correct blue color: rgb(33, 150, 243) = #2196f3
+- Verified placing second exit at (10, 10) automatically removed previous exit at (5, 5)
+- Console logs confirm: "Removed previous exit at (5, 5)" followed by "Placed exit at (10, 10)"
+- Tested drag-and-drop: dragged exit from palette to (3, 7), verified previous exit at (10, 10) removed
+- Console logs confirm: "Removed previous exit at (10, 10) via drag-drop" followed by "Dropped exit at (3, 7)"
+- Verified JSON export logic: exit is stored as single Position object (Position | null), not array
+- Code review confirmed uniqueness enforcement in both click handler (EditorLayout.svelte:372-380) and drag-drop handler (:246-254)
+- Typecheck passed with 0 errors and 0 warnings
+- Files changed:
+  - scripts/ralph/prd.json (US-T017 marked as passes: true)
+  - scripts/test/result.txt (CI results)
+- **Learnings for future iterations:**
+  - Exit entity uniqueness is fully implemented: only one exit can exist on the grid at a time
+  - When placing a new exit (click or drag-drop), the code loops through all cells and removes any existing exit
+  - The removal logic checks: if (cells[r][c].entity === 'exit' && !(r === row && c === col))
+  - Exit is stored as single Position object in JSON export, not an array like other entities
+  - Console logs provide clear visibility: "Removed previous exit at (r, c)" and "Placed exit at (r, c)"
+  - Browser MCP console_messages tool captures all console logs for verification
+  - Code review can verify JSON export behavior by examining type definitions and export logic
+---
+

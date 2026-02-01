@@ -294,8 +294,8 @@
         "Typecheck passes"
       ],
       "priority": 17,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "All exit entity uniqueness tests passed: placed exit at (5, 5) with correct blue color (#2196f3), placed second exit at (10, 10) and verified first exit automatically removed, tested drag-and-drop with same behavior (console logs confirm 'Removed previous exit' messages), verified JSON export uses single Position object (not array), typecheck passed with 0 errors"
     },
     {
       "id": "US-T018",
