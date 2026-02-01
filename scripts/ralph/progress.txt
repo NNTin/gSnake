@@ -25,3 +25,18 @@ Started: Sun Feb  1 18:25:00 CET 2026
   - The format script should have both `--write` for fixing and `--check` for CI/validation
   - After installing prettier, always run it to format the codebase before linting
 ---
+
+## Sun Feb  1 19:16:42 CET 2026 - US-002
+- Created pre-commit hook for gsnake-editor
+- Files changed:
+  - gsnake-editor/.github/hooks/pre-commit (new file, executable)
+- Hook follows established pattern: format check → lint → typecheck → build (NO tests)
+- Tested hook successfully - all checks pass
+- Committed in submodule and updated parent repo reference
+- **Learnings for future iterations:**
+  - Pre-commit hooks for TypeScript/Svelte submodules use npm scripts: format:check, lint, check, build
+  - Always test hooks before committing to ensure all commands work
+  - gsnake-editor is a submodule - must commit in submodule first, then update parent repo reference
+  - Use `git push` after each commit to update CI pipeline (per Ralph instructions)
+  - Pre-commit hooks must be executable (chmod +x)
+---
