@@ -1,6 +1,10 @@
 {
-  "latestVersion": "v0.2.2",
+  "latestVersion": "v0.2.3",
   "versions": [
+    {
+      "version": "v0.2.3",
+      "date": "2026-02-01T19:34:09.995Z"
+    },
     {
       "version": "v0.2.2",
       "date": "2026-01-20T21:38:04.517Z"
