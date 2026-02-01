@@ -1,32 +1,32 @@
 === Act CI Test Results ===
-Started: Sun Feb  1 15:37:09 CET 2026
+Started: Sun Feb  1 16:22:12 CET 2026
 
 ## Summary
 
-- [SUCCESS] ./gsnake-levels/.github/workflows/test.yml::test
-- [SUCCESS] ./gsnake-levels/.github/workflows/ci.yml::build
-- [SUCCESS] ./gsnake-levels/.github/workflows/ci.yml::test
-- [SUCCESS] ./gsnake-web/.github/workflows/test.yml::test
-- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::typecheck
-- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::test
-- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::build
-- [SUCCESS] ./gsnake-specs/.github/workflows/test.yml::test
-- [SUCCESS] ./gsnake-specs/.github/workflows/ci.yml::markdown-lint
-- [SUCCESS] ./gsnake-specs/.github/workflows/ci.yml::link-check
-- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::typecheck
-- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::test
-- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::build
-- [SUCCESS] ./.github/workflows/ci.yml::wasm
-- [SUCCESS] ./.github/workflows/ci.yml::gsnake-editor-test
-- [SUCCESS] ./.github/workflows/ci.yml::e2e-test
-- [SUCCESS] ./.github/workflows/ci.yml::build
-- [SUCCESS] ./.github/workflows/ci.yml::test
+- [FAILED] ./gsnake-levels/.github/workflows/test.yml::test
+- [FAILED] ./gsnake-levels/.github/workflows/ci.yml::build
+- [FAILED] ./gsnake-levels/.github/workflows/ci.yml::test
+- [FAILED] ./gsnake-web/.github/workflows/test.yml::test
+- [FAILED] ./gsnake-web/.github/workflows/ci.yml::build
+- [FAILED] ./gsnake-web/.github/workflows/ci.yml::typecheck
+- [FAILED] ./gsnake-web/.github/workflows/ci.yml::test
+- [FAILED] ./gsnake-specs/.github/workflows/test.yml::test
+- [FAILED] ./gsnake-specs/.github/workflows/ci.yml::markdown-lint
+- [FAILED] ./gsnake-specs/.github/workflows/ci.yml::link-check
+- [FAILED] ./gsnake-editor/.github/workflows/ci.yml::build
+- [FAILED] ./gsnake-editor/.github/workflows/ci.yml::typecheck
+- [FAILED] ./gsnake-editor/.github/workflows/ci.yml::test
+- [FAILED] ./.github/workflows/ci.yml::test
+- [FAILED] ./.github/workflows/ci.yml::wasm
+- [FAILED] ./.github/workflows/ci.yml::gsnake-editor-test
+- [FAILED] ./.github/workflows/ci.yml::e2e-test
+- [FAILED] ./.github/workflows/ci.yml::build
 
-**Total: 18 passed, 0 failed**
+**Total: 0 passed, 18 failed**
 
 ---
-Completed: Sun Feb  1 15:54:07 CET 2026
-Duration: 00:16:58
-Result: 18 passed, 0 failed
+Completed: Sun Feb  1 16:22:19 CET 2026
+Duration: 00:00:07
+Result: 0 passed, 18 failed
 Result file: /home/nntin/git/gSnake/scripts/test/result.txt
 Temp dir: /home/nntin/git/gSnake/scripts/test/tmp_act_results
