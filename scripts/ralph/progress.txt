@@ -76,3 +76,21 @@ Started: Sun Feb  1 18:25:00 CET 2026
   - Must run cargo fmt before clippy to fix formatting issues first
   - rustfmt.toml in gsnake-core uses nightly-only features, causing warnings but not errors
 ---
+## Sun Feb  1 20:10:00 CET 2026 - US-005
+- Created enable-all-hooks.sh helper script for one-command enablement
+- Files changed:
+  - .github/hooks/enable-all-hooks.sh (new file, executable)
+- Script enables hooks in parent repo and all initialized submodules
+- Uses git submodule foreach to iterate through submodules
+- Checks for .github/hooks directory before enabling hooks in each repo
+- Provides clear output showing which repos had hooks enabled/skipped
+- POSIX-compatible (uses /bin/sh, no bashisms)
+- Successfully tested - hooks enabled in parent, gsnake-editor, gsnake-levels, gsnake-specs, gsnake-web
+- gsnake-python skipped (no .github/hooks directory)
+- **Learnings for future iterations:**
+  - git submodule foreach is the correct way to iterate through submodules
+  - Use --quiet flag with git submodule foreach to suppress "Entering 'submodule'" messages in the foreach body
+  - The $name variable in git submodule foreach context contains the submodule name
+  - POSIX sh uses [ ] for conditionals, not [[ ]] (which is a bashism)
+  - Pre-commit hook now runs automatically on commits in parent repo
+---
