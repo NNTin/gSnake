@@ -339,3 +339,27 @@ Started: Sat Jan 31 19:53:02 CET 2026
   - Console logging helps verify operations: EditorLayout.svelte:448 for Load click, :501 for successful load
 ---
 
+## Sun Feb 1 06:00:00 CET 2026 - US-T016
+- Tested Grid Responsiveness with Browser MCP
+- Tested minimum grid size 5x5: verified 25 cells render correctly
+- Tested maximum grid size 50x50: verified 2500 cells render with scrolling (parent container overflow: scrollHeight 1090 > clientHeight 432, scrollWidth 1147 > clientWidth 547)
+- Tested non-square grid 10x30: verified 300 cells render correctly
+- Tested browser resize to 1024px width: verified layout adapts properly with full entity palette visible
+- Typecheck passed with 0 errors and 0 warnings
+- Files changed:
+  - gsnake-specs/test-results/us-t016-grid-5x5.png (screenshot added)
+  - gsnake-specs/test-results/us-t016-grid-50x50.png (screenshot added)
+  - gsnake-specs/test-results/us-t016-grid-10x30.png (screenshot added)
+  - gsnake-specs/test-results/us-t016-grid-1024px.png (screenshot added)
+  - scripts/ralph/prd.json (US-T016 marked as passes: true)
+  - scripts/test/result.txt (CI results)
+- **Learnings for future iterations:**
+  - Grid responsiveness is fully implemented: minimum 5x5, maximum 50x50, non-square dimensions all supported
+  - Large grids (50x50) trigger scrolling in the parent container, not the grid container itself
+  - The grid container has role="application" and is wrapped in a parent div that provides overflow scrolling
+  - Browser resize works correctly: at 1024px width, layout adapts and shows full entity palette
+  - Grid cells maintain consistent 32x32px sizing with 1px borders across all grid sizes
+  - For very large grids, browser snapshots become too large (>120k chars), use browser_run_code and evaluation instead
+  - Screenshots are saved in .playwright-mcp/ directory, then copied to gsnake-specs/test-results/
+---
+
