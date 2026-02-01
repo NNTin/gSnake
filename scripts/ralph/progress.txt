@@ -140,3 +140,23 @@ Started: Sat Jan 31 19:53:02 CET 2026
   - Always include scripts/test/result.txt in commits per Ralph instructions
 ---
 
+## Sun Feb 1 01:45:00 CET 2026 - US-T008
+- Tested Entity Removal with Browser MCP
+- Verified obstacle removed with Shift+Click: cell becomes empty, console logs "Removed entity from (7, 7)"
+- Verified snake segment removal with index updating: placed H, 1, 2, 3, then Shift+Click on segment 1
+- Confirmed segment removed and remaining segments renumbered: 2->1, 3->2
+- Verified shift-hover class applied when Shift key pressed using keyboard event simulation
+- CSS rule .shift-hover:hover::after provides red overlay (rgba(255, 0, 0, 0.3)) on hover
+- Files changed:
+  - gsnake-specs/test-results/entity-removal-shift-click.png (screenshot added)
+  - scripts/ralph/prd.json (US-T008 marked as passes: true)
+  - scripts/test/result.txt (CI results)
+- **Learnings for future iterations:**
+  - Shift+Click removal is fully implemented in EditorLayout.svelte:273-316
+  - Snake segment removal updates all subsequent segment indices correctly (lines 288-297)
+  - The shift-hover class is applied via keydown/keyup event handlers in GridCanvas.svelte
+  - Red overlay only appears on :hover when shift-hover class is present (not constantly visible)
+  - Can simulate keyboard events with KeyboardEvent and shiftKey property for testing
+  - Browser evaluation can check classList and computed styles including pseudo-elements
+---
+
