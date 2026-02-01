@@ -153,8 +153,8 @@
         "Typecheck passes"
       ],
       "priority": 9,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "All undo/redo tests passed: button clicks work, keyboard shortcuts (Ctrl+Z, Ctrl+Y) work, redo stack cleared after new action, buttons properly disable when stacks empty"
     },
     {
       "id": "US-T010",
