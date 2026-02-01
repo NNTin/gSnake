@@ -8,3 +8,39 @@ Started: Sat Feb 1 14:00:00 CET 2026
 - Always include scripts/test/result.txt in commits per Ralph instructions
 
 ---
+## 2026-02-01 15:35 - US-001
+- Created .github/hooks/ directory in gsnake-levels submodule
+- Added README.md with instructions for enabling/disabling hooks
+- Verified typecheck passes with cargo check
+- Committed and pushed to gsnake-levels submodule
+
+**Files changed:**
+- gsnake-levels/.github/hooks/README.md (new)
+
+**Learnings for future iterations:**
+- Must work inside the specific submodule directory (was already in gsnake-levels/)
+- Submodules must be committed separately before committing to main repo
+- Git submodule commits need to be pushed individually
+- README.md provides clear instructions for opt-in hook setup using `git config core.hooksPath .github/hooks`
+---
+## 2026-02-01 16:00 - US-002
+- Created pre-commit hook script in gsnake-levels/.github/hooks/pre-commit
+- Hook runs cargo fmt, clippy, check, and build without tests
+- Fixed clippy warnings in build.rs (needless borrow), verify_all.rs (ptr_arg), and verify.rs (unnecessary_literal_unwrap)
+- Applied cargo fmt to all files to ensure consistency
+- Committed and pushed to gsnake-levels submodule
+
+**Files changed:**
+- gsnake-levels/.github/hooks/pre-commit (new, executable)
+- gsnake-levels/build.rs (clippy fix)
+- gsnake-levels/src/verify_all.rs (clippy fix + import Path)
+- gsnake-levels/src/verify.rs (clippy fix)
+- Multiple source files (cargo fmt applied)
+
+**Learnings for future iterations:**
+- Pre-commit hooks must be executable (chmod +x)
+- Rust clippy with -D warnings is strict and catches subtle issues like needless borrows and ptr_arg
+- The hook script uses `set -e` to exit on first failure
+- Tests are explicitly excluded from pre-commit hook for speed
+- When fixing clippy issues, watch for missing imports (e.g., Path when changing &PathBuf to &Path)
+---
