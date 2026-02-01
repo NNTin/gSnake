@@ -438,3 +438,24 @@ Started: Sat Jan 31 19:53:02 CET 2026
   - Browser MCP verification confirms all acceptance criteria met
 ---
 
+
+## Sun Feb 1 08:50:00 CET 2026 - US-F002
+- Completed toast notification implementation for error messages
+- Most features were already implemented: svelte-5-french-toast installed, Toaster component in App.svelte, success toasts for save and test level
+- Replaced single alert() call in GridSizeModal.svelte with toast.error notification
+- Files changed:
+  - gsnake-editor/src/lib/GridSizeModal.svelte (replaced alert with toast.error)
+  - scripts/ralph/prd.json (US-F002 marked as passes: true)
+  - scripts/test/result.txt (CI results)
+- **Learnings for future iterations:**
+  - svelte-5-french-toast (not svelte-french-toast) is the Svelte 5 compatible version
+  - Toast notifications already extensively implemented across the codebase
+  - All toasts use consistent 5-second duration and custom styling
+  - Success toasts: green background (#d4edda), green checkmark icon, green border (#4caf50)
+  - Error toasts: red background (#f8d7da), red X icon, red border (#dc3545)
+  - Warning toasts: yellow background (#fff3cd), yellow border (#ffc107)
+  - Toast container appears at top of viewport with status role
+  - Browser MCP can capture toast messages in snapshots but they auto-dismiss quickly
+  - GridSizeModal was the only component still using alert() for validation errors
+---
+
