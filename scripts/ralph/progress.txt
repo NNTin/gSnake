@@ -386,3 +386,28 @@ Started: Sat Jan 31 19:53:02 CET 2026
   - Code review can verify JSON export behavior by examining type definitions and export logic
 ---
 
+
+## Sun Feb 1 07:10:00 CET 2026 - US-T018
+- Tested Level ID Uniqueness with Browser MCP
+- Created and saved two levels sequentially: "Level A" and "Level B"
+- Verified Level A ID: 1769926145765-ply2bd
+- Verified Level B ID: 1769926174156-sf1bz3
+- Verified IDs are different (timestamps differ by 28.391 seconds)
+- Verified both IDs match timestamp-random pattern (13-digit timestamp + dash + 6-character random string)
+- Typecheck passed with 0 errors and 0 warnings
+- Files changed:
+  - gsnake-specs/test-results/us-t018-level-a.json (Level A JSON)
+  - gsnake-specs/test-results/us-t018-level-b.json (Level B JSON)
+  - gsnake-specs/test-results/us-t018-level-id-uniqueness.png (screenshot)
+  - scripts/ralph/prd.json (US-T018 marked as passes: true)
+  - scripts/test/result.txt (CI results)
+- **Learnings for future iterations:**
+  - Level ID generation successfully uses timestamp (Date.now()) + random string to ensure uniqueness
+  - The random string portion uses 6 alphanumeric characters (lowercase letters and digits)
+  - Timestamp component ensures chronological ordering and prevents collisions when levels are created at different times
+  - Random component prevents collisions if multiple levels are created in the same millisecond
+  - ID format is consistent: {timestamp}-{random} (e.g., 1769926145765-ply2bd)
+  - Browser download handling can be automated with page.waitForEvent('download') and download.saveAs()
+  - Test files saved to gsnake-specs/test-results/ for documentation
+---
+
