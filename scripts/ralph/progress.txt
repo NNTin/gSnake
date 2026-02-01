@@ -94,3 +94,22 @@ Started: Sun Feb  1 18:25:00 CET 2026
   - POSIX sh uses [ ] for conditionals, not [[ ]] (which is a bashism)
   - Pre-commit hook now runs automatically on commits in parent repo
 ---
+## Sun Feb  1 20:14:00 CET 2026 - US-006
+- Updated parent hooks README with comprehensive documentation
+- Files changed:
+  - .github/hooks/README.md (completely rewritten)
+- Added section for enable-all-hooks.sh script with usage examples
+- Documented manual per-repo enablement as alternative
+- Listed all repos with hooks available (parent, gsnake-web, gsnake-levels, gsnake-specs, gsnake-editor)
+- Explained that submodule hooks are independent and can be enabled selectively
+- Listed exact commands run by parent pre-commit hook (cargo fmt, clippy, check, build)
+- Explained that tests are excluded and parent hook doesn't check submodules
+- Added verification and disabling sections with commands for both parent and submodules
+- Follows style of submodule hook READMEs
+- **Learnings for future iterations:**
+  - README structure: Quick Start → Manual Enablement → Verification → Disabling → Available Repos → Available Hooks → Notes
+  - Provide both automated (enable-all-hooks.sh) and manual options for flexibility
+  - Clearly explain scope of parent hooks (gsnake-core only, no submodules)
+  - Note that tests are excluded from pre-commit for speed
+  - Git submodule foreach command is useful for verification across all submodules
+---
