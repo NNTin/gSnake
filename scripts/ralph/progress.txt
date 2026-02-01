@@ -40,3 +40,39 @@ Started: Sun Feb  1 18:25:00 CET 2026
   - Use `git push` after each commit to update CI pipeline (per Ralph instructions)
   - Pre-commit hooks must be executable (chmod +x)
 ---
+## Sun Feb  1 19:36:00 CET 2026 - US-003
+- Created hooks README for gsnake-editor following existing submodule pattern
+- Files changed:
+  - gsnake-editor/.github/hooks/README.md (new file)
+- README includes:
+  - Enable command: `git config core.hooksPath .github/hooks`
+  - Verification: `git config core.hooksPath`
+  - Disable: `git config --unset core.hooksPath`
+  - Lists all 4 commands run by pre-commit: format:check, lint, check, build
+  - Note about tests not running in hooks
+- Committed in submodule and updated parent repo reference
+- **Learnings for future iterations:**
+  - Hook READMEs follow consistent format across all submodules (gsnake-web, gsnake-levels, gsnake-specs, gsnake-editor)
+  - README structure: Enabling Hooks → Verification → Disabling Hooks → Available Hooks (with numbered list of commands)
+  - Always include note explaining tests are excluded for speed
+  - CI pipeline still passing after changes (18/18 tests)
+---
+## Sun Feb  1 20:06:00 CET 2026 - US-004
+- Created pre-commit hook for parent gSnake project validating gsnake-core workspace only
+- Files changed:
+  - .github/hooks/pre-commit (new file, executable)
+  - gsnake-core/engine/core/src/models.rs (added #[allow(clippy::too_many_arguments)])
+  - gsnake-core/engine/bindings/wasm/src/lib.rs (fixed clippy doc_markdown, uninlined_format_args, single_match_else)
+  - gsnake-core/engine/bindings/cli/src/levels.rs (moved levels_path before test module, added #[must_use])
+  - gsnake-core formatting changes (cargo fmt --all)
+- Hook runs: cargo fmt --check → cargo clippy → cargo check → cargo build (NO tests)
+- Clippy configured with allowances for pedantic style warnings to keep focus on important issues
+- All checks pass successfully
+- **Learnings for future iterations:**
+  - Parent repo pre-commit hooks follow same pattern as submodules: format check → lint → typecheck → build
+  - Cargo clippy can have many pedantic warnings in existing codebases - use -A flags to allow minor style issues
+  - Allowed clippy lints: uninlined-format-args, ptr-arg, wildcard-imports, unnested-or-patterns, too-many-lines, ignored-unit-patterns, match-same-arms
+  - Pre-commit hooks for parent repo check gsnake-core workspace only, NOT submodules
+  - Must run cargo fmt before clippy to fix formatting issues first
+  - rustfmt.toml in gsnake-core uses nightly-only features, causing warnings but not errors
+---
