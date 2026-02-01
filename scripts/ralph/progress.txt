@@ -160,3 +160,47 @@ Started: Sat Jan 31 19:53:02 CET 2026
   - Browser evaluation can check classList and computed styles including pseudo-elements
 ---
 
+## Sun Feb 1 02:35:00 CET 2026 - US-T009
+- Tested Undo/Redo Functionality with Browser MCP
+- Placed 3 different entities: Obstacle at (2, 5), Food at (5, 10), Exit at (9, 0)
+- Verified Undo button click removes last entity and enables Redo button
+- Verified Redo button click restores removed entity
+- Tested keyboard shortcuts: Ctrl+Z (undo) and Ctrl+Y (redo) both work correctly
+- Verified placing new entity after undo clears redo stack (Redo button becomes disabled)
+- Verified Undo button disables when undo stack is empty (after undoing all 3 actions)
+- Console logs confirm undo/redo operations: "Undo performed" and "Redo performed"
+- Files changed:
+  - gsnake-specs/test-results/undo-redo-functionality.png (screenshot added)
+  - scripts/ralph/prd.json (US-T009 marked as passes: true)
+  - scripts/test/result.txt (CI results)
+- **Learnings for future iterations:**
+  - Undo/Redo functionality is fully implemented in EditorLayout.svelte with keyboard shortcuts
+  - Undo button ref e28, Redo button ref e29 in browser snapshot
+  - Undo/Redo operations log to console from EditorLayout.svelte:549 and :576
+  - Buttons properly disable/enable based on stack state (disabled attribute added/removed)
+  - Can use browser_run_code to automate multiple sequential operations like undoing all actions
+  - Redo stack is cleared when new action performed after undo (proper undo/redo stack behavior)
+  - Keyboard shortcuts Ctrl+Z and Ctrl+Y work via page.keyboard.press() in Browser MCP
+---
+
+## Sun Feb 1 03:20:00 CET 2026 - US-T010
+- Tested Snake Direction Configuration with Browser MCP
+- Verified default selection is 'East' in the direction dropdown (ref e30)
+- Clicked dropdown and verified all 4 options available: North, South, East, West
+- Tested selecting each direction: North, South, West, and back to East
+- Console logs confirm direction changes: "Snake direction changed to: {direction}"
+- Verified direction selection persists during level editing (placed obstacle and food, dropdown still shows East)
+- Browser evaluation confirmed dropdown value remains "east" after entity placement
+- Typecheck passed with 0 errors and 0 warnings
+- Files changed:
+  - scripts/ralph/prd.json (US-T010 marked as passes: true)
+  - scripts/test/result.txt (CI results)
+- **Learnings for future iterations:**
+  - Direction dropdown is a standard HTML select element with value attribute
+  - Default direction is "East" (lowercase "east" in code, capitalized in UI)
+  - Direction changes are logged to console from EditorLayout.svelte:584
+  - Browser MCP select_option tool works seamlessly with direction dropdown
+  - Direction state persists across all editing operations (entity placement, selection changes)
+  - Can use browser evaluation to directly check dropdown value for verification
+---
+
