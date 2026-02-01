@@ -411,3 +411,30 @@ Started: Sat Jan 31 19:53:02 CET 2026
   - Test files saved to gsnake-specs/test-results/ for documentation
 ---
 
+
+## Sun Feb 1 08:00:00 CET 2026 - US-F001
+- Verified Level Validation Warnings feature already implemented in SaveLevelModal.svelte
+- Tested all validation scenarios:
+  - No entities: all 3 warnings displayed (no snake, no food, no exit)
+  - Only snake: 2 warnings displayed (no food, no exit)
+  - Export Anyway button appears when warnings present
+  - Cancel button works correctly
+  - Export with warnings succeeds and downloads JSON file
+- Validation logic uses reactive statements to calculate warnings array (lines 18-24)
+- Warning box styled with yellow background (#fff3cd) and warning icon
+- Button text dynamically changes: "Export" → "Export Anyway" when hasWarnings is true
+- Typecheck passed with 0 errors and 0 warnings
+- Files verified:
+  - gsnake-editor/src/lib/SaveLevelModal.svelte (validation UI and logic)
+  - gsnake-editor/src/lib/EditorLayout.svelte (validation data calculation lines 640-662)
+  - scripts/ralph/prd.json (US-F001 marked as passes: true)
+  - scripts/test/result.txt (CI results)
+- **Learnings for future iterations:**
+  - SaveLevelModal already had comprehensive validation warnings implemented
+  - Reactive Svelte statements ($:) automatically recalculate warnings when props change
+  - Warning UI uses consistent styling with info-box (border-left approach)
+  - The "Export Anyway" vs "Export" button text is controlled by hasWarnings ternary
+  - No code changes needed - feature was already complete and working
+  - Browser MCP verification confirms all acceptance criteria met
+---
+
