@@ -13,3 +13,6 @@
 [submodule "gsnake-editor"]
 	path = gsnake-editor
 	url = https://github.com/NNTin/gsnake-editor.git
+[submodule "gsnake-n8n"]
+	path = gsnake-n8n
+	url = https://github.com/NNTin/gsnake-n8n.git

@@ -3,12 +3,14 @@
   "private": true,
   "version": "0.2.2",
   "scripts": {
+    "dev": "concurrently -n editor,web -c blue,green \"npm --prefix gsnake-editor run dev\" \"npm --prefix gsnake-web run dev\"",
     "test:e2e": "playwright test --reporter=list",
     "report": "allure serve artifacts/allure-results"
   },
   "devDependencies": {
     "@playwright/test": "^1.41.0",
     "@types/node": "^25.0.9",
-    "allure-playwright": "^2.10.0"
+    "allure-playwright": "^2.10.0",
+    "concurrently": "^9.2.1"
   }
 }
