@@ -1,16 +1,17 @@
 {
   "project": "gSnake",
-  "description": "Pre-Commit Hooks for gsnake-editor and Parent gSnake Project - Add pre-commit hooks to remaining repos following established patterns",
+  "description": "Automated Level Metadata Synchronization and Validation - Migrate levels from string to numeric IDs, auto-generate metadata, create playback solutions, and add CI validation",
   "userStories": [
     {
       "id": "US-001",
-      "title": "Add format/lint scripts to gsnake-editor package.json",
-      "description": "As a developer, I need format and lint scripts in gsnake-editor to support the pre-commit hook.",
+      "title": "Add ID migration helper function to read and parse string IDs",
+      "description": "As a developer, I need a helper function to extract numeric IDs from string-based IDs so that level files can be migrated.",
       "acceptanceCriteria": [
-        "Add 'format' script using Prettier to package.json",
-        "Add 'lint' script using ESLint to package.json",
-        "Install necessary devDependencies (prettier, eslint, eslint-plugin-svelte if needed)",
-        "Scripts run successfully without errors",
+        "Create function that parses string IDs like '1769977122223-g36bwe'",
+        "Extract timestamp portion (1769977122223) as u32",
+        "Verify extracted timestamp fits within u32 range (0 to 4,294,967,295)",
+        "Return error if ID format is invalid or timestamp out of range",
+        "Add unit tests for valid and invalid ID formats",
         "Typecheck passes"
       ],
       "priority": 1,
@@ -19,98 +20,220 @@
     },
     {
       "id": "US-002",
-      "title": "Create pre-commit hook for gsnake-editor",
-      "description": "As a maintainer, I want a pre-commit hook for gsnake-editor that runs format, lint, typecheck, and build without tests.",
+      "title": "Implement level JSON ID migration logic",
+      "description": "As a developer, I need to update level JSON files from string to numeric IDs so they can be parsed by gsnake-core.",
       "acceptanceCriteria": [
-        "Create gsnake-editor/.github/hooks/pre-commit script",
-        "Hook runs formatter check (npm run format -- --check or similar)",
-        "Hook runs linter (npm run lint)",
-        "Hook runs typecheck (npm run check)",
-        "Hook runs build (npm run build)",
-        "Hook does NOT run npm test, vitest, or test commands",
-        "Script is executable (chmod +x)",
-        "Hook exits with error code on any failure",
+        "Read level JSON files with string IDs",
+        "Use US-001 helper to extract numeric ID",
+        "Update 'id' field to numeric value",
+        "Preserve all other fields (name, difficulty, gridSize, snake, obstacles, food, etc.)",
+        "Write updated JSON back to file with proper formatting",
+        "Validate migrated levels parse successfully with LevelDefinition",
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-003",
-      "title": "Create hooks README for gsnake-editor",
-      "description": "As a maintainer, I want clear documentation in gsnake-editor explaining how to enable and verify hooks.",
+      "title": "Create level analysis module for name generation",
+      "description": "As a developer, I need a module to analyze level mechanics so creative names can be generated.",
       "acceptanceCriteria": [
-        "Create gsnake-editor/.github/hooks/README.md",
-        "README explains 'git config core.hooksPath .github/hooks' command",
-        "README includes verification step (git config --get core.hooksPath)",
-        "README includes disable step (git config --unset core.hooksPath)",
-        "README lists exact commands run by the pre-commit hook",
-        "README follows same format as existing submodule hook READMEs",
+        "Create analysis function that reads level JSON",
+        "Identify presence of: floatingFood, fallingFood, stones, spikes",
+        "Detect obstacle patterns (vertical walls, horizontal walls, scattered)",
+        "Calculate grid complexity metrics (obstacle density, food count)",
+        "Return structured analysis result (mechanics present, patterns detected)",
+        "Add unit tests for different level configurations",
         "Typecheck passes"
       ],
       "priority": 3,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-004",
-      "title": "Create pre-commit hook for parent gSnake project",
-      "description": "As a maintainer, I want a pre-commit hook for the parent gSnake project that validates gsnake-core workspace only.",
+      "title": "Implement creative name generator based on level analysis",
+      "description": "As a developer, I need to generate descriptive level names from analysis results so levels are identifiable.",
       "acceptanceCriteria": [
-        "Create .github/hooks/pre-commit in parent repo root",
-        "Hook changes directory to gsnake-core",
-        "Hook runs 'cargo fmt --all -- --check'",
-        "Hook runs 'cargo clippy --all-targets -- -D warnings'",
-        "Hook runs 'cargo check'",
-        "Hook runs 'cargo build'",
-        "Hook does NOT run 'cargo test'",
-        "Hook does NOT run 'npm run test:e2e'",
-        "Hook does NOT recurse into submodules",
-        "Hook includes comments explaining it checks gsnake-core only and avoids tests",
-        "Script is executable (chmod +x)",
+        "Use US-003 analysis to generate names",
+        "Priority 1: Special mechanics (Floating/Falling/Stones/Spikes)",
+        "Priority 2: Obstacle patterns (Tower/Bridge/Zigzag/Islands)",
+        "Priority 3: Complexity indicators for modifiers",
+        "Generate 1-4 word gameplay-descriptive names",
+        "Ensure uniqueness by tracking generated names across difficulties",
+        "Update level JSON 'name' field from 'todoname' to generated name",
         "Typecheck passes"
       ],
       "priority": 4,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-005",
-      "title": "Create helper script to enable hooks in all repos",
-      "description": "As a maintainer, I want a helper script that enables hooks in the parent repo and all initialized submodules with one command.",
+      "title": "Create levels.toml generation logic",
+      "description": "As a developer, I need to auto-generate levels.toml files from level JSON files so metadata stays synchronized.",
       "acceptanceCriteria": [
-        "Create .github/hooks/enable-all-hooks.sh in parent repo",
-        "Script sets core.hooksPath in parent repo (.github/hooks)",
-        "Script iterates through initialized submodules using git submodule foreach or similar",
-        "Script checks if .github/hooks exists in each submodule before setting config",
-        "Script skips uninitialized submodules gracefully",
-        "Script provides clear output showing which repos had hooks enabled",
-        "Script is executable (chmod +x)",
-        "Script is POSIX-compatible (no bashisms)",
+        "Scan levels/{easy,medium,hard}/ directories for .json files",
+        "For each level, create TOML entry with: id, file, author='gsnake', solved=true, difficulty, tags=[], description",
+        "Use level filename for 'file' field and 'id' field",
+        "Use generated name from US-004 for 'description' field",
+        "Fail with clear error if JSON file doesn't exist",
+        "Write levels.toml to levels/{difficulty}/levels.toml",
+        "Format TOML with proper indentation using toml crate",
         "Typecheck passes"
       ],
       "priority": 5,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-006",
-      "title": "Update parent hooks README to document all features",
-      "description": "As a maintainer, I want the parent repo's hooks README to document the helper script, commands run, and usage.",
+      "title": "Update solve_level max_depth to 500",
+      "description": "As a developer, I need to increase solver depth to handle complex levels.",
       "acceptanceCriteria": [
-        "Update .github/hooks/README.md in parent repo",
-        "Add section documenting './enable-all-hooks.sh' for one-command enablement",
-        "Document manual per-repo enablement as alternative",
-        "List which repos have hooks available (parent, gsnake-web, gsnake-levels, gsnake-specs, gsnake-editor)",
-        "Explain that submodule hooks are independent and can be enabled selectively",
-        "List exact commands run by parent repo's pre-commit hook",
-        "Explain hooks exclude tests and parent hook doesn't check submodules",
-        "Maintain existing structure and add new sections appropriately",
+        "Update solve_level binary to use max_depth=500 as default",
+        "Keep max_depth as CLI argument for flexibility",
+        "Update help text to reflect new default",
         "Typecheck passes"
       ],
       "priority": 6,
-      "passes": true,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Implement playback generation for all levels",
+      "description": "As a developer, I need to generate playback solutions so levels can be verified and replayed.",
+      "acceptanceCriteria": [
+        "Run solve_level binary for each migrated level JSON",
+        "Save playback to playbacks/{difficulty}/ with matching filename",
+        "If solve succeeds, playback JSON created successfully",
+        "If solve fails, log warning with level ID but continue processing",
+        "Return list of solved/unsolved level IDs",
+        "Typecheck passes"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "Update levels.toml solved status based on playback generation",
+      "description": "As a developer, I need to mark levels as solved/unsolved based on whether playbacks were generated.",
+      "acceptanceCriteria": [
+        "After US-007 playback generation, update levels.toml entries",
+        "Set solved=true for levels with successful playback generation",
+        "Set solved=false for levels where solve_level failed",
+        "Write updated levels.toml files",
+        "Typecheck passes"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "Add sync-metadata subcommand",
+      "description": "As a developer, I want to run metadata sync independently so I can update metadata without generating levels.json.",
+      "acceptanceCriteria": [
+        "Add 'sync-metadata' subcommand to main.rs using clap",
+        "Accept optional --difficulty <easy|medium|hard> flag",
+        "Default syncs all difficulties if no flag provided",
+        "Run operations in order: migrate IDs (US-002), generate names (US-004), create levels.toml (US-005), generate playbacks (US-007), update solved status (US-008)",
+        "Report summary: 'Migrated X IDs, generated X names, updated X levels.toml files, created X playbacks'",
+        "Exit code 0 on success, non-zero on failure",
+        "Typecheck passes"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "Integrate sync into generate-levels-json command",
+      "description": "As a developer, I want metadata sync to run automatically when generating levels.json so output uses up-to-date metadata.",
+      "acceptanceCriteria": [
+        "Add --sync flag to generate-levels-json subcommand",
+        "Add --no-sync flag to disable auto-sync",
+        "Run sync by default (unless --no-sync passed)",
+        "Call US-009 sync-metadata logic before level aggregation",
+        "Log sync progress (migrating, naming, updating, generating playbacks)",
+        "If sync fails, abort generate-levels-json with error",
+        "Typecheck passes"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-011",
+      "title": "Add validate-levels-toml subcommand",
+      "description": "As a developer, I need a validation command for CI to check levels.toml integrity.",
+      "acceptanceCriteria": [
+        "Add 'validate-levels-toml' subcommand to main.rs",
+        "For each difficulty (easy, medium, hard):",
+        "- Check levels.toml exists and is valid TOML format",
+        "- Verify all referenced JSON files exist",
+        "- Parse all JSON files as valid LevelDefinition",
+        "Fail immediately on first validation error with clear message including file path",
+        "Exit code 0 if all valid, 1 on validation failure, 2 on IO error, 3 on parse error",
+        "Typecheck passes"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-012",
+      "title": "Add CI validation job to gsnake-levels workflow",
+      "description": "As a developer, I want CI to validate levels.toml files so invalid metadata is caught before merge.",
+      "acceptanceCriteria": [
+        "Add 'validate-levels' job to .github/workflows/ci.yml",
+        "Job runs on push and pull_request events",
+        "Use same setup as build/test jobs (checkout, rust toolchain, cargo config)",
+        "Run 'cargo run -- validate-levels-toml' in working directory",
+        "Job fails CI if validation command returns non-zero exit code",
+        "Add to existing jobs (after build and test)",
+        "Typecheck passes"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-013",
+      "title": "Execute full migration on all 9 level files",
+      "description": "As a developer, I need to run the complete sync-metadata command to migrate all new levels.",
+      "acceptanceCriteria": [
+        "Run 'cargo run -- sync-metadata' from gsnake-levels directory",
+        "Verify all 9 level files (2 easy, 3 medium, 3 hard) are migrated to numeric IDs",
+        "Verify all levels have creative generated names (no 'todoname' remaining)",
+        "Verify levels.toml files created in all three difficulty folders",
+        "Verify playback JSON files created for all solvable levels",
+        "Verify all migrated levels parse successfully with gsnake-core LevelDefinition",
+        "Commit changes with message: 'feat: US-013 - Execute full migration on all 9 level files'",
+        "Typecheck passes"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-014",
+      "title": "Update gsnake-core levels.json with new levels",
+      "description": "As a developer, I need to regenerate levels.json so gsnake-core includes the new migrated levels.",
+      "acceptanceCriteria": [
+        "Run 'cargo run -- generate-levels-json > ../../gsnake-core/engine/core/data/levels.json' from gsnake-levels",
+        "Verify levels.json contains all 12 existing levels plus 9 new levels (21 total)",
+        "Verify new levels have numeric IDs and generated names",
+        "Verify JSON is properly formatted",
+        "Commit changes with message: 'feat: US-014 - Update gsnake-core levels.json with new levels'",
+        "Typecheck passes"
+      ],
+      "priority": 14,
+      "passes": false,
       "notes": ""
     }
   ]

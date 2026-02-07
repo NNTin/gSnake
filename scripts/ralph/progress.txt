@@ -1,115 +1,26 @@
 # Ralph Progress Log
-Started: Sun Feb  1 18:25:00 CET 2026
----
+Started: Sat Feb  7 18:28:37 CET 2026
 
 ## Codebase Patterns
-- The gSnake project uses npm scripts for format/lint in TypeScript/Svelte submodules
-- Format checks use prettier with `--check` flag for validation, `--write` for fixing
-- Svelte 5 projects require ESLint flat config with typescript-eslint and eslint-plugin-svelte
-- When adding ESLint to Svelte projects, fix common issues: add keys to {#each} blocks, avoid `any` types, remove unused variables
-- Pre-commit hooks in submodules follow pattern: format check → lint → typecheck → build (NO tests)
+- gsnake-levels uses pre-commit hooks that run rustfmt, clippy with `-D warnings`, typecheck, and build
+- When adding new modules, register them in both src/lib.rs and src/main.rs
+- Use `#[allow(dead_code)]` for functions that will be used in future stories to pass clippy checks
+- gsnake-core LevelDefinition expects `id: u32`, not string or u64
+
 ---
 
-## Sun Feb  1 18:35:00 CET 2026 - US-001
-- Implemented format and lint scripts for gsnake-editor
-- Files changed:
-  - package.json (added format, format:check, lint scripts)
-  - package-lock.json (installed prettier, eslint, eslint-plugin-svelte, @eslint/js, typescript-eslint, globals)
-  - Created .prettierrc, .prettierignore, eslint.config.js
-  - Fixed linting issues in server.ts, integration.test.ts, and Svelte components (added keys to each blocks)
+## 2026-02-07 18:30 - US-001
+- Implemented parse_string_id() function in new migration.rs module
+- Parses string IDs in format "timestamp-suffix" and extracts numeric timestamp
+- Returns error if timestamp exceeds u32::MAX or format is invalid
+- Added 11 unit tests covering valid and invalid cases
+- **Files changed:**
+  - Created: gsnake-levels/src/migration.rs
+  - Modified: gsnake-levels/src/lib.rs
+  - Modified: gsnake-levels/src/main.rs
 - **Learnings for future iterations:**
-  - Prettier and ESLint configs should be created from scratch for Svelte 5 projects (no legacy configs exist)
-  - ESLint 9+ requires flat config format (eslint.config.js) not the old .eslintrc format
-  - Svelte {#each} blocks require keys - use unique identifiers like `(entity.type)` or `(`${row}-${col}`)`
-  - Replace `any` types with `unknown` for better type safety
-  - The format script should have both `--write` for fixing and `--check` for CI/validation
-  - After installing prettier, always run it to format the codebase before linting
----
-
-## Sun Feb  1 19:16:42 CET 2026 - US-002
-- Created pre-commit hook for gsnake-editor
-- Files changed:
-  - gsnake-editor/.github/hooks/pre-commit (new file, executable)
-- Hook follows established pattern: format check → lint → typecheck → build (NO tests)
-- Tested hook successfully - all checks pass
-- Committed in submodule and updated parent repo reference
-- **Learnings for future iterations:**
-  - Pre-commit hooks for TypeScript/Svelte submodules use npm scripts: format:check, lint, check, build
-  - Always test hooks before committing to ensure all commands work
-  - gsnake-editor is a submodule - must commit in submodule first, then update parent repo reference
-  - Use `git push` after each commit to update CI pipeline (per Ralph instructions)
-  - Pre-commit hooks must be executable (chmod +x)
----
-## Sun Feb  1 19:36:00 CET 2026 - US-003
-- Created hooks README for gsnake-editor following existing submodule pattern
-- Files changed:
-  - gsnake-editor/.github/hooks/README.md (new file)
-- README includes:
-  - Enable command: `git config core.hooksPath .github/hooks`
-  - Verification: `git config core.hooksPath`
-  - Disable: `git config --unset core.hooksPath`
-  - Lists all 4 commands run by pre-commit: format:check, lint, check, build
-  - Note about tests not running in hooks
-- Committed in submodule and updated parent repo reference
-- **Learnings for future iterations:**
-  - Hook READMEs follow consistent format across all submodules (gsnake-web, gsnake-levels, gsnake-specs, gsnake-editor)
-  - README structure: Enabling Hooks → Verification → Disabling Hooks → Available Hooks (with numbered list of commands)
-  - Always include note explaining tests are excluded for speed
-  - CI pipeline still passing after changes (18/18 tests)
----
-## Sun Feb  1 20:06:00 CET 2026 - US-004
-- Created pre-commit hook for parent gSnake project validating gsnake-core workspace only
-- Files changed:
-  - .github/hooks/pre-commit (new file, executable)
-  - gsnake-core/engine/core/src/models.rs (added #[allow(clippy::too_many_arguments)])
-  - gsnake-core/engine/bindings/wasm/src/lib.rs (fixed clippy doc_markdown, uninlined_format_args, single_match_else)
-  - gsnake-core/engine/bindings/cli/src/levels.rs (moved levels_path before test module, added #[must_use])
-  - gsnake-core formatting changes (cargo fmt --all)
-- Hook runs: cargo fmt --check → cargo clippy → cargo check → cargo build (NO tests)
-- Clippy configured with allowances for pedantic style warnings to keep focus on important issues
-- All checks pass successfully
-- **Learnings for future iterations:**
-  - Parent repo pre-commit hooks follow same pattern as submodules: format check → lint → typecheck → build
-  - Cargo clippy can have many pedantic warnings in existing codebases - use -A flags to allow minor style issues
-  - Allowed clippy lints: uninlined-format-args, ptr-arg, wildcard-imports, unnested-or-patterns, too-many-lines, ignored-unit-patterns, match-same-arms
-  - Pre-commit hooks for parent repo check gsnake-core workspace only, NOT submodules
-  - Must run cargo fmt before clippy to fix formatting issues first
-  - rustfmt.toml in gsnake-core uses nightly-only features, causing warnings but not errors
----
-## Sun Feb  1 20:10:00 CET 2026 - US-005
-- Created enable-all-hooks.sh helper script for one-command enablement
-- Files changed:
-  - .github/hooks/enable-all-hooks.sh (new file, executable)
-- Script enables hooks in parent repo and all initialized submodules
-- Uses git submodule foreach to iterate through submodules
-- Checks for .github/hooks directory before enabling hooks in each repo
-- Provides clear output showing which repos had hooks enabled/skipped
-- POSIX-compatible (uses /bin/sh, no bashisms)
-- Successfully tested - hooks enabled in parent, gsnake-editor, gsnake-levels, gsnake-specs, gsnake-web
-- gsnake-python skipped (no .github/hooks directory)
-- **Learnings for future iterations:**
-  - git submodule foreach is the correct way to iterate through submodules
-  - Use --quiet flag with git submodule foreach to suppress "Entering 'submodule'" messages in the foreach body
-  - The $name variable in git submodule foreach context contains the submodule name
-  - POSIX sh uses [ ] for conditionals, not [[ ]] (which is a bashism)
-  - Pre-commit hook now runs automatically on commits in parent repo
----
-## Sun Feb  1 20:14:00 CET 2026 - US-006
-- Updated parent hooks README with comprehensive documentation
-- Files changed:
-  - .github/hooks/README.md (completely rewritten)
-- Added section for enable-all-hooks.sh script with usage examples
-- Documented manual per-repo enablement as alternative
-- Listed all repos with hooks available (parent, gsnake-web, gsnake-levels, gsnake-specs, gsnake-editor)
-- Explained that submodule hooks are independent and can be enabled selectively
-- Listed exact commands run by parent pre-commit hook (cargo fmt, clippy, check, build)
-- Explained that tests are excluded and parent hook doesn't check submodules
-- Added verification and disabling sections with commands for both parent and submodules
-- Follows style of submodule hook READMEs
-- **Learnings for future iterations:**
-  - README structure: Quick Start → Manual Enablement → Verification → Disabling → Available Repos → Available Hooks → Notes
-  - Provide both automated (enable-all-hooks.sh) and manual options for flexibility
-  - Clearly explain scope of parent hooks (gsnake-core only, no submodules)
-  - Note that tests are excluded from pre-commit for speed
-  - Git submodule foreach command is useful for verification across all submodules
+  - Actual level file timestamps (e.g., 1769977122223) exceed u32::MAX - US-002 will need to handle this
+  - Pre-commit hooks are strict and treat all warnings as errors
+  - The function correctly validates the format and returns errors for out-of-range values
+  - Existing levels in levels.json use simple sequential IDs (1-12), new levels will need similar strategy
 ---
