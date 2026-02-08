@@ -99,3 +99,16 @@ Started: Sat Feb  7 18:28:37 CET 2026
   - Pre-commit hooks passed: rustfmt, clippy -D warnings, typecheck, build
   - Next stories (US-006 onwards) will integrate this module into CLI commands and workflows
 ---
+## 2026-02-08 20:00 - US-006
+- Updated solve_level binary to use max_depth=500 as default (previously 200)
+- Replaced manual CLI argument parsing with clap derive for better UX
+- Added proper help text showing: "Maximum search depth for solver (default: 500)"
+- All acceptance criteria met: default changed, CLI flag preserved, help text added, typecheck passes
+- **Files changed:**
+  - Modified: gsnake-levels/src/bin/solve_level.rs
+- **Learnings for future iterations:**
+  - The solve_level binary now uses clap for argument parsing with proper help text
+  - Increased search depth allows solver to handle more complex levels (up from 200 to 500 moves)
+  - Pre-commit hooks passed: rustfmt, clippy -D warnings, typecheck, build, all 52 tests
+  - CLI usage: `solve_level <level_path> <output_path> [--max-depth 500]`
+---
