@@ -116,8 +116,14 @@ impl GameEngine {
         }
 
         // Check for collision immediately after move (spikes have highest priority)
-        if self.check_collision(self.level_state.snake.segments[0]) {
+        let head = self.level_state.snake.segments[0];
+        if self.check_collision(head) {
             self.game_state.status = GameStatus::GameOver;
+        } else if self.check_exit(head)
+            && self.game_state.food_collected >= self.game_state.total_food
+        {
+            // Win condition is evaluated before any gravity effects.
+            self.game_state.status = GameStatus::LevelComplete;
         } else {
             // Apply gravity to snake
             let hit_spike = gravity::apply_gravity_to_snake(&mut self.level_state);
@@ -129,16 +135,6 @@ impl GameEngine {
 
                 // Apply gravity to falling food
                 gravity::apply_gravity_to_falling_food(&mut self.level_state);
-
-                // Check if reached exit (only if not game over and collected required food)
-                if self.game_state.status == GameStatus::Playing {
-                    let head = self.level_state.snake.segments[0];
-                    if self.check_exit(head)
-                        && self.game_state.food_collected >= self.game_state.total_food
-                    {
-                        self.game_state.status = GameStatus::LevelComplete;
-                    }
-                }
             }
         }
 
@@ -554,6 +550,46 @@ mod tests {
         engine.process_move(Direction::South);
 
         assert_eq!(engine.game_state().status, GameStatus::LevelComplete);
+    }
+
+    #[test]
+    fn test_win_condition_checked_before_gravity() {
+        let mut level = create_test_level();
+        level.snake = vec![Position::new(2, 2)];
+        level.obstacles = vec![];
+        level.food = vec![];
+        level.floating_food = vec![];
+        level.falling_food = vec![];
+        level.spikes = vec![Position::new(2, 5)];
+        level.exit = Position::new(2, 3);
+
+        let mut engine = GameEngine::new(level);
+        engine.game_state.food_collected = engine.game_state.total_food;
+
+        // Move onto exit. Gravity would otherwise continue falling into a spike at (2,5).
+        engine.process_move(Direction::South);
+
+        assert_eq!(engine.game_state().status, GameStatus::LevelComplete);
+        assert_eq!(engine.level_state().snake.segments[0], Position::new(2, 3));
+    }
+
+    #[test]
+    fn test_collision_checked_before_win_condition() {
+        let mut level = create_test_level();
+        level.snake = vec![Position::new(4, 3)];
+        level.food = vec![];
+        level.floating_food = vec![];
+        level.falling_food = vec![];
+        level.spikes = vec![Position::new(4, 4)];
+        level.exit = Position::new(4, 4);
+
+        let mut engine = GameEngine::new(level);
+        engine.game_state.food_collected = engine.game_state.total_food;
+
+        // Moving onto a spike on the exit should still be game over.
+        engine.process_move(Direction::South);
+
+        assert_eq!(engine.game_state().status, GameStatus::GameOver);
     }
 
     #[test]
