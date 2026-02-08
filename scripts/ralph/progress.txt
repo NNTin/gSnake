@@ -134,3 +134,18 @@ Started: Sat Feb  7 18:28:37 CET 2026
   - All 58 tests pass (52 existing + 6 new in playback_generator module)
   - Module is ready for integration into sync-metadata command in US-009
 ---
+## 2026-02-08 22:30 - US-008
+- Implemented update_solved_status_from_results() function in playback_generator.rs
+- Function takes Vec<PlaybackResult> from playback generation and updates levels.toml solved status
+- Uses existing update_solved_status() from levels.rs module to update each level's solved field
+- Added 2 comprehensive unit tests covering both mixed results and empty results scenarios
+- **Files changed:**
+  - Modified: gsnake-levels/src/playback_generator.rs (+106 lines)
+- **Learnings for future iterations:**
+  - The update_solved_status() function in levels.rs already handles reading/updating/writing levels.toml
+  - Only needed to create a wrapper that iterates through PlaybackResult and calls update_solved_status
+  - PlaybackResult contains level_path which is needed for finding the correct levels.toml
+  - Pre-commit hooks passed: rustfmt, clippy -D warnings, typecheck, build
+  - All 60 tests pass (58 existing + 2 new)
+  - Function is ready for integration into sync-metadata command in US-009
+---
