@@ -1,6 +1,6 @@
 #!/bin/bash
 # Ralph Wiggum - Long-running AI agent loop
-# Usage: ./ralph.sh [--tool amp|claude] [max_iterations]
+# Usage: ./ralph.sh [--tool amp|claude|codex] [max_iterations]
 
 set -e
 
@@ -29,8 +29,8 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Validate tool choice
-if [[ "$TOOL" != "amp" && "$TOOL" != "claude" ]]; then
-  echo "Error: Invalid tool '$TOOL'. Must be 'amp' or 'claude'."
+if [[ "$TOOL" != "amp" && "$TOOL" != "claude" && "$TOOL" != "codex" ]]; then
+  echo "Error: Invalid tool '$TOOL'. Must be 'amp', 'claude', or 'codex'."
   exit 1
 fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -73,10 +73,21 @@ for i in $(seq 1 $MAX_ITERATIONS); do
     fi
     "${TIMEOUT_CMD[@]}" amp --dangerously-allow-all < "$SCRIPT_DIR/prompt.md" 2>&1 | tee "$OUTPUT_FILE"
   else
-    # Claude Code: use --dangerously-skip-permissions for autonomous operation, --print for output
+    if [[ ! -f "$SCRIPT_DIR/CLAUDE.md" ]]; then
+      echo "Error: Missing prompt file at $SCRIPT_DIR/CLAUDE.md"
+      exit 1
+    fi
     PROMPT_CONTENT="$(cat "$SCRIPT_DIR/CLAUDE.md")"
-    # Force non-interactive stdin to avoid blocking on any accidental prompt.
-    "${TIMEOUT_CMD[@]}" claude --dangerously-skip-permissions --no-session-persistence --print "$PROMPT_CONTENT" </dev/null 2>&1 | tee "$OUTPUT_FILE"
+
+    if [[ "$TOOL" == "claude" ]]; then
+      # Claude Code: use --dangerously-skip-permissions for autonomous operation, --print for output
+      # Force non-interactive stdin to avoid blocking on any accidental prompt.
+      "${TIMEOUT_CMD[@]}" claude --dangerously-skip-permissions --no-session-persistence --print "$PROMPT_CONTENT" </dev/null 2>&1 | tee "$OUTPUT_FILE"
+    else
+      # Codex: run non-interactively with sandbox/approval bypass for autonomous operation.
+      # Force non-interactive stdin to avoid blocking on any accidental prompt.
+      "${TIMEOUT_CMD[@]}" codex exec --dangerously-bypass-approvals-and-sandbox "$PROMPT_CONTENT" </dev/null 2>&1 | tee "$OUTPUT_FILE"
+    fi
   fi
   CMD_STATUS=${PIPESTATUS[0]}
   set -e

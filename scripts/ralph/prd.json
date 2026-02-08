@@ -1,240 +1,328 @@
 {
   "project": "gSnake",
-  "description": "Automated Level Metadata Synchronization and Validation - Migrate levels from string to numeric IDs, auto-generate metadata, create playback solutions, and add CI validation",
+  "description": "Increase automated test coverage to 80%+ line coverage for gsnake-web, gsnake-editor, gsnake-core, and gsnake-levels with immediate blocking CI enforcement and expanded E2E quality gates.",
   "userStories": [
     {
       "id": "US-001",
-      "title": "Add ID migration helper function to read and parse string IDs",
-      "description": "As a developer, I need a helper function to extract numeric IDs from string-based IDs so that level files can be migrated.",
+      "title": "Define package-level coverage command contract",
+      "description": "As a maintainer, I need one documented coverage command per package so that local and CI execution are consistent.",
       "acceptanceCriteria": [
-        "Create function that parses string IDs like '1769977122223-g36bwe'",
-        "Extract timestamp portion (1769977122223) as u32",
-        "Verify extracted timestamp fits within u32 range (0 to 4,294,967,295)",
-        "Return error if ID format is invalid or timestamp out of range",
-        "Add unit tests for valid and invalid ID formats",
-        "Typecheck passes"
+        "Document and align coverage commands for gsnake-web, gsnake-editor, gsnake-core, and gsnake-levels",
+        "Coverage output locations are standardized and committed",
+        "Running all four coverage commands locally succeeds",
+        "Typecheck passes",
+        "Tests pass"
       ],
       "priority": 1,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-002",
-      "title": "Implement level JSON ID migration logic",
-      "description": "As a developer, I need to update level JSON files from string to numeric IDs so they can be parsed by gsnake-core.",
+      "title": "Add gsnake-web engine unit tests for initialization and error mapping",
+      "description": "As a developer, I want deterministic tests for web engine initialization and contract error mapping so that regressions are caught early.",
       "acceptanceCriteria": [
-        "Read level JSON files with string IDs",
-        "Use US-001 helper to extract numeric ID",
-        "Update 'id' field to numeric value",
-        "Preserve all other fields (name, difficulty, gridSize, snake, obstacles, food, etc.)",
-        "Write updated JSON back to file with proper formatting",
-        "Validate migrated levels parse successfully with LevelDefinition",
-        "Typecheck passes"
+        "Add unit tests for WasmGameEngine init success and failure paths",
+        "Add assertions for contract error kind/message/context mapping",
+        "Cover next-level and reset behavior using mocked wasm engine",
+        "Typecheck passes",
+        "Tests pass"
       ],
       "priority": 2,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-003",
-      "title": "Create level analysis module for name generation",
-      "description": "As a developer, I need a module to analyze level mechanics so creative names can be generated.",
+      "title": "Add gsnake-web store wiring tests",
+      "description": "As a developer, I want tests for store event propagation so gameplay frame and error state updates remain correct.",
       "acceptanceCriteria": [
-        "Create analysis function that reads level JSON",
-        "Identify presence of: floatingFood, fallingFood, stones, spikes",
-        "Detect obstacle patterns (vertical walls, horizontal walls, scattered)",
-        "Calculate grid complexity metrics (obstacle density, food count)",
-        "Return structured analysis result (mechanics present, patterns detected)",
-        "Add unit tests for different level configurations",
-        "Typecheck passes"
+        "Add tests for levelChanged, frameChanged, and engineError handling in stores",
+        "Assert snakeLength calculation and gameState synchronization from frame events",
+        "Cover contract debug exposure behavior with and without contractTest query param",
+        "Typecheck passes",
+        "Tests pass"
       ],
       "priority": 3,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-004",
-      "title": "Implement creative name generator based on level analysis",
-      "description": "As a developer, I need to generate descriptive level names from analysis results so levels are identifiable.",
+      "title": "Add gsnake-web UI tests for level loading and selector flows",
+      "description": "As a player, I want level selection and load failure UX protected by tests so that navigation and errors behave correctly.",
       "acceptanceCriteria": [
-        "Use US-003 analysis to generate names",
-        "Priority 1: Special mechanics (Floating/Falling/Stones/Spikes)",
-        "Priority 2: Obstacle patterns (Tower/Bridge/Zigzag/Islands)",
-        "Priority 3: Complexity indicators for modifiers",
-        "Generate 1-4 word gameplay-descriptive names",
-        "Ensure uniqueness by tracking generated names across difficulties",
-        "Update level JSON 'name' field from 'todoname' to generated name",
-        "Typecheck passes"
+        "Add component tests that cover level selector open/close and selecting a level",
+        "Add tests for level load error modal visibility and dismiss flow",
+        "Assert displayed labels/buttons for selector and load error states",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 4,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-005",
-      "title": "Create levels.toml generation logic",
-      "description": "As a developer, I need to auto-generate levels.toml files from level JSON files so metadata stays synchronized.",
+      "title": "Add gsnake-web UI tests for completion and restart flows",
+      "description": "As a player, I want completion banners and restart controls to remain reliable so level progression UX does not regress.",
       "acceptanceCriteria": [
-        "Scan levels/{easy,medium,hard}/ directories for .json files",
-        "For each level, create TOML entry with: id, file, author='gsnake', solved=true, difficulty, tags=[], description",
-        "Use level filename for 'file' field and 'id' field",
-        "Use generated name from US-004 for 'description' field",
-        "Fail with clear error if JSON file doesn't exist",
-        "Write levels.toml to levels/{difficulty}/levels.toml",
-        "Format TOML with proper indentation using toml crate",
-        "Typecheck passes"
+        "Add component tests for level complete and all-complete UI states",
+        "Add tests for restart button and keyboard-driven restart behavior through UI state",
+        "Assert correct CTA visibility based on game state",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 5,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-006",
-      "title": "Update solve_level max_depth to 500",
-      "description": "As a developer, I need to increase solver depth to handle complex levels.",
+      "title": "Add gsnake-editor server API negative-path tests",
+      "description": "As a maintainer, I want editor API validation and failure paths covered so invalid payloads cannot silently regress behavior.",
       "acceptanceCriteria": [
-        "Update solve_level binary to use max_depth=500 as default",
-        "Keep max_depth as CLI argument for flexibility",
-        "Update help text to reflect new default",
-        "Typecheck passes"
+        "Add tests for invalid/malformed payload rejection in editor API routes",
+        "Add tests for missing payload and unsupported method responses",
+        "Assert status codes and error payload structure",
+        "Typecheck passes",
+        "Tests pass"
       ],
       "priority": 6,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-007",
-      "title": "Implement playback generation for all levels",
-      "description": "As a developer, I need to generate playback solutions so levels can be verified and replayed.",
+      "title": "Add gsnake-editor model and ID conversion tests",
+      "description": "As a developer, I want strong tests around level schema and ID conversion logic so editor output matches runtime contracts.",
       "acceptanceCriteria": [
-        "Run solve_level binary for each migrated level JSON",
-        "Save playback to playbacks/{difficulty}/ with matching filename",
-        "If solve succeeds, playback JSON created successfully",
-        "If solve fails, log warning with level ID but continue processing",
-        "Return list of solved/unsolved level IDs",
-        "Typecheck passes"
+        "Add tests for numeric ID validation boundaries and invalid inputs",
+        "Add tests for serialization shape used by save/export payloads",
+        "Assert compatibility with expected level contract fields",
+        "Typecheck passes",
+        "Tests pass"
       ],
       "priority": 7,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-008",
-      "title": "Update levels.toml solved status based on playback generation",
-      "description": "As a developer, I need to mark levels as solved/unsolved based on whether playbacks were generated.",
+      "title": "Add gsnake-editor UI tests for EditorLayout save/load workflow",
+      "description": "As a level designer, I want save and load behavior covered so exported and imported levels preserve editor state.",
       "acceptanceCriteria": [
-        "After US-007 playback generation, update levels.toml entries",
-        "Set solved=true for levels with successful playback generation",
-        "Set solved=false for levels where solve_level failed",
-        "Write updated levels.toml files",
-        "Typecheck passes"
+        "Add component tests for save modal opening, payload generation, and save action",
+        "Add tests for loading valid level data and rendering resulting grid state",
+        "Add tests for invalid load payload handling with user-facing error feedback",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 8,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-009",
-      "title": "Add sync-metadata subcommand",
-      "description": "As a developer, I want to run metadata sync independently so I can update metadata without generating levels.json.",
+      "title": "Add gsnake-editor GridCanvas interaction and undo/redo tests",
+      "description": "As a level designer, I want editing interactions and undo/redo protected so core authoring behavior remains stable.",
       "acceptanceCriteria": [
-        "Add 'sync-metadata' subcommand to main.rs using clap",
-        "Accept optional --difficulty <easy|medium|hard> flag",
-        "Default syncs all difficulties if no flag provided",
-        "Run operations in order: migrate IDs (US-002), generate names (US-004), create levels.toml (US-005), generate playbacks (US-007), update solved status (US-008)",
-        "Report summary: 'Migrated X IDs, generated X names, updated X levels.toml files, created X playbacks'",
-        "Exit code 0 on success, non-zero on failure",
-        "Typecheck passes"
+        "Add tests for entity placement/removal interactions in grid canvas",
+        "Add tests for snake segment ordering behavior during edits",
+        "Add tests that verify undo/redo stack behavior for multi-step edits",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 9,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-010",
-      "title": "Integrate sync into generate-levels-json command",
-      "description": "As a developer, I want metadata sync to run automatically when generating levels.json so output uses up-to-date metadata.",
+      "title": "Expand gsnake-core engine branch coverage",
+      "description": "As a gameplay engineer, I want additional engine tests for uncovered branches so movement and gravity rules stay correct.",
       "acceptanceCriteria": [
-        "Add --sync flag to generate-levels-json subcommand",
-        "Add --no-sync flag to disable auto-sync",
-        "Run sync by default (unless --no-sync passed)",
-        "Call US-009 sync-metadata logic before level aggregation",
-        "Log sync progress (migrating, naming, updating, generating playbacks)",
-        "If sync fails, abort generate-levels-json with error",
-        "Typecheck passes"
+        "Add tests for uncovered movement, collision, and gravity branches in core engine",
+        "Add regression tests for any bug discovered while writing new tests",
+        "Keep existing contract test fixtures passing",
+        "Typecheck passes",
+        "Tests pass"
       ],
       "priority": 10,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-011",
-      "title": "Add validate-levels-toml subcommand",
-      "description": "As a developer, I need a validation command for CI to check levels.toml integrity.",
+      "title": "Expand gsnake-core wasm binding coverage",
+      "description": "As a maintainer, I want wasm binding behavior and error conversion paths covered so web integration remains reliable.",
       "acceptanceCriteria": [
-        "Add 'validate-levels-toml' subcommand to main.rs",
-        "For each difficulty (easy, medium, hard):",
-        "- Check levels.toml exists and is valid TOML format",
-        "- Verify all referenced JSON files exist",
-        "- Parse all JSON files as valid LevelDefinition",
-        "Fail immediately on first validation error with clear message including file path",
-        "Exit code 0 if all valid, 1 on validation failure, 2 on IO error, 3 on parse error",
-        "Typecheck passes"
+        "Add tests for wasm binding initialization and error serialization paths",
+        "Cover frame callback and direction parsing edge cases",
+        "Ensure generated contract types remain compatible with web tests",
+        "Typecheck passes",
+        "Tests pass"
       ],
       "priority": 11,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-012",
-      "title": "Add CI validation job to gsnake-levels workflow",
-      "description": "As a developer, I want CI to validate levels.toml files so invalid metadata is caught before merge.",
+      "title": "Expand gsnake-core CLI coverage",
+      "description": "As a maintainer, I want CLI input/playback branches tested so command-line tooling regressions are caught.",
       "acceptanceCriteria": [
-        "Add 'validate-levels' job to .github/workflows/ci.yml",
-        "Job runs on push and pull_request events",
-        "Use same setup as build/test jobs (checkout, rust toolchain, cargo config)",
-        "Run 'cargo run -- validate-levels-toml' in working directory",
-        "Job fails CI if validation command returns non-zero exit code",
-        "Add to existing jobs (after build and test)",
-        "Typecheck passes"
+        "Add tests for CLI input mapping and playback parse failure paths",
+        "Add tests for invalid file and malformed playback handling",
+        "Assert expected exit behavior/messages for failure scenarios",
+        "Typecheck passes",
+        "Tests pass"
       ],
       "priority": 12,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-013",
-      "title": "Execute full migration on all 9 level files",
-      "description": "As a developer, I need to run the complete sync-metadata command to migrate all new levels.",
+      "title": "Expand gsnake-levels generation and sync coverage",
+      "description": "As a content pipeline maintainer, I want level generation and metadata sync branches tested so metadata updates remain safe.",
       "acceptanceCriteria": [
-        "Run 'cargo run -- sync-metadata' from gsnake-levels directory",
-        "Verify all 9 level files (2 easy, 3 medium, 3 hard) are migrated to numeric IDs",
-        "Verify all levels have creative generated names (no 'todoname' remaining)",
-        "Verify levels.toml files created in all three difficulty folders",
-        "Verify playback JSON files created for all solvable levels",
-        "Verify all migrated levels parse successfully with gsnake-core LevelDefinition",
-        "Commit changes with message: 'feat: US-013 - Execute full migration on all 9 level files'",
-        "Typecheck passes"
+        "Add tests for generate-levels-json and sync-metadata success/failure paths",
+        "Cover path resolution behavior when running from root and package directories",
+        "Add regression tests for any discovered metadata sync bug",
+        "Typecheck passes",
+        "Tests pass"
       ],
       "priority": 13,
-      "passes": true,
-      "notes": "Migration completed successfully. 8 level files migrated (not 9 as stated in description), IDs 13-20 assigned, all names generated, 6 playbacks created (2 hard levels unsolvable within depth 500)."
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-014",
-      "title": "Update gsnake-core levels.json with new levels",
-      "description": "As a developer, I need to regenerate levels.json so gsnake-core includes the new migrated levels.",
+      "title": "Expand gsnake-levels verification and playback coverage",
+      "description": "As a maintainer, I want verify and playback tooling edge cases covered so broken level/playback files fail predictably.",
       "acceptanceCriteria": [
-        "Run 'cargo run -- generate-levels-json > ../../gsnake-core/engine/core/data/levels.json' from gsnake-levels",
-        "Verify levels.json contains all 12 existing levels plus 9 new levels (21 total)",
-        "Verify new levels have numeric IDs and generated names",
-        "Verify JSON is properly formatted",
-        "Commit changes with message: 'feat: US-014 - Update gsnake-core levels.json with new levels'",
-        "Typecheck passes"
+        "Add tests for verify, verify-all, and playback path inference error cases",
+        "Add tests for malformed playback files and missing resource behavior",
+        "Assert deterministic error messages and exit status behavior",
+        "Typecheck passes",
+        "Tests pass"
       ],
       "priority": 14,
-      "passes": true,
-      "notes": "Successfully merged 12 existing levels with 8 new levels (20 total, not 21 as stated). Generated levels using --no-sync to avoid polluting JSON output. All levels have numeric IDs and generated names."
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-015",
+      "title": "Add E2E coverage for gameplay progression flow",
+      "description": "As a release owner, I want end-to-end gameplay progression scenarios so integration regressions are blocked.",
+      "acceptanceCriteria": [
+        "Add E2E scenario covering level play-through, completion, and next-level progression",
+        "Add assertions for game-over and restart flows in browser",
+        "Ensure scenario runs deterministically in CI with existing setup scripts",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 15,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-016",
+      "title": "Add E2E coverage for editor create-save-load flow",
+      "description": "As a release owner, I want full editor workflow E2E coverage so level authoring regressions are caught before merge.",
+      "acceptanceCriteria": [
+        "Add E2E scenario covering editor create, entity placement, save, and reload",
+        "Add assertions for API-backed test-level handoff from editor to web",
+        "Ensure scenario is stable under CI service startup order",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 16,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-017",
+      "title": "Fix source bugs discovered by new coverage tests",
+      "description": "As a maintainer, I want bugs uncovered by coverage work fixed immediately so reaching 80% does not hide known defects.",
+      "acceptanceCriteria": [
+        "Fix each newly discovered bug in production code with minimal safe change",
+        "Add regression test for each bug fixed",
+        "No existing tests regress after bug fixes",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 17,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-018",
+      "title": "Enforce gsnake-web 80% line threshold in CI",
+      "description": "As a maintainer, I want gsnake-web coverage to block merges below 80% so web test coverage cannot regress.",
+      "acceptanceCriteria": [
+        "Set gsnake-web coverage threshold to at least 80% line coverage",
+        "Coverage job fails when gsnake-web drops below threshold",
+        "Coverage artifact upload remains enabled",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 18,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-019",
+      "title": "Enforce gsnake-editor 80% line threshold in CI",
+      "description": "As a maintainer, I want gsnake-editor coverage to block merges below 80% so editor test coverage cannot regress.",
+      "acceptanceCriteria": [
+        "Set gsnake-editor coverage threshold to at least 80% line coverage",
+        "Coverage job fails when gsnake-editor drops below threshold",
+        "Coverage artifact upload remains enabled",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 19,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-020",
+      "title": "Enforce gsnake-core and gsnake-levels 80% line thresholds",
+      "description": "As a maintainer, I want Rust package coverage to block merges below 80% so engine and levels coverage cannot regress.",
+      "acceptanceCriteria": [
+        "Set cargo-llvm-cov fail-under-lines to at least 80 for gsnake-core",
+        "Set cargo-llvm-cov fail-under-lines to at least 80 for gsnake-levels",
+        "Rust coverage jobs fail when thresholds are not met",
+        "Coverage artifact upload remains enabled",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 20,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-021",
+      "title": "Make coverage and E2E checks required merge gates",
+      "description": "As a release owner, I want all coverage and E2E checks required on PRs so merges are blocked unless quality gates pass.",
+      "acceptanceCriteria": [
+        "Coverage and E2E workflows are configured as required status checks",
+        "PR validation fails when any required coverage or E2E check fails",
+        "Root and package CI behavior is consistent for blocking enforcement",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 21,
+      "passes": false,
+      "notes": ""
     }
   ]
 }
