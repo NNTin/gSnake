@@ -38,7 +38,7 @@ PRD_FILE="$SCRIPT_DIR/prd.json"
 PROGRESS_FILE="$SCRIPT_DIR/progress.txt"
 ARCHIVE_DIR="$SCRIPT_DIR/archive"
 TEST_ACT_SCRIPT="$SCRIPT_DIR/../test/test_act.sh"
-ITERATION_TIMEOUT="${ITERATION_TIMEOUT:-1800}"
+ITERATION_TIMEOUT="${ITERATION_TIMEOUT:-900}"
 
 mkdir -p "$ARCHIVE_DIR"
 
@@ -60,7 +60,8 @@ for i in $(seq 1 $MAX_ITERATIONS); do
   OUTPUT_FILE="$ARCHIVE_DIR/iteration_${i}_$(date +%Y%m%d_%H%M%S).log"
   TIMEOUT_CMD=()
   if command -v timeout >/dev/null 2>&1; then
-    TIMEOUT_CMD=(timeout "$ITERATION_TIMEOUT")
+    # Keep command in foreground process group so TTY reads don't trigger job-control stop.
+    TIMEOUT_CMD=(timeout --foreground "$ITERATION_TIMEOUT")
   fi
 
   # Run the selected tool with the ralph prompt
@@ -74,7 +75,8 @@ for i in $(seq 1 $MAX_ITERATIONS); do
   else
     # Claude Code: use --dangerously-skip-permissions for autonomous operation, --print for output
     PROMPT_CONTENT="$(cat "$SCRIPT_DIR/CLAUDE.md")"
-    "${TIMEOUT_CMD[@]}" claude --dangerously-skip-permissions --no-session-persistence --print "$PROMPT_CONTENT" 2>&1 | tee "$OUTPUT_FILE"
+    # Force non-interactive stdin to avoid blocking on any accidental prompt.
+    "${TIMEOUT_CMD[@]}" claude --dangerously-skip-permissions --no-session-persistence --print "$PROMPT_CONTENT" </dev/null 2>&1 | tee "$OUTPUT_FILE"
   fi
   CMD_STATUS=${PIPESTATUS[0]}
   set -e
