@@ -149,3 +149,22 @@ Started: Sat Feb  7 18:28:37 CET 2026
   - All 60 tests pass (58 existing + 2 new)
   - Function is ready for integration into sync-metadata command in US-009
 ---
+## 2026-02-08 23:00 - US-009
+- Implemented sync-metadata subcommand in main.rs with clap
+- Created sync_metadata.rs module with sync_metadata() function
+- Added optional --difficulty flag for filtering (easy, medium, hard)
+- Orchestrates operations: generate names, create levels.toml, generate playbacks, update solved status
+- Reports summary showing counts for names generated, toml files updated, and playbacks created
+- Uses max_depth=500 for playback generation (from US-006)
+- **Files changed:**
+  - Created: gsnake-levels/src/sync_metadata.rs (116 lines)
+  - Modified: gsnake-levels/src/lib.rs (registered module)
+  - Modified: gsnake-levels/src/main.rs (added command and handler)
+- **Learnings for future iterations:**
+  - The sync-metadata command orchestrates previously implemented functions from US-004, US-005, US-007, and US-008
+  - Playback generator functions require separate levels_dir and playbacks_dir paths plus max_depth parameter
+  - Used DEFAULT_DIFFICULTIES constant from levels.rs for consistent difficulty names
+  - ID migration (US-002) is skipped in this orchestration as it requires manual ID assignment per level
+  - All 60 tests pass, pre-commit hooks passed: rustfmt, clippy -D warnings, typecheck, build
+  - Command is ready for use in US-013 to execute full migration
+---
