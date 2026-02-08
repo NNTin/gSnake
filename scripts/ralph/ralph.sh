@@ -91,15 +91,15 @@ for i in $(seq 1 $MAX_ITERATIONS); do
   fi
   CMD_STATUS=${PIPESTATUS[0]}
   set -e
-  OUTPUT="$(cat "$OUTPUT_FILE")"
 
   if [[ "$CMD_STATUS" -eq 124 || "$CMD_STATUS" -eq 137 ]]; then
     echo ""
     echo "Warning: iteration $i timed out after ${ITERATION_TIMEOUT}s"
   fi
-  
-  # Check for completion signal
-  if echo "$OUTPUT" | grep -q "<promise>COMPLETE</promise>"; then
+
+  # Check completion by reading failing stories from PRD.
+  REMAINING_STORIES="$(jq '.userStories[] | select(.passes == false) | {id, title, passes}' "$PRD_FILE")"
+  if [[ -z "$REMAINING_STORIES" ]]; then
     echo ""
     echo "Ralph completed all tasks!"
     echo "Completed at iteration $i of $MAX_ITERATIONS"
