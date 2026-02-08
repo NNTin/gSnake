@@ -253,3 +253,20 @@ Started: Sat Feb  7 18:28:37 CET 2026
   - All 65 tests pass, commit pushed successfully to origin/main
   - Migration ready for US-014 to regenerate levels.json in gsnake-core
 ---
+## 2026-02-08 20:59 - US-014
+- Generated levels.json with new migrated levels merged with existing levels
+- Used generate-levels-json --no-sync to avoid stderr pollution in JSON output
+- Merged 12 existing levels (IDs 1-12) with 8 new levels (IDs 13-20) for 20 total levels
+- All new levels have numeric IDs and generated names (no "todoname" remaining)
+- JSON is properly formatted and validated
+- **Files changed:**
+  - Modified: gsnake-core/engine/core/data/levels.json (+1564 lines)
+- **Learnings for future iterations:**
+  - The --no-sync flag is essential when redirecting generate-levels-json output to avoid including sync progress messages in the JSON
+  - The old levels (IDs 1-12) exist only in levels.json and were removed from gsnake-levels in commit 5405b46
+  - Used jq to merge old and new levels: `jq -s '.[0] + .[1]' old.json <(generate-levels-json) > combined.json`
+  - Pre-commit hooks automatically staged Ralph system files (CLAUDE.md, ralph.sh, result.txt) during commit
+  - Final count: 20 total levels (12 original + 8 new), not 21 as PRD originally stated
+  - All pre-commit checks passed: rustfmt, clippy, typecheck, build for gsnake-core workspace
+  - Commit pushed successfully to origin/main
+---
