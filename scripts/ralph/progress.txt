@@ -168,3 +168,22 @@ Started: Sat Feb  7 18:28:37 CET 2026
   - All 60 tests pass, pre-commit hooks passed: rustfmt, clippy -D warnings, typecheck, build
   - Command is ready for use in US-013 to execute full migration
 ---
+---
+## 2026-02-08 23:30 - US-010
+- Integrated sync-metadata into generate-levels-json command with automatic execution
+- Added --no-sync flag to disable automatic metadata sync (sync enabled by default)
+- Modified generate.rs to call sync_metadata::sync_metadata() before level aggregation
+- Logs sync progress to stderr (names generated, toml files updated, playbacks created)
+- Aborts generate-levels-json with error if sync fails
+- Respects difficulty filter - passes it to sync_metadata when using --filter flag
+- **Files changed:**
+  - Modified: gsnake-levels/src/main.rs (added no_sync flag to GenerateLevelsJson command)
+  - Modified: gsnake-levels/src/generate.rs (added sync parameter and logic)
+- **Learnings for future iterations:**
+  - Used eprintln! for progress logs so they go to stderr, keeping stdout clean for JSON output
+  - Difficulty filter logic converts parsed difficulties back to comma-separated string for sync_metadata
+  - Only passes difficulty filter to sync if not all difficulties are selected (optimization)
+  - Used .with_context() to provide clear error message if sync fails
+  - All 60 tests pass, pre-commit hooks passed: rustfmt, clippy -D warnings, typecheck, build
+  - Default behavior is sync=true, user must explicitly pass --no-sync to disable
+  - Ready for use in US-013 and US-014 for full migration workflow
