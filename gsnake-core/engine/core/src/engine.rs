@@ -3,6 +3,8 @@ use crate::{
     LevelState, Position,
 };
 
+const MAX_FRAME_CELLS: usize = 2_000_000;
+
 /// Main game engine that manages game state and processes moves
 #[derive(Debug, Clone)]
 pub struct GameEngine {
@@ -150,8 +152,20 @@ impl GameEngine {
     /// Generates a Frame representing the current game state
     #[must_use]
     pub fn generate_frame(&self) -> Frame {
-        let width = self.level_state.grid_size.width as usize;
-        let height = self.level_state.grid_size.height as usize;
+        let width = match usize::try_from(self.level_state.grid_size.width) {
+            Ok(value) if value > 0 => value,
+            _ => return Frame::new(Vec::new(), self.game_state.clone()),
+        };
+        let height = match usize::try_from(self.level_state.grid_size.height) {
+            Ok(value) if value > 0 => value,
+            _ => return Frame::new(Vec::new(), self.game_state.clone()),
+        };
+        let Some(cell_count) = width.checked_mul(height) else {
+            return Frame::new(Vec::new(), self.game_state.clone());
+        };
+        if cell_count > MAX_FRAME_CELLS {
+            return Frame::new(Vec::new(), self.game_state.clone());
+        }
 
         // Initialize empty grid
         let mut grid = vec![vec![CellType::Empty; width]; height];
@@ -627,5 +641,16 @@ mod tests {
         assert_eq!(frame.grid[1][1], CellType::Obstacle);
         assert_eq!(frame.grid[3][3], CellType::Food);
         assert_eq!(frame.grid[4][4], CellType::Exit);
+    }
+
+    #[test]
+    fn test_frame_generation_invalid_grid_is_safe() {
+        let mut level = create_test_level();
+        level.grid_size = GridSize::new(-1, 5);
+
+        let engine = GameEngine::new(level);
+        let frame = engine.generate_frame();
+
+        assert!(frame.grid.is_empty());
     }
 }

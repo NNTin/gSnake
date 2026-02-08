@@ -1,4 +1,4 @@
-use gsnake_core::*;
+use gsnake_core::{CellType, Direction, Frame, GameState, GameStatus};
 
 fn main() {
     println!("=== Testing gSnake Core Serialization ===\n");
@@ -16,7 +16,7 @@ fn main() {
 
     let json = serde_json::to_string_pretty(&frame).expect("Failed to serialize");
     println!("Serialized Frame to JSON:");
-    println!("{}\n", json);
+    println!("{json}\n");
 
     // Test 2: Deserialize the JSON back
     let deserialized: Frame = serde_json::from_str(&json).expect("Failed to deserialize");
@@ -38,15 +38,15 @@ fn main() {
     println!("=== Testing Enum Serialization ===");
     let direction = Direction::North;
     let dir_json = serde_json::to_string(&direction).unwrap();
-    println!("Direction::North serialized: {}", dir_json);
+    println!("Direction::North serialized: {dir_json}");
 
     let cell = CellType::SnakeHead;
     let cell_json = serde_json::to_string(&cell).unwrap();
-    println!("CellType::SnakeHead serialized: {}", cell_json);
+    println!("CellType::SnakeHead serialized: {cell_json}");
 
     let status = GameStatus::Playing;
     let status_json = serde_json::to_string(&status).unwrap();
-    println!("GameStatus::Playing serialized: {}\n", status_json);
+    println!("GameStatus::Playing serialized: {status_json}\n");
 
     println!("✅ All serialization tests passed!");
 }

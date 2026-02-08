@@ -4,7 +4,7 @@ use gsnake_core::{
 };
 use std::collections::BTreeMap;
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 // =============================================================================
 // 2.1 Enum Serialization Tests
@@ -225,8 +225,7 @@ fn test_direction_roundtrip() {
         let deserialized: Direction = serde_json::from_str(&json).unwrap();
         assert_eq!(
             direction, deserialized,
-            "Direction round-trip failed for {:?}",
-            direction
+            "Direction round-trip failed for {direction:?}"
         );
     }
 }
@@ -245,8 +244,7 @@ fn test_celltype_roundtrip() {
         let deserialized: CellType = serde_json::from_str(&json).unwrap();
         assert_eq!(
             cell_type, deserialized,
-            "CellType round-trip failed for {:?}",
-            cell_type
+            "CellType round-trip failed for {cell_type:?}"
         );
     }
 }
@@ -263,8 +261,7 @@ fn test_gamestatus_roundtrip() {
         let deserialized: GameStatus = serde_json::from_str(&json).unwrap();
         assert_eq!(
             status, deserialized,
-            "GameStatus round-trip failed for {:?}",
-            status
+            "GameStatus round-trip failed for {status:?}"
         );
     }
 }
@@ -341,7 +338,7 @@ fn generate_contract_fixtures() {
 // Helper Functions
 // =============================================================================
 
-fn write_fixture<T: serde::Serialize>(dir: &PathBuf, filename: &str, data: &T) {
+fn write_fixture<T: serde::Serialize>(dir: &Path, filename: &str, data: &T) {
     let path = dir.join(filename);
     let json = serde_json::to_string_pretty(data).unwrap();
     fs::write(&path, json).unwrap();

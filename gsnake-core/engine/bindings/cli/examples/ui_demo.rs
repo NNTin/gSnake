@@ -30,6 +30,7 @@ fn main() -> Result<()> {
     result
 }
 
+#[allow(clippy::too_many_lines)]
 fn run_demo(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>) -> Result<()> {
     let mut demo_state = 0;
 
@@ -68,7 +69,7 @@ fn run_demo(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>) -> Result<()>
                     grid_width,
                     grid_height,
                 ) {
-                    Ok(_) => {
+                    Ok(()) => {
                         // Render normal UI
                         UI::render(f, &frame);
                     },
@@ -88,7 +89,7 @@ fn run_demo(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>) -> Result<()>
         if event::poll(Duration::from_millis(100))? {
             if let Event::Key(key) = event::read()? {
                 match key.code {
-                    KeyCode::Char('q') | KeyCode::Char('Q') => {
+                    KeyCode::Char('q' | 'Q') => {
                         break;
                     },
                     KeyCode::Char(' ') => {
@@ -100,9 +101,6 @@ fn run_demo(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>) -> Result<()>
                         frame = engine.generate_frame();
 
                         match demo_state {
-                            0 => {
-                                // Normal state
-                            },
                             1 => {
                                 // After collecting food
                                 engine.process_move(Direction::East);
@@ -121,31 +119,28 @@ fn run_demo(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>) -> Result<()>
                                 frame.state.status = GameStatus::LevelComplete;
                                 frame.state.food_collected = frame.state.total_food;
                             },
-                            4 => {
-                                // Terminal too small (simulated)
-                            },
                             _ => {},
                         }
                     },
-                    KeyCode::Up | KeyCode::Char('w') | KeyCode::Char('W') => {
+                    KeyCode::Up | KeyCode::Char('w' | 'W') => {
                         if demo_state == 0 || demo_state == 1 {
                             engine.process_move(Direction::North);
                             frame = engine.generate_frame();
                         }
                     },
-                    KeyCode::Down | KeyCode::Char('s') | KeyCode::Char('S') => {
+                    KeyCode::Down | KeyCode::Char('s' | 'S') => {
                         if demo_state == 0 || demo_state == 1 {
                             engine.process_move(Direction::South);
                             frame = engine.generate_frame();
                         }
                     },
-                    KeyCode::Left | KeyCode::Char('a') | KeyCode::Char('A') => {
+                    KeyCode::Left | KeyCode::Char('a' | 'A') => {
                         if demo_state == 0 || demo_state == 1 {
                             engine.process_move(Direction::West);
                             frame = engine.generate_frame();
                         }
                     },
-                    KeyCode::Right | KeyCode::Char('d') | KeyCode::Char('D') => {
+                    KeyCode::Right | KeyCode::Char('d' | 'D') => {
                         if demo_state == 0 || demo_state == 1 {
                             engine.process_move(Direction::East);
                             frame = engine.generate_frame();

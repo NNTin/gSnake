@@ -24,7 +24,7 @@ fn print_frame(engine: &GameEngine) {
                 CellType::Obstacle => "#",
                 CellType::Exit => "E",
             };
-            print!("{} ", c);
+            print!("{c} ");
         }
         println!();
     }
