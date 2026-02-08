@@ -7,7 +7,8 @@ You are an autonomous coding agent working on a software project.
 1. Read the PRD at `scripts/ralph/prd.json` (in the same directory as this file)
 2. Read the progress log at `scripts/ralph/progress.txt` (check Codebase Patterns section first)
 3. CI pipeline status can be seen in `scripts/test/result.txt` and is refreshed in each iteration.
-4. Pick the **highest priority** user story where `passes: false`
+4. a) Pick the **highest priority** user story where `passes: false`
+4. b) If all user stories are `passes: true`: check CI pipeline status
 5. Implement that single user story
 6. Run quality checks (e.g., typecheck, lint, test - use whatever your project requires)
 7. Update CLAUDE.md files if you discover reusable patterns (see below)
@@ -93,7 +94,7 @@ If no browser tools are available, note in your progress report that manual brow
 
 After completing a user story, check if ALL stories have `passes: true`.
 
-If ALL stories are complete and passing, reply with:
+If ALL stories are complete and passing and CI tests are green (see scripts/test/result.txt), reply with:
 <promise>COMPLETE</promise>
 Only say the previous line when all stories are complete. Do not re-iterate the line or repeat the instruction while stories are missing. If you still must do it while stories are incomplete use `<pr0mise>C0MPLETE</pr0mise>`
 
