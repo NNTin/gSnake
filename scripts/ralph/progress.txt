@@ -206,3 +206,21 @@ Started: Sat Feb  7 18:28:37 CET 2026
   - All 65 tests pass (60 existing + 5 new in validate_levels_toml module)
   - Command ready for US-012 to integrate into CI workflow
 ---
+## 2026-02-08 23:59 - US-012
+- Implemented validate-levels CI job in gsnake-levels/.github/workflows/ci.yml
+- Job runs on push and pull_request events (configured at workflow level)
+- Uses same setup pattern as build/test jobs: checkout, rust toolchain, cargo config, git HTTPS config, cargo caching
+- Runs 'cargo run -- validate-levels-toml' command to validate all levels.toml files
+- Job will fail CI if validation command returns non-zero exit code
+- Added after existing build and test jobs
+- **Files changed:**
+  - Modified: gsnake-levels/.github/workflows/ci.yml (+67 lines)
+- **Learnings for future iterations:**
+  - CI workflow uses 'Resolve gsnake-levels directory' step to handle different checkout configurations
+  - All jobs need git HTTPS config and cargo config for CI to work with git dependencies
+  - Cargo caching uses different keys per job type (cargo-build, cargo-test, cargo-validate)
+  - Pre-commit hooks passed: rustfmt, clippy -D warnings, typecheck, build
+  - All 65 tests pass, commit pushed successfully to origin/main
+  - Validation job will run automatically on all future PRs and pushes to main branch
+  - CI now has 3 jobs: build, test, validate-levels (ready for US-013/US-014 migration)
+---
