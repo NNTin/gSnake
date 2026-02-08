@@ -7,6 +7,9 @@ set -e
 
 echo "Running pre-commit checks for gsnake-core workspace..."
 
+# Prevent committing secrets from .env into tracked files.
+.github/hooks/check-env-secrets.sh
+
 # Change to gsnake-core directory
 cd gsnake-core
 

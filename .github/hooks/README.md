@@ -1,6 +1,6 @@
 # Git Hooks for gSnake
 
-This directory contains shared git hooks for the parent gSnake repository. Additional hooks are available in submodules (gsnake-web, gsnake-levels, gsnake-specs, gsnake-editor).
+This directory contains shared git hooks for the parent gSnake repository. Additional hooks are available in submodules (gsnake-editor, gsnake-levels, gsnake-n8n, gsnake-python, gsnake-specs, gsnake-web).
 
 ## Quick Start: Enable All Hooks
 
@@ -68,11 +68,13 @@ git submodule foreach 'git config --unset core.hooksPath'
 
 The following repositories have git hooks available:
 
-- **Parent (gSnake)**: Validates gsnake-core Rust workspace
-- **gsnake-web**: Format, lint, typecheck, build
-- **gsnake-levels**: Format, lint, typecheck, build
-- **gsnake-specs**: Markdown lint, link check
-- **gsnake-editor**: Format, lint, typecheck, build
+- **Parent (gSnake)**: .env secret scan + gsnake-core format/lint/typecheck/build
+- **gsnake-editor**: .env secret scan + format/lint/typecheck/build
+- **gsnake-levels**: .env secret scan + format/lint/typecheck/build
+- **gsnake-n8n**: .env secret scan
+- **gsnake-python**: .env secret scan
+- **gsnake-specs**: .env secret scan + markdown format/lint
+- **gsnake-web**: .env secret scan + format/typecheck/build
 
 **Note**: Submodule hooks are independent and can be enabled selectively. You don't need to enable hooks in all repos.
 
@@ -80,14 +82,19 @@ The following repositories have git hooks available:
 
 ### Parent Repository: pre-commit
 
-The parent repo's pre-commit hook validates the **gsnake-core Rust workspace only**. It does NOT check submodules.
+The parent repo's pre-commit hook runs secret checks for `.env` first, then validates the **gsnake-core Rust workspace only**. It does NOT check submodules.
 
-The hook runs the following checks (in gsnake-core directory):
+The hook runs the following checks:
 
-1. **Format Check**: `cargo fmt --all -- --check`
-2. **Linter**: `cargo clippy --all-targets -- -D warnings` (with allowances for pedantic style warnings)
-3. **Type Check**: `cargo check`
-4. **Build**: `cargo build`
+1. **Secret Scan**:
+   - Fails if `.env` is tracked by git
+   - Scans tracked files in the working tree for exact matches of `.env` values
+   - Reports only `KEY` + `file:line` without printing secret values
+   - Optional allowlist file: `.github/hooks/env-key-allowlist.txt` (one key per line)
+2. **Format Check**: `cargo fmt --all -- --check` (in `gsnake-core`)
+3. **Linter**: `cargo clippy --all-targets -- -D warnings` (in `gsnake-core`, with allowances for pedantic style warnings)
+4. **Type Check**: `cargo check` (in `gsnake-core`)
+5. **Build**: `cargo build` (in `gsnake-core`)
 
 **Note: Tests are NOT run in pre-commit hooks for speed.** The parent hook also does NOT recurse into submodules. Run `cargo test` and `npm run test:e2e` manually before pushing.
 

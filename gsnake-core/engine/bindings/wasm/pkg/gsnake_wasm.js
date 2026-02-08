@@ -1,7 +1,7 @@
 /* @ts-self-types="./gsnake_wasm.d.ts" */
 
 /**
- * WASM wrapper around the Rust GameEngine
+ * WASM wrapper around the Rust `GameEngine`
  * Provides JS-friendly interface for the web frontend
  */
 export class WasmGameEngine {
@@ -72,7 +72,7 @@ export class WasmGameEngine {
     }
     /**
      * Processes a move in the given direction
-     * Returns a Frame on success; failures return a ContractError
+     * Returns a Frame on success; failures return a `ContractError`
      * Automatically invokes the onFrame callback with the new state
      * @param {any} direction
      * @returns {any}
