@@ -30,12 +30,20 @@ cargo run -p gsnake-cli
 # Run tests
 cargo test
 
+# Generate coverage report (requires cargo-llvm-cov)
+./scripts/coverage.sh
+
 # Generate documentation
 cargo doc --no-deps
 
 # Build WASM bindings
 cd engine/bindings/wasm
 wasm-pack build
+```
+
+Coverage artifacts are written to:
+```
+target/llvm-cov/lcov.info
 ```
 
 ### WASM Build Output

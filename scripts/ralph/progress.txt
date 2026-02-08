@@ -6,6 +6,7 @@ Started: Sat Feb  7 18:28:37 CET 2026
 - When adding new modules, register them in both src/lib.rs and src/main.rs
 - Use `#[allow(dead_code)]` for functions that will be used in future stories to pass clippy checks
 - gsnake-core LevelDefinition expects `id: u32`, not string or u64
+- Coverage contract pattern: use package-level coverage commands (`npm run coverage` for JS packages, `./scripts/coverage.sh` for Rust packages) and write reports to package-local output directories (`coverage/` or `target/llvm-cov/lcov.info`)
 
 ---
 
@@ -269,4 +270,32 @@ Started: Sat Feb  7 18:28:37 CET 2026
   - Final count: 20 total levels (12 original + 8 new), not 21 as PRD originally stated
   - All pre-commit checks passed: rustfmt, clippy, typecheck, build for gsnake-core workspace
   - Commit pushed successfully to origin/main
+---
+## 2026-02-08 23:57 - US-001
+- Defined and documented a single package-level coverage command contract for gsnake-web, gsnake-editor, gsnake-core, and gsnake-levels
+- Added `coverage` npm scripts for JS packages and reusable `scripts/coverage.sh` scripts for Rust packages
+- Updated root and submodule CI coverage jobs to call package-level commands instead of inline coverage invocations
+- Standardized and documented coverage output locations: `coverage/` for JS packages and `target/llvm-cov/lcov.info` for Rust packages
+- Verified all four coverage commands run successfully locally
+- Verified typecheck and test commands pass for all four packages
+- **Files changed:**
+  - Modified: README.md
+  - Modified: .github/workflows/ci.yml
+  - Modified: gsnake-web/package.json
+  - Modified: gsnake-web/README.md
+  - Modified: gsnake-web/.github/workflows/ci.yml
+  - Modified: gsnake-editor/package.json
+  - Modified: gsnake-editor/README.md
+  - Modified: gsnake-editor/.github/workflows/ci.yml
+  - Modified: gsnake-core/README.md
+  - Created: gsnake-core/scripts/coverage.sh
+  - Modified: gsnake-levels/README.md
+  - Created: gsnake-levels/scripts/coverage.sh
+  - Modified: gsnake-levels/.github/workflows/ci.yml
+  - Modified: scripts/ralph/prd.json
+  - Modified: scripts/ralph/progress.txt
+- **Learnings for future iterations:**
+  - Package-level coverage commands are now the source of truth for CI and local runs; update these first when changing coverage behavior
+  - For Rust packages, keep coverage flags in `scripts/coverage.sh` to avoid drift between different workflow files
+  - Keep coverage outputs package-local (`coverage/` or `target/llvm-cov/lcov.info`) so artifact uploads stay stable across root and standalone workflows
 ---

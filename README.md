@@ -188,6 +188,22 @@ npm run build
 
 Each submodule can be cloned and built independently. See the README.md in each submodule for instructions.
 
+### Coverage Command Contract
+
+Use exactly one package-level command per package:
+
+- `gsnake-web`: `npm run coverage`
+- `gsnake-editor`: `npm run coverage`
+- `gsnake-core`: `./scripts/coverage.sh`
+- `gsnake-levels`: `./scripts/coverage.sh`
+
+Coverage report output locations are standardized:
+
+- `gsnake-web/coverage/`
+- `gsnake-editor/coverage/`
+- `gsnake-core/target/llvm-cov/lcov.info`
+- `gsnake-levels/target/llvm-cov/lcov.info`
+
 ### Testing CI Locally
 
 All submodule CI workflows are designed to be compatible with [nektos/act](https://github.com/nektos/act), a tool for running GitHub Actions locally.

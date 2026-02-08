@@ -179,9 +179,7 @@ jobs:
           fi
 
       - name: Generate coverage report
-        run: |
-          mkdir -p target/llvm-cov
-          cargo llvm-cov --workspace --all-targets --fail-under-lines 55 --lcov --output-path target/llvm-cov/lcov.info
+        run: ./scripts/coverage.sh
         working-directory: gsnake-core
 
       - name: Upload coverage artifact
@@ -212,7 +210,7 @@ jobs:
         working-directory: gsnake-editor
 
       - name: Run coverage
-        run: npm run test:coverage
+        run: npm run coverage
         working-directory: gsnake-editor
 
       - name: Upload coverage artifact
@@ -243,7 +241,7 @@ jobs:
         working-directory: gsnake-web
 
       - name: Run coverage
-        run: npm run test:coverage
+        run: npm run coverage
         working-directory: gsnake-web
 
       - name: Upload coverage artifact
