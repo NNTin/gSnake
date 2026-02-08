@@ -1,8 +1,12 @@
 use crate::{LevelState, Position};
 
 /// Apply gravity to the snake
-/// Returns true if the snake hit a spike during falling
+/// Returns true if any snake segment touched a spike
 pub fn apply_gravity_to_snake(level_state: &mut LevelState) -> bool {
+    if snake_touches_spike(level_state) {
+        return true;
+    }
+
     while can_snake_fall(level_state) {
         // Move all segments down by 1
         for segment in &mut level_state.snake.segments {
@@ -10,8 +14,7 @@ pub fn apply_gravity_to_snake(level_state: &mut LevelState) -> bool {
         }
 
         // Check if snake hit a spike
-        let head = level_state.snake.segments[0];
-        if is_spike(head, level_state) {
+        if snake_touches_spike(level_state) {
             return true;
         }
     }
@@ -225,6 +228,14 @@ fn is_exit(pos: Position, level_state: &LevelState) -> bool {
     level_state.exit.x == pos.x && level_state.exit.y == pos.y
 }
 
+fn snake_touches_spike(level_state: &LevelState) -> bool {
+    level_state
+        .snake
+        .segments
+        .iter()
+        .any(|segment| is_spike(*segment, level_state))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -329,6 +340,20 @@ mod tests {
 
         assert!(hit_spike);
         assert_eq!(state.snake.segments[0].y, 5); // Snake is on spike
+    }
+
+    #[test]
+    fn test_snake_dies_when_body_hits_spike() {
+        let mut state = create_test_level_state();
+        state.snake = Snake::new(vec![Position::new(5, 2), Position::new(5, 3)]);
+        state.spikes = vec![Position::new(5, 4)];
+        state.snake.direction = Some(Direction::East);
+
+        let hit_spike = apply_gravity_to_snake(&mut state);
+
+        assert!(hit_spike);
+        assert_eq!(state.snake.segments[0], Position::new(5, 3));
+        assert_eq!(state.snake.segments[1], Position::new(5, 4));
     }
 
     #[test]

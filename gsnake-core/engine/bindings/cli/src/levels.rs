@@ -67,7 +67,7 @@ mod tests {
     fn test_load_levels() {
         let levels = load_levels(levels_path()).expect("Failed to load levels");
         assert!(!levels.is_empty(), "Should load at least one level");
-        assert_eq!(levels.len(), 12, "Should load 12 levels");
+        assert_eq!(levels.len(), 20, "Should load 20 levels");
     }
 
     #[test]

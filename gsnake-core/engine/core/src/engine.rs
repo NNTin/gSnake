@@ -264,7 +264,7 @@ impl GameEngine {
     /// Checks if a position has a collision (out of bounds, spike, obstacle, or self)
     fn check_collision(&self, head: Position) -> bool {
         // Check spikes first (highest priority)
-        if self.is_spike(head) {
+        if self.snake_touches_spike() {
             return true;
         }
 
@@ -286,6 +286,15 @@ impl GameEngine {
         }
 
         false
+    }
+
+    /// Checks if any snake segment contains a spike
+    fn snake_touches_spike(&self) -> bool {
+        self.level_state
+            .snake
+            .segments
+            .iter()
+            .any(|segment| self.is_spike(*segment))
     }
 
     /// Checks if a position is within the grid bounds
@@ -455,6 +464,25 @@ mod tests {
 
         // Move north into obstacle
         engine.process_move(Direction::North);
+
+        assert_eq!(engine.game_state().status, GameStatus::GameOver);
+    }
+
+    #[test]
+    fn test_body_collision_with_spike_after_move() {
+        let mut level = create_test_level();
+        level.snake = vec![Position::new(2, 2), Position::new(1, 2)];
+        level.snake_direction = Direction::East;
+        level.obstacles = vec![
+            Position::new(1, 3),
+            Position::new(2, 3),
+            Position::new(3, 3),
+        ];
+        level.spikes = vec![Position::new(2, 2)];
+
+        let mut engine = GameEngine::new(level);
+
+        engine.process_move(Direction::East);
 
         assert_eq!(engine.game_state().status, GameStatus::GameOver);
     }
