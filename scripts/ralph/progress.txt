@@ -1,3 +1,7 @@
+## Codebase Patterns
+- Coverage behavior should be changed via each package's `coverage` command first; workflows should call those commands instead of duplicating coverage flags.
+- For `gsnake-web` `WasmGameEngine` unit tests, mock `gsnake-wasm` with `vi.hoisted` shared state and a local `MockRustEngine` class to drive init/error branches deterministically.
+
 ## 2026-02-08 23:57 - US-001
 - Defined and documented a single package-level coverage command contract for gsnake-web, gsnake-editor, gsnake-core, and gsnake-levels
 - Added `coverage` npm scripts for JS packages and reusable `scripts/coverage.sh` scripts for Rust packages
@@ -25,4 +29,19 @@
   - Package-level coverage commands are now the source of truth for CI and local runs; update these first when changing coverage behavior
   - For Rust packages, keep coverage flags in `scripts/coverage.sh` to avoid drift between different workflow files
   - Keep coverage outputs package-local (`coverage/` or `target/llvm-cov/lcov.info`) so artifact uploads stay stable across root and standalone workflows
+---
+## 2026-02-09 00:34 - US-002
+- Added `WasmGameEngine` unit tests for init failure on level loading, contract-error passthrough mapping, and reset behavior after next-level progression
+- Verified `gsnake-web` quality checks pass with `npm --prefix gsnake-web run check` and `npm --prefix gsnake-web run test`
+- Refreshed CI status via `scripts/test/test_act.sh` (result: 19 passed, 6 failed coverage jobs)
+- **Files changed:**
+  - Modified: gsnake-web/tests/unit/WasmGameEngine.test.ts
+  - Modified: gsnake-web/engine/CLAUDE.md
+  - Modified: scripts/test/result.txt
+  - Modified: scripts/ralph/prd.json
+  - Modified: scripts/ralph/progress.txt
+- **Learnings for future iterations:**
+  - `WasmGameEngine` emits fallback `initializationFailed` errors for level-load failures, and preserves full contract errors when already in contract shape
+  - Reset behavior can be validated by asserting constructor invocations in the mocked Rust engine (`init` + `nextLevel` + `resetLevel`)
+  - Full act refresh currently reports coverage gate failures across package and root coverage jobs; functional/typecheck/test jobs remain green
 ---
