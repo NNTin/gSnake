@@ -187,3 +187,22 @@ Started: Sat Feb  7 18:28:37 CET 2026
   - All 60 tests pass, pre-commit hooks passed: rustfmt, clippy -D warnings, typecheck, build
   - Default behavior is sync=true, user must explicitly pass --no-sync to disable
   - Ready for use in US-013 and US-014 for full migration workflow
+## 2026-02-08 23:45 - US-011
+- Implemented validate-levels-toml subcommand for CI validation
+- Created validate_levels_toml.rs module with validation functions
+- Added validate_difficulty_levels_toml() to check each difficulty folder
+- Validates levels.toml exists, is valid TOML, all referenced JSON files exist, and parse as LevelDefinition
+- Implements exit codes: 0=success, 1=validation error, 2=IO error, 3=parse error
+- Added 5 comprehensive unit tests covering all validation scenarios
+- **Files changed:**
+  - Created: gsnake-levels/src/validate_levels_toml.rs (264 lines)
+  - Modified: gsnake-levels/src/lib.rs (registered module)
+  - Modified: gsnake-levels/src/main.rs (added command and handler)
+- **Learnings for future iterations:**
+  - Validation detects when levels.toml references non-existent JSON files (will be fixed by US-013)
+  - Exit codes use process::exit() for proper CI integration
+  - LevelDefinition format includes: snake as array of positions, snakeDirection field, exit field, floatingFood/fallingFood/stones/spikes arrays, totalFood field
+  - Pre-commit hooks passed: rustfmt, clippy -D warnings, typecheck, build
+  - All 65 tests pass (60 existing + 5 new in validate_levels_toml module)
+  - Command ready for US-012 to integrate into CI workflow
+---
