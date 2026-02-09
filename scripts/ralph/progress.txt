@@ -1,6 +1,7 @@
 ## Codebase Patterns
 - Coverage behavior should be changed via each package's `coverage` command first; workflows should call those commands instead of duplicating coverage flags.
 - For `gsnake-web`, enforce coverage gates in `vitest.config.ts` via `test.coverage.thresholds`; CI coverage jobs call `npm run coverage` and inherit those limits.
+- For `gsnake-editor`, enforce coverage gates in `vitest.config.ts` via `test.coverage.thresholds`; standalone and root CI coverage jobs both call `npm run coverage` and inherit those limits.
 - In local `scripts/test/test_act.sh` runs, `actions/upload-artifact` steps can fail with missing `ACTIONS_RUNTIME_TOKEN`; use pre-upload step results to judge actual test/coverage health.
 - For `gsnake-web` `WasmGameEngine` unit tests, mock `gsnake-wasm` with `vi.hoisted` shared state and a local `MockRustEngine` class to drive init/error branches deterministically.
 - For `gsnake-web` store wiring tests, drive event-order transitions with a small fake engine (`engineError` followed by `frameChanged`) to assert stale errors are cleared and frame state is resynced.
@@ -341,4 +342,21 @@
   - In local `act` runs, coverage jobs may still fail at `actions/upload-artifact` with missing `ACTIONS_RUNTIME_TOKEN` even when coverage tests themselves pass
   - This refresh also showed an `e2e-test` infrastructure failure from `wasm-pack` release download HTTP 500, which is external to coverage-threshold changes
   - Keep README coverage notes aligned with enforced thresholds to reduce confusion during CI triage
+---
+## 2026-02-09 18:22 - US-019
+- Raised `gsnake-editor` Vitest coverage thresholds to enforce an 80% line gate in the package coverage command used by CI
+- Updated `gsnake-editor` README coverage section to document the enforced 80% line threshold
+- Verified `gsnake-editor` checks with `npm --prefix gsnake-editor run check`, `npm --prefix gsnake-editor run lint`, `npm --prefix gsnake-editor run test`, and `npm --prefix gsnake-editor run coverage` (`83.2%` lines)
+- Refreshed CI status via `scripts/test/test_act.sh` (result: 17 passed, 8 failed; `gsnake-editor` coverage test steps passed and job failures remained at artifact upload under local `act`)
+- **Files changed:**
+  - Modified: gsnake-editor/vitest.config.ts
+  - Modified: gsnake-editor/README.md
+  - Modified: gsnake-editor (submodule pointer)
+  - Modified: scripts/test/result.txt
+  - Modified: scripts/ralph/prd.json
+  - Modified: scripts/ralph/progress.txt
+- **Learnings for future iterations:**
+  - `gsnake-editor` coverage enforcement should be tuned in `vitest.config.ts` thresholds; both standalone and root coverage workflows inherit it through `npm run coverage`
+  - In `act` runs, confirm coverage-gate success from the `Run coverage` step and summary before treating `upload-artifact` `ACTIONS_RUNTIME_TOKEN` failures as true coverage regressions
+  - Full `act` refresh now shows broader non-story failures (`gsnake-levels` test/coverage, root `wasm`, root `core-coverage`, root `gsnake-web-coverage`) while editor build/typecheck/test remain green
 ---
