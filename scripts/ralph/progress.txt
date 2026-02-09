@@ -15,6 +15,7 @@
 - For `gsnake-levels` tests that change process cwd (`find_levels_root` paths), use a shared test guard (`src/test_cwd.rs`) to serialize cwd mutation and always restore the original directory.
 - For `gsnake-levels` CLI error-path coverage, add integration tests that run `env!("CARGO_BIN_EXE_gsnake-levels")` from temp directories and assert both exit code `1` and stable stderr fragments.
 - For root Playwright gameplay flow tests, use `data-element-id` selectors plus a numeric counter helper (`moves-display`) so each keyboard action asserts deterministic move increments instead of relying on timing-only waits.
+- For root Playwright editor-to-web E2E handoff tests, poll editor/web/API service readiness (`3003`, `3000`, `3001`) before UI steps and round-trip exported JSON via `download` + `filechooser` to keep save/load assertions deterministic in CI.
 
 ## 2026-02-08 23:57 - US-001
 - Defined and documented a single package-level coverage command contract for gsnake-web, gsnake-editor, gsnake-core, and gsnake-levels
@@ -285,5 +286,20 @@
 - **Learnings for future iterations:**
   - For gameplay E2E, assert move counter increments (`data-element-id="moves-display"`) on every key press to reduce flakiness when frame timing varies
   - Validate restart behavior through both UI CTA (`restart-level-btn`) and keyboard input (`Space`) to cover modal and input-path regressions in one scenario
+  - Full `act` refresh still reports six coverage-gate failures while functional/typecheck/test/e2e jobs pass
+---
+## 2026-02-09 15:31 - US-016
+- Added a robust Playwright editor workflow scenario covering create, entity placement, save/export download, landing-page reload, in-editor reload, and test-mode handoff to gsnake-web
+- Added API-backed handoff assertions for POST/GET `/api/test-level` payload consistency and popup test-mode rendering checks in gsnake-web
+- Verified checks with `npm run test:e2e -- e2e/level-editor.spec.ts`, `npm run test:e2e`, and `scripts/test/test_act.sh` (result: 19 passed, 6 failed coverage jobs)
+- Browser verification: no browser MCP resource is configured in this environment, so manual browser verification is still required
+- **Files changed:**
+  - Modified: e2e/level-editor.spec.ts
+  - Modified: scripts/ralph/prd.json
+  - Modified: scripts/ralph/progress.txt
+  - Modified: scripts/test/result.txt
+- **Learnings for future iterations:**
+  - For editor save/load E2E flows, capture exported files via Playwright `download.saveAs(...)` and feed the same file back through `filechooser.setFiles(...)` to validate round-trip state
+  - To keep editor/web integration tests stable, explicitly wait for all three services (editor UI, web UI, editor API) before triggering UI interactions and popup-based handoff checks
   - Full `act` refresh still reports six coverage-gate failures while functional/typecheck/test/e2e jobs pass
 ---
