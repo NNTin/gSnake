@@ -101,6 +101,14 @@ Error response from daemon: get act-CI-Test-...-env: no such volume
 
 This is a known limitation with act's volume handling. The test script has been updated to run jobs sequentially to minimize these issues, but they may still occur occasionally. If you encounter this, simply re-run the specific job.
 
+### Artifact Upload Token Errors in Act
+Jobs that use `actions/upload-artifact` can fail in local `act` runs with:
+```
+Unable to get the ACTIONS_RUNTIME_TOKEN env variable
+```
+
+When this happens, review the preceding job steps to determine whether build/test/coverage work actually passed before the upload step. Treat this as an act runtime limitation unless the same failure reproduces on GitHub Actions.
+
 ### Missing npm Scripts
 Many submodules show failures for missing npm scripts (test, build, check). This is expected as those submodules may not have these scripts implemented yet. Focus on the jobs that should work based on the actual package.json content.
 

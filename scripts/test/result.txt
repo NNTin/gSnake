@@ -1,5 +1,5 @@
 === Act CI Test Results ===
-Started: Mon Feb  9 16:01:02 CET 2026
+Started: Mon Feb  9 16:57:15 CET 2026
 
 ## Summary
 
@@ -9,31 +9,31 @@ Started: Mon Feb  9 16:01:02 CET 2026
 - [SUCCESS] ./gsnake-levels/.github/workflows/ci.yml::validate-levels
 - [FAILED] ./gsnake-levels/.github/workflows/ci.yml::coverage
 - [SUCCESS] ./gsnake-web/.github/workflows/test.yml::test
-- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::typecheck
 - [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::test
 - [FAILED] ./gsnake-web/.github/workflows/ci.yml::coverage
 - [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::build
+- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::typecheck
 - [SUCCESS] ./gsnake-specs/.github/workflows/test.yml::test
 - [SUCCESS] ./gsnake-specs/.github/workflows/ci.yml::markdown-lint
 - [SUCCESS] ./gsnake-specs/.github/workflows/ci.yml::link-check
-- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::typecheck
 - [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::test
 - [FAILED] ./gsnake-editor/.github/workflows/ci.yml::coverage
 - [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::build
-- [SUCCESS] ./.github/workflows/ci.yml::test
+- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::typecheck
 - [SUCCESS] ./.github/workflows/ci.yml::wasm
 - [SUCCESS] ./.github/workflows/ci.yml::gsnake-editor-test
 - [FAILED] ./.github/workflows/ci.yml::core-coverage
 - [FAILED] ./.github/workflows/ci.yml::gsnake-editor-coverage
 - [FAILED] ./.github/workflows/ci.yml::gsnake-web-coverage
-- [SUCCESS] ./.github/workflows/ci.yml::e2e-test
+- [FAILED] ./.github/workflows/ci.yml::e2e-test
 - [SUCCESS] ./.github/workflows/ci.yml::build
+- [SUCCESS] ./.github/workflows/ci.yml::test
 
-**Total: 19 passed, 6 failed**
+**Total: 18 passed, 7 failed**
 
 ---
-Completed: Mon Feb  9 16:26:03 CET 2026
-Duration: 00:25:01
-Result: 19 passed, 6 failed
+Completed: Mon Feb  9 17:18:55 CET 2026
+Duration: 00:21:40
+Result: 18 passed, 7 failed
 Result file: /home/nntin/git/gSnake/scripts/test/result.txt
 Temp dir: /home/nntin/git/gSnake/scripts/test/tmp_act_results
