@@ -5,6 +5,7 @@
 - For `gsnake-web` component tests, keep `vitest.config.ts` aligned with Vite (`svelte`, `vite-plugin-wasm`, `vite-plugin-top-level-await`) and use `// @vitest-environment jsdom` plus `context` maps when components rely on `getContext`.
 - For `gsnake-web` `GameContainer` UI tests, inject a `GAME_ENGINE` context stub (`loadLevel`, `restartLevel`, `processMove`) and drive `gameState`/`level` stores to assert status-specific CTA visibility via `data-element-id` selectors.
 - For `gsnake-editor` server API tests, call `resetTestLevelForTests()` in `beforeEach` so module-scoped in-memory storage does not leak state between requests/assertions.
+- For `gsnake-editor` export/ID logic, keep pure helpers in `src/lib/levelModel.ts` and call them from Svelte components so unit tests cover runtime payload contracts without UI harness setup.
 
 ## 2026-02-08 23:57 - US-001
 - Defined and documented a single package-level coverage command contract for gsnake-web, gsnake-editor, gsnake-core, and gsnake-levels
@@ -115,5 +116,24 @@
 - **Learnings for future iterations:**
   - `gsnake-editor/server.ts` stores test levels in module-scoped memory; export/use `resetTestLevelForTests()` in test suites to keep API tests deterministic
   - API negative-path tests in this repo should assert structured JSON error contracts (`error` plus `details`/`allowedMethods`) and `Allow` headers for `405`
+  - Full `act` refresh still reports six coverage-gate failures while functional/typecheck/test/e2e jobs pass
+---
+## 2026-02-09 05:12 - US-007
+- Added `gsnake-editor` model tests for uint32 ID validation boundaries/invalid inputs, deterministic ID generation behavior, and export payload contract shape/field naming
+- Extracted shared editor model logic into `src/lib/levelModel.ts` (`isValidLevelId`, `generateLevelId`, `buildLevelExportPayload`) and wired `App.svelte` + `EditorLayout.svelte` to use it
+- Verified `gsnake-editor` checks pass with `npm --prefix gsnake-editor run check`, `npm --prefix gsnake-editor run lint`, `npm --prefix gsnake-editor run test`, and `npm --prefix gsnake-editor run test:coverage`
+- Refreshed CI status via `scripts/test/test_act.sh` (result: 19 passed, 6 failed coverage jobs)
+- **Files changed:**
+  - Added: gsnake-editor/src/lib/levelModel.ts
+  - Modified: gsnake-editor/src/App.svelte
+  - Modified: gsnake-editor/src/lib/EditorLayout.svelte
+  - Modified: gsnake-editor/src/tests/types.test.ts
+  - Modified: gsnake-editor (submodule pointer)
+  - Modified: scripts/test/result.txt
+  - Modified: scripts/ralph/prd.json
+  - Modified: scripts/ralph/progress.txt
+- **Learnings for future iterations:**
+  - Move reusable Svelte component logic (ID validation and export serialization) into plain `src/lib/*.ts` helpers first, then call from components to keep tests deterministic and lightweight
+  - Export payload contract checks should assert camelCase keys (`gridSize`, `snakeDirection`) and reject snake_case variants to mirror gsnake-core contract expectations
   - Full `act` refresh still reports six coverage-gate failures while functional/typecheck/test/e2e jobs pass
 ---
