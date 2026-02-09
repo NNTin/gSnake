@@ -1,6 +1,7 @@
 ## Codebase Patterns
 - Coverage behavior should be changed via each package's `coverage` command first; workflows should call those commands instead of duplicating coverage flags.
 - For `gsnake-web` `WasmGameEngine` unit tests, mock `gsnake-wasm` with `vi.hoisted` shared state and a local `MockRustEngine` class to drive init/error branches deterministically.
+- For `gsnake-web` store wiring tests, drive event-order transitions with a small fake engine (`engineError` followed by `frameChanged`) to assert stale errors are cleared and frame state is resynced.
 
 ## 2026-02-08 23:57 - US-001
 - Defined and documented a single package-level coverage command contract for gsnake-web, gsnake-editor, gsnake-core, and gsnake-levels
@@ -44,4 +45,21 @@
   - `WasmGameEngine` emits fallback `initializationFailed` errors for level-load failures, and preserves full contract errors when already in contract shape
   - Reset behavior can be validated by asserting constructor invocations in the mocked Rust engine (`init` + `nextLevel` + `resetLevel`)
   - Full act refresh currently reports coverage gate failures across package and root coverage jobs; functional/typecheck/test jobs remain green
+---
+## 2026-02-09 01:28 - US-003
+- Added explicit `gsnake-web` store wiring tests for `levelChanged`, `frameChanged`, and `engineError` handling, including stale error clearing when a new frame arrives
+- Verified `gameState` and `snakeLength` synchronization from `frameChanged` events and kept contract debug exposure coverage with and without `contractTest=1`
+- Verified `gsnake-web` quality checks pass with `npm --prefix gsnake-web run check`, `npm --prefix gsnake-web run test`, and `npm --prefix gsnake-web run test:coverage`
+- Refreshed CI status via `scripts/test/test_act.sh` (result: 19 passed, 6 failed coverage jobs)
+- **Files changed:**
+  - Modified: gsnake-web/tests/unit/stores.test.ts
+  - Modified: gsnake-web (submodule pointer)
+  - Modified: scripts/test/result.txt
+  - Modified: scripts/ralph/CLAUDE.md
+  - Modified: scripts/ralph/prd.json
+  - Modified: scripts/ralph/progress.txt
+- **Learnings for future iterations:**
+  - Store wiring tests are easiest to keep deterministic by emitting engine events in sequence through a fake listener-based engine rather than mocking Svelte internals
+  - To validate `frameChanged` recovery, set `engineError` first via `engineError` event and assert it is cleared after the next `frameChanged` event
+  - CI status refresh currently remains blocked by coverage gate jobs across package and root workflows even when functional/test/typecheck jobs pass
 ---
