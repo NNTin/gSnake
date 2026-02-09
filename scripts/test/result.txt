@@ -1,26 +1,25 @@
 === Act CI Test Results ===
-Started: Mon Feb  9 04:47:18 CET 2026
+Started: Mon Feb  9 06:37:08 CET 2026
 
 ## Summary
 
 - [SUCCESS] ./gsnake-levels/.github/workflows/test.yml::test
+- [FAILED] ./gsnake-levels/.github/workflows/ci.yml::coverage
 - [SUCCESS] ./gsnake-levels/.github/workflows/ci.yml::build
 - [SUCCESS] ./gsnake-levels/.github/workflows/ci.yml::test
 - [SUCCESS] ./gsnake-levels/.github/workflows/ci.yml::validate-levels
-- [FAILED] ./gsnake-levels/.github/workflows/ci.yml::coverage
 - [SUCCESS] ./gsnake-web/.github/workflows/test.yml::test
-- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::build
 - [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::typecheck
 - [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::test
 - [FAILED] ./gsnake-web/.github/workflows/ci.yml::coverage
+- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::build
 - [SUCCESS] ./gsnake-specs/.github/workflows/test.yml::test
-- [SUCCESS] ./gsnake-specs/.github/workflows/ci.yml::link-check
 - [SUCCESS] ./gsnake-specs/.github/workflows/ci.yml::markdown-lint
-- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::test
-- [FAILED] ./gsnake-editor/.github/workflows/ci.yml::coverage
+- [SUCCESS] ./gsnake-specs/.github/workflows/ci.yml::link-check
 - [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::build
 - [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::typecheck
-- [SUCCESS] ./.github/workflows/ci.yml::wasm
+- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::test
+- [FAILED] ./gsnake-editor/.github/workflows/ci.yml::coverage
 - [SUCCESS] ./.github/workflows/ci.yml::gsnake-editor-test
 - [FAILED] ./.github/workflows/ci.yml::core-coverage
 - [FAILED] ./.github/workflows/ci.yml::gsnake-editor-coverage
@@ -28,12 +27,13 @@ Started: Mon Feb  9 04:47:18 CET 2026
 - [SUCCESS] ./.github/workflows/ci.yml::e2e-test
 - [SUCCESS] ./.github/workflows/ci.yml::build
 - [SUCCESS] ./.github/workflows/ci.yml::test
+- [SUCCESS] ./.github/workflows/ci.yml::wasm
 
 **Total: 19 passed, 6 failed**
 
 ---
-Completed: Mon Feb  9 05:11:58 CET 2026
-Duration: 00:24:40
+Completed: Mon Feb  9 07:02:08 CET 2026
+Duration: 00:25:00
 Result: 19 passed, 6 failed
 Result file: /home/nntin/git/gSnake/scripts/test/result.txt
 Temp dir: /home/nntin/git/gSnake/scripts/test/tmp_act_results

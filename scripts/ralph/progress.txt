@@ -6,6 +6,9 @@
 - For `gsnake-web` `GameContainer` UI tests, inject a `GAME_ENGINE` context stub (`loadLevel`, `restartLevel`, `processMove`) and drive `gameState`/`level` stores to assert status-specific CTA visibility via `data-element-id` selectors.
 - For `gsnake-editor` server API tests, call `resetTestLevelForTests()` in `beforeEach` so module-scoped in-memory storage does not leak state between requests/assertions.
 - For `gsnake-editor` export/ID logic, keep pure helpers in `src/lib/levelModel.ts` and call them from Svelte components so unit tests cover runtime payload contracts without UI harness setup.
+- For `gsnake-editor` Svelte component tests, keep `vitest.config.ts` aligned with `vite.config.ts` and do not force runes mode while components still use legacy `export let` syntax.
+- For `gsnake-editor` load flows that change grid dimensions and then hydrate entities, `await tick()` between dimension updates and `placeEntitiesFromLevelData(...)` so reactive grid reinitialization does not wipe imported entities.
+- For `gsnake-editor` grid interaction tests, target cells with `.cell[data-row][data-col]` and assert snake labels (`H`, `1`, `2`, ...) to verify segment reindexing after removals and undo/redo.
 
 ## 2026-02-08 23:57 - US-001
 - Defined and documented a single package-level coverage command contract for gsnake-web, gsnake-editor, gsnake-core, and gsnake-levels
@@ -135,5 +138,44 @@
 - **Learnings for future iterations:**
   - Move reusable Svelte component logic (ID validation and export serialization) into plain `src/lib/*.ts` helpers first, then call from components to keep tests deterministic and lightweight
   - Export payload contract checks should assert camelCase keys (`gridSize`, `snakeDirection`) and reject snake_case variants to mirror gsnake-core contract expectations
+  - Full `act` refresh still reports six coverage-gate failures while functional/typecheck/test/e2e jobs pass
+---
+## 2026-02-09 06:09 - US-008
+- Added `gsnake-editor` `EditorLayout` component tests covering save modal opening, export/download payload flow, valid JSON load rendering, and invalid load toast feedback
+- Fixed load hydration ordering in `EditorLayout` by awaiting a Svelte tick after grid dimension updates before applying loaded entities, preventing reactive grid reset from clearing imported state
+- Updated `gsnake-editor` Vitest Svelte plugin setup to match Vite config (no forced runes mode) so legacy `export let` components compile in tests
+- Verified `gsnake-editor` checks pass with `npm --prefix gsnake-editor run check`, `npm --prefix gsnake-editor run lint` (warnings only from generated coverage files), `npm --prefix gsnake-editor run test`, and `npm --prefix gsnake-editor run test:coverage`
+- Refreshed CI status via `scripts/test/test_act.sh` (result: 19 passed, 6 failed coverage jobs)
+- Browser verification: no browser MCP resource is configured in this environment, so manual browser verification is still required
+- **Files changed:**
+  - Added: gsnake-editor/src/tests/EditorLayout.saveLoad.test.ts
+  - Modified: gsnake-editor/src/lib/EditorLayout.svelte
+  - Modified: gsnake-editor/vitest.config.ts
+  - Modified: gsnake-editor (submodule pointer)
+  - Modified: scripts/test/result.txt
+  - Modified: scripts/ralph/prd.json
+  - Modified: scripts/ralph/progress.txt
+- **Learnings for future iterations:**
+  - `EditorLayout` load tests can mock `input[type=file]` payloads with file-like objects exposing `text()` instead of relying on environment-specific `File`/`Blob` APIs
+  - For save-export UI tests, assert `URL.createObjectURL` inputs and anchor-click side effects to cover download behavior without filesystem/network dependencies
+  - Full `act` refresh still reports six coverage-gate failures while functional/typecheck/test/e2e jobs pass
+---
+## 2026-02-09 07:02 - US-009
+- Added `gsnake-editor` `EditorLayout` interaction tests for grid placement/removal, snake segment reindexing during edits, and multi-step undo/redo behavior with redo clearing on new actions
+- Verified `gsnake-editor` checks pass with `npm --prefix gsnake-editor run check`, `npm --prefix gsnake-editor run lint`, `npm --prefix gsnake-editor run test`, and `npm --prefix gsnake-editor run test:coverage`
+- Refreshed CI status via `scripts/test/test_act.sh` (result: 19 passed, 6 failed coverage jobs)
+- Browser verification: no browser MCP resource is configured in this environment, so manual browser verification is still required
+- **Files changed:**
+  - Added: gsnake-editor/src/tests/EditorLayout.saveLoad.test.ts
+  - Added: gsnake-editor/src/tests/EditorLayout.gridInteractions.test.ts
+  - Modified: gsnake-editor/src/lib/EditorLayout.svelte
+  - Modified: gsnake-editor/vitest.config.ts
+  - Modified: gsnake-editor (submodule pointer)
+  - Modified: scripts/test/result.txt
+  - Modified: scripts/ralph/prd.json
+  - Modified: scripts/ralph/progress.txt
+- **Learnings for future iterations:**
+  - Undo/redo regression tests for `EditorLayout` are easiest to stabilize by asserting toolbar button enabled states alongside grid cell classes and snake index labels
+  - Use Shift+click in component tests (`fireEvent.click(cell, { shiftKey: true })`) to cover the removal path and segment-index compaction logic
   - Full `act` refresh still reports six coverage-gate failures while functional/typecheck/test/e2e jobs pass
 ---
