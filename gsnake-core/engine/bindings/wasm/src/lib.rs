@@ -11,6 +11,7 @@ use wasm_bindgen::prelude::*;
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 const LEVELS_JSON: &str = include_str!("../../../core/data/levels.json");
+type FrameCallback<'a> = &'a mut dyn FnMut(&Frame) -> Result<(), String>;
 
 /// Initialize panic hook for better error messages in the browser console
 #[wasm_bindgen(start)]
@@ -31,13 +32,10 @@ impl WasmGameEngine {
     /// Creates a new WASM game engine from serialized level JSON
     #[wasm_bindgen(constructor)]
     pub fn new(level_json: JsValue) -> Result<WasmGameEngine, JsValue> {
-        let level: LevelDefinition = from_value(level_json)
-            .map_err(|e| contract_error(ContractErrorKind::InvalidInput, &e.to_string()))?;
+        let level = parse_level_result(from_value(level_json).map_err(|e| e.to_string()))
+            .map_err(|error| contract_error_from_data(&error))?;
 
-        Ok(WasmGameEngine {
-            engine: GameEngine::new(level),
-            on_frame_callback: None,
-        })
+        Ok(initialize_engine(level))
     }
 
     /// Registers a JavaScript callback to be invoked whenever the game state changes
@@ -53,28 +51,18 @@ impl WasmGameEngine {
     /// Automatically invokes the onFrame callback with the new state
     #[wasm_bindgen(js_name = processMove)]
     pub fn process_move(&mut self, direction: JsValue) -> Result<JsValue, JsValue> {
-        let direction: Direction = from_value(direction)
-            .map_err(|e| contract_error(ContractErrorKind::InvalidInput, &e.to_string()))?;
-
-        let processed = self.engine.process_move(direction);
-        if !processed {
-            return Err(contract_error(
-                ContractErrorKind::InputRejected,
-                "Input rejected by engine",
-            ));
-        }
-
-        let frame = self.engine.generate_frame();
-        let frame_js = serialize_frame(&frame)?;
+        let direction = parse_direction_js_value(direction)?;
+        let frame = process_move_on_engine(&mut self.engine, direction)
+            .map_err(|error| contract_error_from_data(&error))?;
 
         if let Some(callback) = &self.on_frame_callback {
-            callback.call1(&JsValue::NULL, &frame_js).map_err(|e| {
-                let msg = e.as_string().unwrap_or_else(|| format!("{e:?}"));
-                contract_error(ContractErrorKind::InternalError, &msg)
-            })?;
+            let mut callback_fn =
+                |current_frame: &Frame| invoke_js_callback(callback, current_frame);
+            emit_frame_with_callback(&frame, Some(&mut callback_fn))
+                .map_err(|error| contract_error_from_data(&error))?;
         }
 
-        Ok(frame_js)
+        serialize_frame(&frame)
     }
 
     /// Gets the current game frame (grid + state)
@@ -102,11 +90,11 @@ impl WasmGameEngine {
     /// Emits the current frame to the registered callback
     fn emit_frame(&self) -> Result<(), JsValue> {
         if let Some(callback) = &self.on_frame_callback {
-            let frame_js = self.get_frame()?;
-            callback.call1(&JsValue::NULL, &frame_js).map_err(|e| {
-                let msg = e.as_string().unwrap_or_else(|| format!("{e:?}"));
-                contract_error(ContractErrorKind::InternalError, &msg)
-            })?;
+            let frame = self.engine.generate_frame();
+            let mut callback_fn =
+                |current_frame: &Frame| invoke_js_callback(callback, current_frame);
+            emit_frame_with_callback(&frame, Some(&mut callback_fn))
+                .map_err(|error| contract_error_from_data(&error))?;
         }
         Ok(())
     }
@@ -132,27 +120,111 @@ fn serialize_frame(frame: &Frame) -> Result<JsValue, JsValue> {
         .map_err(|e| contract_error(ContractErrorKind::SerializationFailed, &e.to_string()))
 }
 
-fn contract_error(kind: ContractErrorKind, message: &str) -> JsValue {
-    let error = ContractError {
+fn initialize_engine(level: LevelDefinition) -> WasmGameEngine {
+    WasmGameEngine {
+        engine: GameEngine::new(level),
+        on_frame_callback: None,
+    }
+}
+
+fn parse_level_result(
+    level_result: Result<LevelDefinition, String>,
+) -> Result<LevelDefinition, ContractError> {
+    level_result.map_err(|message| build_contract_error(ContractErrorKind::InvalidInput, &message))
+}
+
+fn parse_direction_js_value(direction: JsValue) -> Result<Direction, JsValue> {
+    let direction_str = direction.as_string().ok_or_else(|| {
+        contract_error(
+            ContractErrorKind::InvalidInput,
+            "Direction must be a string",
+        )
+    })?;
+    drop(direction);
+    parse_direction_str(&direction_str).map_err(|error| contract_error_from_data(&error))
+}
+
+fn parse_direction_str(direction: &str) -> Result<Direction, ContractError> {
+    match direction {
+        "North" => Ok(Direction::North),
+        "South" => Ok(Direction::South),
+        "East" => Ok(Direction::East),
+        "West" => Ok(Direction::West),
+        _ => Err(build_contract_error(
+            ContractErrorKind::InvalidInput,
+            &format!("Invalid direction: {direction}"),
+        )),
+    }
+}
+
+fn process_move_on_engine(
+    engine: &mut GameEngine,
+    direction: Direction,
+) -> Result<Frame, ContractError> {
+    let processed = engine.process_move(direction);
+    if !processed {
+        return Err(build_contract_error(
+            ContractErrorKind::InputRejected,
+            "Input rejected by engine",
+        ));
+    }
+
+    Ok(engine.generate_frame())
+}
+
+fn emit_frame_with_callback(
+    frame: &Frame,
+    callback: Option<FrameCallback<'_>>,
+) -> Result<(), ContractError> {
+    if let Some(callback) = callback {
+        callback(frame)
+            .map_err(|message| build_contract_error(ContractErrorKind::InternalError, &message))?;
+    }
+
+    Ok(())
+}
+
+fn invoke_js_callback(callback: &Function, frame: &Frame) -> Result<(), String> {
+    let frame_js = serialize_frame(frame).map_err(|error| js_error_message(&error))?;
+    callback
+        .call1(&JsValue::NULL, &frame_js)
+        .map_err(|error| js_error_message(&error))?;
+    Ok(())
+}
+
+fn js_error_message(error: &JsValue) -> String {
+    error.as_string().unwrap_or_else(|| format!("{error:?}"))
+}
+
+fn build_contract_error(kind: ContractErrorKind, message: &str) -> ContractError {
+    ContractError {
         kind,
         message: message.to_string(),
         context: None,
         rejection_reason: None,
-    };
+    }
+}
 
+fn contract_error(kind: ContractErrorKind, message: &str) -> JsValue {
+    let error = build_contract_error(kind, message);
+    contract_error_from_data(&error)
+}
+
+fn contract_error_from_data(error: &ContractError) -> JsValue {
     if let Ok(value) = to_value(&error) {
         value
     } else {
         let obj = js_sys::Object::new();
+        let error_kind = error.kind;
         let _ = js_sys::Reflect::set(
             &obj,
             &JsValue::from_str("kind"),
-            &JsValue::from_str(contract_error_kind_str(kind)),
+            &JsValue::from_str(contract_error_kind_str(error_kind)),
         );
         let _ = js_sys::Reflect::set(
             &obj,
             &JsValue::from_str("message"),
-            &JsValue::from_str(message),
+            &JsValue::from_str(&error.message),
         );
         obj.into()
     }
@@ -172,23 +244,156 @@ fn contract_error_kind_str(kind: ContractErrorKind) -> &'static str {
 mod tests {
     use super::*;
     use gsnake_core::{GridSize, Position};
+    use std::cell::Cell;
 
     #[test]
-    fn test_direction_parsing() {
-        // Just a basic smoke test for the Rust side
-        // Full WASM integration tests would require wasm-bindgen-test
-        let level = LevelDefinition::new(
+    fn test_initialize_engine_sets_empty_callback() {
+        let engine = initialize_engine(create_level());
+        assert_eq!(engine.engine.game_state().moves, 0);
+        assert!(engine.on_frame_callback.is_none());
+    }
+
+    #[test]
+    fn test_parse_level_result_maps_error_kind() {
+        let error = parse_level_result(Err("bad level payload".to_string()))
+            .expect_err("invalid level payload should map to contract error");
+        assert_eq!(error.kind, ContractErrorKind::InvalidInput);
+        assert_eq!(error.message, "bad level payload");
+    }
+
+    #[test]
+    fn test_parse_level_result_success() {
+        let level = create_level();
+        let parsed = parse_level_result(Ok(level.clone())).expect("valid level should parse");
+        assert_eq!(parsed, level);
+    }
+
+    #[test]
+    fn test_parse_direction_str_accepts_cardinals() {
+        assert_eq!(
+            parse_direction_str("North").expect("north should parse"),
+            Direction::North
+        );
+        assert_eq!(
+            parse_direction_str("South").expect("south should parse"),
+            Direction::South
+        );
+        assert_eq!(
+            parse_direction_str("East").expect("east should parse"),
+            Direction::East
+        );
+        assert_eq!(
+            parse_direction_str("West").expect("west should parse"),
+            Direction::West
+        );
+    }
+
+    #[test]
+    fn test_parse_direction_str_rejects_edge_cases() {
+        assert_parse_direction_error("north");
+        assert_parse_direction_error(" EAST ");
+        assert_parse_direction_error("NORTH");
+        assert_parse_direction_error("");
+        assert_parse_direction_error("Diagonal");
+    }
+
+    #[test]
+    fn test_process_move_on_engine_accepts_valid_direction() {
+        let mut engine = GameEngine::new(create_level());
+        let frame = process_move_on_engine(&mut engine, Direction::North)
+            .expect("valid direction should produce frame");
+        assert_eq!(frame.state.moves, 1);
+    }
+
+    #[test]
+    fn test_process_move_on_engine_rejects_opposite_direction() {
+        let mut engine = GameEngine::new(create_level());
+        let error = process_move_on_engine(&mut engine, Direction::West)
+            .expect_err("opposite direction should be rejected");
+        assert_eq!(error.kind, ContractErrorKind::InputRejected);
+        assert_eq!(error.message, "Input rejected by engine");
+    }
+
+    #[test]
+    fn test_emit_frame_with_callback_without_callback_is_noop() {
+        let frame = GameEngine::new(create_level()).generate_frame();
+        let result = emit_frame_with_callback(&frame, None);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_emit_frame_with_callback_invokes_callback() {
+        let frame = GameEngine::new(create_level()).generate_frame();
+        let called = Cell::new(false);
+        let mut callback = |_: &Frame| {
+            called.set(true);
+            Ok(())
+        };
+        emit_frame_with_callback(&frame, Some(&mut callback)).expect("callback should succeed");
+        assert!(called.get());
+    }
+
+    #[test]
+    fn test_emit_frame_with_callback_maps_callback_errors() {
+        let frame = GameEngine::new(create_level()).generate_frame();
+        let mut callback = |_: &Frame| Err("callback failed".to_string());
+        let error = emit_frame_with_callback(&frame, Some(&mut callback))
+            .expect_err("callback failures should map to internal error");
+        assert_eq!(error.kind, ContractErrorKind::InternalError);
+        assert_eq!(error.message, "callback failed");
+    }
+
+    #[test]
+    fn test_build_contract_error_shape() {
+        let error =
+            build_contract_error(ContractErrorKind::SerializationFailed, "serialize failed");
+        assert_eq!(error.kind, ContractErrorKind::SerializationFailed);
+        assert_eq!(error.message, "serialize failed");
+        assert!(error.context.is_none());
+        assert!(error.rejection_reason.is_none());
+    }
+
+    #[test]
+    fn test_contract_error_kind_mapping() {
+        assert_eq!(
+            contract_error_kind_str(ContractErrorKind::InvalidInput),
+            "invalidInput"
+        );
+        assert_eq!(
+            contract_error_kind_str(ContractErrorKind::InputRejected),
+            "inputRejected"
+        );
+        assert_eq!(
+            contract_error_kind_str(ContractErrorKind::SerializationFailed),
+            "serializationFailed"
+        );
+        assert_eq!(
+            contract_error_kind_str(ContractErrorKind::InitializationFailed),
+            "initializationFailed"
+        );
+        assert_eq!(
+            contract_error_kind_str(ContractErrorKind::InternalError),
+            "internalError"
+        );
+    }
+
+    fn create_level() -> LevelDefinition {
+        LevelDefinition::new(
             1,
             "Test".to_string(),
             GridSize::new(5, 5),
-            vec![Position::new(2, 2)],
+            vec![Position::new(2, 2), Position::new(2, 3)],
             vec![],
-            vec![],
-            Position::new(4, 4),
+            vec![Position::new(4, 4)],
+            Position::new(4, 0),
             Direction::East,
-        );
+        )
+    }
 
-        let engine = GameEngine::new(level);
-        assert_eq!(engine.game_state().moves, 0);
+    fn assert_parse_direction_error(direction: &str) {
+        let error = parse_direction_str(direction)
+            .expect_err("invalid direction tokens should return invalidInput");
+        assert_eq!(error.kind, ContractErrorKind::InvalidInput);
+        assert_eq!(error.message, format!("Invalid direction: {direction}"));
     }
 }
