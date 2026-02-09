@@ -4,6 +4,8 @@
 - For `gsnake-editor`, enforce coverage gates in `vitest.config.ts` via `test.coverage.thresholds`; standalone and root CI coverage jobs both call `npm run coverage` and inherit those limits.
 - For Rust coverage gates, enforce thresholds in each package's `scripts/coverage.sh`; in `gsnake-core`, use `cargo llvm-cov --package gsnake-core` so the 80% gate targets engine coverage instead of CLI/WASM surface area.
 - In local `scripts/test/test_act.sh` runs, `actions/upload-artifact` steps can fail with missing `ACTIONS_RUNTIME_TOKEN`; use pre-upload step results to judge actual test/coverage health.
+- For workflows run in both GitHub Actions and local `act`, guard artifact uploads with `if: ${{ always() && env.ACT != 'true' }}` so local runs do not fail on missing runtime tokens while GitHub uploads stay enabled.
+- For branch-protection merge gating across repos, keep the gate job name as `Required Merge Gates` so a single required context string (`CI / Required Merge Gates`) can be enforced in `.github/settings.yml`.
 - For `gsnake-web` `WasmGameEngine` unit tests, mock `gsnake-wasm` with `vi.hoisted` shared state and a local `MockRustEngine` class to drive init/error branches deterministically.
 - For `gsnake-web` store wiring tests, drive event-order transitions with a small fake engine (`engineError` followed by `frameChanged`) to assert stale errors are cleared and frame state is resynced.
 - For `gsnake-web` component tests, keep `vitest.config.ts` aligned with Vite (`svelte`, `vite-plugin-wasm`, `vite-plugin-top-level-await`) and use `// @vitest-environment jsdom` plus `context` maps when components rely on `getContext`.
@@ -380,4 +382,26 @@
   - For Rust thresholds in this repo, verify `Generate coverage report` step success in `act` logs; `upload-artifact` failures can mask successful gate enforcement
   - `gsnake-core` engine gate should stay on `--package gsnake-core`; switching back to `--workspace` drops total lines under 80% due intentionally untested CLI/UI/WASM surfaces
   - Keep README coverage notes aligned with script-enforced thresholds so CI failures are interpreted correctly
+---
+## 2026-02-09 21:53 - US-021
+- Added `required-merge-gates` jobs in root and package CI workflows so PRs expose a single merge-blocking status for coverage and E2E gates
+- Added `.github/settings.yml` in root and package repos to require `CI / Required Merge Gates` on `main`
+- Updated coverage artifact upload steps to skip under local `act` (`env.ACT == 'true'`) while keeping uploads enabled on GitHub Actions
+- Refreshed CI status via `scripts/test/test_act.sh` (result: 29 passed, 0 failed)
+- **Files changed:**
+  - Modified: .github/workflows/ci.yml
+  - Added: .github/settings.yml
+  - Modified: gsnake-web/.github/workflows/ci.yml
+  - Added: gsnake-web/.github/settings.yml
+  - Modified: gsnake-editor/.github/workflows/ci.yml
+  - Added: gsnake-editor/.github/settings.yml
+  - Modified: gsnake-levels/.github/workflows/ci.yml
+  - Added: gsnake-levels/.github/settings.yml
+  - Modified: scripts/test/result.txt
+  - Modified: scripts/ralph/prd.json
+  - Modified: scripts/ralph/progress.txt
+- **Learnings for future iterations:**
+  - Keep required gate job names stable (`Required Merge Gates`) so branch-protection contexts remain consistent across repos
+  - For local `act` parity, guard `actions/upload-artifact` with `if: ${{ always() && env.ACT != 'true' }}` to avoid token-related false negatives
+  - Use the full `scripts/test/test_act.sh` refresh to verify package and root merge-gate jobs together before marking CI gating stories complete
 ---

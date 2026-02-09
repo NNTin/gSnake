@@ -183,7 +183,7 @@ jobs:
         working-directory: gsnake-core
 
       - name: Upload coverage artifact
-        if: always()
+        if: ${{ always() && env.ACT != 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: gsnake-core-coverage
@@ -214,7 +214,7 @@ jobs:
         working-directory: gsnake-editor
 
       - name: Upload coverage artifact
-        if: always()
+        if: ${{ always() && env.ACT != 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: gsnake-editor-coverage
@@ -245,7 +245,7 @@ jobs:
         working-directory: gsnake-web
 
       - name: Upload coverage artifact
-        if: always()
+        if: ${{ always() && env.ACT != 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: gsnake-web-coverage
@@ -349,3 +349,30 @@ jobs:
         env:
           CI: true
         run: npm run test:e2e
+
+  required-merge-gates:
+    name: Required Merge Gates
+    if: ${{ always() && github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    needs:
+      - core-coverage
+      - gsnake-editor-coverage
+      - gsnake-web-coverage
+      - e2e-test
+    steps:
+      - name: Validate required checks
+        run: |
+          echo "core-coverage: ${{ needs['core-coverage'].result }}"
+          echo "gsnake-editor-coverage: ${{ needs['gsnake-editor-coverage'].result }}"
+          echo "gsnake-web-coverage: ${{ needs['gsnake-web-coverage'].result }}"
+          echo "e2e-test: ${{ needs['e2e-test'].result }}"
+
+          if [[ "${{ needs['core-coverage'].result }}" != "success" || \
+                "${{ needs['gsnake-editor-coverage'].result }}" != "success" || \
+                "${{ needs['gsnake-web-coverage'].result }}" != "success" || \
+                "${{ needs['e2e-test'].result }}" != "success" ]]; then
+            echo "One or more required coverage/E2E checks failed."
+            exit 1
+          fi
+
+          echo "Coverage and E2E merge gates passed."

@@ -108,6 +108,10 @@ Unable to get the ACTIONS_RUNTIME_TOKEN env variable
 ```
 
 When this happens, review the preceding job steps to determine whether build/test/coverage work actually passed before the upload step. Treat this as an act runtime limitation unless the same failure reproduces on GitHub Actions.
+Where possible, prevent this class of false failures by guarding artifact uploads in workflows with:
+```yaml
+if: ${{ always() && env.ACT != 'true' }}
+```
 
 ### Missing npm Scripts
 Many submodules show failures for missing npm scripts (test, build, check). This is expected as those submodules may not have these scripts implemented yet. Focus on the jobs that should work based on the actual package.json content.
