@@ -9,6 +9,7 @@
 - For `gsnake-editor` Svelte component tests, keep `vitest.config.ts` aligned with `vite.config.ts` and do not force runes mode while components still use legacy `export let` syntax.
 - For `gsnake-editor` load flows that change grid dimensions and then hydrate entities, `await tick()` between dimension updates and `placeEntitiesFromLevelData(...)` so reactive grid reinitialization does not wipe imported entities.
 - For `gsnake-editor` grid interaction tests, target cells with `.cell[data-row][data-col]` and assert snake labels (`H`, `1`, `2`, ...) to verify segment reindexing after removals and undo/redo.
+- For `gsnake-editor` save validation, count `food`, `floating-food`, and `falling-food` together so modal warnings stay consistent with exported `totalFood`.
 - For `gsnake-core` branch-coverage work, place tests in `engine/core/src/*.rs` modules so they can mutate private `GameEngine`/`LevelState` fields without adding production-only hooks.
 - For `gsnake-core` wasm binding unit tests on native targets, keep parsing/callback logic in pure helpers and avoid creating `JsValue`/`Function` test fixtures directly because `wasm-bindgen` JS shims panic outside `wasm32`.
 - For `gsnake-core` CLI coverage, keep parser/exit failure assertions in unit tests inside `engine/bindings/cli/src/*.rs` and use temp JSON files to cover missing-file, malformed-JSON, and invalid-key playback errors.
@@ -301,5 +302,22 @@
 - **Learnings for future iterations:**
   - For editor save/load E2E flows, capture exported files via Playwright `download.saveAs(...)` and feed the same file back through `filechooser.setFiles(...)` to validate round-trip state
   - To keep editor/web integration tests stable, explicitly wait for all three services (editor UI, web UI, editor API) before triggering UI interactions and popup-based handoff checks
+  - Full `act` refresh still reports six coverage-gate failures while functional/typecheck/test/e2e jobs pass
+---
+## 2026-02-09 16:26 - US-017
+- Fixed editor save validation so floating and falling food count as food, preventing false "No food placed" warnings for valid levels
+- Added a regression test that places only floating food and verifies the save modal shows `Export` (no no-food warning)
+- Verified `gsnake-editor` checks with `npm --prefix gsnake-editor run check`, `npm --prefix gsnake-editor run lint`, and `npm --prefix gsnake-editor run test`
+- Refreshed CI status via `scripts/test/test_act.sh` (result: 19 passed, 6 failed coverage jobs)
+- **Files changed:**
+  - Modified: gsnake-editor/src/lib/EditorLayout.svelte
+  - Modified: gsnake-editor/src/tests/EditorLayout.saveLoad.test.ts
+  - Modified: gsnake-editor (submodule pointer)
+  - Modified: scripts/test/result.txt
+  - Modified: scripts/ralph/prd.json
+  - Modified: scripts/ralph/progress.txt
+- **Learnings for future iterations:**
+  - Save-modal validation in `EditorLayout` must treat `food`, `floating-food`, and `falling-food` as equivalent edible entities to stay consistent with exported `totalFood`
+  - Regression tests for validation warnings are stable when asserting modal button label (`Export` vs `Export Anyway`) in addition to warning text
   - Full `act` refresh still reports six coverage-gate failures while functional/typecheck/test/e2e jobs pass
 ---
