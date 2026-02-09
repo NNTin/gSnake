@@ -3,6 +3,7 @@
 - For `gsnake-web` `WasmGameEngine` unit tests, mock `gsnake-wasm` with `vi.hoisted` shared state and a local `MockRustEngine` class to drive init/error branches deterministically.
 - For `gsnake-web` store wiring tests, drive event-order transitions with a small fake engine (`engineError` followed by `frameChanged`) to assert stale errors are cleared and frame state is resynced.
 - For `gsnake-web` component tests, keep `vitest.config.ts` aligned with Vite (`svelte`, `vite-plugin-wasm`, `vite-plugin-top-level-await`) and use `// @vitest-environment jsdom` plus `context` maps when components rely on `getContext`.
+- For `gsnake-web` `GameContainer` UI tests, inject a `GAME_ENGINE` context stub (`loadLevel`, `restartLevel`, `processMove`) and drive `gameState`/`level` stores to assert status-specific CTA visibility via `data-element-id` selectors.
 
 ## 2026-02-08 23:57 - US-001
 - Defined and documented a single package-level coverage command contract for gsnake-web, gsnake-editor, gsnake-core, and gsnake-levels
@@ -81,4 +82,20 @@
   - `LevelSelectorOverlay` tests that click level cards need async flush cycles after click because `selectLevel` awaits `loadLevel` before closing the overlay store
   - For components that use Svelte stores directly, instantiate components against `document.body` and assert both visible labels/buttons and store state transitions
   - CI full refresh continues to fail only on coverage gates while functional/typecheck/test/e2e jobs remain green
+---
+## 2026-02-09 03:19 - US-005
+- Added `gsnake-web` UI flow tests for level-complete/all-complete states, game-over CTAs, header restart button behavior, and keyboard restart/back actions driven by UI state
+- Verified `gsnake-web` quality checks pass with `npm --prefix gsnake-web run check`, `npm --prefix gsnake-web run test`, and `npm --prefix gsnake-web run test:coverage`
+- Refreshed CI status via `scripts/test/test_act.sh` (result: 19 passed, 6 failed coverage jobs)
+- Browser verification: no browser MCP resource is configured in this environment, so manual browser verification is still required
+- **Files changed:**
+  - Modified: gsnake-web/tests/unit/LevelUiFlows.test.ts
+  - Modified: gsnake-web (submodule pointer)
+  - Modified: scripts/test/result.txt
+  - Modified: scripts/ralph/prd.json
+  - Modified: scripts/ralph/progress.txt
+- **Learnings for future iterations:**
+  - `GameContainer` tests should always provide a full `GAME_ENGINE` stub because restart controls and game-over modal actions both rely on context methods
+  - To validate restart-related CTAs, set `gameState` to `GameOver` and `AllComplete` explicitly and assert modal action buttons by `data-element-id`
+  - CI full refresh still fails only on coverage gates while functional/typecheck/test/e2e jobs remain green
 ---
