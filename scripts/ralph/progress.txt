@@ -13,6 +13,8 @@
 - For `gsnake-core` wasm binding unit tests on native targets, keep parsing/callback logic in pure helpers and avoid creating `JsValue`/`Function` test fixtures directly because `wasm-bindgen` JS shims panic outside `wasm32`.
 - For `gsnake-core` CLI coverage, keep parser/exit failure assertions in unit tests inside `engine/bindings/cli/src/*.rs` and use temp JSON files to cover missing-file, malformed-JSON, and invalid-key playback errors.
 - For `gsnake-levels` tests that change process cwd (`find_levels_root` paths), use a shared test guard (`src/test_cwd.rs`) to serialize cwd mutation and always restore the original directory.
+- For `gsnake-levels` CLI error-path coverage, add integration tests that run `env!("CARGO_BIN_EXE_gsnake-levels")` from temp directories and assert both exit code `1` and stable stderr fragments.
+- For root Playwright gameplay flow tests, use `data-element-id` selectors plus a numeric counter helper (`moves-display`) so each keyboard action asserts deterministic move increments instead of relying on timing-only waits.
 
 ## 2026-02-08 23:57 - US-001
 - Defined and documented a single package-level coverage command contract for gsnake-web, gsnake-editor, gsnake-core, and gsnake-levels
@@ -249,5 +251,39 @@
 - **Learnings for future iterations:**
   - For cwd-sensitive command tests, guard `std::env::set_current_dir` with a shared mutex to avoid racey test failures under parallel Rust test execution
   - Keep difficulty normalization centralized before generating TOML and playback paths so single-difficulty sync uses canonical folder names
+  - Full `act` refresh still reports six coverage-gate failures while functional/typecheck/test/e2e jobs pass
+---
+## 2026-02-09 12:42 - US-014
+- Expanded `gsnake-levels` verification/playback coverage with deterministic failure-path tests for `verify_level` (missing level/playback resources, malformed playback JSON, game-over and not-complete outcomes)
+- Added `verify-all` tests for playback-path inference failure, missing-level errors, missing-playback skip behavior, and solved-status updates when verification fails
+- Added CLI integration tests that run `gsnake-levels` commands and assert deterministic stderr fragments and exit status `1` for `verify`/`verify-all` failure scenarios
+- Verified `gsnake-levels` checks pass with `cargo fmt --all --check`, `cargo check --workspace --all-targets`, `cargo test`, and `cargo llvm-cov --summary-only` (`verify.rs` line coverage 98.96%, `verify_all.rs` line coverage 96.58%)
+- Refreshed CI status via `scripts/test/test_act.sh` (result: 19 passed, 6 failed coverage jobs)
+- **Files changed:**
+  - Modified: gsnake-levels/src/verify.rs
+  - Modified: gsnake-levels/src/verify_all.rs
+  - Added: gsnake-levels/tests/cli_error_paths_test.rs
+  - Modified: gsnake-levels (submodule pointer)
+  - Modified: scripts/test/result.txt
+  - Modified: scripts/ralph/prd.json
+  - Modified: scripts/ralph/progress.txt
+- **Learnings for future iterations:**
+  - Prefer temp-fixture level/playback files over repo fixtures for verify-path tests so assertions remain stable when generated level IDs change
+  - For CLI exit-behavior tests, assert concise stderr substrings (`Failed to resolve playback path`, `Level file not found`) instead of absolute paths to keep tests deterministic across environments
+  - Full `act` refresh still reports six coverage-gate failures while functional/typecheck/test/e2e jobs pass
+---
+## 2026-02-09 14:34 - US-015
+- Added a root Playwright gameplay progression scenario that covers level completion, level transition to Level 2, game-over modal behavior, and both button/keyboard restart flows
+- Hardened the E2E assertions with a move-counter helper to validate deterministic state transitions after each key press
+- Verified checks with `npm run test:e2e -- e2e/gravity.spec.ts`, `npm run test:e2e`, `npm --prefix gsnake-web run check`, and `scripts/test/test_act.sh` (result: 19 passed, 6 failed coverage jobs)
+- **Files changed:**
+  - Modified: e2e/gravity.spec.ts
+  - Modified: gsnake-core/engine/bindings/wasm/pkg/gsnake_wasm_bg.wasm
+  - Modified: scripts/test/result.txt
+  - Modified: scripts/ralph/prd.json
+  - Modified: scripts/ralph/progress.txt
+- **Learnings for future iterations:**
+  - For gameplay E2E, assert move counter increments (`data-element-id="moves-display"`) on every key press to reduce flakiness when frame timing varies
+  - Validate restart behavior through both UI CTA (`restart-level-btn`) and keyboard input (`Space`) to cover modal and input-path regressions in one scenario
   - Full `act` refresh still reports six coverage-gate failures while functional/typecheck/test/e2e jobs pass
 ---
