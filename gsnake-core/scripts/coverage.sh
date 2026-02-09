@@ -4,8 +4,8 @@ set -euo pipefail
 mkdir -p target/llvm-cov
 
 cargo llvm-cov \
-  --workspace \
+  --package gsnake-core \
   --all-targets \
-  --fail-under-lines 55 \
+  --fail-under-lines 80 \
   --lcov \
   --output-path target/llvm-cov/lcov.info
