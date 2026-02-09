@@ -9,6 +9,7 @@
 - For `gsnake-editor` Svelte component tests, keep `vitest.config.ts` aligned with `vite.config.ts` and do not force runes mode while components still use legacy `export let` syntax.
 - For `gsnake-editor` load flows that change grid dimensions and then hydrate entities, `await tick()` between dimension updates and `placeEntitiesFromLevelData(...)` so reactive grid reinitialization does not wipe imported entities.
 - For `gsnake-editor` grid interaction tests, target cells with `.cell[data-row][data-col]` and assert snake labels (`H`, `1`, `2`, ...) to verify segment reindexing after removals and undo/redo.
+- For `gsnake-core` branch-coverage work, place tests in `engine/core/src/*.rs` modules so they can mutate private `GameEngine`/`LevelState` fields without adding production-only hooks.
 
 ## 2026-02-08 23:57 - US-001
 - Defined and documented a single package-level coverage command contract for gsnake-web, gsnake-editor, gsnake-core, and gsnake-levels
@@ -177,5 +178,21 @@
 - **Learnings for future iterations:**
   - Undo/redo regression tests for `EditorLayout` are easiest to stabilize by asserting toolbar button enabled states alongside grid cell classes and snake index labels
   - Use Shift+click in component tests (`fireEvent.click(cell, { shiftKey: true })`) to cover the removal path and segment-index compaction logic
+  - Full `act` refresh still reports six coverage-gate failures while functional/typecheck/test/e2e jobs pass
+---
+## 2026-02-09 07:59 - US-010
+- Expanded `gsnake-core` engine/gravity coverage with targeted tests for non-playing and empty-snake move rejection, blocked stone pushes, gravity spike death paths, floating/falling food collection, and frame generation guardrails
+- Added gravity unit tests for immediate spike contact, stone support, and solid-exit support to cover previously untested fall-stop branches
+- Verified `gsnake-core` checks pass with `cargo check --workspace --all-targets`, `cargo test`, `./scripts/coverage.sh`, and `cargo llvm-cov --package gsnake-core --all-targets --summary-only` (engine line coverage 98.34%, gravity 100%)
+- Refreshed CI status via `scripts/test/test_act.sh` (result: 19 passed, 6 failed coverage jobs)
+- **Files changed:**
+  - Modified: gsnake-core/engine/core/src/engine.rs
+  - Modified: gsnake-core/engine/core/src/gravity.rs
+  - Modified: scripts/test/result.txt
+  - Modified: scripts/ralph/prd.json
+  - Modified: scripts/ralph/progress.txt
+- **Learnings for future iterations:**
+  - For `GameEngine::process_move` branch coverage, build deterministic layouts that isolate one decision point (stone push outcome, gravity hit, or status gate) to avoid unrelated gravity/collision side effects
+  - `generate_frame` guardrail branches are easiest to cover with explicit invalid dimensions (`<= 0`) and oversized grids (`> MAX_FRAME_CELLS`) rather than huge fixtures
   - Full `act` refresh still reports six coverage-gate failures while functional/typecheck/test/e2e jobs pass
 ---

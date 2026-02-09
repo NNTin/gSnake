@@ -401,6 +401,27 @@ mod tests {
         assert_eq!(engine.game_state().moves, 0);
         assert_eq!(engine.game_state().food_collected, 0);
         assert_eq!(engine.game_state().total_food, 1);
+        assert_eq!(engine.level_definition().name, "Test Level");
+        assert_eq!(engine.level_state().snake.segments[0], Position::new(5, 5));
+    }
+
+    #[test]
+    fn test_engine_uses_explicit_total_food_and_normalizes_zero_level_id() {
+        let mut level = create_test_level();
+        level.id = 0;
+        level.food = vec![
+            Position::new(1, 1),
+            Position::new(2, 2),
+            Position::new(3, 3),
+        ];
+        level.floating_food = vec![Position::new(4, 4)];
+        level.falling_food = vec![Position::new(5, 5)];
+        level.total_food = 9;
+
+        let engine = GameEngine::new(level);
+
+        assert_eq!(engine.game_state().current_level, 1);
+        assert_eq!(engine.game_state().total_food, 9);
     }
 
     #[test]
@@ -435,6 +456,48 @@ mod tests {
     }
 
     #[test]
+    fn test_process_move_rejected_when_game_not_playing() {
+        let level = create_test_level();
+        let mut engine = GameEngine::new(level);
+        engine.game_state.status = GameStatus::GameOver;
+
+        let result = engine.process_move(Direction::North);
+
+        assert!(!result);
+        assert_eq!(engine.game_state().moves, 0);
+        assert_eq!(engine.game_state().status, GameStatus::GameOver);
+    }
+
+    #[test]
+    fn test_process_move_with_empty_snake_sets_game_over() {
+        let mut level = create_test_level();
+        level.snake = Vec::new();
+
+        let mut engine = GameEngine::new(level);
+        let result = engine.process_move(Direction::East);
+
+        assert!(!result);
+        assert_eq!(engine.game_state().status, GameStatus::GameOver);
+        assert_eq!(engine.game_state().moves, 0);
+    }
+
+    #[test]
+    fn test_process_move_allows_turn_when_direction_is_missing() {
+        let mut level = create_test_level();
+        level.snake = vec![Position::new(5, 5)];
+        level.obstacles = vec![Position::new(4, 6)];
+
+        let mut engine = GameEngine::new(level);
+        engine.level_state.snake.direction = None;
+
+        let result = engine.process_move(Direction::West);
+
+        assert!(result);
+        assert_eq!(engine.level_state().snake.direction, Some(Direction::West));
+        assert_eq!(engine.game_state().moves, 1);
+    }
+
+    #[test]
     fn test_food_collection() {
         let mut level = create_test_level();
         level.snake = vec![Position::new(5, 4)];
@@ -448,6 +511,58 @@ mod tests {
         assert_eq!(engine.game_state().food_collected, 1);
         assert_eq!(engine.level_state().food.len(), 0);
         assert_eq!(engine.level_state().snake.segments.len(), 2); // Snake grew
+    }
+
+    #[test]
+    fn test_floating_food_collection() {
+        let mut level = create_test_level();
+        level.snake = vec![Position::new(4, 2)];
+        level.food = vec![];
+        level.floating_food = vec![Position::new(5, 2)];
+        level.obstacles = vec![Position::new(5, 3)];
+
+        let mut engine = GameEngine::new(level);
+        let result = engine.process_move(Direction::East);
+
+        assert!(result);
+        assert_eq!(engine.game_state().food_collected, 1);
+        assert_eq!(engine.level_state().floating_food.len(), 0);
+        assert_eq!(engine.level_state().snake.segments.len(), 2);
+    }
+
+    #[test]
+    fn test_falling_food_collection() {
+        let mut level = create_test_level();
+        level.snake = vec![Position::new(4, 2)];
+        level.food = vec![];
+        level.falling_food = vec![Position::new(5, 2)];
+        level.obstacles = vec![Position::new(5, 3)];
+
+        let mut engine = GameEngine::new(level);
+        let result = engine.process_move(Direction::East);
+
+        assert!(result);
+        assert_eq!(engine.game_state().food_collected, 1);
+        assert_eq!(engine.level_state().falling_food.len(), 0);
+        assert_eq!(engine.level_state().snake.segments.len(), 2);
+    }
+
+    #[test]
+    fn test_stone_push_blocked_rejects_move() {
+        let mut level = create_test_level();
+        level.snake = vec![Position::new(2, 2)];
+        level.snake_direction = Direction::East;
+        level.food = vec![];
+        level.obstacles = vec![Position::new(4, 2)];
+        level.stones = vec![Position::new(3, 2)];
+
+        let mut engine = GameEngine::new(level);
+        let result = engine.process_move(Direction::East);
+
+        assert!(!result);
+        assert_eq!(engine.level_state().snake.segments[0], Position::new(2, 2));
+        assert_eq!(engine.level_state().stones, vec![Position::new(3, 2)]);
+        assert_eq!(engine.game_state().moves, 0);
     }
 
     #[test]
@@ -533,6 +648,22 @@ mod tests {
 
         // Snake should fall to y=4 (one above obstacle at (6, 5))
         assert_eq!(engine.level_state().snake.segments[0], Position::new(6, 4));
+    }
+
+    #[test]
+    fn test_gravity_hit_spike_sets_game_over() {
+        let mut level = create_test_level();
+        level.snake = vec![Position::new(2, 1)];
+        level.food = vec![];
+        level.obstacles = vec![];
+        level.spikes = vec![Position::new(3, 3)];
+
+        let mut engine = GameEngine::new(level);
+        let result = engine.process_move(Direction::East);
+
+        assert!(result);
+        assert_eq!(engine.game_state().status, GameStatus::GameOver);
+        assert_eq!(engine.level_state().snake.segments[0], Position::new(3, 3));
     }
 
     #[test]
@@ -652,5 +783,54 @@ mod tests {
         let frame = engine.generate_frame();
 
         assert!(frame.grid.is_empty());
+    }
+
+    #[test]
+    fn test_frame_generation_invalid_height_is_safe() {
+        let mut level = create_test_level();
+        level.grid_size = GridSize::new(5, 0);
+
+        let engine = GameEngine::new(level);
+        let frame = engine.generate_frame();
+
+        assert!(frame.grid.is_empty());
+    }
+
+    #[test]
+    fn test_frame_generation_oversized_grid_is_safe() {
+        let mut level = create_test_level();
+        level.grid_size = GridSize::new(2_000, 2_000);
+
+        let engine = GameEngine::new(level);
+        let frame = engine.generate_frame();
+
+        assert!(frame.grid.is_empty());
+    }
+
+    #[test]
+    fn test_frame_generation_ignores_out_of_bounds_entities() {
+        let mut level = create_test_level();
+        level.grid_size = GridSize::new(4, 4);
+        level.snake = vec![Position::new(-1, 0), Position::new(3, 1)];
+        level.obstacles = vec![Position::new(1, 1), Position::new(4, 1)];
+        level.food = vec![Position::new(2, 2), Position::new(-1, 2)];
+        level.floating_food = vec![Position::new(4, 0)];
+        level.falling_food = vec![Position::new(0, 4)];
+        level.stones = vec![Position::new(0, -1)];
+        level.spikes = vec![Position::new(-1, 3)];
+        level.exit = Position::new(4, 4);
+
+        let engine = GameEngine::new(level);
+        let frame = engine.generate_frame();
+
+        assert_eq!(frame.grid[1][1], CellType::Obstacle);
+        assert_eq!(frame.grid[2][2], CellType::Food);
+        assert_eq!(frame.grid[1][3], CellType::SnakeBody);
+        assert_eq!(frame.grid[0][0], CellType::Empty);
+        assert!(frame
+            .grid
+            .iter()
+            .flatten()
+            .all(|cell| *cell != CellType::SnakeHead));
     }
 }

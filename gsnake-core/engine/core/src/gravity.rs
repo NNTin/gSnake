@@ -267,6 +267,18 @@ mod tests {
     }
 
     #[test]
+    fn test_snake_already_on_spike_returns_immediately() {
+        let mut state = create_test_level_state();
+        state.spikes = vec![Position::new(5, 2)];
+        state.snake.direction = Some(Direction::East);
+
+        let hit_spike = apply_gravity_to_snake(&mut state);
+
+        assert!(hit_spike);
+        assert_eq!(state.snake.segments[0], Position::new(5, 2));
+    }
+
+    #[test]
     fn test_snake_stops_on_obstacle() {
         let mut state = create_test_level_state();
         state.obstacles = vec![Position::new(5, 5)];
@@ -275,6 +287,29 @@ mod tests {
         apply_gravity_to_snake(&mut state);
 
         assert_eq!(state.snake.segments[0].y, 4); // Stops above obstacle
+    }
+
+    #[test]
+    fn test_snake_stops_on_stone() {
+        let mut state = create_test_level_state();
+        state.stones = vec![Position::new(5, 5)];
+        state.snake.direction = Some(Direction::East);
+
+        apply_gravity_to_snake(&mut state);
+
+        assert_eq!(state.snake.segments[0].y, 4); // Stops above stone
+    }
+
+    #[test]
+    fn test_snake_stops_on_solid_exit() {
+        let mut state = create_test_level_state();
+        state.exit = Position::new(5, 5);
+        state.exit_is_solid = true;
+        state.snake.direction = Some(Direction::East);
+
+        apply_gravity_to_snake(&mut state);
+
+        assert_eq!(state.snake.segments[0].y, 4); // Solid exit acts as platform
     }
 
     #[test]
