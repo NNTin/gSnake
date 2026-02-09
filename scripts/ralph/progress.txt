@@ -12,6 +12,7 @@
 - For `gsnake-core` branch-coverage work, place tests in `engine/core/src/*.rs` modules so they can mutate private `GameEngine`/`LevelState` fields without adding production-only hooks.
 - For `gsnake-core` wasm binding unit tests on native targets, keep parsing/callback logic in pure helpers and avoid creating `JsValue`/`Function` test fixtures directly because `wasm-bindgen` JS shims panic outside `wasm32`.
 - For `gsnake-core` CLI coverage, keep parser/exit failure assertions in unit tests inside `engine/bindings/cli/src/*.rs` and use temp JSON files to cover missing-file, malformed-JSON, and invalid-key playback errors.
+- For `gsnake-levels` tests that change process cwd (`find_levels_root` paths), use a shared test guard (`src/test_cwd.rs`) to serialize cwd mutation and always restore the original directory.
 
 ## 2026-02-08 23:57 - US-001
 - Defined and documented a single package-level coverage command contract for gsnake-web, gsnake-editor, gsnake-core, and gsnake-levels
@@ -228,5 +229,25 @@
 - **Learnings for future iterations:**
   - CLI parser failure-path coverage is deterministic when tests create temp playback JSON files and assert contextual errors from `Playback::from_input_file(...)`
   - In single-level mode, `finalize_exit` is the canonical failure gate and should keep returning `Level not completed` until completion status is reached
+  - Full `act` refresh still reports six coverage-gate failures while functional/typecheck/test/e2e jobs pass
+---
+## 2026-02-09 11:45 - US-013
+- Expanded `gsnake-levels` coverage for `generate-levels-json` and `sync-metadata` with success/failure-path tests plus root/package cwd resolution tests
+- Fixed a metadata-sync bug where difficulty filters were not normalized; `sync_metadata` now trims/lowercases difficulty input and rejects unknown values with an explicit error
+- Verified `gsnake-levels` checks pass with `cargo check --workspace --all-targets`, `cargo test`, `./scripts/coverage.sh`, and `cargo llvm-cov --summary-only` (`generate.rs` line coverage 94.27%, `sync_metadata.rs` line coverage 95.78%)
+- Refreshed CI status via `scripts/test/test_act.sh` (result: 19 passed, 6 failed coverage jobs)
+- **Files changed:**
+  - Modified: gsnake-levels/src/generate.rs
+  - Modified: gsnake-levels/src/sync_metadata.rs
+  - Modified: gsnake-levels/src/lib.rs
+  - Modified: gsnake-levels/src/main.rs
+  - Added: gsnake-levels/src/test_cwd.rs
+  - Modified: gsnake-levels (submodule pointer)
+  - Modified: scripts/test/result.txt
+  - Modified: scripts/ralph/prd.json
+  - Modified: scripts/ralph/progress.txt
+- **Learnings for future iterations:**
+  - For cwd-sensitive command tests, guard `std::env::set_current_dir` with a shared mutex to avoid racey test failures under parallel Rust test execution
+  - Keep difficulty normalization centralized before generating TOML and playback paths so single-difficulty sync uses canonical folder names
   - Full `act` refresh still reports six coverage-gate failures while functional/typecheck/test/e2e jobs pass
 ---

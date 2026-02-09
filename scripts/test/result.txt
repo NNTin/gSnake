@@ -1,13 +1,13 @@
 === Act CI Test Results ===
-Started: Mon Feb  9 10:22:35 CET 2026
+Started: Mon Feb  9 11:20:37 CET 2026
 
 ## Summary
 
 - [SUCCESS] ./gsnake-levels/.github/workflows/test.yml::test
-- [SUCCESS] ./gsnake-levels/.github/workflows/ci.yml::build
 - [SUCCESS] ./gsnake-levels/.github/workflows/ci.yml::test
 - [SUCCESS] ./gsnake-levels/.github/workflows/ci.yml::validate-levels
 - [FAILED] ./gsnake-levels/.github/workflows/ci.yml::coverage
+- [SUCCESS] ./gsnake-levels/.github/workflows/ci.yml::build
 - [SUCCESS] ./gsnake-web/.github/workflows/test.yml::test
 - [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::build
 - [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::typecheck
@@ -20,6 +20,7 @@ Started: Mon Feb  9 10:22:35 CET 2026
 - [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::typecheck
 - [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::test
 - [FAILED] ./gsnake-editor/.github/workflows/ci.yml::coverage
+- [SUCCESS] ./.github/workflows/ci.yml::e2e-test
 - [SUCCESS] ./.github/workflows/ci.yml::build
 - [SUCCESS] ./.github/workflows/ci.yml::test
 - [SUCCESS] ./.github/workflows/ci.yml::wasm
@@ -27,13 +28,12 @@ Started: Mon Feb  9 10:22:35 CET 2026
 - [FAILED] ./.github/workflows/ci.yml::core-coverage
 - [FAILED] ./.github/workflows/ci.yml::gsnake-editor-coverage
 - [FAILED] ./.github/workflows/ci.yml::gsnake-web-coverage
-- [SUCCESS] ./.github/workflows/ci.yml::e2e-test
 
 **Total: 19 passed, 6 failed**
 
 ---
-Completed: Mon Feb  9 10:47:35 CET 2026
-Duration: 00:25:00
+Completed: Mon Feb  9 11:45:06 CET 2026
+Duration: 00:24:29
 Result: 19 passed, 6 failed
 Result file: /home/nntin/git/gSnake/scripts/test/result.txt
 Temp dir: /home/nntin/git/gSnake/scripts/test/tmp_act_results
