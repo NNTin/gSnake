@@ -11,6 +11,7 @@
 - For `gsnake-editor` grid interaction tests, target cells with `.cell[data-row][data-col]` and assert snake labels (`H`, `1`, `2`, ...) to verify segment reindexing after removals and undo/redo.
 - For `gsnake-core` branch-coverage work, place tests in `engine/core/src/*.rs` modules so they can mutate private `GameEngine`/`LevelState` fields without adding production-only hooks.
 - For `gsnake-core` wasm binding unit tests on native targets, keep parsing/callback logic in pure helpers and avoid creating `JsValue`/`Function` test fixtures directly because `wasm-bindgen` JS shims panic outside `wasm32`.
+- For `gsnake-core` CLI coverage, keep parser/exit failure assertions in unit tests inside `engine/bindings/cli/src/*.rs` and use temp JSON files to cover missing-file, malformed-JSON, and invalid-key playback errors.
 
 ## 2026-02-08 23:57 - US-001
 - Defined and documented a single package-level coverage command contract for gsnake-web, gsnake-editor, gsnake-core, and gsnake-levels
@@ -211,5 +212,21 @@
 - **Learnings for future iterations:**
   - Keep wasm-facing logic thin and route parsing/callback/error branches through pure helper functions so native Rust unit tests can cover behavior without wasm harnesses
   - `wasm-bindgen` host tests should avoid creating JavaScript-backed values (`JsValue::from_str`, JS `Function`) directly because these require wasm runtime shims and can panic on native targets
+  - Full `act` refresh still reports six coverage-gate failures while functional/typecheck/test/e2e jobs pass
+---
+## 2026-02-09 10:47 - US-012
+- Expanded `gsnake-core` CLI coverage with tests for input key mappings, playback parse failure paths, invalid/malformed playback files, and single-level exit behavior messaging
+- Verified `gsnake-core` checks pass with `cargo fmt --all --check`, `cargo check --workspace --all-targets`, `cargo test -p gsnake-cli`, and `cargo llvm-cov --package gsnake-cli --all-targets --summary-only` (input line coverage 87.69%, playback line coverage 98.59%)
+- Refreshed CI status via `scripts/test/test_act.sh` (result: 19 passed, 6 failed coverage jobs)
+- **Files changed:**
+  - Modified: gsnake-core/engine/bindings/cli/src/input.rs
+  - Modified: gsnake-core/engine/bindings/cli/src/playback.rs
+  - Modified: gsnake-core/engine/bindings/cli/src/main.rs
+  - Modified: scripts/test/result.txt
+  - Modified: scripts/ralph/prd.json
+  - Modified: scripts/ralph/progress.txt
+- **Learnings for future iterations:**
+  - CLI parser failure-path coverage is deterministic when tests create temp playback JSON files and assert contextual errors from `Playback::from_input_file(...)`
+  - In single-level mode, `finalize_exit` is the canonical failure gate and should keep returning `Level not completed` until completion status is reached
   - Full `act` refresh still reports six coverage-gate failures while functional/typecheck/test/e2e jobs pass
 ---

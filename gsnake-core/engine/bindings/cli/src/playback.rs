@@ -98,6 +98,41 @@ fn parse_key(key: &str) -> Result<Action> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::{
+        fs,
+        path::{Path, PathBuf},
+        time::{SystemTime, UNIX_EPOCH},
+    };
+
+    struct TempPlaybackFile {
+        path: PathBuf,
+    }
+
+    impl TempPlaybackFile {
+        fn new(contents: &str) -> Self {
+            let unique = SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .expect("clock should be after epoch")
+                .as_nanos();
+            let mut path = std::env::temp_dir();
+            path.push(format!(
+                "gsnake-cli-playback-{}-{unique}.json",
+                std::process::id()
+            ));
+            fs::write(&path, contents).expect("failed to create temp playback file");
+            Self { path }
+        }
+
+        fn path(&self) -> &Path {
+            &self.path
+        }
+    }
+
+    impl Drop for TempPlaybackFile {
+        fn drop(&mut self) {
+            let _ = fs::remove_file(&self.path);
+        }
+    }
 
     #[test]
     fn parse_string_input() {
@@ -114,5 +149,80 @@ mod tests {
         assert_eq!(parse_key("U").unwrap(), Action::MoveNorth);
         assert_eq!(parse_key("reset").unwrap(), Action::Reset);
         assert_eq!(parse_key("q").unwrap(), Action::Quit);
+        assert_eq!(parse_key(" north ").unwrap(), Action::MoveNorth);
+    }
+
+    #[test]
+    fn parse_string_input_rejects_invalid_character() {
+        let err = Playback::from_input_string("RX", 200).unwrap_err();
+        assert!(err.to_string().contains("Invalid input character 'X'"));
+    }
+
+    #[test]
+    fn parse_string_input_rejects_empty_input() {
+        let err = Playback::from_input_string(" \n\t ", 200).unwrap_err();
+        assert_eq!(
+            err.to_string(),
+            "Input string is empty after trimming whitespace"
+        );
+    }
+
+    #[test]
+    fn parse_input_file_rejects_missing_file() {
+        let mut missing_path = std::env::temp_dir();
+        let unique = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("clock should be after epoch")
+            .as_nanos();
+        missing_path.push(format!(
+            "gsnake-cli-missing-playback-{}-{unique}.json",
+            std::process::id()
+        ));
+
+        let err = Playback::from_input_file(&missing_path).unwrap_err();
+        assert!(
+            err.to_string().contains("Failed to read input file"),
+            "unexpected error: {err}"
+        );
+    }
+
+    #[test]
+    fn parse_input_file_rejects_malformed_json() {
+        let playback_file = TempPlaybackFile::new("not-json");
+
+        let err = Playback::from_input_file(playback_file.path()).unwrap_err();
+        assert!(
+            err.to_string().contains("Failed to parse playback JSON"),
+            "unexpected error: {err}"
+        );
+    }
+
+    #[test]
+    fn parse_input_file_rejects_empty_playback() {
+        let playback_file = TempPlaybackFile::new("[]");
+
+        let err = Playback::from_input_file(playback_file.path()).unwrap_err();
+        assert_eq!(err.to_string(), "Playback input file is empty");
+    }
+
+    #[test]
+    fn parse_input_file_rejects_invalid_key() {
+        let playback_file = TempPlaybackFile::new(r#"[{"key":"Sideways","delay_ms":25}]"#);
+
+        let err = Playback::from_input_file(playback_file.path()).unwrap_err();
+        assert!(err.to_string().contains("Invalid key 'Sideways'"));
+    }
+
+    #[test]
+    fn parse_input_file_success_path() {
+        let playback_file =
+            TempPlaybackFile::new(r#"[{"key":"right","delay_ms":25},{"key":"Q","delay_ms":1}]"#);
+
+        let playback = Playback::from_input_file(playback_file.path()).unwrap();
+        assert_eq!(playback.steps.len(), 2);
+        assert_eq!(playback.steps[0].action, Action::MoveEast);
+        assert_eq!(playback.steps[0].delay, Duration::from_millis(25));
+        assert_eq!(playback.steps[1].action, Action::Quit);
+        assert_eq!(playback.steps[1].delay, Duration::from_millis(1));
     }
 }

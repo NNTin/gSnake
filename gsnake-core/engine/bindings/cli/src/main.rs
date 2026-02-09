@@ -440,3 +440,60 @@ impl PlaybackState {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn base_args() -> Args {
+        Args {
+            input: None,
+            input_file: None,
+            delay_ms: 200,
+            level_file: None,
+            level_id: None,
+            level_index: None,
+            record: false,
+            record_output: None,
+        }
+    }
+
+    #[test]
+    fn finalize_exit_single_level_requires_completion() {
+        let err = finalize_exit(GameStatus::Playing, true).unwrap_err();
+        assert_eq!(err.to_string(), "Level not completed");
+    }
+
+    #[test]
+    fn finalize_exit_single_level_accepts_completed_statuses() {
+        assert!(finalize_exit(GameStatus::LevelComplete, true).is_ok());
+        assert!(finalize_exit(GameStatus::AllComplete, true).is_ok());
+    }
+
+    #[test]
+    fn finalize_exit_multi_level_allows_any_status() {
+        assert!(finalize_exit(GameStatus::Playing, false).is_ok());
+        assert!(finalize_exit(GameStatus::GameOver, false).is_ok());
+    }
+
+    #[test]
+    fn load_requested_levels_rejects_missing_level_file() {
+        let mut args = base_args();
+        args.level_file = Some(PathBuf::from("does-not-exist-level.json"));
+
+        let err = load_requested_levels(&args).unwrap_err();
+        assert!(
+            err.to_string().contains("Failed to read level file"),
+            "unexpected error: {err}"
+        );
+    }
+
+    #[test]
+    fn load_requested_levels_rejects_zero_level_index() {
+        let mut args = base_args();
+        args.level_index = Some(0);
+
+        let err = load_requested_levels(&args).unwrap_err();
+        assert_eq!(err.to_string(), "Level indices start at 1");
+    }
+}

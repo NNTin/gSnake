@@ -75,4 +75,68 @@ mod tests {
         let quit = KeyEvent::from(KeyCode::Char('q'));
         assert_eq!(InputHandler::key_to_action(quit), Some(Action::Quit));
     }
+
+    #[test]
+    fn test_arrow_and_uppercase_key_mappings() {
+        assert_eq!(
+            InputHandler::key_to_action(KeyEvent::from(KeyCode::Up)),
+            Some(Action::MoveNorth)
+        );
+        assert_eq!(
+            InputHandler::key_to_action(KeyEvent::from(KeyCode::Down)),
+            Some(Action::MoveSouth)
+        );
+        assert_eq!(
+            InputHandler::key_to_action(KeyEvent::from(KeyCode::Left)),
+            Some(Action::MoveWest)
+        );
+        assert_eq!(
+            InputHandler::key_to_action(KeyEvent::from(KeyCode::Right)),
+            Some(Action::MoveEast)
+        );
+        assert_eq!(
+            InputHandler::key_to_action(KeyEvent::from(KeyCode::Char('W'))),
+            Some(Action::MoveNorth)
+        );
+        assert_eq!(
+            InputHandler::key_to_action(KeyEvent::from(KeyCode::Char('S'))),
+            Some(Action::MoveSouth)
+        );
+        assert_eq!(
+            InputHandler::key_to_action(KeyEvent::from(KeyCode::Char('A'))),
+            Some(Action::MoveWest)
+        );
+        assert_eq!(
+            InputHandler::key_to_action(KeyEvent::from(KeyCode::Char('D'))),
+            Some(Action::MoveEast)
+        );
+    }
+
+    #[test]
+    fn test_continue_and_escape_key_mappings() {
+        assert_eq!(
+            InputHandler::key_to_action(KeyEvent::from(KeyCode::Enter)),
+            Some(Action::Continue)
+        );
+        assert_eq!(
+            InputHandler::key_to_action(KeyEvent::from(KeyCode::Char(' '))),
+            Some(Action::Continue)
+        );
+        assert_eq!(
+            InputHandler::key_to_action(KeyEvent::from(KeyCode::Esc)),
+            Some(Action::Quit)
+        );
+    }
+
+    #[test]
+    fn test_unmapped_keys_return_none() {
+        assert_eq!(
+            InputHandler::key_to_action(KeyEvent::from(KeyCode::Char('x'))),
+            None
+        );
+        assert_eq!(
+            InputHandler::key_to_action(KeyEvent::from(KeyCode::Tab)),
+            None
+        );
+    }
 }
