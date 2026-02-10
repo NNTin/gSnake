@@ -61,10 +61,11 @@ Plans:
   3. Rapid game events (falling food, snake movement) trigger frame updates without visible lag
   4. Loading a level and then switching levels shows no memory increase in DevTools heap snapshot
   5. GameGrid component uses primitive props (CellType values) not object references when rendering cells
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- TBD
+- [ ] 03-01-PLAN.md -- Add per-CellType CSS opacity for visual layering and SpriteLoader onDestroy cleanup
+- [ ] 03-02-PLAN.md -- Visual verification checkpoint for SVG game integration
 
 ### Phase 4: Performance & Validation
 **Goal**: Visual upgrade maintains 60fps performance and all object combinations render correctly
