@@ -77,10 +77,10 @@ Plans:
   2. Test level with all object types simultaneously visible runs at 60fps for 30 seconds
   3. Visual regression screenshots show SVG rendering matches expected appearance for all objects
   4. Developer can observe in DevTools that will-change CSS hints are applied only to animated elements (not static objects)
-**Plans**: TBD
+**Plans:** 1 plan
 
 Plans:
-- TBD
+- [ ] 04-01-PLAN.md — Automated performance pre-checks and manual DevTools profiling verification
 
 ## Progress
 
@@ -92,7 +92,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | 1. SVG Asset Creation | 1/1 | ✓ Complete | 2026-02-10 |
 | 2. Rendering Infrastructure | 1/1 | ✓ Complete | 2026-02-10 |
 | 3. Game Integration | 2/2 | ✓ Complete | 2026-02-10 |
-| 4. Performance & Validation | 0/TBD | Not started | - |
+| 4. Performance & Validation | 0/1 | Not started | - |
 
 ---
 *Roadmap created: 2026-02-09*
