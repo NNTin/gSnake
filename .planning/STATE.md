@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-09)
 ## Current Position
 
 Phase: 3 of 4 (Game Integration)
-Plan: 0 of TBD in current phase
-Status: Ready to plan Phase 3
-Last activity: 2026-02-10 — Completed Phase 2, accepted native Vite approach deviation
+Plan: 1 of 2 in current phase
+Status: In progress - Phase 3
+Last activity: 2026-02-10 — Completed 03-01: Visual layering and memory management
 
-Progress: [█████░░░░░] 50% (Phase 2 of 4 complete)
+Progress: [█████░░░░░] 50% (Phase 2 of 4 complete, Phase 3 in progress)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
-- Average duration: 24 min
-- Total execution time: 0.80 hours
+- Total plans completed: 3
+- Average duration: 16 min
+- Total execution time: 0.82 hours
 
 **By Phase:**
 
@@ -29,9 +29,10 @@ Progress: [█████░░░░░] 50% (Phase 2 of 4 complete)
 |-------|-------|-------|----------|
 | 01-svg-asset-creation | 1 | 45 min | 45 min |
 | 02-rendering-infrastructure | 1 | 3 min | 3 min |
+| 03-game-integration | 1 | 1 min | 1 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (45 min), 02-01 (3 min)
+- Last 5 plans: 01-01 (45 min), 02-01 (3 min), 03-01 (1 min)
 - Trend: Accelerating
 
 *Updated after each plan completion*
@@ -58,6 +59,16 @@ Recent decisions affecting current work:
    - Native Vite ?url imports sufficient for sprite loading use case
    - Simpler dependency tree, no functionality lost
 
+4. **Visual layering through opacity instead of stacking** (03-01)
+   - Game engine stores one CellType per cell (no multi-object stacking)
+   - Layering achieved via per-CellType opacity mapping
+   - Hazards semi-transparent (Spike 0.8, Stone 0.85, Obstacle 0.9), gameplay objects opaque (1.0)
+
+5. **Explicit onDestroy cleanup for SpriteLoader** (03-01)
+   - Defensive memory management pattern
+   - Clears spriteContent string on component destruction
+   - Ensures prompt garbage collection of SVG data
+
 ### Pending Todos
 
 [From .planning/todos/pending/ — ideas captured during sessions]
@@ -72,8 +83,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-10 (Phase 2 execution)
-Stopped at: Phase 2 complete. SVG rendering infrastructure implemented with SpriteLoader and Cell components. Ready for Phase 3 game integration.
+Last session: 2026-02-10 (Phase 3 execution)
+Stopped at: Completed 03-01-PLAN.md - Visual layering and memory management implemented
 Resume file: None
 
 **Phase 1 Status:** ✓ Complete
@@ -88,3 +99,10 @@ Resume file: None
 - Cell components render SVG use elements
 - All 68 tests passing with new rendering approach
 - Ready for game integration (Phase 3)
+
+**Phase 3 Status:** In Progress (1 of 2 plans complete)
+- 03-01: ✓ Visual layering and memory management
+  - Per-CellType opacity mapping implemented
+  - onDestroy cleanup for SpriteLoader
+  - All 68 tests passing
+- 03-02: Pending - Full game state rendering integration
