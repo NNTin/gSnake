@@ -29,10 +29,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Total sprites.svg bundle size is under 20KB and each symbol is under 2KB
   4. All symbols use consistent viewBox coordinates (same dimensions across all 10 objects)
   5. Opening any symbol in browser shows geometric shapes without filters, blur, or drop-shadow effects
-**Plans**: TBD
+**Plans:** 1 plan
 
 Plans:
-- TBD
+- [ ] 01-01-PLAN.md — Create and validate SVG sprite sheet with all 10 game object symbols
 
 ### Phase 2: Rendering Infrastructure
 **Goal**: SVG sprite system is built and ready to render game objects using symbol references
@@ -85,11 +85,11 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. SVG Asset Creation | 0/TBD | Not started | - |
+| 1. SVG Asset Creation | 0/1 | Not started | - |
 | 2. Rendering Infrastructure | 0/TBD | Not started | - |
 | 3. Game Integration | 0/TBD | Not started | - |
 | 4. Performance & Validation | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-09*
-*Last updated: 2026-02-09*
+*Last updated: 2026-02-10*
