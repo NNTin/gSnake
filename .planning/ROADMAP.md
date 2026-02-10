@@ -45,10 +45,10 @@ Plans:
   3. Cell.svelte renders SVG using `<use>` elements with correct symbol ID mapping from CellType enum
   4. Developer can inspect DOM and see 2 nodes per cell (svg + use) instead of duplicated graphics
   5. TypeScript autocomplete works for SVG imports without errors in IDE
-**Plans**: TBD
+**Plans:** 1 plan
 
 Plans:
-- TBD
+- [ ] 02-01-PLAN.md — Install SVG tooling, create SpriteLoader, and convert Cell.svelte to SVG use-element rendering
 
 ### Phase 3: Game Integration
 **Goal**: SVG game objects render live game state with transparency support for object layering
@@ -87,7 +87,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. SVG Asset Creation | 1/1 | ✓ Complete | 2026-02-10 |
-| 2. Rendering Infrastructure | 0/TBD | Not started | - |
+| 2. Rendering Infrastructure | 0/1 | Not started | - |
 | 3. Game Integration | 0/TBD | Not started | - |
 | 4. Performance & Validation | 0/TBD | Not started | - |
 
