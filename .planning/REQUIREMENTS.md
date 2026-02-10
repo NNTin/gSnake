@@ -30,7 +30,7 @@ Requirements for SVG rendering upgrade. Each maps to roadmap phases.
 - [ ] **INTEG-02**: Connect Cell.svelte to frame store for reactive updates
 - [ ] **INTEG-03**: Pass primitive props only to Cell components (avoid object props for performance)
 - [ ] **INTEG-04**: Implement partial transparency/opacity for object layering
-- [ ] **INTEG-05**: Integrate requestAnimationFrame with game engine frame updates
+- [x] **INTEG-05**: ~~Integrate requestAnimationFrame with game engine frame updates~~ **REMOVED** — Research (03-RESEARCH.md) confirms RAF is an anti-pattern: the game engine already uses event-driven updates via processMove() → frameChanged → store.set(). Adding RAF would introduce polling overhead with no benefit.
 - [ ] **INTEG-06**: Implement proper cleanup in onDestroy lifecycle hook (prevent memory leaks)
 
 ### Performance & Validation
@@ -94,7 +94,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INTEG-02 | Phase 3 | Pending |
 | INTEG-03 | Phase 3 | Pending |
 | INTEG-04 | Phase 3 | Pending |
-| INTEG-05 | Phase 3 | Pending |
+| INTEG-05 | Phase 3 | Removed (anti-pattern per research) |
 | INTEG-06 | Phase 3 | Pending |
 | PERF-01 | Phase 4 | Pending |
 | PERF-02 | Phase 4 | Pending |
@@ -102,8 +102,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PERF-04 | Phase 4 | Pending |
 
 **Coverage:**
-- v1 requirements: 20 total
-- Mapped to phases: 20
+- v1 requirements: 19 active (1 removed: INTEG-05)
+- Mapped to phases: 19
 - Unmapped: 0 ✓
 
 ---

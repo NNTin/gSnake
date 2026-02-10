@@ -54,7 +54,7 @@ Plans:
 ### Phase 3: Game Integration
 **Goal**: SVG game objects render live game state with transparency support for object layering
 **Depends on**: Phase 2
-**Requirements**: INTEG-01, INTEG-02, INTEG-03, INTEG-04, INTEG-05, INTEG-06
+**Requirements**: INTEG-01, INTEG-02, INTEG-03, INTEG-04, INTEG-06
 **Success Criteria** (what must be TRUE):
   1. Player can see all game object types rendered as SVGs during actual gameplay
   2. When snake moves over spike, both objects are visible through transparency (layering works)
