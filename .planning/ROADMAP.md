@@ -62,10 +62,11 @@ Plans:
   4. Loading a level and then switching levels shows no memory increase in DevTools heap snapshot
   5. GameGrid component uses primitive props (CellType values) not object references when rendering cells
 **Plans:** 2 plans
+**Status**: ✓ Complete (2026-02-10)
 
 Plans:
-- [ ] 03-01-PLAN.md -- Add per-CellType CSS opacity for visual layering and SpriteLoader onDestroy cleanup
-- [ ] 03-02-PLAN.md -- Visual verification checkpoint for SVG game integration
+- [x] 03-01-PLAN.md -- Add per-CellType CSS opacity for visual layering and SpriteLoader onDestroy cleanup
+- [x] 03-02-PLAN.md -- Visual verification checkpoint for SVG game integration
 
 ### Phase 4: Performance & Validation
 **Goal**: Visual upgrade maintains 60fps performance and all object combinations render correctly
@@ -90,9 +91,9 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 1. SVG Asset Creation | 1/1 | ✓ Complete | 2026-02-10 |
 | 2. Rendering Infrastructure | 1/1 | ✓ Complete | 2026-02-10 |
-| 3. Game Integration | 0/TBD | Not started | - |
+| 3. Game Integration | 2/2 | ✓ Complete | 2026-02-10 |
 | 4. Performance & Validation | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-09*
-*Last updated: 2026-02-10 (Phase 2 complete)*
+*Last updated: 2026-02-10 (Phase 3 complete)*
