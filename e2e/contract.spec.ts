@@ -6,39 +6,31 @@ test.describe('Contract Payloads', () => {
 
     await page.waitForSelector('.cell');
 
-    const cellClasses = await page.$$eval('.cell', cells =>
-      cells.map(cell => cell.className.split(' ').filter(Boolean))
+    const cellTypes = await page.$$eval('.cell', cells =>
+      cells.map(cell => {
+        const use = cell.querySelector('use');
+        const href = use?.getAttribute('href') ?? use?.getAttribute('xlink:href') ?? '';
+        return href.startsWith('#') ? href.slice(1) : href;
+      })
     );
 
     const allowed = new Set([
-      'snake-head',
-      'snake-body',
-      'food',
-      'floating-food',
-      'falling-food',
-      'stone',
-      'spike',
-      'obstacle',
-      'exit'
+      'Empty',
+      'SnakeHead',
+      'SnakeBody',
+      'Food',
+      'FloatingFood',
+      'Stone',
+      'Spike',
+      'Obstacle',
+      'Exit'
     ]);
 
-    const unknownExtras = new Set<string>();
-    for (const classes of cellClasses) {
-      expect(classes).toContain('cell');
-      const extra = classes.filter(
-        (cls: string) => cls !== 'cell' && !cls.startsWith('svelte-') && !cls.startsWith('s-')
-      );
-      extra.forEach((cls: string) => {
-        if (!allowed.has(cls)) {
-          unknownExtras.add(cls);
-        }
-      });
-    }
-    expect(Array.from(unknownExtras)).toEqual([]);
+    const unknownTypes = cellTypes.filter(type => !allowed.has(type));
+    expect(unknownTypes).toEqual([]);
 
-    const flattened = cellClasses.flat();
-    expect(flattened.filter(cls => cls === 'snake-head').length).toBe(1);
-    expect(flattened.filter(cls => cls === 'snake-body').length).toBeGreaterThan(0);
+    expect(cellTypes.filter(type => type === 'SnakeHead').length).toBe(1);
+    expect(cellTypes.filter(type => type === 'SnakeBody').length).toBeGreaterThan(0);
   });
 
   test('processMove updates frame payloads', async ({ page }) => {

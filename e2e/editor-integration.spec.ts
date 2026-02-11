@@ -20,6 +20,8 @@ async function clickCell(page: Page, row: number, col: number) {
 
 test.describe('Level Editor Test Workflow', () => {
   test('should upload and test a level without CORS errors', async ({ page, context }) => {
+    test.setTimeout(20_000);
+
     await startNewLevel(page);
 
     // Place a simple valid level
