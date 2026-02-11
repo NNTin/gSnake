@@ -55,7 +55,7 @@ async function createNewLevel(page: Page, width: number, height: number): Promis
   await expect(page.getByRole('button', { name: 'Create New Level' })).toBeVisible();
   await page.getByRole('button', { name: 'Create New Level' }).click();
 
-  const modal = page.locator('.modal');
+  const modal = page.getByRole('dialog');
   await expect(modal.getByRole('heading', { name: 'Create New Level' })).toBeVisible();
   await modal.getByLabel('Width').fill(String(width));
   await modal.getByLabel('Height').fill(String(height));

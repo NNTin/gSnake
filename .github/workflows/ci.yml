@@ -249,7 +249,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: gsnake-web-coverage
-          path: gsnake-web/coverage
+          path: gsnake-web/packages/gsnake-web-app/coverage
 
   e2e-test:
     name: E2E Tests
@@ -306,7 +306,11 @@ jobs:
         run: |
           npm --prefix gsnake-web ci
           rm -rf gsnake-web/node_modules/gsnake-wasm
+          rm -rf gsnake-web/packages/gsnake-web-app/node_modules/gsnake-wasm
+          mkdir -p gsnake-web/node_modules
+          mkdir -p gsnake-web/packages/gsnake-web-app/node_modules
           cp -R e2e/fixtures/gsnake-wasm/pkg gsnake-web/node_modules/gsnake-wasm
+          cp -R e2e/fixtures/gsnake-wasm/pkg gsnake-web/packages/gsnake-web-app/node_modules/gsnake-wasm
           npm --prefix gsnake-web run build
 
       - name: Setup gsnake-editor for E2E

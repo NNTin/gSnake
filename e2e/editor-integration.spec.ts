@@ -7,7 +7,8 @@ async function startNewLevel(page: Page) {
   await expect(createNewButton).toBeVisible();
   await createNewButton.click();
 
-  const createModalButton = page.locator('.modal').getByRole('button', { name: 'Create' });
+  const createDialog = page.getByRole('dialog');
+  const createModalButton = createDialog.getByRole('button', { name: 'Create' });
   await expect(createModalButton).toBeVisible();
   await createModalButton.click();
 

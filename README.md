@@ -58,114 +58,40 @@ Each submodule can build and test independently using git branch dependencies.
 
 ### Submodule Dependency Resolution
 
-The repository supports two working modes:
+The repository supports two modes:
 
-1. **Root repository mode** (this repo with submodules): Uses local paths for fast development
-2. **Standalone submodule mode**: Uses git dependencies to build independently
+1. Root repository mode (this repo with submodules)
+2. Standalone submodule mode (each submodule cloned independently)
 
-#### Auto-Detection Mechanism
+`gsnake-web` and `gsnake-editor` now synchronize UI through `gsnake-web-ui`:
 
-Build scripts automatically detect which mode they're running in by checking for `../.git` and `../gsnake-core`.
+- `gsnake-web` is an npm workspace with:
+  - `packages/gsnake-web-ui`
+  - `packages/gsnake-web-app`
+- `gsnake-editor` depends on `gsnake-web-ui` via an auto-detection preinstall script.
 
-**Detection Logic:**
-- If `../.git` exists AND `../gsnake-core` exists → Root repository mode
-- Otherwise → Standalone mode
+#### Root Repository Mode
 
-**Available detection script:**
+- `gsnake-web-app` uses local `gsnake-core` WASM
+- `gsnake-editor` uses local `../gsnake-web/packages/gsnake-web-ui`
+- shared style/sprite/component changes can be validated across both apps immediately
 
-```bash
-# From any submodule, source the detection script
-source ../../scripts/detect-repo-context.sh
+#### Standalone Mode
 
-if [ "$GSNAKE_ROOT_REPO" = "true" ]; then
-  echo "Running in root repo - using local paths"
-  # GSNAKE_CORE_PATH, GSNAKE_WEB_PATH, etc. are available
-else
-  echo "Running standalone - using git dependencies"
-fi
-```
+- `gsnake-web` vendors prebuilt WASM automatically
+- `gsnake-editor` vendors a `gsnake-web-ui` snapshot from `NNTin/gsnake-web` `main` and builds it locally for precompiled consumption
+- standalone CI jobs force this mode with `FORCE_GIT_DEPS=1`
 
-**Exported environment variables (root repo mode):**
-- `GSNAKE_ROOT_REPO=true`
-- `GSNAKE_CORE_PATH=../gsnake-core`
-- `GSNAKE_LEVELS_PATH=../gsnake-levels`
-- `GSNAKE_WEB_PATH=../gsnake-web`
-- `GSNAKE_EDITOR_PATH=../gsnake-editor`
-- `GSNAKE_SPECS_PATH=../gsnake-specs`
+#### Shared UI Workflow
 
-#### How Overrides Work
+When changing shared art style:
 
-Each submodule automatically switches between git dependencies and local paths:
+1. edit `gsnake-web/packages/gsnake-web-ui`
+2. run `npm --prefix gsnake-web run dev` (UI watch + web app dev)
+3. run `npm --prefix gsnake-editor run dev` to verify editor parity
+4. build/test both packages before merge
 
-**Rust submodules (gsnake-levels):**
-- `build.rs` detects root repo and creates `.cargo/config.toml`
-- Uses `[patch]` section to override git dependencies with local paths
-- Example: `git = "https://github.com/nntin/gsnake"` → `path = "../gsnake-core"`
-
-**JavaScript submodules (gsnake-web, gsnake-editor):**
-- `scripts/detect-local-deps.js` runs as preinstall hook
-- Dynamically updates `package.json` before npm install
-- Example: `git+https://...` → `file:../gsnake-core/...`
-
-#### Examples
-
-**Root repository (automatic local paths):**
-```bash
-cd gsnake-web
-npm install  # Automatically uses file:../gsnake-core/...
-npm run build
-
-cd ../gsnake-levels
-cargo build  # Automatically patches to use ../gsnake-core
-```
-
-**Standalone (git dependencies):**
-```bash
-git clone https://github.com/nntin/gsnake-web.git
-cd gsnake-web
-npm install  # Uses git+https://github.com/nntin/gsnake.git#main:...
-npm run build
-```
-
-#### Troubleshooting
-
-**Problem: Local override not working (still using git dependencies)**
-
-Check detection:
-```bash
-cd gsnake-web
-node scripts/detect-local-deps.js
-# Should output: "Root repository detected"
-```
-
-Verify paths:
-```bash
-ls ../.git  # Should exist
-ls ../gsnake-core  # Should exist
-```
-
-Force reinstall:
-```bash
-rm -rf node_modules package-lock.json
-npm install
-```
-
-**Problem: Build fails with "dependency not found"**
-
-Check submodules:
-```bash
-# From root repo
-git submodule update --init --recursive
-```
-
-Verify working directory:
-```bash
-pwd  # Should be inside gSnake/gsnake-web or similar
-```
-
-For more details, see:
-- [Repository Architecture](gsnake-specs/tasks/repo-architecture.md)
-- [Standalone Submodules Build PRD](gsnake-specs/tasks/prd-standalone-submodules-build.md)
+Breaking `gsnake-web-ui` changes are allowed, but editor compatibility must be updated quickly to keep standalone CI green.
 
 ### Building
 
@@ -199,7 +125,7 @@ Use exactly one package-level command per package:
 
 Coverage report output locations are standardized:
 
-- `gsnake-web/coverage/`
+- `gsnake-web/packages/gsnake-web-app/coverage/`
 - `gsnake-editor/coverage/`
 - `gsnake-core/target/llvm-cov/lcov.info`
 - `gsnake-levels/target/llvm-cov/lcov.info`
