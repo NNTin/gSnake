@@ -312,9 +312,23 @@ jobs:
       - name: Copy Build Artifacts
         run: |
           TARGET_DIR="gh-pages-root/${{ env.DEPLOY_DIR }}"
+          if [ -d "gsnake-web/packages/gsnake-web-app/dist" ]; then
+            BUILD_DIR="gsnake-web/packages/gsnake-web-app/dist"
+          elif [ -d "gsnake-web/dist" ]; then
+            BUILD_DIR="gsnake-web/dist"
+          else
+            echo "No build output directory found."
+            echo "Checked:"
+            echo "  - gsnake-web/packages/gsnake-web-app/dist"
+            echo "  - gsnake-web/dist"
+            echo "Available dist directories under gsnake-web:"
+            find gsnake-web -maxdepth 4 -type d -name dist | sort || true
+            exit 1
+          fi
+
           rm -rf "$TARGET_DIR"
           mkdir -p "$TARGET_DIR"
-          cp -r gsnake-web/dist/* "$TARGET_DIR"
+          cp -a "$BUILD_DIR"/. "$TARGET_DIR"/
 
       # --- Deploy ---
       - name: Deploy to GitHub Pages
