@@ -37,6 +37,8 @@ fi
 
 # Array to store job information
 declare -a JOB_NAMES=()
+declare -A JOB_REPO_DIRS=()
+declare -A JOB_WORKFLOW_RELS=()
 
 echo "=== Act CI Test Results ===" > "${RESULT_FILE}"
 echo "Started: $(date)" >> "${RESULT_FILE}"
@@ -44,12 +46,16 @@ echo "" >> "${RESULT_FILE}"
 
 # Function to run a single job
 run_job() {
-    local workflow="$1"
-    local job="$2"
-    local output_file="$3"
-    local status_file="$4"
+    local repo_dir="$1"
+    local workflow_rel="$2"
+    local job="$3"
+    local output_file="$4"
+    local status_file="$5"
 
-    if act -W "${workflow}" -j "${job}" --container-architecture linux/amd64 > "${output_file}" 2>&1; then
+    if (
+        cd "${repo_dir}" &&
+        act -W "${workflow_rel}" -j "${job}" --container-architecture linux/amd64 > "${output_file}" 2>&1
+    ); then
         echo "SUCCESS" > "${status_file}"
     else
         echo "FAILED" > "${status_file}"
@@ -62,8 +68,30 @@ for workflow in "${WORKFLOWS[@]}"; do
         continue
     fi
 
+    repo_dir="${workflow%%/.github/workflows/*}"
+    if [[ -z "${repo_dir}" ]]; then
+        repo_dir="."
+    fi
+    if grep -Eq "repository:[[:space:]]*NNTin/gSnake" "${workflow}"; then
+        repo_dir="."
+    fi
+    if [[ "${workflow}" == "./gsnake-specs/.github/workflows/test.yml" ]]; then
+        repo_dir="."
+    fi
+
+    if [[ "${repo_dir}" == "." ]]; then
+        workflow_rel="${workflow#./}"
+    else
+        workflow_rel="${workflow#${repo_dir}/}"
+    fi
+
     # Get list of jobs for this workflow
-    jobs=$(act -l -W "${workflow}" 2>/dev/null | tail -n +2 | awk '{print $2}' || true)
+    jobs=$(
+        (
+            cd "${repo_dir}" &&
+            act -l -W "${workflow_rel}" 2>/dev/null | tail -n +2 | awk '{print $2}'
+        ) || true
+    )
 
     if [[ -z "${jobs}" ]]; then
         continue
@@ -72,6 +100,8 @@ for workflow in "${WORKFLOWS[@]}"; do
     for job in ${jobs}; do
         job_name="${workflow}::${job}"
         JOB_NAMES+=("${job_name}")
+        JOB_REPO_DIRS["${job_name}"]="${repo_dir}"
+        JOB_WORKFLOW_RELS["${job_name}"]="${workflow_rel}"
     done
 done
 
@@ -87,11 +117,13 @@ for job_name in "${JOB_NAMES[@]}"; do
     job_index=$((job_index + 1))
     workflow="${job_name%%::*}"
     job="${job_name##*::}"
+    repo_dir="${JOB_REPO_DIRS["${job_name}"]}"
+    workflow_rel="${JOB_WORKFLOW_RELS["${job_name}"]}"
     output_file="${TEMP_DIR}/${workflow//\//_}_${job}.log"
     status_file="${TEMP_DIR}/${workflow//\//_}_${job}.status"
 
     echo "  Running: ${job_name} (${job_index} of ${total_jobs})"
-    run_job "${workflow}" "${job}" "${output_file}" "${status_file}"
+    run_job "${repo_dir}" "${workflow_rel}" "${job}" "${output_file}" "${status_file}"
 done
 
 # Generate summary
