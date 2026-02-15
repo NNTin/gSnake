@@ -1,14 +1,17 @@
-=== Act CI Test Results ===
-Started: Sun Feb 15 23:46:33 CET 2026
+=== Iteration Test Results (US-004) ===
+Started: Mon Feb 16 00:25:58 CET 2026
 
-## Summary
+## Local Checks
+- [SUCCESS] gsnake-web :: npm run check
+- [SUCCESS] gsnake-web :: npm test -- --run tests/unit/WasmGameEngine.test.ts
+- [SUCCESS] gsnake-web :: npm test
 
-- [SUCCESS] ./.github/workflows/ci.yml::test
-
-**Total: 1 passed, 0 failed**
+## Act CI Checks
+- [SUCCESS] gsnake-web/.github/workflows/ci.yml::typecheck
+- [SUCCESS] gsnake-web/.github/workflows/ci.yml::test
 
 ---
-Completed: Sun Feb 15 23:48:28 CET 2026
-Duration: 00:01:55
-Result: 1 passed, 0 failed
-Result file: /home/nntin/git/gSnake/scripts/test/result.txt
+Completed: Mon Feb 16 00:26:56 CET 2026
+Duration: 00:00:58
+Result: 5 passed, 0 failed
+Notes: One initial act invocation from monorepo root failed due relative workflow path assumptions; reran from gsnake-web root and all checks passed.

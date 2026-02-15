@@ -2,6 +2,7 @@
 - `GameEngine::process_move` returns `Result<bool, EngineError>`: use `Ok(false)` for rejected-but-valid gameplay input and `Err(...)` for runtime invariant violations; bindings decide how to map/report engine errors.
 - `GameEngine::new` is a fallible constructor: propagate/annotate `EngineError` at app boundaries (CLI/WASM/tooling) instead of unwrapping, and include level identifiers in context strings for debuggability.
 - Grid-size boundary tests should use `MAX_GRID_CELLS` directly (`1x1` minimum valid, `MAX_GRID_CELLS x 1` maximum valid, `(MAX_GRID_CELLS + 1) x 1` overflow) to lock behavior to the engine's safety cap constant.
+- For web startup level selection, pass the raw `level` query value to `WasmGameEngine.init(...)`; `WasmGameEngine` owns strict parsing and deterministic fallback-to-level-1 behavior.
 
 # Ralph Progress Log
 Started: Sun Feb 15 20:54:09 CET 2026
@@ -36,4 +37,15 @@ Started: Sun Feb 15 20:54:09 CET 2026
   - Patterns discovered: engine boundary tests are colocated in `gsnake-core/engine/core/src/engine.rs` under `mod tests` and should validate both error variant and error message text.
   - Gotchas encountered: `act` output is verbose and truncated in terminal captures; keep a concise summary in `scripts/test/result.txt` for iteration traceability.
   - Useful context: root CI `test` job runs `cargo test -p gsnake-core --verbose` plus the `generate_contract_fixtures` test target, so core engine boundary regressions are covered there.
+---
+## 2026-02-16 00:27:11 CET - US-004
+- Hardened `WasmGameEngine` start-level parsing to reject invalid query-like inputs (`NaN`, empty, decimal, text, non-positive) and centralized the fallback behavior in engine code.
+- Updated startup semantics so out-of-range start levels deterministically fall back to level 1, and switched `App.svelte` to pass the raw `level` query param into `WasmGameEngine.init(...)`.
+- Added/updated `WasmGameEngine` unit coverage for invalid query-like values fallback, above-range fallback behavior, and valid integer string handling.
+- Ran `npm run check` and `npm test` in `gsnake-web`, plus `act -W .github/workflows/ci.yml -j typecheck --container-architecture linux/amd64` and `act -W .github/workflows/ci.yml -j test --container-architecture linux/amd64` in `gsnake-web` (all success).
+- Files changed: `gsnake-web/packages/gsnake-web-app/engine/WasmGameEngine.ts`, `gsnake-web/packages/gsnake-web-app/components/App.svelte`, `gsnake-web/packages/gsnake-web-app/tests/unit/WasmGameEngine.test.ts`, `gsnake-web/packages/gsnake-web-app/engine/CLAUDE.md`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`.
+- **Learnings for future iterations:**
+  - Patterns discovered: URL-level sanitization should be engine-owned to keep every startup entrypoint consistent (query parsing and direct init calls).
+  - Gotchas encountered: running `act` for submodule workflows from the monorepo root can break relative script paths; run from submodule root with local workflow path.
+  - Useful context: browser tools were not available in this iteration, so manual browser verification is still needed for the URL-query startup path.
 ---
