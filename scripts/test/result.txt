@@ -1,20 +1,14 @@
 === Act CI Test Results ===
-Started: Sun Feb 15 23:06:10 CET 2026
+Started: Sun Feb 15 23:46:33 CET 2026
 
 ## Summary
 
 - [SUCCESS] ./.github/workflows/ci.yml::test
-- [FAILED] ./gsnake-levels/.github/workflows/ci.yml::test
 
-**Total: 1 passed, 1 failed**
-
-## Failure Notes
-
-- `./gsnake-levels/.github/workflows/ci.yml::test` failed in local `act` because `act` checks out remote sources; the container used a pre-change `gsnake-core` API where `GameEngine::new` is still infallible, so updated `gsnake-levels` code calling `.with_context(...)` on constructor result could not compile.
-- This mismatch is expected before pushing both repo and submodule updates.
+**Total: 1 passed, 0 failed**
 
 ---
-Completed: Sun Feb 15 23:09:08 CET 2026
-Duration: 00:02:58
-Result: 1 passed, 1 failed
+Completed: Sun Feb 15 23:48:28 CET 2026
+Duration: 00:01:55
+Result: 1 passed, 0 failed
 Result file: /home/nntin/git/gSnake/scripts/test/result.txt

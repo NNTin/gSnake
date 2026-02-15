@@ -1,6 +1,7 @@
 ## Codebase Patterns
 - `GameEngine::process_move` returns `Result<bool, EngineError>`: use `Ok(false)` for rejected-but-valid gameplay input and `Err(...)` for runtime invariant violations; bindings decide how to map/report engine errors.
 - `GameEngine::new` is a fallible constructor: propagate/annotate `EngineError` at app boundaries (CLI/WASM/tooling) instead of unwrapping, and include level identifiers in context strings for debuggability.
+- Grid-size boundary tests should use `MAX_GRID_CELLS` directly (`1x1` minimum valid, `MAX_GRID_CELLS x 1` maximum valid, `(MAX_GRID_CELLS + 1) x 1` overflow) to lock behavior to the engine's safety cap constant.
 
 # Ralph Progress Log
 Started: Sun Feb 15 20:54:09 CET 2026
@@ -25,4 +26,14 @@ Started: Sun Feb 15 20:54:09 CET 2026
   - Patterns discovered: constructor contract changes in `gsnake-core` ripple into sibling tooling repos (`gsnake-levels`) because they consume the same engine API.
   - Gotchas encountered: `Result::expect_err` on `initialize_engine` required avoiding a `Debug` bound on `WasmGameEngine`; use explicit `match` when only the error path matters.
   - Useful context: CLI/WASM entrypoints now surface invalid grid-size errors with level-specific context, making malformed level debugging deterministic.
+---
+## 2026-02-15 23:48:28 CET - US-003
+- Added explicit grid-size boundary tests in `GameEngine` for negative, zero, minimum valid, maximum valid, and maximum+1 cases.
+- Asserted exact `EngineError` variants and messages for invalid boundary values, and asserted successful engine creation at both valid boundaries.
+- Ran `cargo test --manifest-path gsnake-core/engine/core/Cargo.toml` and `act -W .github/workflows/ci.yml -j test --container-architecture linux/amd64` (success).
+- Files changed: `gsnake-core/engine/core/src/engine.rs`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`.
+- **Learnings for future iterations:**
+  - Patterns discovered: engine boundary tests are colocated in `gsnake-core/engine/core/src/engine.rs` under `mod tests` and should validate both error variant and error message text.
+  - Gotchas encountered: `act` output is verbose and truncated in terminal captures; keep a concise summary in `scripts/test/result.txt` for iteration traceability.
+  - Useful context: root CI `test` job runs `cargo test -p gsnake-core --verbose` plus the `generate_contract_fixtures` test target, so core engine boundary regressions are covered there.
 ---

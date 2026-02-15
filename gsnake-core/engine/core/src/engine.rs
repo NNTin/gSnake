@@ -848,42 +848,83 @@ mod tests {
     }
 
     #[test]
-    fn test_engine_creation_rejects_non_positive_grid_size() {
+    fn test_engine_creation_rejects_negative_grid_size() {
         let mut level = create_test_level();
-        level.grid_size = GridSize::new(-1, 0);
+        level.grid_size = GridSize::new(-1, 1);
 
-        let error = GameEngine::new(level).expect_err("non-positive grid size should fail");
+        let error = GameEngine::new(level).expect_err("negative grid size should fail");
         assert_eq!(
             error,
             EngineError::InvalidGridSize {
                 width: -1,
-                height: 0
+                height: 1
             }
         );
         assert_eq!(
             error.to_string(),
-            "Invalid grid size: width=-1, height=0. Both dimensions must be positive."
+            "Invalid grid size: width=-1, height=1. Both dimensions must be positive."
         );
     }
 
     #[test]
-    fn test_engine_creation_rejects_oversized_grid() {
+    fn test_engine_creation_rejects_zero_grid_size() {
         let mut level = create_test_level();
-        level.grid_size = GridSize::new(2_000, 2_000);
+        level.grid_size = GridSize::new(0, 1);
 
-        let error = GameEngine::new(level).expect_err("oversized grid should fail");
+        let error = GameEngine::new(level).expect_err("zero grid size should fail");
+        assert_eq!(
+            error,
+            EngineError::InvalidGridSize {
+                width: 0,
+                height: 1
+            }
+        );
+        assert_eq!(
+            error.to_string(),
+            "Invalid grid size: width=0, height=1. Both dimensions must be positive."
+        );
+    }
+
+    #[test]
+    fn test_engine_creation_accepts_minimum_valid_grid_size() {
+        let mut level = create_test_level();
+        level.grid_size = GridSize::new(1, 1);
+
+        let engine = GameEngine::new(level).expect("minimum valid grid should succeed");
+        assert_eq!(engine.level_state().grid_size, GridSize::new(1, 1));
+    }
+
+    #[test]
+    fn test_engine_creation_accepts_maximum_valid_grid_size() {
+        let mut level = create_test_level();
+        level.grid_size = GridSize::new(MAX_GRID_CELLS as i32, 1);
+
+        let engine = GameEngine::new(level).expect("max boundary grid should succeed");
+        assert_eq!(
+            engine.level_state().grid_size,
+            GridSize::new(MAX_GRID_CELLS as i32, 1)
+        );
+    }
+
+    #[test]
+    fn test_engine_creation_rejects_maximum_plus_one_grid_size() {
+        let mut level = create_test_level();
+        level.grid_size = GridSize::new((MAX_GRID_CELLS as i32) + 1, 1);
+
+        let error = GameEngine::new(level).expect_err("max+1 grid should fail");
         assert_eq!(
             error,
             EngineError::GridSizeExceedsMaxCells {
-                width: 2_000,
-                height: 2_000,
+                width: (MAX_GRID_CELLS as i32) + 1,
+                height: 1,
                 max_cells: MAX_GRID_CELLS,
             }
         );
         assert_eq!(
             error.to_string(),
             format!(
-                "Invalid grid size: width=2000, height=2000 exceeds safe cell cap ({} cells)",
+                "Invalid grid size: width={}, height=1 exceeds safe cell cap ({} cells)",
+                (MAX_GRID_CELLS as i32) + 1,
                 MAX_GRID_CELLS
             )
         );
