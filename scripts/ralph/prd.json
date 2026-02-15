@@ -1,327 +1,368 @@
 {
   "project": "gSnake",
-  "description": "Increase automated test coverage to 80%+ line coverage for gsnake-web, gsnake-editor, gsnake-core, and gsnake-levels with immediate blocking CI enforcement and expanded E2E quality gates.",
+  "description": "Reliability hardening backlog derived from FINDINGS (2026-02-15) and PRD 'gSnake Codebase Reliability Hardening'. Focus: remove critical panic/input-validation failures, centralize LevelDefinition contract validation, close high-priority test gaps, replace panic-oriented tooling paths, and document fragile engine semantics.",
   "userStories": [
     {
       "id": "US-001",
-      "title": "Define package-level coverage command contract",
-      "description": "As a maintainer, I need one documented coverage command per package so that local and CI execution are consistent.",
+      "title": "Replace critical snake-head unwrap in engine runtime path",
+      "description": "As a player, I want malformed snake state to return a structured engine error instead of panicking so gameplay failure handling is safe.",
       "acceptanceCriteria": [
-        "Document and align coverage commands for gsnake-web, gsnake-editor, gsnake-core, and gsnake-levels",
-        "Coverage output locations are standardized and committed",
-        "Running all four coverage commands locally succeeds",
+        "Replace head-segment access unwrap in gsnake-core/engine/core/src/engine.rs with explicit Result error handling",
+        "Return an EngineError variant with clear message when snake has zero segments",
+        "Normal gameplay behavior remains unchanged for valid state",
+        "Add or update a regression test proving malformed state returns error and does not panic",
         "Typecheck passes",
         "Tests pass"
       ],
       "priority": 1,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-002",
-      "title": "Add gsnake-web engine unit tests for initialization and error mapping",
-      "description": "As a developer, I want deterministic tests for web engine initialization and contract error mapping so that regressions are caught early.",
+      "title": "Enforce grid-size validation before engine allocations",
+      "description": "As a level author, I want invalid grid sizes rejected deterministically so the engine cannot panic or allocate unsafe frame buffers.",
       "acceptanceCriteria": [
-        "Add unit tests for WasmGameEngine init success and failure paths",
-        "Add assertions for contract error kind/message/context mapping",
-        "Cover next-level and reset behavior using mocked wasm engine",
+        "Validate gridSize in engine construction path before any frame/grid allocation",
+        "Reject non-positive gridSize values with explicit InvalidGridSize-style error",
+        "Reject oversized gridSize values beyond a defined safe frame-cell cap",
+        "Error messages include the invalid value to aid debugging",
         "Typecheck passes",
         "Tests pass"
       ],
       "priority": 2,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-003",
-      "title": "Add gsnake-web store wiring tests",
-      "description": "As a developer, I want tests for store event propagation so gameplay frame and error state updates remain correct.",
+      "title": "Add boundary tests for grid-size validation",
+      "description": "As a maintainer, I want explicit tests for grid-size boundaries so validation behavior stays stable across refactors.",
       "acceptanceCriteria": [
-        "Add tests for levelChanged, frameChanged, and engineError handling in stores",
-        "Assert snakeLength calculation and gameState synchronization from frame events",
-        "Cover contract debug exposure behavior with and without contractTest query param",
+        "Add tests covering negative, zero, minimum valid, maximum valid, and maximum+1 grid sizes",
+        "Tests assert explicit error type/message for invalid values",
+        "Tests assert successful engine creation for valid boundary values",
         "Typecheck passes",
         "Tests pass"
       ],
       "priority": 3,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-004",
-      "title": "Add gsnake-web UI tests for level loading and selector flows",
-      "description": "As a player, I want level selection and load failure UX protected by tests so that navigation and errors behave correctly.",
+      "title": "Harden level query parsing against NaN and non-integer input",
+      "description": "As a web player, I want invalid `level` query params sanitized so game startup is always deterministic.",
       "acceptanceCriteria": [
-        "Add component tests that cover level selector open/close and selecting a level",
-        "Add tests for level load error modal visibility and dismiss flow",
-        "Assert displayed labels/buttons for selector and load error states",
+        "Update gsnake-web/packages/gsnake-web-app/engine/WasmGameEngine.ts level parsing to reject NaN, empty, decimal, and non-numeric input",
+        "Out-of-range values consistently fall back to level 1 (or current default behavior if explicitly documented)",
+        "No invalid level parameter can place stores/engine in inconsistent startup state",
         "Typecheck passes",
-        "Tests pass",
-        "Verify in browser using dev-browser skill"
+        "Tests pass"
       ],
       "priority": 4,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-005",
-      "title": "Add gsnake-web UI tests for completion and restart flows",
-      "description": "As a player, I want completion banners and restart controls to remain reliable so level progression UX does not regress.",
+      "title": "Add WasmGameEngine query-parameter regression tests",
+      "description": "As a maintainer, I want tests for valid and invalid level query permutations so URL parsing regressions are caught quickly.",
       "acceptanceCriteria": [
-        "Add component tests for level complete and all-complete UI states",
-        "Add tests for restart button and keyboard-driven restart behavior through UI state",
-        "Assert correct CTA visibility based on game state",
+        "Add unit tests covering valid integer, NaN, empty, decimal, text, below-range, and above-range level query values",
+        "Tests assert selected level index/id after parsing and fallback",
+        "Tests verify engine/store initialization remains consistent when invalid query input is provided",
         "Typecheck passes",
-        "Tests pass",
-        "Verify in browser using dev-browser skill"
+        "Tests pass"
       ],
       "priority": 5,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-006",
-      "title": "Add gsnake-editor server API negative-path tests",
-      "description": "As a maintainer, I want editor API validation and failure paths covered so invalid payloads cannot silently regress behavior.",
+      "title": "Define canonical LevelDefinition schema artifact",
+      "description": "As a maintainer, I want one canonical LevelDefinition contract source so schema changes do not drift across Rust, editor server, web, and E2E tests.",
       "acceptanceCriteria": [
-        "Add tests for invalid/malformed payload rejection in editor API routes",
-        "Add tests for missing payload and unsupported method responses",
-        "Assert status codes and error payload structure",
+        "Create a canonical LevelDefinition schema artifact in a shared location and document ownership",
+        "Document how consumers regenerate or import derived validators/guards",
+        "Include all currently used optional fields (floatingFood, fallingFood, stones, spikes, totalFood semantics)",
+        "Add a minimal validation fixture set proving schema accepts valid and rejects invalid examples",
         "Typecheck passes",
         "Tests pass"
       ],
       "priority": 6,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-007",
-      "title": "Add gsnake-editor model and ID conversion tests",
-      "description": "As a developer, I want strong tests around level schema and ID conversion logic so editor output matches runtime contracts.",
+      "title": "Integrate editor server with schema-driven LevelDefinition validation",
+      "description": "As an editor maintainer, I want server validation to rely on the canonical schema so rule updates happen in one place.",
       "acceptanceCriteria": [
-        "Add tests for numeric ID validation boundaries and invalid inputs",
-        "Add tests for serialization shape used by save/export payloads",
-        "Assert compatibility with expected level contract fields",
+        "Refactor gsnake-editor/server.ts validation flow to call schema-driven validator module instead of scattered manual checks",
+        "Keep response contract stable or document any intentional response-shape changes",
+        "Return structured field-level validation errors for invalid payloads",
         "Typecheck passes",
         "Tests pass"
       ],
       "priority": 7,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-008",
-      "title": "Add gsnake-editor UI tests for EditorLayout save/load workflow",
-      "description": "As a level designer, I want save and load behavior covered so exported and imported levels preserve editor state.",
+      "title": "Replace duplicated E2E LevelDefinition guards with shared utility",
+      "description": "As a test maintainer, I want E2E contract checks to reuse one shared guard so test suites cannot drift.",
       "acceptanceCriteria": [
-        "Add component tests for save modal opening, payload generation, and save action",
-        "Add tests for loading valid level data and rendering resulting grid state",
-        "Add tests for invalid load payload handling with user-facing error feedback",
+        "Move duplicated isLevelDefinition-style checks from e2e specs into a shared utility module",
+        "Update e2e/complete-workflow.spec.ts and e2e/level-validation.spec.ts to use shared utility",
+        "No duplicated ad-hoc LevelDefinition guard logic remains in those specs",
         "Typecheck passes",
-        "Tests pass",
-        "Verify in browser using dev-browser skill"
+        "Tests pass"
       ],
       "priority": 8,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-009",
-      "title": "Add gsnake-editor GridCanvas interaction and undo/redo tests",
-      "description": "As a level designer, I want editing interactions and undo/redo protected so core authoring behavior remains stable.",
+      "title": "Add contract drift test between canonical schema and runtime consumers",
+      "description": "As a maintainer, I want automated drift detection so schema/validator mismatches fail fast in CI.",
       "acceptanceCriteria": [
-        "Add tests for entity placement/removal interactions in grid canvas",
-        "Add tests for snake segment ordering behavior during edits",
-        "Add tests that verify undo/redo stack behavior for multi-step edits",
+        "Add a test or CI check that fails when canonical schema and consumer validators/types diverge",
+        "Check covers at least editor server and web contract consumer paths",
+        "Failure message explains how to regenerate/synchronize artifacts",
         "Typecheck passes",
-        "Tests pass",
-        "Verify in browser using dev-browser skill"
+        "Tests pass"
       ],
       "priority": 9,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-010",
-      "title": "Expand gsnake-core engine branch coverage",
-      "description": "As a gameplay engineer, I want additional engine tests for uncovered branches so movement and gravity rules stay correct.",
+      "title": "Add editor validation edge-case API tests",
+      "description": "As a maintainer, I want editor API tests for risky input combinations so validation regressions are blocked.",
       "acceptanceCriteria": [
-        "Add tests for uncovered movement, collision, and gravity branches in core engine",
-        "Add regression tests for any bug discovered while writing new tests",
-        "Keep existing contract test fixtures passing",
+        "Add tests for gridSize=0 and negative/invalid coordinate payloads",
+        "Add tests for invalid field combinations identified in FINDINGS",
+        "Assert structured error payload fields and HTTP status behavior",
         "Typecheck passes",
         "Tests pass"
       ],
       "priority": 10,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-011",
-      "title": "Expand gsnake-core wasm binding coverage",
-      "description": "As a maintainer, I want wasm binding behavior and error conversion paths covered so web integration remains reliable.",
+      "title": "Add dedicated Cell.svelte component tests",
+      "description": "As a web maintainer, I want direct Cell component coverage so rendering regressions are caught at component level.",
       "acceptanceCriteria": [
-        "Add tests for wasm binding initialization and error serialization paths",
-        "Cover frame callback and direction parsing edge cases",
-        "Ensure generated contract types remain compatible with web tests",
+        "Create dedicated test file for Cell.svelte",
+        "Cover rendering for major cell variants and state-dependent visual output used by gameplay",
+        "Ensure test naming and structure match existing gsnake-web component test conventions",
         "Typecheck passes",
         "Tests pass"
       ],
       "priority": 11,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-012",
-      "title": "Expand gsnake-core CLI coverage",
-      "description": "As a maintainer, I want CLI input/playback branches tested so command-line tooling regressions are caught.",
+      "title": "Add dedicated Header.svelte component tests",
+      "description": "As a web maintainer, I want Header component behavior covered so HUD/navigation state regressions are detected.",
       "acceptanceCriteria": [
-        "Add tests for CLI input mapping and playback parse failure paths",
-        "Add tests for invalid file and malformed playback handling",
-        "Assert expected exit behavior/messages for failure scenarios",
+        "Create dedicated test file for Header.svelte",
+        "Cover displayed labels/actions for representative game state combinations",
+        "Assert event callback wiring for header actions where applicable",
         "Typecheck passes",
         "Tests pass"
       ],
       "priority": 12,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-013",
-      "title": "Expand gsnake-levels generation and sync coverage",
-      "description": "As a content pipeline maintainer, I want level generation and metadata sync branches tested so metadata updates remain safe.",
+      "title": "Add dedicated RestartButton.svelte component tests",
+      "description": "As a web maintainer, I want RestartButton behavior validated so restart UX remains reliable.",
       "acceptanceCriteria": [
-        "Add tests for generate-levels-json and sync-metadata success/failure paths",
-        "Cover path resolution behavior when running from root and package directories",
-        "Add regression tests for any discovered metadata sync bug",
+        "Create dedicated test file for RestartButton.svelte",
+        "Cover enabled/disabled rendering and click handler invocation",
+        "Assert accessibility-related button behavior used by existing component patterns",
         "Typecheck passes",
         "Tests pass"
       ],
       "priority": 13,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-014",
-      "title": "Expand gsnake-levels verification and playback coverage",
-      "description": "As a maintainer, I want verify and playback tooling edge cases covered so broken level/playback files fail predictably.",
+      "title": "Add KeyboardHandler tests for rapid and modifier-key input",
+      "description": "As a gameplay maintainer, I want keyboard edge-case coverage so input handling stays stable under real user behavior.",
       "acceptanceCriteria": [
-        "Add tests for verify, verify-all, and playback path inference error cases",
-        "Add tests for malformed playback files and missing resource behavior",
-        "Assert deterministic error messages and exit status behavior",
+        "Add tests for rapid repeated directional key presses",
+        "Add tests for modifier-key combinations and non-movement key behavior",
+        "Assert input lock/queue behavior expected by engine integration",
         "Typecheck passes",
         "Tests pass"
       ],
       "priority": 14,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-015",
-      "title": "Add E2E coverage for gameplay progression flow",
-      "description": "As a release owner, I want end-to-end gameplay progression scenarios so integration regressions are blocked.",
+      "title": "Expand web contract tests for missing cell-type variants",
+      "description": "As a contract maintainer, I want web contract tests to include all supported cell variants so serialization drift is caught.",
       "acceptanceCriteria": [
-        "Add E2E scenario covering level play-through, completion, and next-level progression",
-        "Add assertions for game-over and restart flows in browser",
-        "Ensure scenario runs deterministically in CI with existing setup scripts",
+        "Extend gsnake-web/tests/contract/types.test.ts to include FloatingFood, FallingFood, Stone, and Spike variants",
+        "Add mixed-variant fixture coverage where parsing/typing behavior differs",
+        "Assert invalid variant payloads fail with expected validation errors",
         "Typecheck passes",
-        "Tests pass",
-        "Verify in browser using dev-browser skill"
+        "Tests pass"
       ],
       "priority": 15,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-016",
-      "title": "Add E2E coverage for editor create-save-load flow",
-      "description": "As a release owner, I want full editor workflow E2E coverage so level authoring regressions are caught before merge.",
+      "title": "Expand core engine contract stone-interaction matrix tests",
+      "description": "As a core engine maintainer, I want broader stone interaction matrix coverage so physics contract behavior remains stable.",
       "acceptanceCriteria": [
-        "Add E2E scenario covering editor create, entity placement, save, and reload",
-        "Add assertions for API-backed test-level handoff from editor to web",
-        "Ensure scenario is stable under CI service startup order",
+        "Add tests in gsnake-core/engine/core/tests/contract_tests.rs for missing stone interaction combinations",
+        "Document expected outcomes in test case names or inline test fixtures",
+        "Ensure new matrix tests pass alongside existing gravity/collision suites",
         "Typecheck passes",
-        "Tests pass",
-        "Verify in browser using dev-browser skill"
+        "Tests pass"
       ],
       "priority": 16,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-017",
-      "title": "Fix source bugs discovered by new coverage tests",
-      "description": "As a maintainer, I want bugs uncovered by coverage work fixed immediately so reaching 80% does not hide known defects.",
+      "title": "Replace unwrap/expect in CLI playback error paths",
+      "description": "As a CLI user, I want playback tooling to return actionable errors instead of panicking on malformed input.",
       "acceptanceCriteria": [
-        "Fix each newly discovered bug in production code with minimal safe change",
-        "Add regression test for each bug fixed",
-        "No existing tests regress after bug fixes",
+        "Replace high-risk unwrap/expect usage in gsnake-core/engine/bindings/cli/src/playback.rs with Result propagation",
+        "Attach context to propagated errors so failing file/parse stage is visible",
+        "Add regression tests for malformed playback/file cases",
         "Typecheck passes",
         "Tests pass"
       ],
       "priority": 17,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-018",
-      "title": "Enforce gsnake-web 80% line threshold in CI",
-      "description": "As a maintainer, I want gsnake-web coverage to block merges below 80% so web test coverage cannot regress.",
+      "title": "Replace unwrap/expect in gsnake-levels generation path",
+      "description": "As a tooling user, I want generation commands to fail gracefully so batch operations provide useful diagnostics.",
       "acceptanceCriteria": [
-        "Set gsnake-web coverage threshold to at least 80% line coverage",
-        "Coverage job fails when gsnake-web drops below threshold",
-        "Coverage artifact upload remains enabled",
+        "Replace targeted unwrap/expect sites in gsnake-levels/src/generate.rs with Result-based error propagation",
+        "Preserve existing success-path behavior and output format",
+        "Add tests for generation failures to verify stable error messaging",
         "Typecheck passes",
         "Tests pass"
       ],
       "priority": 18,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-019",
-      "title": "Enforce gsnake-editor 80% line threshold in CI",
-      "description": "As a maintainer, I want gsnake-editor coverage to block merges below 80% so editor test coverage cannot regress.",
+      "title": "Replace unwrap/expect in gsnake-levels migration path",
+      "description": "As a tooling user, I want migration commands to report failures without panicking so migration issues are easier to debug.",
       "acceptanceCriteria": [
-        "Set gsnake-editor coverage threshold to at least 80% line coverage",
-        "Coverage job fails when gsnake-editor drops below threshold",
-        "Coverage artifact upload remains enabled",
+        "Replace targeted unwrap/expect sites in gsnake-levels/src/migration.rs with Result-based handling",
+        "Add contextual error messages for migration file and operation step",
+        "Add tests for malformed migration inputs and missing resources",
         "Typecheck passes",
         "Tests pass"
       ],
       "priority": 19,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-020",
-      "title": "Enforce gsnake-core and gsnake-levels 80% line thresholds",
-      "description": "As a maintainer, I want Rust package coverage to block merges below 80% so engine and levels coverage cannot regress.",
+      "title": "Introduce multi-error aggregation for levels validation workflows",
+      "description": "As a maintainer, I want batch validation to report all issues in one run so remediation is faster than fail-fast panic loops.",
       "acceptanceCriteria": [
-        "Set cargo-llvm-cov fail-under-lines to at least 80 for gsnake-core",
-        "Set cargo-llvm-cov fail-under-lines to at least 80 for gsnake-levels",
-        "Rust coverage jobs fail when thresholds are not met",
-        "Coverage artifact upload remains enabled",
+        "Implement an error aggregation pattern for at least one high-impact gsnake-levels validation workflow",
+        "Output includes multiple actionable validation errors in a single command run",
+        "Add tests proving aggregate behavior and stable output format",
         "Typecheck passes",
         "Tests pass"
       ],
       "priority": 20,
-      "passes": true,
+      "passes": false,
       "notes": ""
     },
     {
       "id": "US-021",
-      "title": "Make coverage and E2E checks required merge gates",
-      "description": "As a release owner, I want all coverage and E2E checks required on PRs so merges are blocked unless quality gates pass.",
+      "title": "Document gravity and stone collision order dependency",
+      "description": "As a contributor, I want clear documentation of physics order dependency so future edits do not introduce off-by-one regressions.",
       "acceptanceCriteria": [
-        "Coverage and E2E workflows are configured as required status checks",
-        "PR validation fails when any required coverage or E2E check fails",
-        "Root and package CI behavior is consistent for blocking enforcement",
+        "Add focused explanatory comments in gsnake-core/engine/core/src/gravity.rs for order-sensitive collision logic",
+        "Add or update developer documentation with a short rationale and maintenance guidance",
+        "Reference at least one test covering this order dependency from docs/comments",
         "Typecheck passes",
         "Tests pass"
       ],
       "priority": 21,
-      "passes": true,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-022",
+      "title": "Document level serialization semantics for optional fields",
+      "description": "As an editor/runtime maintainer, I want totalFood and optional-field semantics explicitly documented so round-trip behavior stays consistent.",
+      "acceptanceCriteria": [
+        "Document semantics for totalFood, floatingFood, fallingFood, stones, and spikes in a single authoritative developer document",
+        "Define round-trip expectations between editor model and server serialization",
+        "Link documentation from the relevant editor/server source files",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 22,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-023",
+      "title": "Centralize WasmGameEngine frame emission pattern documentation",
+      "description": "As a web maintainer, I want one authoritative frame-emission guide so initialization/order assumptions remain consistent.",
+      "acceptanceCriteria": [
+        "Document required frame emission pattern (including explicit getFrame-after-create behavior) in one authoritative location",
+        "Update implementation comments/README links so contributors can discover the pattern quickly",
+        "Add or update regression test coverage that depends on this initialization sequence",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 23,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-024",
+      "title": "Final reliability hardening verification sweep",
+      "description": "As a release owner, I want a final integrated verification pass so the full reliability-hardening backlog ships with evidence.",
+      "acceptanceCriteria": [
+        "Run full required quality checks for impacted packages (typecheck, lint, tests) and resolve regressions",
+        "Confirm no targeted critical/high findings remain unaddressed in implemented scope",
+        "Update gsnake-specs/task artifacts or status notes with implemented outcomes and residual risks",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 24,
+      "passes": false,
       "notes": ""
     }
   ]
