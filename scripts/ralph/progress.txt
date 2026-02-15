@@ -1,5 +1,6 @@
 ## Codebase Patterns
 - `GameEngine::process_move` returns `Result<bool, EngineError>`: use `Ok(false)` for rejected-but-valid gameplay input and `Err(...)` for runtime invariant violations; bindings decide how to map/report engine errors.
+- `GameEngine::new` is a fallible constructor: propagate/annotate `EngineError` at app boundaries (CLI/WASM/tooling) instead of unwrapping, and include level identifiers in context strings for debuggability.
 
 # Ralph Progress Log
 Started: Sun Feb 15 20:54:09 CET 2026
@@ -13,4 +14,15 @@ Started: Sun Feb 15 20:54:09 CET 2026
   - Patterns discovered: for engine move semantics, callers must handle both soft rejection (`Ok(false)`) and hard invariant errors (`Err(EngineError)`); this avoids silently swallowing malformed state.
   - Gotchas encountered: changing a core engine API requires propagating signature updates through bindings and demos, not just core tests.
   - Useful context: WASM adapter maps engine invariant failures to `ContractErrorKind::InternalError` and should preserve the engine error message for debugging.
+---
+## 2026-02-15 23:05:16 CET - US-002
+- Added constructor-time grid-size validation in `GameEngine::new` and made the constructor fallible (`Result<Self, EngineError>`) so invalid dimensions are rejected before runtime frame/grid usage.
+- Added `EngineError::InvalidGridSize { width, height }` and `EngineError::GridSizeExceedsMaxCells { ... }` with explicit messages including invalid values; introduced `MAX_GRID_CELLS` as the enforced safety cap.
+- Updated engine consumers (core tests/examples, wasm binding, CLI binding, and `gsnake-levels` verification/solver tooling) to handle constructor errors via propagation/context or explicit test/demo `expect(...)`.
+- Added regression coverage for non-positive and oversized grid-size rejection and ensured defensive frame generation behavior is still safe for malformed runtime state.
+- Files changed: `gsnake-core/engine/core/src/models.rs`, `gsnake-core/engine/core/src/engine.rs`, `gsnake-core/engine/core/examples/gameplay_demo.rs`, `gsnake-core/engine/bindings/wasm/src/lib.rs`, `gsnake-core/engine/bindings/cli/src/main.rs`, `gsnake-core/engine/bindings/cli/examples/ui_demo.rs`, `gsnake-levels/src/verify.rs`, `gsnake-levels/src/bin/solve_level.rs`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`.
+- **Learnings for future iterations:**
+  - Patterns discovered: constructor contract changes in `gsnake-core` ripple into sibling tooling repos (`gsnake-levels`) because they consume the same engine API.
+  - Gotchas encountered: `Result::expect_err` on `initialize_engine` required avoiding a `Debug` bound on `WasmGameEngine`; use explicit `match` when only the error path matters.
+  - Useful context: CLI/WASM entrypoints now surface invalid grid-size errors with level-specific context, making malformed level debugging deterministic.
 ---

@@ -241,6 +241,15 @@ impl Frame {
 #[ts(rename_all = "camelCase")]
 pub enum EngineError {
     SnakeHasNoSegments,
+    InvalidGridSize {
+        width: i32,
+        height: i32,
+    },
+    GridSizeExceedsMaxCells {
+        width: i32,
+        height: i32,
+        max_cells: usize,
+    },
 }
 
 impl fmt::Display for EngineError {
@@ -250,6 +259,22 @@ impl fmt::Display for EngineError {
                 write!(
                     f,
                     "Invalid snake state: expected at least one segment, found 0"
+                )
+            },
+            Self::InvalidGridSize { width, height } => {
+                write!(
+                    f,
+                    "Invalid grid size: width={width}, height={height}. Both dimensions must be positive."
+                )
+            },
+            Self::GridSizeExceedsMaxCells {
+                width,
+                height,
+                max_cells,
+            } => {
+                write!(
+                    f,
+                    "Invalid grid size: width={width}, height={height} exceeds safe cell cap ({max_cells} cells)"
                 )
             },
         }

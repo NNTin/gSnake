@@ -125,7 +125,12 @@ fn run_game(
     record_mode: bool,
 ) -> Result<()> {
     let mut current_level_index = 0;
-    let mut engine = GameEngine::new(levels[current_level_index].clone());
+    let mut engine = GameEngine::new(levels[current_level_index].clone()).with_context(|| {
+        format!(
+            "Invalid grid size in level id {}",
+            levels[current_level_index].id
+        )
+    })?;
     let mut frame = engine.generate_frame();
     let mut playback_state = playback.and_then(PlaybackState::new);
     let mut playback_done_at: Option<Instant> = None;
@@ -171,7 +176,7 @@ fn run_game(
                     &mut current_level_index,
                     levels,
                     single_level_mode,
-                ) {
+                )? {
                     return finalize_exit(frame.state.status, single_level_mode);
                 }
             } else {
@@ -194,7 +199,7 @@ fn run_game(
                     &mut current_level_index,
                     levels,
                     single_level_mode,
-                ) {
+                )? {
                     return finalize_exit(frame.state.status, single_level_mode);
                 }
             }
@@ -215,13 +220,18 @@ fn apply_action(
     current_level_index: &mut usize,
     levels: &[gsnake_core::LevelDefinition],
     single_level_mode: bool,
-) -> bool {
+) -> Result<bool> {
     match action {
         Action::Quit => {
-            return false;
+            return Ok(false);
         },
         Action::Reset => {
-            *engine = GameEngine::new(levels[*current_level_index].clone());
+            *engine = GameEngine::new(levels[*current_level_index].clone()).with_context(|| {
+                format!(
+                    "Invalid grid size in level id {}",
+                    levels[*current_level_index].id
+                )
+            })?;
             *frame = engine.generate_frame();
         },
         Action::Continue => {
@@ -233,13 +243,26 @@ fn apply_action(
                     frame.state.status = GameStatus::AllComplete;
                 } else {
                     // Load next level
-                    *engine = GameEngine::new(levels[*current_level_index].clone());
+                    *engine = GameEngine::new(levels[*current_level_index].clone()).with_context(
+                        || {
+                            format!(
+                                "Invalid grid size in level id {}",
+                                levels[*current_level_index].id
+                            )
+                        },
+                    )?;
                     *frame = engine.generate_frame();
                 }
             } else if frame.state.status == GameStatus::AllComplete {
                 // Restart from first level
                 *current_level_index = 0;
-                *engine = GameEngine::new(levels[*current_level_index].clone());
+                *engine =
+                    GameEngine::new(levels[*current_level_index].clone()).with_context(|| {
+                        format!(
+                            "Invalid grid size in level id {}",
+                            levels[*current_level_index].id
+                        )
+                    })?;
                 *frame = engine.generate_frame();
             }
         },
@@ -269,7 +292,7 @@ fn apply_action(
         },
     }
 
-    true
+    Ok(true)
 }
 
 fn finalize_exit(status: GameStatus, single_level_mode: bool) -> Result<()> {

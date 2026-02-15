@@ -35,7 +35,7 @@ impl WasmGameEngine {
         let level = parse_level_result(from_value(level_json).map_err(|e| e.to_string()))
             .map_err(|error| contract_error_from_data(&error))?;
 
-        Ok(initialize_engine(level))
+        initialize_engine(level).map_err(|error| contract_error_from_data(&error))
     }
 
     /// Registers a JavaScript callback to be invoked whenever the game state changes
@@ -120,11 +120,15 @@ fn serialize_frame(frame: &Frame) -> Result<JsValue, JsValue> {
         .map_err(|e| contract_error(ContractErrorKind::SerializationFailed, &e.to_string()))
 }
 
-fn initialize_engine(level: LevelDefinition) -> WasmGameEngine {
-    WasmGameEngine {
-        engine: GameEngine::new(level),
+fn initialize_engine(level: LevelDefinition) -> Result<WasmGameEngine, ContractError> {
+    let engine = GameEngine::new(level).map_err(|error| {
+        build_contract_error(ContractErrorKind::InitializationFailed, &error.to_string())
+    })?;
+
+    Ok(WasmGameEngine {
+        engine,
         on_frame_callback: None,
-    }
+    })
 }
 
 fn parse_level_result(
@@ -250,9 +254,26 @@ mod tests {
 
     #[test]
     fn test_initialize_engine_sets_empty_callback() {
-        let engine = initialize_engine(create_level());
+        let engine = initialize_engine(create_level()).expect("valid level should initialize");
         assert_eq!(engine.engine.game_state().moves, 0);
         assert!(engine.on_frame_callback.is_none());
+    }
+
+    #[test]
+    fn test_initialize_engine_maps_invalid_grid_to_initialization_failed() {
+        let mut level = create_level();
+        level.grid_size = GridSize::new(0, 5);
+
+        let Err(error) = initialize_engine(level) else {
+            panic!("invalid grid size should fail");
+        };
+
+        assert_eq!(error.kind, ContractErrorKind::InitializationFailed);
+        assert!(
+            error.message.contains("width=0, height=5"),
+            "unexpected error message: {}",
+            error.message
+        );
     }
 
     #[test]
@@ -301,7 +322,8 @@ mod tests {
 
     #[test]
     fn test_process_move_on_engine_accepts_valid_direction() {
-        let mut engine = GameEngine::new(create_level());
+        let mut engine =
+            GameEngine::new(create_level()).expect("test level should have a valid grid size");
         let frame = process_move_on_engine(&mut engine, Direction::North)
             .expect("valid direction should produce frame");
         assert_eq!(frame.state.moves, 1);
@@ -309,7 +331,8 @@ mod tests {
 
     #[test]
     fn test_process_move_on_engine_rejects_opposite_direction() {
-        let mut engine = GameEngine::new(create_level());
+        let mut engine =
+            GameEngine::new(create_level()).expect("test level should have a valid grid size");
         let error = process_move_on_engine(&mut engine, Direction::West)
             .expect_err("opposite direction should be rejected");
         assert_eq!(error.kind, ContractErrorKind::InputRejected);
@@ -320,7 +343,7 @@ mod tests {
     fn test_process_move_on_engine_maps_malformed_state_to_internal_error() {
         let mut level = create_level();
         level.snake = vec![];
-        let mut engine = GameEngine::new(level);
+        let mut engine = GameEngine::new(level).expect("test level should have a valid grid size");
 
         let error = process_move_on_engine(&mut engine, Direction::North)
             .expect_err("empty snake should map to internal error");
@@ -334,14 +357,18 @@ mod tests {
 
     #[test]
     fn test_emit_frame_with_callback_without_callback_is_noop() {
-        let frame = GameEngine::new(create_level()).generate_frame();
+        let frame = GameEngine::new(create_level())
+            .expect("test level should have a valid grid size")
+            .generate_frame();
         let result = emit_frame_with_callback(&frame, None);
         assert!(result.is_ok());
     }
 
     #[test]
     fn test_emit_frame_with_callback_invokes_callback() {
-        let frame = GameEngine::new(create_level()).generate_frame();
+        let frame = GameEngine::new(create_level())
+            .expect("test level should have a valid grid size")
+            .generate_frame();
         let called = Cell::new(false);
         let mut callback = |_: &Frame| {
             called.set(true);
@@ -353,7 +380,9 @@ mod tests {
 
     #[test]
     fn test_emit_frame_with_callback_maps_callback_errors() {
-        let frame = GameEngine::new(create_level()).generate_frame();
+        let frame = GameEngine::new(create_level())
+            .expect("test level should have a valid grid size")
+            .generate_frame();
         let mut callback = |_: &Frame| Err("callback failed".to_string());
         let error = emit_frame_with_callback(&frame, Some(&mut callback))
             .expect_err("callback failures should map to internal error");

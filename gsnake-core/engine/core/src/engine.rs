@@ -1,9 +1,9 @@
 use crate::{
     gravity, stone_mechanics, CellType, Direction, EngineError, Frame, GameState, GameStatus,
-    LevelDefinition, LevelState, Position,
+    GridSize, LevelDefinition, LevelState, Position,
 };
 
-const MAX_FRAME_CELLS: usize = 2_000_000;
+pub const MAX_GRID_CELLS: usize = 2_000_000;
 
 /// Main game engine that manages game state and processes moves
 #[derive(Debug, Clone)]
@@ -16,8 +16,9 @@ pub struct GameEngine {
 
 impl GameEngine {
     /// Creates a new game engine with the given level definition
-    #[must_use]
-    pub fn new(level: LevelDefinition) -> Self {
+    pub fn new(level: LevelDefinition) -> Result<Self, EngineError> {
+        Self::validate_grid_size(level.grid_size)?;
+
         // Calculate total food requirement
         // If total_food is explicitly set (non-zero), use it
         // Otherwise, count all food items (regular + floating + falling)
@@ -30,12 +31,12 @@ impl GameEngine {
         let current_level = if level.id == 0 { 1 } else { level.id };
         let level_state = LevelState::from_definition(&level);
 
-        Self {
+        Ok(Self {
             game_state: GameState::new(current_level, total_food),
             level_definition: level,
             level_state,
             input_locked: false,
-        }
+        })
     }
 
     /// Returns a reference to the current game state
@@ -163,7 +164,7 @@ impl GameEngine {
         let Some(cell_count) = width.checked_mul(height) else {
             return Frame::new(Vec::new(), self.game_state.clone());
         };
-        if cell_count > MAX_FRAME_CELLS {
+        if cell_count > MAX_GRID_CELLS {
             return Frame::new(Vec::new(), self.game_state.clone());
         }
 
@@ -372,6 +373,36 @@ impl GameEngine {
                 | (Direction::West, Direction::East)
         )
     }
+
+    fn validate_grid_size(grid_size: GridSize) -> Result<(), EngineError> {
+        let width = grid_size.width;
+        let height = grid_size.height;
+
+        if width <= 0 || height <= 0 {
+            return Err(EngineError::InvalidGridSize { width, height });
+        }
+
+        let width_usize =
+            usize::try_from(width).map_err(|_| EngineError::InvalidGridSize { width, height })?;
+        let height_usize =
+            usize::try_from(height).map_err(|_| EngineError::InvalidGridSize { width, height })?;
+        let Some(cell_count) = width_usize.checked_mul(height_usize) else {
+            return Err(EngineError::GridSizeExceedsMaxCells {
+                width,
+                height,
+                max_cells: MAX_GRID_CELLS,
+            });
+        };
+        if cell_count > MAX_GRID_CELLS {
+            return Err(EngineError::GridSizeExceedsMaxCells {
+                width,
+                height,
+                max_cells: MAX_GRID_CELLS,
+            });
+        }
+
+        Ok(())
+    }
 }
 
 #[cfg(test)]
@@ -392,10 +423,14 @@ mod tests {
         )
     }
 
+    fn create_engine(level: LevelDefinition) -> GameEngine {
+        GameEngine::new(level).expect("test level should have a valid grid size")
+    }
+
     #[test]
     fn test_engine_creation() {
         let level = create_test_level();
-        let engine = GameEngine::new(level);
+        let engine = create_engine(level);
 
         assert_eq!(engine.game_state().status, GameStatus::Playing);
         assert_eq!(engine.game_state().moves, 0);
@@ -418,7 +453,7 @@ mod tests {
         level.falling_food = vec![Position::new(5, 5)];
         level.total_food = 9;
 
-        let engine = GameEngine::new(level);
+        let engine = create_engine(level);
 
         assert_eq!(engine.game_state().current_level, 1);
         assert_eq!(engine.game_state().total_food, 9);
@@ -431,7 +466,7 @@ mod tests {
         level.snake = vec![Position::new(5, 5)];
         level.obstacles = vec![Position::new(5, 6)]; // Platform below
 
-        let mut engine = GameEngine::new(level);
+        let mut engine = create_engine(level);
 
         // Move north - snake will move to (5,4) then fall back to (5,5) due to gravity
         let result = engine
@@ -449,7 +484,7 @@ mod tests {
         level.snake = vec![Position::new(5, 5), Position::new(5, 6)];
         level.snake_direction = Direction::North;
 
-        let mut engine = GameEngine::new(level);
+        let mut engine = create_engine(level);
 
         // Try to move south (opposite of north)
         let result = engine
@@ -462,7 +497,7 @@ mod tests {
     #[test]
     fn test_process_move_rejected_when_game_not_playing() {
         let level = create_test_level();
-        let mut engine = GameEngine::new(level);
+        let mut engine = create_engine(level);
         engine.game_state.status = GameStatus::GameOver;
 
         let result = engine
@@ -479,7 +514,7 @@ mod tests {
         let mut level = create_test_level();
         level.snake = Vec::new();
 
-        let mut engine = GameEngine::new(level);
+        let mut engine = create_engine(level);
         let result = engine.process_move(Direction::East);
 
         assert_eq!(result, Err(EngineError::SnakeHasNoSegments));
@@ -493,7 +528,7 @@ mod tests {
         level.snake = vec![Position::new(5, 5)];
         level.obstacles = vec![Position::new(4, 6)];
 
-        let mut engine = GameEngine::new(level);
+        let mut engine = create_engine(level);
         engine.level_state.snake.direction = None;
 
         let result = engine
@@ -511,7 +546,7 @@ mod tests {
         level.snake = vec![Position::new(5, 4)];
         level.food = vec![Position::new(5, 3)];
 
-        let mut engine = GameEngine::new(level);
+        let mut engine = create_engine(level);
 
         // Move north to collect food
         engine
@@ -531,7 +566,7 @@ mod tests {
         level.floating_food = vec![Position::new(5, 2)];
         level.obstacles = vec![Position::new(5, 3)];
 
-        let mut engine = GameEngine::new(level);
+        let mut engine = create_engine(level);
         let result = engine
             .process_move(Direction::East)
             .expect("valid snake state should not fail");
@@ -550,7 +585,7 @@ mod tests {
         level.falling_food = vec![Position::new(5, 2)];
         level.obstacles = vec![Position::new(5, 3)];
 
-        let mut engine = GameEngine::new(level);
+        let mut engine = create_engine(level);
         let result = engine
             .process_move(Direction::East)
             .expect("valid snake state should not fail");
@@ -570,7 +605,7 @@ mod tests {
         level.obstacles = vec![Position::new(4, 2)];
         level.stones = vec![Position::new(3, 2)];
 
-        let mut engine = GameEngine::new(level);
+        let mut engine = create_engine(level);
         let result = engine
             .process_move(Direction::East)
             .expect("valid snake state should not fail");
@@ -587,7 +622,7 @@ mod tests {
         level.snake = vec![Position::new(0, 5)];
         level.snake_direction = Direction::North;
 
-        let mut engine = GameEngine::new(level);
+        let mut engine = create_engine(level);
 
         // Move west into wall
         engine
@@ -603,7 +638,7 @@ mod tests {
         level.snake = vec![Position::new(3, 4)];
         level.obstacles = vec![Position::new(3, 3)];
 
-        let mut engine = GameEngine::new(level);
+        let mut engine = create_engine(level);
 
         // Move north into obstacle
         engine
@@ -625,7 +660,7 @@ mod tests {
         ];
         level.spikes = vec![Position::new(2, 2)];
 
-        let mut engine = GameEngine::new(level);
+        let mut engine = create_engine(level);
 
         engine
             .process_move(Direction::East)
@@ -649,7 +684,7 @@ mod tests {
         // Add platform below to prevent falling through
         level.obstacles = vec![Position::new(5, 7), Position::new(6, 7)];
 
-        let mut engine = GameEngine::new(level);
+        let mut engine = create_engine(level);
 
         // Move south into own body at (5, 6)
         engine
@@ -665,7 +700,7 @@ mod tests {
         level.snake = vec![Position::new(5, 2)];
         level.obstacles = vec![Position::new(6, 5)]; // Floor at y=5 in column 6
 
-        let mut engine = GameEngine::new(level);
+        let mut engine = create_engine(level);
 
         // Move east (should trigger gravity)
         engine
@@ -684,7 +719,7 @@ mod tests {
         level.obstacles = vec![];
         level.spikes = vec![Position::new(3, 3)];
 
-        let mut engine = GameEngine::new(level);
+        let mut engine = create_engine(level);
         let result = engine
             .process_move(Direction::East)
             .expect("valid snake state should not fail");
@@ -700,7 +735,7 @@ mod tests {
         level.snake = vec![Position::new(5, 2)];
         level.food = vec![Position::new(6, 3)]; // Food at (6, 3)
 
-        let mut engine = GameEngine::new(level);
+        let mut engine = create_engine(level);
 
         // Move east (should trigger gravity but stop at food)
         engine
@@ -718,7 +753,7 @@ mod tests {
         level.food = vec![];
         level.exit = Position::new(9, 9);
 
-        let mut engine = GameEngine::new(level);
+        let mut engine = create_engine(level);
         engine.game_state.food_collected = engine.game_state.total_food;
 
         // Move south to exit
@@ -740,7 +775,7 @@ mod tests {
         level.spikes = vec![Position::new(2, 5)];
         level.exit = Position::new(2, 3);
 
-        let mut engine = GameEngine::new(level);
+        let mut engine = create_engine(level);
         engine.game_state.food_collected = engine.game_state.total_food;
 
         // Move onto exit. Gravity would otherwise continue falling into a spike at (2,5).
@@ -762,7 +797,7 @@ mod tests {
         level.spikes = vec![Position::new(4, 4)];
         level.exit = Position::new(4, 4);
 
-        let mut engine = GameEngine::new(level);
+        let mut engine = create_engine(level);
         engine.game_state.food_collected = engine.game_state.total_food;
 
         // Moving onto a spike on the exit should still be game over.
@@ -780,7 +815,7 @@ mod tests {
         level.food = vec![Position::new(5, 5)]; // Food still remaining
         level.exit = Position::new(9, 9);
 
-        let mut engine = GameEngine::new(level);
+        let mut engine = create_engine(level);
 
         // Move south to exit (but haven't collected all food)
         engine
@@ -800,7 +835,7 @@ mod tests {
         level.food = vec![Position::new(3, 3)];
         level.exit = Position::new(4, 4);
 
-        let engine = GameEngine::new(level);
+        let engine = create_engine(level);
         let frame = engine.generate_frame();
 
         assert_eq!(frame.grid.len(), 5);
@@ -813,35 +848,52 @@ mod tests {
     }
 
     #[test]
-    fn test_frame_generation_invalid_grid_is_safe() {
+    fn test_engine_creation_rejects_non_positive_grid_size() {
         let mut level = create_test_level();
-        level.grid_size = GridSize::new(-1, 5);
+        level.grid_size = GridSize::new(-1, 0);
 
-        let engine = GameEngine::new(level);
-        let frame = engine.generate_frame();
-
-        assert!(frame.grid.is_empty());
+        let error = GameEngine::new(level).expect_err("non-positive grid size should fail");
+        assert_eq!(
+            error,
+            EngineError::InvalidGridSize {
+                width: -1,
+                height: 0
+            }
+        );
+        assert_eq!(
+            error.to_string(),
+            "Invalid grid size: width=-1, height=0. Both dimensions must be positive."
+        );
     }
 
     #[test]
-    fn test_frame_generation_invalid_height_is_safe() {
-        let mut level = create_test_level();
-        level.grid_size = GridSize::new(5, 0);
-
-        let engine = GameEngine::new(level);
-        let frame = engine.generate_frame();
-
-        assert!(frame.grid.is_empty());
-    }
-
-    #[test]
-    fn test_frame_generation_oversized_grid_is_safe() {
+    fn test_engine_creation_rejects_oversized_grid() {
         let mut level = create_test_level();
         level.grid_size = GridSize::new(2_000, 2_000);
 
-        let engine = GameEngine::new(level);
-        let frame = engine.generate_frame();
+        let error = GameEngine::new(level).expect_err("oversized grid should fail");
+        assert_eq!(
+            error,
+            EngineError::GridSizeExceedsMaxCells {
+                width: 2_000,
+                height: 2_000,
+                max_cells: MAX_GRID_CELLS,
+            }
+        );
+        assert_eq!(
+            error.to_string(),
+            format!(
+                "Invalid grid size: width=2000, height=2000 exceeds safe cell cap ({} cells)",
+                MAX_GRID_CELLS
+            )
+        );
+    }
 
+    #[test]
+    fn test_frame_generation_invalid_runtime_grid_is_safe() {
+        let mut engine = create_engine(create_test_level());
+        engine.level_state.grid_size = GridSize::new(-1, 5);
+        let frame = engine.generate_frame();
         assert!(frame.grid.is_empty());
     }
 
@@ -858,7 +910,7 @@ mod tests {
         level.spikes = vec![Position::new(-1, 3)];
         level.exit = Position::new(4, 4);
 
-        let engine = GameEngine::new(level);
+        let engine = create_engine(level);
         let frame = engine.generate_frame();
 
         assert_eq!(frame.grid[1][1], CellType::Obstacle);

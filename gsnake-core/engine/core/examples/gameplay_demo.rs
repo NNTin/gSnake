@@ -55,7 +55,7 @@ fn main() {
         Direction::East,
     );
 
-    let mut engine = GameEngine::new(level);
+    let mut engine = GameEngine::new(level).expect("demo level should have a valid grid size");
 
     println!("Initial state:");
     print_frame(&engine);

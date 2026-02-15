@@ -36,7 +36,7 @@ fn run_demo(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>) -> Result<()>
 
     // Create test level
     let level = create_test_level();
-    let mut engine = GameEngine::new(level);
+    let mut engine = GameEngine::new(level).expect("demo level should have a valid grid size");
 
     // Get initial frame
     let mut frame = engine.generate_frame();
@@ -97,7 +97,8 @@ fn run_demo(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>) -> Result<()>
 
                         // Reset engine and create different states
                         let level = create_test_level();
-                        engine = GameEngine::new(level);
+                        engine = GameEngine::new(level)
+                            .expect("demo level should have a valid grid size");
                         frame = engine.generate_frame();
 
                         match demo_state {
