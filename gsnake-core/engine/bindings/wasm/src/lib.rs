@@ -161,7 +161,9 @@ fn process_move_on_engine(
     engine: &mut GameEngine,
     direction: Direction,
 ) -> Result<Frame, ContractError> {
-    let processed = engine.process_move(direction);
+    let processed = engine.process_move(direction).map_err(|error| {
+        build_contract_error(ContractErrorKind::InternalError, &error.to_string())
+    })?;
     if !processed {
         return Err(build_contract_error(
             ContractErrorKind::InputRejected,
@@ -312,6 +314,22 @@ mod tests {
             .expect_err("opposite direction should be rejected");
         assert_eq!(error.kind, ContractErrorKind::InputRejected);
         assert_eq!(error.message, "Input rejected by engine");
+    }
+
+    #[test]
+    fn test_process_move_on_engine_maps_malformed_state_to_internal_error() {
+        let mut level = create_level();
+        level.snake = vec![];
+        let mut engine = GameEngine::new(level);
+
+        let error = process_move_on_engine(&mut engine, Direction::North)
+            .expect_err("empty snake should map to internal error");
+
+        assert_eq!(error.kind, ContractErrorKind::InternalError);
+        assert_eq!(
+            error.message,
+            "Invalid snake state: expected at least one segment, found 0"
+        );
     }
 
     #[test]

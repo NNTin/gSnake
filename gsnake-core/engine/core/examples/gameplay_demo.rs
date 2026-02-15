@@ -61,27 +61,27 @@ fn main() {
     print_frame(&engine);
 
     println!("\n--- Move 1: East (head towards first food) ---");
-    engine.process_move(Direction::East);
+    let _ = engine.process_move(Direction::East);
     print_frame(&engine);
 
     println!("\n--- Move 2: East (collect first food) ---");
-    engine.process_move(Direction::East);
+    let _ = engine.process_move(Direction::East);
     print_frame(&engine);
 
     println!("\n--- Move 3: East (head towards second food) ---");
-    engine.process_move(Direction::East);
+    let _ = engine.process_move(Direction::East);
     print_frame(&engine);
 
     println!("\n--- Move 4: East (collect second food) ---");
-    engine.process_move(Direction::East);
+    let _ = engine.process_move(Direction::East);
     print_frame(&engine);
 
     println!("\n--- Move 5: East (head towards exit) ---");
-    engine.process_move(Direction::East);
+    let _ = engine.process_move(Direction::East);
     print_frame(&engine);
 
     println!("\n--- Move 6: East (reach exit - level complete!) ---");
-    engine.process_move(Direction::East);
+    let _ = engine.process_move(Direction::East);
     print_frame(&engine);
 
     if engine.game_state().status == GameStatus::LevelComplete {

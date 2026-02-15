@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use std::fmt;
 use ts_rs::TS;
 
 /// Represents a 2D position on the game grid
@@ -233,6 +234,29 @@ impl Frame {
         Self { grid, state }
     }
 }
+
+/// Runtime engine errors surfaced when game state invariants are violated.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(rename_all = "camelCase")]
+pub enum EngineError {
+    SnakeHasNoSegments,
+}
+
+impl fmt::Display for EngineError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::SnakeHasNoSegments => {
+                write!(
+                    f,
+                    "Invalid snake state: expected at least one segment, found 0"
+                )
+            },
+        }
+    }
+}
+
+impl std::error::Error for EngineError {}
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
 #[serde(rename_all = "camelCase")]

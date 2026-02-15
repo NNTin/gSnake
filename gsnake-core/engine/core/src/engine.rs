@@ -1,6 +1,6 @@
 use crate::{
-    gravity, stone_mechanics, CellType, Direction, Frame, GameState, GameStatus, LevelDefinition,
-    LevelState, Position,
+    gravity, stone_mechanics, CellType, Direction, EngineError, Frame, GameState, GameStatus,
+    LevelDefinition, LevelState, Position,
 };
 
 const MAX_FRAME_CELLS: usize = 2_000_000;
@@ -57,17 +57,18 @@ impl GameEngine {
     }
 
     /// Processes a move in the given direction
-    /// Returns true if the move was processed, false if input was locked or invalid
-    pub fn process_move(&mut self, direction: Direction) -> bool {
+    /// Returns true if the move was processed, false if input was locked or invalid.
+    /// Returns an `EngineError` if runtime state invariants are violated.
+    pub fn process_move(&mut self, direction: Direction) -> Result<bool, EngineError> {
         // Check if input is locked or game is not in Playing state
         if self.input_locked || self.game_state.status != GameStatus::Playing {
-            return false;
+            return Ok(false);
         }
 
-        if self.level_state.snake.segments.is_empty() {
+        let Some(current_head) = self.level_state.snake.segments.first().copied() else {
             self.game_state.status = GameStatus::GameOver;
-            return false;
-        }
+            return Err(EngineError::SnakeHasNoSegments);
+        };
 
         // Lock input immediately
         self.input_locked = true;
@@ -76,7 +77,7 @@ impl GameEngine {
         if let Some(current_dir) = self.level_state.snake.direction {
             if Self::is_opposite_direction(direction, current_dir) {
                 self.input_locked = false;
-                return false;
+                return Ok(false);
             }
         }
 
@@ -84,7 +85,6 @@ impl GameEngine {
         self.level_state.snake.direction = Some(direction);
 
         // Calculate new head position
-        let current_head = *self.level_state.snake.segments.first().unwrap();
         let new_head = Self::get_new_head_position(current_head, direction);
 
         // Check if moving into a stone
@@ -101,7 +101,7 @@ impl GameEngine {
                 | stone_mechanics::PushResult::VerticalPushAttempt => {
                     // Stone push failed, reject the move
                     self.input_locked = false;
-                    return false;
+                    return Ok(false);
                 },
             }
         }
@@ -146,7 +146,7 @@ impl GameEngine {
         // Unlock input
         self.input_locked = false;
 
-        true
+        Ok(true)
     }
 
     /// Generates a Frame representing the current game state
@@ -434,7 +434,9 @@ mod tests {
         let mut engine = GameEngine::new(level);
 
         // Move north - snake will move to (5,4) then fall back to (5,5) due to gravity
-        let result = engine.process_move(Direction::North);
+        let result = engine
+            .process_move(Direction::North)
+            .expect("valid snake state should not fail");
         assert!(result);
         // After moving north and applying gravity, snake falls back to platform
         assert_eq!(engine.level_state().snake.segments[0], Position::new(5, 5));
@@ -450,7 +452,9 @@ mod tests {
         let mut engine = GameEngine::new(level);
 
         // Try to move south (opposite of north)
-        let result = engine.process_move(Direction::South);
+        let result = engine
+            .process_move(Direction::South)
+            .expect("valid snake state should not fail");
         assert!(!result);
         assert_eq!(engine.game_state().moves, 0);
     }
@@ -461,7 +465,9 @@ mod tests {
         let mut engine = GameEngine::new(level);
         engine.game_state.status = GameStatus::GameOver;
 
-        let result = engine.process_move(Direction::North);
+        let result = engine
+            .process_move(Direction::North)
+            .expect("valid snake state should not fail");
 
         assert!(!result);
         assert_eq!(engine.game_state().moves, 0);
@@ -469,14 +475,14 @@ mod tests {
     }
 
     #[test]
-    fn test_process_move_with_empty_snake_sets_game_over() {
+    fn test_process_move_with_empty_snake_returns_engine_error() {
         let mut level = create_test_level();
         level.snake = Vec::new();
 
         let mut engine = GameEngine::new(level);
         let result = engine.process_move(Direction::East);
 
-        assert!(!result);
+        assert_eq!(result, Err(EngineError::SnakeHasNoSegments));
         assert_eq!(engine.game_state().status, GameStatus::GameOver);
         assert_eq!(engine.game_state().moves, 0);
     }
@@ -490,7 +496,9 @@ mod tests {
         let mut engine = GameEngine::new(level);
         engine.level_state.snake.direction = None;
 
-        let result = engine.process_move(Direction::West);
+        let result = engine
+            .process_move(Direction::West)
+            .expect("valid snake state should not fail");
 
         assert!(result);
         assert_eq!(engine.level_state().snake.direction, Some(Direction::West));
@@ -506,7 +514,9 @@ mod tests {
         let mut engine = GameEngine::new(level);
 
         // Move north to collect food
-        engine.process_move(Direction::North);
+        engine
+            .process_move(Direction::North)
+            .expect("valid snake state should not fail");
 
         assert_eq!(engine.game_state().food_collected, 1);
         assert_eq!(engine.level_state().food.len(), 0);
@@ -522,7 +532,9 @@ mod tests {
         level.obstacles = vec![Position::new(5, 3)];
 
         let mut engine = GameEngine::new(level);
-        let result = engine.process_move(Direction::East);
+        let result = engine
+            .process_move(Direction::East)
+            .expect("valid snake state should not fail");
 
         assert!(result);
         assert_eq!(engine.game_state().food_collected, 1);
@@ -539,7 +551,9 @@ mod tests {
         level.obstacles = vec![Position::new(5, 3)];
 
         let mut engine = GameEngine::new(level);
-        let result = engine.process_move(Direction::East);
+        let result = engine
+            .process_move(Direction::East)
+            .expect("valid snake state should not fail");
 
         assert!(result);
         assert_eq!(engine.game_state().food_collected, 1);
@@ -557,7 +571,9 @@ mod tests {
         level.stones = vec![Position::new(3, 2)];
 
         let mut engine = GameEngine::new(level);
-        let result = engine.process_move(Direction::East);
+        let result = engine
+            .process_move(Direction::East)
+            .expect("valid snake state should not fail");
 
         assert!(!result);
         assert_eq!(engine.level_state().snake.segments[0], Position::new(2, 2));
@@ -574,7 +590,9 @@ mod tests {
         let mut engine = GameEngine::new(level);
 
         // Move west into wall
-        engine.process_move(Direction::West);
+        engine
+            .process_move(Direction::West)
+            .expect("valid snake state should not fail");
 
         assert_eq!(engine.game_state().status, GameStatus::GameOver);
     }
@@ -588,7 +606,9 @@ mod tests {
         let mut engine = GameEngine::new(level);
 
         // Move north into obstacle
-        engine.process_move(Direction::North);
+        engine
+            .process_move(Direction::North)
+            .expect("valid snake state should not fail");
 
         assert_eq!(engine.game_state().status, GameStatus::GameOver);
     }
@@ -607,7 +627,9 @@ mod tests {
 
         let mut engine = GameEngine::new(level);
 
-        engine.process_move(Direction::East);
+        engine
+            .process_move(Direction::East)
+            .expect("valid snake state should not fail");
 
         assert_eq!(engine.game_state().status, GameStatus::GameOver);
     }
@@ -630,7 +652,9 @@ mod tests {
         let mut engine = GameEngine::new(level);
 
         // Move south into own body at (5, 6)
-        engine.process_move(Direction::South);
+        engine
+            .process_move(Direction::South)
+            .expect("valid snake state should not fail");
 
         assert_eq!(engine.game_state().status, GameStatus::GameOver);
     }
@@ -644,7 +668,9 @@ mod tests {
         let mut engine = GameEngine::new(level);
 
         // Move east (should trigger gravity)
-        engine.process_move(Direction::East);
+        engine
+            .process_move(Direction::East)
+            .expect("valid snake state should not fail");
 
         // Snake should fall to y=4 (one above obstacle at (6, 5))
         assert_eq!(engine.level_state().snake.segments[0], Position::new(6, 4));
@@ -659,7 +685,9 @@ mod tests {
         level.spikes = vec![Position::new(3, 3)];
 
         let mut engine = GameEngine::new(level);
-        let result = engine.process_move(Direction::East);
+        let result = engine
+            .process_move(Direction::East)
+            .expect("valid snake state should not fail");
 
         assert!(result);
         assert_eq!(engine.game_state().status, GameStatus::GameOver);
@@ -675,7 +703,9 @@ mod tests {
         let mut engine = GameEngine::new(level);
 
         // Move east (should trigger gravity but stop at food)
-        engine.process_move(Direction::East);
+        engine
+            .process_move(Direction::East)
+            .expect("valid snake state should not fail");
 
         // Snake should stop at y=2 (food at (6, 3) acts as platform below)
         assert_eq!(engine.level_state().snake.segments[0], Position::new(6, 2));
@@ -692,7 +722,9 @@ mod tests {
         engine.game_state.food_collected = engine.game_state.total_food;
 
         // Move south to exit
-        engine.process_move(Direction::South);
+        engine
+            .process_move(Direction::South)
+            .expect("valid snake state should not fail");
 
         assert_eq!(engine.game_state().status, GameStatus::LevelComplete);
     }
@@ -712,7 +744,9 @@ mod tests {
         engine.game_state.food_collected = engine.game_state.total_food;
 
         // Move onto exit. Gravity would otherwise continue falling into a spike at (2,5).
-        engine.process_move(Direction::South);
+        engine
+            .process_move(Direction::South)
+            .expect("valid snake state should not fail");
 
         assert_eq!(engine.game_state().status, GameStatus::LevelComplete);
         assert_eq!(engine.level_state().snake.segments[0], Position::new(2, 3));
@@ -732,7 +766,9 @@ mod tests {
         engine.game_state.food_collected = engine.game_state.total_food;
 
         // Moving onto a spike on the exit should still be game over.
-        engine.process_move(Direction::South);
+        engine
+            .process_move(Direction::South)
+            .expect("valid snake state should not fail");
 
         assert_eq!(engine.game_state().status, GameStatus::GameOver);
     }
@@ -747,7 +783,9 @@ mod tests {
         let mut engine = GameEngine::new(level);
 
         // Move south to exit (but haven't collected all food)
-        engine.process_move(Direction::South);
+        engine
+            .process_move(Direction::South)
+            .expect("valid snake state should not fail");
 
         // Should still be playing (exit doesn't trigger completion)
         assert_eq!(engine.game_state().status, GameStatus::Playing);

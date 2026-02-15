@@ -1,0 +1,16 @@
+## Codebase Patterns
+- `GameEngine::process_move` returns `Result<bool, EngineError>`: use `Ok(false)` for rejected-but-valid gameplay input and `Err(...)` for runtime invariant violations; bindings decide how to map/report engine errors.
+
+# Ralph Progress Log
+Started: Sun Feb 15 20:54:09 CET 2026
+---
+## 2026-02-15 22:24:05 CET - US-001
+- Replaced snake-head access `unwrap` in `GameEngine::process_move` with explicit guarded access and structured `EngineError` propagation for malformed empty-snake runtime state.
+- Added `EngineError::SnakeHasNoSegments` with a clear diagnostic message and updated engine tests to assert `Err(EngineError::SnakeHasNoSegments)` rather than panic-like behavior.
+- Updated affected consumers/callers for the new `Result<bool, EngineError>` contract (`gsnake-wasm`, CLI binding, and core/CLI demo flows), including WASM-side mapping to `ContractErrorKind::InternalError`.
+- Files changed: `gsnake-core/engine/core/src/engine.rs`, `gsnake-core/engine/core/src/models.rs`, `gsnake-core/engine/bindings/wasm/src/lib.rs`, `gsnake-core/engine/bindings/cli/src/main.rs`, `gsnake-core/engine/bindings/cli/examples/ui_demo.rs`, `gsnake-core/engine/core/examples/gameplay_demo.rs`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`.
+- **Learnings for future iterations:**
+  - Patterns discovered: for engine move semantics, callers must handle both soft rejection (`Ok(false)`) and hard invariant errors (`Err(EngineError)`); this avoids silently swallowing malformed state.
+  - Gotchas encountered: changing a core engine API requires propagating signature updates through bindings and demos, not just core tests.
+  - Useful context: WASM adapter maps engine invariant failures to `ContractErrorKind::InternalError` and should preserve the engine error message for debugging.
+---

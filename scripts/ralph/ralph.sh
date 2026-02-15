@@ -38,7 +38,8 @@ PRD_FILE="$SCRIPT_DIR/prd.json"
 PROGRESS_FILE="$SCRIPT_DIR/progress.txt"
 ARCHIVE_DIR="$SCRIPT_DIR/archive"
 TEST_ACT_SCRIPT="$SCRIPT_DIR/../test/test_act.sh"
-ITERATION_TIMEOUT="${ITERATION_TIMEOUT:-1800}"
+# Setting iteration timeout in seconds (5 hours) high since I don't expect Codex to hang like Claude. But if it is hanging it will be addressed.
+ITERATION_TIMEOUT="${ITERATION_TIMEOUT:-18000}"
 
 mkdir -p "$ARCHIVE_DIR"
 

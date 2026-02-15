@@ -245,25 +245,25 @@ fn apply_action(
         },
         Action::MoveNorth => {
             if frame.state.status == GameStatus::Playing {
-                engine.process_move(Direction::North);
+                let _ = engine.process_move(Direction::North);
                 *frame = engine.generate_frame();
             }
         },
         Action::MoveSouth => {
             if frame.state.status == GameStatus::Playing {
-                engine.process_move(Direction::South);
+                let _ = engine.process_move(Direction::South);
                 *frame = engine.generate_frame();
             }
         },
         Action::MoveEast => {
             if frame.state.status == GameStatus::Playing {
-                engine.process_move(Direction::East);
+                let _ = engine.process_move(Direction::East);
                 *frame = engine.generate_frame();
             }
         },
         Action::MoveWest => {
             if frame.state.status == GameStatus::Playing {
-                engine.process_move(Direction::West);
+                let _ = engine.process_move(Direction::West);
                 *frame = engine.generate_frame();
             }
         },

@@ -7,7 +7,7 @@ You are an autonomous coding agent working on a software project.
 1. Read the PRD at `scripts/ralph/prd.json` (in the same directory as this file)
 2. Read the progress log at `scripts/ralph/progress.txt` (check Codebase Patterns section first)
 3. CI pipeline status can be seen in `scripts/test/result.txt` and is refreshed in each iteration.
-   - In Ralph loops, this full refresh is intentional: run `scripts/test/test_act.sh` even though `scripts/test/CLAUDE.md` recommends avoiding full-suite runs for normal iteration.
+   Do not run `scripts/test/test_act.sh`. Use `act -W <workflow-path> -j <job-name> --container-architecture linux/amd64` to run individual tests.
 4. a) Pick the **highest priority** user story where `passes: false`
 4. b) If all user stories are `passes: true`: check CI pipeline status
 5. Implement that single user story

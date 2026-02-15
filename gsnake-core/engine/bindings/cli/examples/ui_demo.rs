@@ -103,13 +103,13 @@ fn run_demo(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>) -> Result<()>
                         match demo_state {
                             1 => {
                                 // After collecting food
-                                engine.process_move(Direction::East);
+                                let _ = engine.process_move(Direction::East);
                                 frame = engine.generate_frame();
                             },
                             2 => {
                                 // Game Over - move into wall
                                 for _ in 0..20 {
-                                    engine.process_move(Direction::West);
+                                    let _ = engine.process_move(Direction::West);
                                 }
                                 frame = engine.generate_frame();
                                 frame.state.status = GameStatus::GameOver;
@@ -124,25 +124,25 @@ fn run_demo(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>) -> Result<()>
                     },
                     KeyCode::Up | KeyCode::Char('w' | 'W') => {
                         if demo_state == 0 || demo_state == 1 {
-                            engine.process_move(Direction::North);
+                            let _ = engine.process_move(Direction::North);
                             frame = engine.generate_frame();
                         }
                     },
                     KeyCode::Down | KeyCode::Char('s' | 'S') => {
                         if demo_state == 0 || demo_state == 1 {
-                            engine.process_move(Direction::South);
+                            let _ = engine.process_move(Direction::South);
                             frame = engine.generate_frame();
                         }
                     },
                     KeyCode::Left | KeyCode::Char('a' | 'A') => {
                         if demo_state == 0 || demo_state == 1 {
-                            engine.process_move(Direction::West);
+                            let _ = engine.process_move(Direction::West);
                             frame = engine.generate_frame();
                         }
                     },
                     KeyCode::Right | KeyCode::Char('d' | 'D') => {
                         if demo_state == 0 || demo_state == 1 {
-                            engine.process_move(Direction::East);
+                            let _ = engine.process_move(Direction::East);
                             frame = engine.generate_frame();
                         }
                     },
