@@ -7,6 +7,7 @@
 - Every `WasmGameEngine` path that creates a Rust engine (`init`/`loadLevel`/`nextLevel`/`resetLevel`) must call `getFrame()` immediately after `onFrame` registration and preserve event order `levelChanged` then `frameChanged`; keep the contract in `gsnake-web/packages/gsnake-web-app/engine/frame-emission.md`.
 - `LevelDefinition` schema changes must be made in `contracts/level-definition.schema.json` and validated with `npm run test:level-schema`; keep fixtures in `contracts/fixtures/` updated in the same change.
 - Keep `contracts/generated/level-definition-validator.ts` in sync with schema changes by running `npm run generate:level-validator`; `npm run test:level-schema` now enforces freshness via `npm run check:level-validator`.
+- In `gsnake-web`, `packages/gsnake-web-app/contracts/levelDefinitionGuard.ts` should stay a typed wrapper around a generated validator artifact (`gsnake-web/contracts/generated/level-definition-validator.ts`) instead of maintaining manual field-by-field guards.
 - Optional-field and `totalFood` semantics for editor/server round-trips are centralized in `contracts/level-definition-semantics.md`; source code should link there instead of re-documenting semantics ad hoc.
 - For schema drift tests in submodules, resolve schema paths with monorepo-first and vendored-local fallback candidates so checks run in both monorepo CI and standalone submodule CI.
 - Editor server LevelDefinition validation must flow through `src/server/levelDefinitionValidator.ts` (Ajv + canonical schema) and return `details` as `{ field, keyword, message }` objects so API errors stay field-addressable.
@@ -288,4 +289,15 @@ Started: Sun Feb 15 20:54:09 CET 2026
   - Patterns discovered: keep schema-derived validator output committed under `contracts/generated/` so all packages can import one canonical runtime guard source.
   - Gotchas encountered: Ajv standalone emits `require(...)` runtime helpers even with ESM codegen, so generation should normalize those imports for ESM-friendly TypeScript output.
   - Useful context: this story changed shared contract tooling/docs only; no browser verification was required.
+---
+## 2026-02-16 17:39:37 CET - US-002
+- Replaced the manual web `LevelDefinition` guard implementation with a typed wrapper that delegates validation to a generated schema-derived validator.
+- Added a vendored generated validator artifact at `gsnake-web/contracts/generated/level-definition-validator.ts` and updated web drift-test messaging to reference generated-validator alignment.
+- Added `../../../contracts` to `gsnake-web-app` Vite `server.fs.allow` so the app can import the shared generated validator from the web submodule-level contracts directory in dev/test workflows.
+- Ran `npm run check` and `npm test` in `gsnake-web`, plus `act -W .github/workflows/ci.yml -j typecheck --container-architecture linux/amd64` and `act -W .github/workflows/ci.yml -j test --container-architecture linux/amd64` in `gsnake-web` (all success).
+- Files changed: `gsnake-web/packages/gsnake-web-app/contracts/levelDefinitionGuard.ts`, `gsnake-web/packages/gsnake-web-app/tests/contract/levelDefinitionSchemaDrift.test.ts`, `gsnake-web/packages/gsnake-web-app/vite.config.ts`, `gsnake-web/contracts/generated/level-definition-validator.ts`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`.
+- **Learnings for future iterations:**
+  - Patterns discovered: web runtime contract checks should consume generated validators and keep app-level files as typed wrappers only.
+  - Gotchas encountered: when importing shared contract artifacts from outside `gsnake-web-app`, update Vite `server.fs.allow` or dev/test runs can fail with out-of-root access errors.
+  - Useful context: browser tooling is not configured in this environment; this story changed contract-validation plumbing and tests, so manual browser verification can be done separately if desired.
 ---

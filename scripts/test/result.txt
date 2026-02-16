@@ -1,16 +1,16 @@
 === Act CI Test Results ===
-Started: Mon Feb 16 16:57:29 CET 2026
+Started: Mon Feb 16 17:38:35 CET 2026
 
 ## Summary
 
-- [SUCCESS] ./.github/workflows/ci.yml::test
-- [SUCCESS] npm run check:level-validator
-- [SUCCESS] npm run test:level-schema
+- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::typecheck
+- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::test
 
-**Total: 3 passed, 0 failed**
+**Total: 2 passed, 0 failed**
 
 ---
-Completed: Mon Feb 16 16:59:03 CET 2026
-Duration: 00:01:34
-Result: 3 passed, 0 failed
+Completed: Mon Feb 16 17:39:49 CET 2026
+Duration: 00:01:14
+Result: 2 passed, 0 failed
 Result file: /home/nntin/git/gSnake/scripts/test/result.txt
+Temp dir: /home/nntin/git/gSnake/scripts/test/tmp_act_results
