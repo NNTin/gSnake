@@ -4,8 +4,10 @@
   "version": "0.2.4",
   "scripts": {
     "dev": "concurrently -n editor,web -c blue,green \"npm --prefix gsnake-editor run dev\" \"npm --prefix gsnake-web run dev\"",
+    "generate:level-validator": "node scripts/contracts/generate-level-definition-validator.mjs",
+    "check:level-validator": "node scripts/contracts/generate-level-definition-validator.mjs --check",
     "test:e2e": "playwright test --reporter=list",
-    "test:level-schema": "node scripts/contracts/validate-level-definition-schema.mjs",
+    "test:level-schema": "npm run check:level-validator && node scripts/contracts/validate-level-definition-schema.mjs",
     "report": "allure serve artifacts/allure-results"
   },
   "devDependencies": {

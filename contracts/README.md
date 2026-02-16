@@ -7,7 +7,9 @@ This directory holds the canonical `LevelDefinition` schema shared across gSnake
 - Schema: `contracts/level-definition.schema.json`
 - Semantics: `contracts/level-definition-semantics.md`
 - Fixtures: `contracts/fixtures/*.json`
+- Generated validator: `contracts/generated/level-definition-validator.ts`
 - Validation runner: `scripts/contracts/validate-level-definition-schema.mjs`
+- Generator: `scripts/contracts/generate-level-definition-validator.mjs`
 
 ## Ownership
 
@@ -28,8 +30,13 @@ Consumers should derive validators/guards from the canonical schema instead of m
 ## Regeneration / Verification Workflow
 
 1. Update schema and fixtures in this directory.
-2. Regenerate or refresh consumer-side validators/guards from this schema.
-3. Run:
+2. Regenerate the shared validator from repo root:
+
+```bash
+npm run generate:level-validator
+```
+
+3. Verify generated validator and schema fixtures:
 
 ```bash
 npm run test:level-schema

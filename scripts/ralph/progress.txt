@@ -6,6 +6,7 @@
 - `WasmGameEngine.init(...)` startup invariants should assert one `levelChanged` then one `frameChanged` event with no `engineError` for normalized query inputs, so startup behavior stays stable across parsing refactors.
 - Every `WasmGameEngine` path that creates a Rust engine (`init`/`loadLevel`/`nextLevel`/`resetLevel`) must call `getFrame()` immediately after `onFrame` registration and preserve event order `levelChanged` then `frameChanged`; keep the contract in `gsnake-web/packages/gsnake-web-app/engine/frame-emission.md`.
 - `LevelDefinition` schema changes must be made in `contracts/level-definition.schema.json` and validated with `npm run test:level-schema`; keep fixtures in `contracts/fixtures/` updated in the same change.
+- Keep `contracts/generated/level-definition-validator.ts` in sync with schema changes by running `npm run generate:level-validator`; `npm run test:level-schema` now enforces freshness via `npm run check:level-validator`.
 - Optional-field and `totalFood` semantics for editor/server round-trips are centralized in `contracts/level-definition-semantics.md`; source code should link there instead of re-documenting semantics ad hoc.
 - For schema drift tests in submodules, resolve schema paths with monorepo-first and vendored-local fallback candidates so checks run in both monorepo CI and standalone submodule CI.
 - Editor server LevelDefinition validation must flow through `src/server/levelDefinitionValidator.ts` (Ajv + canonical schema) and return `details` as `{ field, keyword, message }` objects so API errors stay field-addressable.
@@ -276,4 +277,15 @@ Started: Sun Feb 15 20:54:09 CET 2026
   - Patterns discovered: root `act` E2E failures with many rapid spec failures can be environmental; clear stale Playwright processes before rerun.
   - Gotchas encountered: `.github/workflows/ci.yml` E2E cleanup calls `fuser`, but `fuser` is unavailable in the act container image; host leftovers can survive until explicitly cleaned.
   - Useful context: browser MCP tooling is not configured in this environment; this story updated docs/status artifacts and CI evidence only.
+---
+## 2026-02-16 16:59:41 CET - US-001
+- Added a root generation workflow for a shared TypeScript LevelDefinition runtime validator (`scripts/contracts/generate-level-definition-validator.mjs`) that compiles `contracts/level-definition.schema.json` via Ajv standalone and emits `contracts/generated/level-definition-validator.ts`.
+- Added reproducible root commands in `package.json` (`generate:level-validator`, `check:level-validator`) and updated `test:level-schema` to enforce validator freshness before fixture checks.
+- Updated contract docs to document the generated artifact location and regeneration workflow.
+- Ran `npm run generate:level-validator`, `npm run test:level-schema`, and `act -W .github/workflows/ci.yml -j test --container-architecture linux/amd64` (success).
+- Files changed: `scripts/contracts/generate-level-definition-validator.mjs`, `contracts/generated/level-definition-validator.ts`, `contracts/README.md`, `package.json`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`.
+- **Learnings for future iterations:**
+  - Patterns discovered: keep schema-derived validator output committed under `contracts/generated/` so all packages can import one canonical runtime guard source.
+  - Gotchas encountered: Ajv standalone emits `require(...)` runtime helpers even with ESM codegen, so generation should normalize those imports for ESM-friendly TypeScript output.
+  - Useful context: this story changed shared contract tooling/docs only; no browser verification was required.
 ---
