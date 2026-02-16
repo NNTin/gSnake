@@ -1,16 +1,14 @@
 === Act CI Test Results ===
-Started: Mon Feb 16 11:08:37 CET 2026
+Started: Mon Feb 16 11:48:11 CET 2026
 
 ## Summary
 
-- [SUCCESS] gsnake-levels/.github/workflows/ci.yml::test
+- [SUCCESS] `cargo test --manifest-path gsnake-core/engine/core/Cargo.toml`
+- [SUCCESS] `./.github/workflows/ci.yml::test` via `act -W .github/workflows/ci.yml -j test --container-architecture linux/amd64`
 
-**Total: 1 passed, 0 failed**
+**Total: 2 passed, 0 failed**
 
 ---
-Completed: Mon Feb 16 11:10:11 CET 2026
-Duration: 00:01:34
-Result: 1 passed, 0 failed
-
-Additional local checks:
-- [SUCCESS] cargo test --manifest-path gsnake-levels/Cargo.toml
+Completed: Mon Feb 16 11:50:14 CET 2026
+Result: 2 passed, 0 failed
+Result file: /home/nntin/git/gSnake/scripts/test/result.txt

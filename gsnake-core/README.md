@@ -102,3 +102,23 @@ For full validation, push to GitHub and verify workflows run successfully there.
 ## Development
 
 When developing in the root gSnake repository, local path dependencies are automatically detected and used. When building standalone, all dependencies are resolved from crates.io.
+
+## Physics Order Invariants
+
+The engine has order-sensitive physics behavior that is intentionally locked by tests. When changing gravity or collision logic, preserve this sequence in `GameEngine::process_move`:
+
+1. Resolve immediate collision at the moved snake head
+1. Resolve win condition
+1. Apply snake gravity
+1. Apply stone gravity
+1. Apply falling-food gravity
+
+Rationale: changing this order can introduce one-cell/off-by-one regressions (for example, if stones fall before snake gravity, supports disappear too early and snake outcomes change).
+
+Maintenance guidance:
+
+- Keep stone gravity as an incremental fixed-point update (`apply_gravity_to_stones`) rather than a batched "compute all next positions" step.
+- If this order is changed intentionally, update and re-verify the order-locking tests:
+  - `gsnake-core/engine/core/src/engine.rs` (`test_win_condition_checked_before_gravity`)
+  - `gsnake-core/engine/core/src/gravity.rs` (`test_snake_stops_on_stone`, `test_stone_stops_on_spike`)
+  - `gsnake-core/engine/core/tests/contract_tests.rs` (`stone_push_matrix_horizontal_push_into_vertical_stack_moves_only_same_row_stone`)

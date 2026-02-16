@@ -15,6 +15,7 @@
 - `KeyboardHandler` should forward rapid directional key events to `processMove` in order and leave lock/rejection decisions to the engine; tests should validate this via `attach()` + `window.dispatchEvent(...)`.
 - In `gsnake-web` contract tests, keep CellType coverage centralized with shared variant lists and pair `isFrame(...)` assertions with explicit invalid-cell diagnostics so enum drift (casing/whitespace/non-string payloads) fails with actionable messages.
 - In `gsnake-core` stone interaction contract tests, use a dedicated fixture level with a fixed obstacle platform row so gravity is deterministic and push-matrix assertions focus on interaction semantics rather than fall order side effects.
+- In `gsnake-core`, preserve physics sequencing in `GameEngine::process_move` (collision -> win -> snake gravity -> stone gravity -> falling-food gravity) and validate intentional changes against the order-locking tests documented in `gsnake-core/README.md`.
 - CLI playback parsing should attach `anyhow::Context` at each stage (file read, JSON parse, per-step key parse with step index + file path) so malformed playback diagnostics are actionable without panics.
 - In `gsnake-levels` tests that mutate process CWD, prefer lock helpers that return `Result` (`?`) over `expect(...)` on `cwd_mutex` so generation-path regressions surface as test errors instead of panic paths.
 - In Rust tests that assert `Result<T, anyhow::Error>`, avoid `assert_eq!(result, Ok(...))` because `anyhow::Error` has no `PartialEq`; use explicit `match` assertions for Ok/Err paths.
@@ -231,4 +232,14 @@ Started: Sun Feb 15 20:54:09 CET 2026
   - Patterns discovered: validation workflows are easier to triage when they emit typed, ordered issue lists and reserve process exit codes for coarse severity.
   - Gotchas encountered: keep aggregation order deterministic (difficulty order then entry order) so CLI-output assertions remain stable.
   - Useful context: `validate-levels-toml` now returns parse exit code (`3`) whenever any parse issue is present, even when IO/validation issues are also collected.
+---
+## 2026-02-16 11:50:14 CET - US-021
+- Added focused order-dependency comments in `gsnake-core/engine/core/src/gravity.rs` documenting why stone gravity remains incremental/fixed-point and linking to regression tests that lock collision/platform semantics.
+- Added a new `Physics Order Invariants` section to `gsnake-core/README.md` documenting the required `process_move` sequencing, rationale for off-by-one risk, and maintenance guidance for future edits.
+- Ran `cargo test --manifest-path gsnake-core/engine/core/Cargo.toml` and `act -W .github/workflows/ci.yml -j test --container-architecture linux/amd64` (success).
+- Files changed: `gsnake-core/engine/core/src/gravity.rs`, `gsnake-core/README.md`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`.
+- **Learnings for future iterations:**
+  - Patterns discovered: physics-order docs are most effective when they pair the required sequencing rule with concrete test names that should fail on regressions.
+  - Gotchas encountered: this area has no nearby `CLAUDE.md`, so reusable guidance should live in `gsnake-core/README.md` and `scripts/ralph/progress.txt`.
+  - Useful context: browser verification was not required because this story changed Rust/docs only.
 ---

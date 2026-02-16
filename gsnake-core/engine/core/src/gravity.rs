@@ -23,6 +23,14 @@ pub fn apply_gravity_to_snake(level_state: &mut LevelState) -> bool {
 
 /// Apply gravity to all stones
 pub fn apply_gravity_to_stones(level_state: &mut LevelState) {
+    // Ordering invariant:
+    // Stones must be updated incrementally in a fixed-point loop (instead of a batched
+    // "next frame" update). This preserves collision/platform semantics for stacked stones
+    // and avoids one-cell drift when support stones move first.
+    // Regression coverage:
+    // - tests::test_snake_stops_on_stone
+    // - tests::test_stone_stops_on_spike
+    // - engine/core/tests/contract_tests.rs::stone_push_matrix_horizontal_push_into_vertical_stack_moves_only_same_row_stone
     // Keep applying gravity until no stones can fall
     loop {
         let mut any_moved = false;
