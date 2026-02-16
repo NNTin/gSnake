@@ -4,6 +4,7 @@
 - Grid-size boundary tests should use `MAX_GRID_CELLS` directly (`1x1` minimum valid, `MAX_GRID_CELLS x 1` maximum valid, `(MAX_GRID_CELLS + 1) x 1` overflow) to lock behavior to the engine's safety cap constant.
 - For web startup level selection, pass the raw `level` query value to `WasmGameEngine.init(...)`; `WasmGameEngine` owns strict parsing and deterministic fallback-to-level-1 behavior.
 - `WasmGameEngine.init(...)` startup invariants should assert one `levelChanged` then one `frameChanged` event with no `engineError` for normalized query inputs, so startup behavior stays stable across parsing refactors.
+- `LevelDefinition` schema changes must be made in `contracts/level-definition.schema.json` and validated with `npm run test:level-schema`; keep fixtures in `contracts/fixtures/` updated in the same change.
 
 # Ralph Progress Log
 Started: Sun Feb 15 20:54:09 CET 2026
@@ -59,4 +60,15 @@ Started: Sun Feb 15 20:54:09 CET 2026
   - Patterns discovered: query-input regression tests are most robust when they assert both loaded level identity and emitted startup events, not only fallback index.
   - Gotchas encountered: if `act` runs against a submodule workflow, execute from that submodule directory so relative script paths resolve correctly.
   - Useful context: this story required test and docs hardening only; browser verification was not required because no UI behavior changed.
+---
+## 2026-02-16 01:47:25 CET - US-006
+- Added a canonical shared `LevelDefinition` JSON Schema at `contracts/level-definition.schema.json`, including optional fields (`floatingFood`, `fallingFood`, `stones`, `spikes`, `exitIsSolid`, `difficulty`) and documented `totalFood` semantics.
+- Added schema fixture set under `contracts/fixtures/` for valid minimal payload, valid optional-field payload, missing-`totalFood` rejection, and invalid optional-field shape rejection.
+- Added contract ownership/import workflow documentation in `contracts/README.md` and created `scripts/contracts/validate-level-definition-schema.mjs` plus `npm run test:level-schema` to enforce fixture-based schema validation.
+- Ran `npm run test:level-schema` and `act -W .github/workflows/ci.yml -j test --container-architecture linux/amd64` (success).
+- Files changed: `contracts/level-definition.schema.json`, `contracts/fixtures/level-definition.valid.json`, `contracts/fixtures/level-definition.valid-optionals.json`, `contracts/fixtures/level-definition.invalid-missing-total-food.json`, `contracts/fixtures/level-definition.invalid-optional-shape.json`, `contracts/README.md`, `scripts/contracts/validate-level-definition-schema.mjs`, `package.json`, `package-lock.json`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`.
+- **Learnings for future iterations:**
+  - Patterns discovered: the canonical contract lives at repo root (`contracts/`) so editor/web/e2e tooling can consume the same schema artifact.
+  - Gotchas encountered: draft 2020-12 schemas require Ajv's 2020 runtime (`ajv/dist/2020.js`) for local fixture validation.
+  - Useful context: this story changed shared contract artifacts/documentation only, so browser verification was not required.
 ---

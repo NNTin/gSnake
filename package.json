@@ -5,9 +5,11 @@
   "scripts": {
     "dev": "concurrently -n editor,web -c blue,green \"npm --prefix gsnake-editor run dev\" \"npm --prefix gsnake-web run dev\"",
     "test:e2e": "playwright test --reporter=list",
+    "test:level-schema": "node scripts/contracts/validate-level-definition-schema.mjs",
     "report": "allure serve artifacts/allure-results"
   },
   "devDependencies": {
+    "ajv": "^8.17.1",
     "@playwright/test": "^1.41.0",
     "@types/node": "^25.0.9",
     "allure-playwright": "^2.10.0",

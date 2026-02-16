@@ -1,0 +1,37 @@
+{
+  "id": 102,
+  "name": "Fixture: Optional Fields Present",
+  "difficulty": "hard",
+  "gridSize": {
+    "width": 16,
+    "height": 12
+  },
+  "snake": [
+    { "x": 3, "y": 3 },
+    { "x": 2, "y": 3 },
+    { "x": 1, "y": 3 }
+  ],
+  "obstacles": [
+    { "x": 0, "y": 0 },
+    { "x": 0, "y": 1 }
+  ],
+  "food": [
+    { "x": 9, "y": 2 }
+  ],
+  "exit": { "x": 14, "y": 10 },
+  "snakeDirection": "North",
+  "floatingFood": [
+    { "x": 6, "y": 6 }
+  ],
+  "fallingFood": [
+    { "x": 7, "y": 1 }
+  ],
+  "stones": [
+    { "x": 5, "y": 7 }
+  ],
+  "spikes": [
+    { "x": 4, "y": 8 }
+  ],
+  "exitIsSolid": true,
+  "totalFood": 3
+}

@@ -1,0 +1,21 @@
+{
+  "id": 202,
+  "name": "Fixture: Invalid optional field shape",
+  "gridSize": {
+    "width": 10,
+    "height": 10
+  },
+  "snake": [
+    { "x": 5, "y": 5 }
+  ],
+  "obstacles": [],
+  "food": [
+    { "x": 3, "y": 3 }
+  ],
+  "exit": { "x": 8, "y": 8 },
+  "snakeDirection": "East",
+  "stones": [
+    { "x": 1 }
+  ],
+  "totalFood": 1
+}
