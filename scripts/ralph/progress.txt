@@ -18,6 +18,7 @@
 - CLI playback parsing should attach `anyhow::Context` at each stage (file read, JSON parse, per-step key parse with step index + file path) so malformed playback diagnostics are actionable without panics.
 - In `gsnake-levels` tests that mutate process CWD, prefer lock helpers that return `Result` (`?`) over `expect(...)` on `cwd_mutex` so generation-path regressions surface as test errors instead of panic paths.
 - In Rust tests that assert `Result<T, anyhow::Error>`, avoid `assert_eq!(result, Ok(...))` because `anyhow::Error` has no `PartialEq`; use explicit `match` assertions for Ok/Err paths.
+- `gsnake-levels validate-levels-toml` should aggregate issues with deterministic numbered output (`[io]`, `[parse]`, `[validation]`) and continue scanning all difficulties/entries in one run.
 
 # Ralph Progress Log
 Started: Sun Feb 15 20:54:09 CET 2026
@@ -219,4 +220,15 @@ Started: Sun Feb 15 20:54:09 CET 2026
   - Patterns discovered: migration-path regression tests should assert chained errors via `format!("{err:#}")` so both step context and root parse/validation failures remain visible.
   - Gotchas encountered: `act` validates a snapshot taken at job start; if source changes during a run, rerun the job to test the latest code.
   - Useful context: `Result<T, anyhow::Error>` comparisons need `match`-based assertions because `anyhow::Error` is not `PartialEq`.
+---
+## 2026-02-16 11:10:11 CET - US-020
+- Implemented multi-error aggregation for `validate-levels-toml` by introducing structured issue collection across all difficulties and level entries with stable numbered stderr output.
+- Added issue typing (`io`/`parse`/`validation`) and deterministic exit-code selection, then expanded tests to cover intra-difficulty aggregation, cross-difficulty aggregation, and output-format stability.
+- Added CLI regression coverage proving one command run reports multiple actionable issues (`missing JSON` + `invalid JSON`) instead of fail-fast behavior.
+- Ran `cargo test --manifest-path gsnake-levels/Cargo.toml` and `act -W gsnake-levels/.github/workflows/ci.yml -j test --container-architecture linux/amd64` (success).
+- Files changed: `gsnake-levels/src/validate_levels_toml.rs`, `gsnake-levels/tests/cli_error_paths_test.rs`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`.
+- **Learnings for future iterations:**
+  - Patterns discovered: validation workflows are easier to triage when they emit typed, ordered issue lists and reserve process exit codes for coarse severity.
+  - Gotchas encountered: keep aggregation order deterministic (difficulty order then entry order) so CLI-output assertions remain stable.
+  - Useful context: `validate-levels-toml` now returns parse exit code (`3`) whenever any parse issue is present, even when IO/validation issues are also collected.
 ---

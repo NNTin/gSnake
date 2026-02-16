@@ -91,6 +91,10 @@ For any story that changes UI, verify it works in the browser if you have browse
 
 If no browser tools are available, note in your progress report that manual browser verification is needed.
 
+## Reusable Repository Patterns
+
+- For `gsnake-levels validate-levels-toml`, keep validation output aggregated and deterministic (`[io]`, `[parse]`, `[validation]` with numbered lines) so one run reports all actionable issues and tests can assert stable CLI output.
+
 ## Stop Condition
 
 The ralph loop is stopped automatically when `scripts/ralph/prd.json` has been completed.
