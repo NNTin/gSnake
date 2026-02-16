@@ -25,6 +25,7 @@
 - In `gsnake-levels` tests that mutate process CWD, prefer lock helpers that return `Result` (`?`) over `expect(...)` on `cwd_mutex` so generation-path regressions surface as test errors instead of panic paths.
 - In Rust tests that assert `Result<T, anyhow::Error>`, avoid `assert_eq!(result, Ok(...))` because `anyhow::Error` has no `PartialEq`; use explicit `match` assertions for Ok/Err paths.
 - `gsnake-levels validate-levels-toml` should aggregate issues with deterministic numbered output (`[io]`, `[parse]`, `[validation]`) and continue scanning all difficulties/entries in one run.
+- `act` runs for `gsnake-levels` can fail in dependency resolution when the remote `nntin/gsnake` git dependency references a submodule commit that is not yet reachable; treat local `cargo check`/`cargo test` as the reliable code-validation signal and log the exact missing-ref error in `scripts/test/result.txt`.
 - Before rerunning root `act` E2E (`.github/workflows/ci.yml::e2e-test`) after broad sudden failures, clear stale host Playwright processes (`pkill -f 'chromium_headless_shell|playwright_chromiumdev_profile' || true`); workflow cleanup relies on `fuser`, which may be unavailable in the act container.
 
 # Ralph Progress Log
@@ -333,4 +334,14 @@ Started: Sun Feb 15 20:54:09 CET 2026
   - Patterns discovered: keep playback parsing errors wrapped with step index + playback file path context so CLI verification failures are directly traceable to an input row.
   - Gotchas encountered: `act -W gsnake-levels/.github/workflows/ci.yml -j test` can fail independently of local code when upstream git dependency submodule refs are unavailable.
   - Useful context: `act -W gsnake-levels/.github/workflows/test.yml -j test` requires a GitHub token for the cross-repo checkout step (`NNTin/gSnake`), so local `cargo test` remains the reliable signal in tokenless environments.
+---
+## 2026-02-16 20:23:36 CET - US-006
+- Verified and finalized aggregated multi-issue reporting for `validate-levels-toml`: deterministic numbered output (`[io]`, `[parse]`, `[validation]`) is present and one run reports multiple issues without fail-fast behavior.
+- Revalidated aggregation coverage in unit/CLI tests (`validate_levels_toml` module tests + `tests/cli_error_paths_test.rs::test_validate_levels_toml_reports_aggregated_errors`) and confirmed local quality gates with `cargo check` and `cargo test`.
+- Re-ran `act -W .github/workflows/ci.yml -j test --container-architecture linux/amd64` in `gsnake-levels`; failure is external (`gsnake-specs` submodule commit `25ec6e9115ffea7fdaca64428d74298c902b6cad` not found on remote), not a validation-command regression.
+- Files changed: `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`, `scripts/test/CLAUDE.md`.
+- **Learnings for future iterations:**
+  - Patterns discovered: for `validate-levels-toml`, keep issue ordering deterministic (difficulty order then entry order) so numbered CLI diagnostics stay testable and stable.
+  - Gotchas encountered: `act` in `gsnake-levels` can fail before tests run if git dependency submodule refs are unavailable remotely; preserve this as CI-environment evidence and rely on local cargo checks for code validation.
+  - Useful context: this story required validation-command/test verification only; no UI behavior changed, so browser verification was not required.
 ---

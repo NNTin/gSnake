@@ -116,6 +116,17 @@ if: ${{ always() && env.ACT != 'true' }}
 ### Missing npm Scripts
 Many submodules show failures for missing npm scripts (test, build, check). This is expected as those submodules may not have these scripts implemented yet. Focus on the jobs that should work based on the actual package.json content.
 
+### Missing Git Submodule Ref During Dependency Fetch
+`gsnake-levels` workflows can fail in `act` before tests execute when Cargo updates the git dependency `https://github.com/nntin/gsnake?branch=main` and one of that repo's submodule commits is not reachable on the remote yet.
+
+Typical symptom:
+```
+failed to update submodule `gsnake-specs`
+revision <sha> not found
+```
+
+Treat this as an external remote-ref availability issue. Record the exact missing SHA in `result.txt`, and use local `cargo check`/`cargo test` as the reliable signal for code-validation in that iteration.
+
 ### Root E2E False Negatives from Stale Playwright Processes
 For `.github/workflows/ci.yml::e2e-test`, broad sudden failures across many Playwright specs can be environmental in local `act` runs.  
 The workflow cleanup step uses `fuser`, but `fuser` may be unavailable in the act container image, leaving host-side Playwright processes alive.

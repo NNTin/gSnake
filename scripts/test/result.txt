@@ -1,17 +1,26 @@
 === Act CI Test Results ===
-Started: Mon Feb 16 19:40:11 CET 2026
+Started: Mon Feb 16 20:20:00 CET 2026
 
 ## Summary
 
-- [SUCCESS] local::cargo check (gsnake-levels)
-- [SUCCESS] local::cargo test (gsnake-levels)
-- [FAILED] ./gsnake-levels/.github/workflows/ci.yml::test (act; external dependency fetch failure: missing `gsnake-specs` submodule ref `25ec6e9115ffea7fdaca64428d74298c902b6cad`)
-- [FAILED] ./gsnake-levels/.github/workflows/test.yml::test (act; `actions/checkout` requires `token` for `NNTin/gSnake` repository checkout)
+- [SUCCESS] gsnake-levels::cargo-check (local)
+- [SUCCESS] gsnake-levels::cargo-test (local)
+- [FAILED] ./gsnake-levels/.github/workflows/ci.yml::test
 
-**Total: 2 passed, 2 failed**
+**Total: 2 passed, 1 failed**
+
+## Failure Details
+
+### ./gsnake-levels/.github/workflows/ci.yml::test
+- `act` reached the test step, but dependency resolution failed before project tests ran.
+- Root cause reported by Cargo/git:
+  - failed to update `https://github.com/nntin/gsnake?branch=main`
+  - failed to update submodule `gsnake-specs`
+  - revision `25ec6e9115ffea7fdaca64428d74298c902b6cad` not found
+- This is an external remote-ref availability problem, not a local `validate-levels-toml` implementation/test failure.
 
 ---
-Completed: Mon Feb 16 19:43:40 CET 2026
-Duration: 00:03:29
-Result: 2 passed, 2 failed
+Completed: Mon Feb 16 20:22:30 CET 2026
+Duration: 00:02:30
+Result: 2 passed, 1 failed
 Result file: /home/nntin/git/gSnake/scripts/test/result.txt
