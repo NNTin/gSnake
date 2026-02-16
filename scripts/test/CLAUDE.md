@@ -116,6 +116,16 @@ if: ${{ always() && env.ACT != 'true' }}
 ### Missing npm Scripts
 Many submodules show failures for missing npm scripts (test, build, check). This is expected as those submodules may not have these scripts implemented yet. Focus on the jobs that should work based on the actual package.json content.
 
+### Root E2E False Negatives from Stale Playwright Processes
+For `.github/workflows/ci.yml::e2e-test`, broad sudden failures across many Playwright specs can be environmental in local `act` runs.  
+The workflow cleanup step uses `fuser`, but `fuser` may be unavailable in the act container image, leaving host-side Playwright processes alive.
+
+If this happens, clear stale processes and rerun the job:
+```bash
+pkill -f 'chromium_headless_shell|playwright_chromiumdev_profile' || true
+act -W .github/workflows/ci.yml -j e2e-test --container-architecture linux/amd64
+```
+
 ## Debugging Tips
 
 - Use `-v` flag for verbose output: `act -v -W ... -j ...`

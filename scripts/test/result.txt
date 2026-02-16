@@ -1,14 +1,51 @@
 === Act CI Test Results ===
-Started: Mon Feb 16 13:06:01 CET 2026
+Started: Mon Feb 16 13:08:58 CET 2026
 
 ## Summary
 
+- [SUCCESS] ./gsnake-levels/.github/workflows/test.yml::test
+- [SUCCESS] ./gsnake-levels/.github/workflows/ci.yml::build
+- [SUCCESS] ./gsnake-levels/.github/workflows/ci.yml::test
+- [SUCCESS] ./gsnake-levels/.github/workflows/ci.yml::validate-levels
+- [SUCCESS] ./gsnake-levels/.github/workflows/ci.yml::coverage
+- [SUCCESS] ./gsnake-levels/.github/workflows/ci.yml::required-merge-gates
+- [SUCCESS] ./gsnake-web/.github/workflows/test.yml::test
 - [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::typecheck
 - [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::test
+- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::coverage
+- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::build
+- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::required-merge-gates
+- [SUCCESS] ./gsnake-specs/.github/workflows/test.yml::test
+- [SUCCESS] ./gsnake-specs/.github/workflows/ci.yml::markdown-lint
+- [SUCCESS] ./gsnake-specs/.github/workflows/ci.yml::link-check
+- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::coverage
+- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::build
+- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::typecheck
+- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::test
+- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::required-merge-gates
+- [SUCCESS] ./.github/workflows/ci.yml::e2e-test
+- [SUCCESS] ./.github/workflows/ci.yml::build
+- [SUCCESS] ./.github/workflows/ci.yml::gsnake-editor-test
+- [SUCCESS] ./.github/workflows/ci.yml::test
+- [SUCCESS] ./.github/workflows/ci.yml::wasm
+- [SUCCESS] ./.github/workflows/ci.yml::gsnake-editor-coverage
+- [SUCCESS] ./.github/workflows/ci.yml::core-coverage
+- [SUCCESS] ./.github/workflows/ci.yml::gsnake-web-coverage
+- [SUCCESS] ./.github/workflows/ci.yml::required-merge-gates
 
-**Total: 2 passed, 0 failed**
+**Total: 29 passed, 0 failed**
 
 ---
-Completed: Mon Feb 16 13:06:47 CET 2026
-Result: 2 passed, 0 failed
-Notes: Executed from gsnake-web submodule root to preserve standalone path resolution.
+Completed: Mon Feb 16 13:42:44 CET 2026
+Duration: 00:33:46
+Result: 29 passed, 0 failed
+Result file: /home/nntin/git/gSnake/scripts/test/result.txt
+Temp dir: /home/nntin/git/gSnake/scripts/test/tmp_act_results
+
+## Iteration Refresh (Mon Feb 16 13:59:55 CET 2026)
+
+- [SUCCESS] ./.github/workflows/ci.yml::e2e-test
+- [SUCCESS] ./gsnake-specs/.github/workflows/ci.yml::markdown-lint
+- [SUCCESS] ./gsnake-specs/.github/workflows/ci.yml::link-check
+
+Targeted reruns after artifact/status updates: 3 passed, 0 failed.

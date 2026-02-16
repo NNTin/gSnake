@@ -22,6 +22,7 @@
 - In `gsnake-levels` tests that mutate process CWD, prefer lock helpers that return `Result` (`?`) over `expect(...)` on `cwd_mutex` so generation-path regressions surface as test errors instead of panic paths.
 - In Rust tests that assert `Result<T, anyhow::Error>`, avoid `assert_eq!(result, Ok(...))` because `anyhow::Error` has no `PartialEq`; use explicit `match` assertions for Ok/Err paths.
 - `gsnake-levels validate-levels-toml` should aggregate issues with deterministic numbered output (`[io]`, `[parse]`, `[validation]`) and continue scanning all difficulties/entries in one run.
+- Before rerunning root `act` E2E (`.github/workflows/ci.yml::e2e-test`) after broad sudden failures, clear stale host Playwright processes (`pkill -f 'chromium_headless_shell|playwright_chromiumdev_profile' || true`); workflow cleanup relies on `fuser`, which may be unavailable in the act container.
 
 # Ralph Progress Log
 Started: Sun Feb 15 20:54:09 CET 2026
@@ -265,4 +266,14 @@ Started: Sun Feb 15 20:54:09 CET 2026
   - Patterns discovered: frame emission expectations should be maintained as a contract document plus unit tests, not just inline comments, so load/reset refactors cannot silently break first render.
   - Gotchas encountered: init-only startup assertions are not enough; reset and next-level paths also construct engines and must keep the same `levelChanged` → `frameChanged` order.
   - Useful context: browser tooling is not configured in this environment; this story changed docs/comments/tests only, so manual browser verification was not required.
+---
+## 2026-02-16 13:59:55 CET - US-024
+- Completed final reliability-hardening verification sweep and updated status notes in `gsnake-specs/tasks/prd-codebase-reliability-hardening.md` with implemented outcomes and residual risks.
+- Ran quality checks with `act`: `./.github/workflows/ci.yml::e2e-test`, `gsnake-specs/.github/workflows/ci.yml::markdown-lint`, and `gsnake-specs/.github/workflows/ci.yml::link-check` (all success on final rerun).
+- Marked `US-024` as passed in `scripts/ralph/prd.json` and refreshed `scripts/test/result.txt` with this iteration's CI status update.
+- Files changed: `gsnake-specs/tasks/prd-codebase-reliability-hardening.md`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`, `scripts/test/CLAUDE.md`.
+- **Learnings for future iterations:**
+  - Patterns discovered: root `act` E2E failures with many rapid spec failures can be environmental; clear stale Playwright processes before rerun.
+  - Gotchas encountered: `.github/workflows/ci.yml` E2E cleanup calls `fuser`, but `fuser` is unavailable in the act container image; host leftovers can survive until explicitly cleaned.
+  - Useful context: browser MCP tooling is not configured in this environment; this story updated docs/status artifacts and CI evidence only.
 ---
