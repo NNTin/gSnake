@@ -8,6 +8,7 @@
 - For schema drift tests in submodules, resolve schema paths with monorepo-first and vendored-local fallback candidates so checks run in both monorepo CI and standalone submodule CI.
 - Editor server LevelDefinition validation must flow through `src/server/levelDefinitionValidator.ts` (Ajv + canonical schema) and return `details` as `{ field, keyword, message }` objects so API errors stay field-addressable.
 - E2E `LevelDefinition` contract guards should be centralized in `e2e/level-definition.ts`; API/E2E specs should import this helper instead of redefining local `isLevelDefinition` logic.
+- Editor API validation tests should assert `details` entries by `field` + `keyword` (including nested paths like `snake.0.x` and `additionalProperties` paths like `stones.0.z`) so schema-driven failures stay stable and actionable.
 
 # Ralph Progress Log
 Started: Sun Feb 15 20:54:09 CET 2026
@@ -107,4 +108,14 @@ Started: Sun Feb 15 20:54:09 CET 2026
   - Patterns discovered: drift tests should validate consumer parity against schema verdicts rather than only fixture pass/fail labels, so integer/additional-property drift is caught early.
   - Gotchas encountered: `act` cannot run same workflow/job names concurrently in one repo due container-name collisions; run targeted jobs sequentially.
   - Useful context: web/editor standalone CI runs without monorepo root, so tests must not assume `../contracts` exists outside each submodule unless fallback handling is implemented.
+---
+## 2026-02-16 04:38:10 CET - US-010
+- Added editor API edge-case regression tests for `gridSize.width=0`, negative coordinate payload handling, invalid coordinate types, and multi-field invalid payload combinations with stable structured validation details.
+- Verified HTTP status + error response contract behavior (`400` + `error/details`) for rejected payloads and round-trip storage for schema-valid negative coordinates.
+- Ran `npm run check`, `npm run lint`, `npm test` in `gsnake-editor`, plus `act -W .github/workflows/ci.yml -j typecheck --container-architecture linux/amd64` and `act -W .github/workflows/ci.yml -j test --container-architecture linux/amd64` in `gsnake-editor` (all success).
+- Files changed: `gsnake-editor/src/tests/server.test.ts`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`.
+- **Learnings for future iterations:**
+  - Patterns discovered: schema-driven server tests should validate `field` and `keyword` together to make Ajv path normalization regressions visible.
+  - Gotchas encountered: negative coordinates are currently schema-valid for `position` fields, so edge-case coverage should explicitly assert acceptance semantics where intended.
+  - Useful context: this story was API/test hardening only; browser verification was not required because no UI behavior changed.
 ---
