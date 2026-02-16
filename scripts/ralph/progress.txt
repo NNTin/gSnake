@@ -28,6 +28,7 @@
 - `gsnake-levels validate-levels-toml` should aggregate issues with deterministic numbered output (`[io]`, `[parse]`, `[validation]`) and continue scanning all difficulties/entries in one run.
 - `gsnake-levels` solver baselines should use `cargo run --bin profile_solver -- --levels-root <...> --difficulties <...> --iterations <...> --max-depth <...>` with fixed arguments; the command scans sorted level JSON files and reports deterministic cumulative-time hotspots.
 - In `gsnake-levels`, keep playback generation and `solve_level` CLI output wiring through `solver::solve_level_to_playback(...)` so playback JSON format stays aligned while metadata sync avoids per-level subprocess overhead.
+- `gsnake-levels/build.rs` mode selection defaults to filesystem `auto` detection; use `GSNAKE_LEVELS_BUILD_MODE=local|standalone|auto` to force behavior when validating standalone vs monorepo workflows.
 - `act` runs for `gsnake-levels` can fail in dependency resolution when the remote `nntin/gsnake` git dependency references a submodule commit that is not yet reachable; treat local `cargo check`/`cargo test` as the reliable code-validation signal and log the exact missing-ref error in `scripts/test/result.txt`.
 - Before rerunning root `act` E2E (`.github/workflows/ci.yml::e2e-test`) after broad sudden failures, clear stale host Playwright processes (`pkill -f 'chromium_headless_shell|playwright_chromiumdev_profile' || true`); workflow cleanup relies on `fuser`, which may be unavailable in the act container.
 
@@ -128,4 +129,15 @@
   - Patterns discovered: keep startup loading indicators tied to engine init lifecycle in `finally` so first paint is explicit and deterministic without suppressing existing error overlays.
   - Gotchas encountered: `act -W gsnake-web/.github/workflows/ci.yml ...` must run from `gsnake-web/` workspace; running from monorepo root breaks the workflow's relative script paths.
   - Useful context: `agent-browser` is available in this environment and can assert startup text via `agent-browser get text body` for quick UI verification.
+---
+## 2026-02-16 23:18:47 CET - US-010
+- Added explicit build-mode override support in `gsnake-levels/build.rs` via `GSNAKE_LEVELS_BUILD_MODE` (`auto`, `local`, `standalone`) while preserving existing filesystem auto-detection as the default behavior.
+- Refactored build-script mode handling into reusable helpers (`BuildMode`, `is_root_repo`, override add/remove helpers) and added clear cargo warning messages for override and auto-detected modes.
+- Updated `gsnake-levels/README.md` to document current build.rs mode-switch behavior, override precedence, accepted values, and reproducible usage commands.
+- Ran `cargo fmt`, `cargo check`, `cargo test` in `gsnake-levels`, and `act -W .github/workflows/ci.yml -j test --container-architecture linux/amd64` from `gsnake-levels` (success).
+- Files changed: `gsnake-levels/build.rs`, `gsnake-levels/README.md`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`.
+- **Learnings for future iterations:**
+  - Patterns discovered: for `gsnake-levels`, keep default build behavior in `auto` mode and expose explicit env overrides so monorepo and standalone CI behavior can be validated deterministically.
+  - Gotchas encountered: `build.rs` mutates `.cargo/config.toml`, so mode switching must stay idempotent and should avoid changing default behavior unless `GSNAKE_LEVELS_BUILD_MODE` is explicitly set.
+  - Useful context: this story only changed Rust build tooling/docs; browser verification was not required.
 ---

@@ -1,17 +1,14 @@
 === Act CI Test Results ===
-Started: Mon Feb 16 22:34:03 CET 2026
+Started: Mon Feb 16 23:18:39 CET 2026
 
 ## Summary
 
-- [SUCCESS] local :: gsnake-web `npm run check`
-- [SUCCESS] local :: gsnake-web `npm test`
-- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::typecheck
-- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::test
-- [INFO] Initial `act` typecheck attempt from monorepo root failed due workflow working-directory mismatch (`packages/gsnake-web-app/scripts/detect-local-deps.js` not found); rerun from `gsnake-web/` succeeded.
-- [SUCCESS] Browser verification (`agent-browser`): loading text `Loading game engine...` was observed during startup, and post-init failure path showed the existing `Level Load Failed` modal.
+- [SUCCESS] ./gsnake-levels/.github/workflows/ci.yml::test
 
-**Total: 5 successful checks, 0 failing checks, 1 informational rerun**
+**Total: 1 passed, 0 failed**
 
 ---
-Completed: Mon Feb 16 22:38:18 CET 2026
+Completed: Mon Feb 16 23:18:39 CET 2026
+Result: 1 passed, 0 failed
+Command: (cd gsnake-levels && act -W .github/workflows/ci.yml -j test --container-architecture linux/amd64)
 Result file: /home/nntin/git/gSnake/scripts/test/result.txt
