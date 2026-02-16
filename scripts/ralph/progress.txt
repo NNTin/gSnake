@@ -323,3 +323,14 @@ Started: Sun Feb 15 20:54:09 CET 2026
   - Gotchas encountered: parse-context assertions are more stable when tests check the full chained error (`format!("{err:#}")`) instead of only `to_string()`.
   - Useful context: root `act` test job exercises `gsnake-core` contract tests plus fixture generation, so CLI binding error-handling changes are covered in that run.
 ---
+## 2026-02-16 19:43:01 CET - US-005
+- Removed remaining production `unwrap(...)` in `gsnake-levels/src/playback.rs` by making single-character key extraction fallible and propagating errors via `Result`.
+- Added per-step playback parse context (`Failed to parse playback step N in <path>`) so `verify` command failures report actionable location details instead of opaque key errors.
+- Added regression coverage for invalid playback keys in both unit (`playback.rs`) and CLI integration (`tests/cli_error_paths_test.rs`) paths.
+- Ran `cargo check` and `cargo test` in `gsnake-levels` (success), and ran `act` for `gsnake-levels` workflows (failed due external checkout/dependency issues noted below).
+- Files changed: `gsnake-levels/src/playback.rs`, `gsnake-levels/tests/cli_error_paths_test.rs`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`.
+- **Learnings for future iterations:**
+  - Patterns discovered: keep playback parsing errors wrapped with step index + playback file path context so CLI verification failures are directly traceable to an input row.
+  - Gotchas encountered: `act -W gsnake-levels/.github/workflows/ci.yml -j test` can fail independently of local code when upstream git dependency submodule refs are unavailable.
+  - Useful context: `act -W gsnake-levels/.github/workflows/test.yml -j test` requires a GitHub token for the cross-repo checkout step (`NNTin/gSnake`), so local `cargo test` remains the reliable signal in tokenless environments.
+---

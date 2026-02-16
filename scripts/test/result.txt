@@ -1,14 +1,17 @@
 === Act CI Test Results ===
-Started: Mon Feb 16 19:01:14 CET 2026
+Started: Mon Feb 16 19:40:11 CET 2026
 
 ## Summary
 
-- [SUCCESS] ./.github/workflows/ci.yml::test
+- [SUCCESS] local::cargo check (gsnake-levels)
+- [SUCCESS] local::cargo test (gsnake-levels)
+- [FAILED] ./gsnake-levels/.github/workflows/ci.yml::test (act; external dependency fetch failure: missing `gsnake-specs` submodule ref `25ec6e9115ffea7fdaca64428d74298c902b6cad`)
+- [FAILED] ./gsnake-levels/.github/workflows/test.yml::test (act; `actions/checkout` requires `token` for `NNTin/gSnake` repository checkout)
 
-**Total: 1 passed, 0 failed**
+**Total: 2 passed, 2 failed**
 
 ---
-Completed: Mon Feb 16 19:03:02 CET 2026
-Duration: 00:01:48
-Result: 1 passed, 0 failed
+Completed: Mon Feb 16 19:43:40 CET 2026
+Duration: 00:03:29
+Result: 2 passed, 2 failed
 Result file: /home/nntin/git/gSnake/scripts/test/result.txt

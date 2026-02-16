@@ -104,17 +104,17 @@ Use `chunkhound` first when you need to find implementation details quickly acro
 Recommended workflow:
 
 ```bash
-# 1) Index a target directory (use a dedicated DB path for your task)
-chunkhound index . --db /tmp/chunkhound-task.duckdb --force-reindex
+# 1) Index a target directory
+chunkhound index .
 
 # 2) Fast exact/pattern lookups (works with --no-embeddings indexes too)
-chunkhound search "Ralph Agent Instructions" . --regex --db /tmp/chunkhound-task.duckdb --page-size 10
+chunkhound search "gsnake" . --regex --page-size 10
 
 # 3) Semantic search (requires embedding provider configured)
-chunkhound search "where are commit requirements documented" . --semantic --db /tmp/chunkhound-task.duckdb --page-size 10
+chunkhound search "levels" . --semantic --page-size 10
 
 # 4) Deep synthesis (requires BOTH LLM + embeddings/reranking configured)
-chunkhound research "What are the required CI and commit steps?" . --db /tmp/chunkhound-task.duckdb
+chunkhound research "What are the required CI and commit steps?" .
 ```
 
 Important caveats:
