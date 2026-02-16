@@ -1,15 +1,22 @@
 === Act CI Test Results ===
-Started: Tue Feb 17 00:02:27 CET 2026
+Started: Tue Feb 17 00:41:14 CET 2026
 
 ## Summary
 
-- [SUCCESS] ./.github/workflows/ci.yml::test
+- [SUCCESS] ./.github/workflows/dependency-audit.yml::npm-audit
+- [SUCCESS] ./.github/workflows/dependency-audit.yml::cargo-audit
 
-**Total: 1 passed, 0 failed**
+**Total: 2 passed, 0 failed**
+
+## Notes
+
+- `npm-audit` currently reports moderate/low issues in `gsnake-web`, `gsnake-specs`, and `gsnake-editor`; job remains green because threshold is `--audit-level=high`.
+- `cargo-audit` reports allowed warnings (unmaintained/unsound advisories) in `gsnake-core` dependencies and no blocking vulnerabilities.
+- `cargo-audit` workflow now generates `gsnake-core/Cargo.lock` during CI because that lockfile is git-ignored in this repository.
 
 ---
-Completed: Tue Feb 17 00:04:04 CET 2026
-Duration: 00:01:37
-Result: 1 passed, 0 failed
-Command: act -W .github/workflows/ci.yml -j test --container-architecture linux/amd64
+Completed: Tue Feb 17 00:54:04 CET 2026
+Duration: 00:12:50
+Result: 2 passed, 0 failed
 Result file: /home/nntin/git/gSnake/scripts/test/result.txt
+Temp dir: /home/nntin/git/gSnake/scripts/test/tmp_act_results

@@ -32,6 +32,7 @@
 - `gsnake-levels/build.rs` mode selection defaults to filesystem `auto` detection; use `GSNAKE_LEVELS_BUILD_MODE=local|standalone|auto` to force behavior when validating standalone vs monorepo workflows.
 - `act` runs for `gsnake-levels` can fail in dependency resolution when the remote `nntin/gsnake` git dependency references a submodule commit that is not yet reachable; treat local `cargo check`/`cargo test` as the reliable code-validation signal and log the exact missing-ref error in `scripts/test/result.txt`.
 - Before rerunning root `act` E2E (`.github/workflows/ci.yml::e2e-test`) after broad sudden failures, clear stale host Playwright processes (`pkill -f 'chromium_headless_shell|playwright_chromiumdev_profile' || true`); workflow cleanup relies on `fuser`, which may be unavailable in the act container.
+- Dependency security checks are centralized in `.github/workflows/dependency-audit.yml`; keep new `package-lock.json`/`Cargo.lock` files added there, and generate `gsnake-core/Cargo.lock` in CI before running `cargo audit` because that lockfile is git-ignored.
 
 ## 2026-02-16 16:59:41 CET - US-001
 - Added a root generation workflow for a shared TypeScript LevelDefinition runtime validator (`scripts/contracts/generate-level-definition-validator.mjs`) that compiles `contracts/level-definition.schema.json` via Ajv standalone and emits `contracts/generated/level-definition-validator.ts`.
@@ -152,4 +153,16 @@
   - Patterns discovered: gravity determinism checks are robust when tests compare sorted coordinate sets from equivalent states that only differ in vector ordering.
   - Gotchas encountered: root CI workflow jobs run from monorepo root; `act` with `-W .github/workflows/ci.yml` should be launched from `/home/nntin/git/gSnake`, not from a subdirectory expecting local workflows.
   - Useful context: this story only changed Rust engine tests/tooling; browser verification was not required.
+---
+## 2026-02-17 00:54:26 CET - US-012
+- Added a dependency maintenance policy document with ownership, update cadence, automated audit scope, and a concrete failure-handling path (`docs/dependency-maintenance-policy.md`).
+- Added a dedicated scheduled/manual GitHub Actions workflow (`.github/workflows/dependency-audit.yml`) that runs `npm audit` across root/web/editor/specs lockfiles and `cargo audit` across `gsnake-core` and `gsnake-levels`.
+- Hardened Rust audit execution by generating `gsnake-core/Cargo.lock` in CI before auditing, since that lockfile is git-ignored in this repository.
+- Updated root docs and test-agent guidance to point to the new audit workflow and local `act` commands.
+- Ran `act -W .github/workflows/dependency-audit.yml -j npm-audit --container-architecture linux/amd64` and `act -W .github/workflows/dependency-audit.yml -j cargo-audit --container-architecture linux/amd64` (both success); refreshed `scripts/test/result.txt`.
+- Files changed: `.github/workflows/dependency-audit.yml`, `docs/dependency-maintenance-policy.md`, `README.md`, `scripts/test/CLAUDE.md`, `scripts/test/result.txt`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`.
+- **Learnings for future iterations:**
+  - Patterns discovered: keep dependency audit coverage lockfile-driven and centralized in one workflow so new packages are added by updating a single matrix/scope list.
+  - Gotchas encountered: `gsnake-core/Cargo.lock` is not tracked, so CI must generate it before `cargo audit` or runs fail with missing lockfile errors.
+  - Useful context: audit runs currently surface non-blocking npm moderate/low findings and allowed cargo warnings; triage policy is documented in `docs/dependency-maintenance-policy.md`.
 ---

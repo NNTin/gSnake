@@ -50,6 +50,18 @@ This is a monorepo containing several submodules:
 
 Each submodule can build and test independently using git branch dependencies.
 
+### Dependency Maintenance and Security Audits
+
+Dependency ownership, update cadence, and security-audit triage are documented in
+`docs/dependency-maintenance-policy.md`.
+
+Automated npm/cargo audits run from `.github/workflows/dependency-audit.yml` on a weekly schedule and can be run manually with:
+
+```bash
+act -W .github/workflows/dependency-audit.yml -j npm-audit --container-architecture linux/amd64
+act -W .github/workflows/dependency-audit.yml -j cargo-audit --container-architecture linux/amd64
+```
+
 ### Local Development Ports
 
 - **gsnake-web (Vite dev server):** http://localhost:3000

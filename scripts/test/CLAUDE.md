@@ -72,6 +72,14 @@ act -l -W .github/workflows/ci.yml
 act -l -W gsnake-web/.github/workflows/ci.yml
 ```
 
+### Dependency Audit Workflow
+The monorepo dependency-security checks are in `.github/workflows/dependency-audit.yml`:
+```bash
+act -W .github/workflows/dependency-audit.yml -j npm-audit --container-architecture linux/amd64
+act -W .github/workflows/dependency-audit.yml -j cargo-audit --container-architecture linux/amd64
+```
+Keep this workflow in sync whenever a new `package-lock.json` or `Cargo.lock` is added.
+
 ## Common Workflow
 
 1. **Check result.txt** to see which jobs failed:
