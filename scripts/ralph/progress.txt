@@ -17,6 +17,7 @@
 - In `gsnake-core` stone interaction contract tests, use a dedicated fixture level with a fixed obstacle platform row so gravity is deterministic and push-matrix assertions focus on interaction semantics rather than fall order side effects.
 - CLI playback parsing should attach `anyhow::Context` at each stage (file read, JSON parse, per-step key parse with step index + file path) so malformed playback diagnostics are actionable without panics.
 - In `gsnake-levels` tests that mutate process CWD, prefer lock helpers that return `Result` (`?`) over `expect(...)` on `cwd_mutex` so generation-path regressions surface as test errors instead of panic paths.
+- In Rust tests that assert `Result<T, anyhow::Error>`, avoid `assert_eq!(result, Ok(...))` because `anyhow::Error` has no `PartialEq`; use explicit `match` assertions for Ok/Err paths.
 
 # Ralph Progress Log
 Started: Sun Feb 15 20:54:09 CET 2026
@@ -208,4 +209,14 @@ Started: Sun Feb 15 20:54:09 CET 2026
   - Patterns discovered: generation-path failure tests are more actionable when assertions use chained diagnostics (`format!("{err:#}")`) and include the level file path.
   - Gotchas encountered: `cwd_mutex().lock()` poison errors can be converted into `anyhow` once in a helper to avoid repeated panic-prone `expect(...)` calls across tests.
   - Useful context: this story was generation command hardening + tests only; browser verification was not required.
+---
+## 2026-02-16 10:27:45 CET - US-019
+- Hardened `gsnake-levels/src/migration.rs` migration error handling with step-specific `anyhow::Context` messages for read/parse/serialize/write/validate operations, each including the target file path.
+- Removed `unwrap` usage from migration module tests by switching to `Result`-returning tests and explicit `match` assertions, and added regression coverage for malformed JSON migration input and missing level file errors.
+- Ran `cargo test` in `gsnake-levels` and `act -W .github/workflows/ci.yml -j test --container-architecture linux/amd64` in `gsnake-levels` (success).
+- Files changed: `gsnake-levels/src/migration.rs`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`.
+- **Learnings for future iterations:**
+  - Patterns discovered: migration-path regression tests should assert chained errors via `format!("{err:#}")` so both step context and root parse/validation failures remain visible.
+  - Gotchas encountered: `act` validates a snapshot taken at job start; if source changes during a run, rerun the job to test the latest code.
+  - Useful context: `Result<T, anyhow::Error>` comparisons need `match`-based assertions because `anyhow::Error` is not `PartialEq`.
 ---
