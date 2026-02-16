@@ -1,14 +1,15 @@
 === Act CI Test Results ===
-Started: Mon Feb 16 23:18:39 CET 2026
+Started: Tue Feb 17 00:02:27 CET 2026
 
 ## Summary
 
-- [SUCCESS] ./gsnake-levels/.github/workflows/ci.yml::test
+- [SUCCESS] ./.github/workflows/ci.yml::test
 
 **Total: 1 passed, 0 failed**
 
 ---
-Completed: Mon Feb 16 23:18:39 CET 2026
+Completed: Tue Feb 17 00:04:04 CET 2026
+Duration: 00:01:37
 Result: 1 passed, 0 failed
-Command: (cd gsnake-levels && act -W .github/workflows/ci.yml -j test --container-architecture linux/amd64)
+Command: act -W .github/workflows/ci.yml -j test --container-architecture linux/amd64
 Result file: /home/nntin/git/gSnake/scripts/test/result.txt

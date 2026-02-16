@@ -22,6 +22,7 @@
 - In `gsnake-web` contract tests, keep CellType coverage centralized with shared variant lists and pair `isFrame(...)` assertions with explicit invalid-cell diagnostics so enum drift (casing/whitespace/non-string payloads) fails with actionable messages.
 - In `gsnake-core` stone interaction contract tests, use a dedicated fixture level with a fixed obstacle platform row so gravity is deterministic and push-matrix assertions focus on interaction semantics rather than fall order side effects.
 - In `gsnake-core`, preserve physics sequencing in `GameEngine::process_move` (collision -> win -> snake gravity -> stone gravity -> falling-food gravity) and validate intentional changes against the order-locking tests documented in `gsnake-core/README.md`.
+- In `gsnake-core` property tests for gravity behavior, normalize equivalent states by reordering entity vectors and compare sorted coordinate outputs to assert deterministic outcomes independent of storage order.
 - CLI playback parsing should attach `anyhow::Context` at each stage (file read, JSON parse, per-step key parse with step index + file path) so malformed playback diagnostics are actionable without panics.
 - In `gsnake-levels` tests that mutate process CWD, prefer lock helpers that return `Result` (`?`) over `expect(...)` on `cwd_mutex` so generation-path regressions surface as test errors instead of panic paths.
 - In Rust tests that assert `Result<T, anyhow::Error>`, avoid `assert_eq!(result, Ok(...))` because `anyhow::Error` has no `PartialEq`; use explicit `match` assertions for Ok/Err paths.
@@ -140,4 +141,15 @@
   - Patterns discovered: for `gsnake-levels`, keep default build behavior in `auto` mode and expose explicit env overrides so monorepo and standalone CI behavior can be validated deterministically.
   - Gotchas encountered: `build.rs` mutates `.cargo/config.toml`, so mode switching must stay idempotent and should avoid changing default behavior unless `GSNAKE_LEVELS_BUILD_MODE` is explicitly set.
   - Useful context: this story only changed Rust build tooling/docs; browser verification was not required.
+---
+## 2026-02-17 00:00:14 CET - US-011
+- Added property-based gravity invariant coverage in `gsnake-core` via new integration tests that generate randomized level states and assert stone/snake safety contracts.
+- Covered stone-gravity invariants for bounds safety, collision/support settling, idempotence after settlement, and deterministic convergence across equivalent states with reordered stone vectors.
+- Covered snake-gravity invariants for rigid-body vertical translation, in-bounds guarantees, spike-hit consistency, repeat-call stability for settled non-spike states, and deterministic outcomes across equivalent blocker orderings.
+- Ran `cargo fmt` and `cargo test` in `gsnake-core`, then ran `act -W .github/workflows/ci.yml -j test --container-architecture linux/amd64` from repo root (success).
+- Files changed: `gsnake-core/engine/core/Cargo.toml`, `gsnake-core/engine/core/tests/gravity_property_tests.rs`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`.
+- **Learnings for future iterations:**
+  - Patterns discovered: gravity determinism checks are robust when tests compare sorted coordinate sets from equivalent states that only differ in vector ordering.
+  - Gotchas encountered: root CI workflow jobs run from monorepo root; `act` with `-W .github/workflows/ci.yml` should be launched from `/home/nntin/git/gSnake`, not from a subdirectory expecting local workflows.
+  - Useful context: this story only changed Rust engine tests/tooling; browser verification was not required.
 ---
