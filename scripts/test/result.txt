@@ -1,20 +1,51 @@
-=== CI/Quality Results (US-007) ===
-Started: 2026-02-16 21:07:05 CET
+=== Act CI Test Results ===
+Started: Mon Feb 16 21:12:22 CET 2026
 
-## Local Checks
-- [SUCCESS] gsnake-levels::cargo fmt
-- [SUCCESS] gsnake-levels::cargo test
+## Summary
 
-## Act Checks
-- [FAILED] gsnake-levels/.github/workflows/ci.yml::test
+- [FAILED] ./gsnake-levels/.github/workflows/test.yml::test
+- [FAILED] ./gsnake-levels/.github/workflows/ci.yml::test
+- [FAILED] ./gsnake-levels/.github/workflows/ci.yml::validate-levels
+- [FAILED] ./gsnake-levels/.github/workflows/ci.yml::coverage
+- [FAILED] ./gsnake-levels/.github/workflows/ci.yml::build
+- [FAILED] ./gsnake-levels/.github/workflows/ci.yml::required-merge-gates
+- [SUCCESS] ./gsnake-web/.github/workflows/test.yml::test
+- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::typecheck
+- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::test
+- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::coverage
+- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::build
+- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::required-merge-gates
+- [SUCCESS] ./gsnake-specs/.github/workflows/test.yml::test
+- [SUCCESS] ./gsnake-specs/.github/workflows/ci.yml::markdown-lint
+- [SUCCESS] ./gsnake-specs/.github/workflows/ci.yml::link-check
+- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::build
+- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::typecheck
+- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::test
+- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::coverage
+- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::required-merge-gates
+- [SUCCESS] ./.github/workflows/ci.yml::build
+- [SUCCESS] ./.github/workflows/ci.yml::core-coverage
+- [SUCCESS] ./.github/workflows/ci.yml::e2e-test
+- [SUCCESS] ./.github/workflows/ci.yml::test
+- [SUCCESS] ./.github/workflows/ci.yml::gsnake-editor-test
+- [SUCCESS] ./.github/workflows/ci.yml::wasm
+- [SUCCESS] ./.github/workflows/ci.yml::gsnake-web-coverage
+- [SUCCESS] ./.github/workflows/ci.yml::gsnake-editor-coverage
+- [SUCCESS] ./.github/workflows/ci.yml::required-merge-gates
 
-## Failure Detail
-`act -W gsnake-levels/.github/workflows/ci.yml -j test --container-architecture linux/amd64`
-failed while resolving git dependency `https://github.com/nntin/gsnake`:
-- submodule fetch failed for `https://github.com/NNTin/gsnake-specs.git`
-- missing ref: `25ec6e9115ffea7fdaca64428d74298c902b6cad`
+**Total: 23 passed, 6 failed**
 
-This is the known external remote-ref availability issue for gsnake-levels act runs.
-Local `cargo test` is the reliable validation signal for this iteration.
+---
+Completed: Mon Feb 16 21:46:59 CET 2026
+Duration: 00:34:37
+Result: 23 passed, 6 failed
+Result file: /home/nntin/git/gSnake/scripts/test/result.txt
+Temp dir: /home/nntin/git/gSnake/scripts/test/tmp_act_results
 
-Completed: 2026-02-16 21:10:42 CET
+---
+## Iteration: 2026-02-16 21:51 CET
+
+- Command: `act -W gsnake-levels/.github/workflows/ci.yml -j test --container-architecture linux/amd64`
+- Result: `[FAILED] gsnake-levels/.github/workflows/ci.yml::test`
+- Failure cause: remote submodule ref unavailable while resolving git dependency `https://github.com/nntin/gsnake?branch=main`:
+  `gsnake-specs` revision `25ec6e9115ffea7fdaca64428d74298c902b6cad` not found (`git fetch ... exit status 128`).
