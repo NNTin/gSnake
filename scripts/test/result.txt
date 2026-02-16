@@ -1,50 +1,17 @@
 === Act CI Test Results ===
-Started: Mon Feb 16 04:39:50 CET 2026
+Started: 2026-02-16 05:52:21 CET
 
 ## Summary
 
-- [SUCCESS] ./gsnake-levels/.github/workflows/test.yml::test
-- [SUCCESS] ./gsnake-levels/.github/workflows/ci.yml::build
-- [SUCCESS] ./gsnake-levels/.github/workflows/ci.yml::test
-- [SUCCESS] ./gsnake-levels/.github/workflows/ci.yml::validate-levels
-- [SUCCESS] ./gsnake-levels/.github/workflows/ci.yml::coverage
-- [SUCCESS] ./gsnake-levels/.github/workflows/ci.yml::required-merge-gates
-- [SUCCESS] ./gsnake-web/.github/workflows/test.yml::test
-- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::build
 - [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::typecheck
 - [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::test
-- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::coverage
-- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::required-merge-gates
-- [SUCCESS] ./gsnake-specs/.github/workflows/test.yml::test
-- [SUCCESS] ./gsnake-specs/.github/workflows/ci.yml::markdown-lint
-- [SUCCESS] ./gsnake-specs/.github/workflows/ci.yml::link-check
-- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::build
-- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::typecheck
-- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::test
-- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::coverage
-- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::required-merge-gates
-- [SUCCESS] ./.github/workflows/ci.yml::e2e-test
-- [SUCCESS] ./.github/workflows/ci.yml::core-coverage
-- [SUCCESS] ./.github/workflows/ci.yml::build
-- [SUCCESS] ./.github/workflows/ci.yml::test
-- [SUCCESS] ./.github/workflows/ci.yml::gsnake-editor-test
-- [SUCCESS] ./.github/workflows/ci.yml::wasm
-- [SUCCESS] ./.github/workflows/ci.yml::gsnake-editor-coverage
-- [SUCCESS] ./.github/workflows/ci.yml::gsnake-web-coverage
-- [SUCCESS] ./.github/workflows/ci.yml::required-merge-gates
 
-**Total: 29 passed, 0 failed**
+**Total: 2 passed, 0 failed**
 
 ---
-Completed: Mon Feb 16 05:12:55 CET 2026
-Duration: 00:33:05
-Result: 29 passed, 0 failed
-Result file: /home/nntin/git/gSnake/scripts/test/result.txt
-Temp dir: /home/nntin/git/gSnake/scripts/test/tmp_act_results
-
-## Iteration 2026-02-16 05:15:25 CET - US-011
-
-- [SUCCESS] gsnake-web/packages/gsnake-web-app::npm run check
-- [SUCCESS] gsnake-web/packages/gsnake-web-app::npm test
-- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::typecheck
-- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::test
+Completed: 2026-02-16 05:53:01 CET
+Duration: 00:00:40
+Result: 2 passed, 0 failed
+Executed via:
+- `act -W .github/workflows/ci.yml -j typecheck --container-architecture linux/amd64`
+- `act -W .github/workflows/ci.yml -j test --container-architecture linux/amd64`

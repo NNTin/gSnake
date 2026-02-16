@@ -10,6 +10,7 @@
 - E2E `LevelDefinition` contract guards should be centralized in `e2e/level-definition.ts`; API/E2E specs should import this helper instead of redefining local `isLevelDefinition` logic.
 - Editor API validation tests should assert `details` entries by `field` + `keyword` (including nested paths like `snake.0.x` and `additionalProperties` paths like `stones.0.z`) so schema-driven failures stay stable and actionable.
 - Svelte component unit tests in `gsnake-web-app` should use `// @vitest-environment jsdom`, instantiate components with `new Component({ target: document.body, props })`, and reset `document.body.innerHTML` between tests for deterministic DOM assertions.
+- For composed Svelte UI units (for example `Header.svelte`), assert action wiring through `data-element-id` buttons and verify both store side effects and engine stub calls to keep interaction contracts stable.
 
 # Ralph Progress Log
 Started: Sun Feb 15 20:54:09 CET 2026
@@ -128,5 +129,16 @@ Started: Sun Feb 15 20:54:09 CET 2026
 - **Learnings for future iterations:**
   - Patterns discovered: for Svelte component-only tests, instantiate components directly and assert emitted DOM attributes/styles without pulling in extra UI testing libraries.
   - Gotchas encountered: `gsnake-web` act jobs must be run from the `gsnake-web` submodule root so standalone dependency rewriting paths resolve correctly.
+  - Useful context: browser tooling is not configured in this environment, so manual browser verification is still needed for UI-story visual checks.
+---
+## 2026-02-16 05:53:14 CET - US-012
+- Added a dedicated `Header.svelte` unit test suite at `gsnake-web/packages/gsnake-web-app/tests/unit/Header.test.ts`.
+- Covered representative header rendering states by asserting score labels (`Level`, `Length`, `Moves`) and corresponding values from stores, including reactive updates after store changes.
+- Verified header action wiring by asserting `Levels` toggles `levelSelectorOpen` and `Restart` invokes `gameEngine.restartLevel()`.
+- Ran `npm run check` and `npm test` in `gsnake-web`, plus `act -W .github/workflows/ci.yml -j typecheck --container-architecture linux/amd64` and `act -W .github/workflows/ci.yml -j test --container-architecture linux/amd64` in `gsnake-web` (all success).
+- Files changed: `gsnake-web/packages/gsnake-web-app/tests/unit/Header.test.ts`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`.
+- **Learnings for future iterations:**
+  - Patterns discovered: in composed component tests, assert both rendered state and side effects from child controls (`store` mutation + engine callback) to lock UI wiring contracts.
+  - Gotchas encountered: focused `vitest --run` filters are relative to the package cwd; using repo-root paths reports `No test files found`.
   - Useful context: browser tooling is not configured in this environment, so manual browser verification is still needed for UI-story visual checks.
 ---
