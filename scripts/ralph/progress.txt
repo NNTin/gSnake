@@ -6,6 +6,7 @@
 - `WasmGameEngine.init(...)` startup invariants should assert one `levelChanged` then one `frameChanged` event with no `engineError` for normalized query inputs, so startup behavior stays stable across parsing refactors.
 - `LevelDefinition` schema changes must be made in `contracts/level-definition.schema.json` and validated with `npm run test:level-schema`; keep fixtures in `contracts/fixtures/` updated in the same change.
 - Editor server LevelDefinition validation must flow through `src/server/levelDefinitionValidator.ts` (Ajv + canonical schema) and return `details` as `{ field, keyword, message }` objects so API errors stay field-addressable.
+- E2E `LevelDefinition` contract guards should be centralized in `e2e/level-definition.ts`; API/E2E specs should import this helper instead of redefining local `isLevelDefinition` logic.
 
 # Ralph Progress Log
 Started: Sun Feb 15 20:54:09 CET 2026
@@ -84,4 +85,14 @@ Started: Sun Feb 15 20:54:09 CET 2026
   - Patterns discovered: map Ajv `instancePath` + `required`/`additionalProperties` params into dot-path field identifiers so clients can tie validation failures directly to form inputs.
   - Gotchas encountered: `server.ts` imports must omit `.ts` suffix because the editor typecheck path does not enable `allowImportingTsExtensions`.
   - Useful context: editor standalone CI (`FORCE_GIT_DEPS=1`) cannot rely on monorepo-only paths; schema loading needs a local fallback artifact.
+---
+## 2026-02-16 03:10:31 CET - US-008
+- Extracted shared `LevelDefinition` typing and `isLevelDefinition` guard into `e2e/level-definition.ts` and removed duplicated ad-hoc guard/type blocks from the two target E2E specs.
+- Updated `e2e/complete-workflow.spec.ts` and `e2e/level-validation.spec.ts` to import `LevelDefinition` and `isLevelDefinition` from the shared utility.
+- Ran `npm run test:e2e -- e2e/complete-workflow.spec.ts e2e/level-validation.spec.ts` and `act -W .github/workflows/ci.yml -j e2e-test --container-architecture linux/amd64` (success).
+- Files changed: `e2e/level-definition.ts`, `e2e/complete-workflow.spec.ts`, `e2e/level-validation.spec.ts`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`.
+- **Learnings for future iterations:**
+  - Patterns discovered: when E2E specs validate serialized LevelDefinition payloads, import `isLevelDefinition` from `e2e/level-definition.ts` to keep contract checks synchronized.
+  - Gotchas encountered: `act` E2E job first-run setup is heavy (Playwright/browser packages), so expect longer runtime even for small test-only refactors.
+  - Useful context: this story changed test utilities/spec wiring only; no product UI behavior changed.
 ---
