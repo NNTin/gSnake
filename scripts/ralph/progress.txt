@@ -13,6 +13,7 @@
 - For composed Svelte UI units (for example `Header.svelte`), assert action wiring through `data-element-id` buttons and verify both store side effects and engine stub calls to keep interaction contracts stable.
 - For interactive Svelte button components, keep native button semantics (`type="button"` and `disabled`) and add dedicated tests that assert enabled/disabled state via DOM attributes plus click side effects.
 - `KeyboardHandler` should forward rapid directional key events to `processMove` in order and leave lock/rejection decisions to the engine; tests should validate this via `attach()` + `window.dispatchEvent(...)`.
+- In `gsnake-web` contract tests, keep CellType coverage centralized with shared variant lists and pair `isFrame(...)` assertions with explicit invalid-cell diagnostics so enum drift (casing/whitespace/non-string payloads) fails with actionable messages.
 
 # Ralph Progress Log
 Started: Sun Feb 15 20:54:09 CET 2026
@@ -164,4 +165,14 @@ Started: Sun Feb 15 20:54:09 CET 2026
   - Patterns discovered: KeyboardHandler coverage is strongest when tests dispatch real `window` keydown events after `attach()`, since that exercises listener wiring and prevent-default behavior together.
   - Gotchas encountered: `gsnake-web` workspace does not define a root `lint` script, so quality checks for this area should use `npm run check` + `npm test` plus workflow `act` jobs.
   - Useful context: input lock/rejection behavior is enforced by engine `processMove`; web handler tests should verify forwarding order, not local debounce/queue logic.
+---
+## 2026-02-16 07:48:26 CET - US-015
+- Expanded `gsnake-web/packages/gsnake-web-app/tests/contract/types.test.ts` with shared CellType variant constants and explicit coverage for `FloatingFood`, `FallingFood`, `Stone`, and `Spike` in both direct type-guard and mixed-frame scenarios.
+- Added mixed-variant frame fixture assertions and invalid variant regression coverage (casing drift, whitespace drift, unknown string, non-string) with explicit expected validation-error messages via a test-local `validateFrameCellTypes(...)` helper.
+- Ran `npm run check` and `npm test` in `gsnake-web`, plus `act -W .github/workflows/ci.yml -j typecheck --container-architecture linux/amd64` and `act -W .github/workflows/ci.yml -j test --container-architecture linux/amd64` in `gsnake-web` (all success).
+- Files changed: `gsnake-web/packages/gsnake-web-app/tests/contract/types.test.ts`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`.
+- **Learnings for future iterations:**
+  - Patterns discovered: contract tests are more durable when they assert both positive mixed-variant acceptance and deterministic invalid-cell diagnostics for drift-prone payload variants.
+  - Gotchas encountered: `isFrame(...)` alone only returns a boolean, so pairing it with an explicit diagnostic helper in tests avoids opaque failures when enum strings drift.
+  - Useful context: this iteration changed contract tests only; browser verification was not required.
 ---
