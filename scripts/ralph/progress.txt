@@ -4,6 +4,7 @@
 - Grid-size boundary tests should use `MAX_GRID_CELLS` directly (`1x1` minimum valid, `MAX_GRID_CELLS x 1` maximum valid, `(MAX_GRID_CELLS + 1) x 1` overflow) to lock behavior to the engine's safety cap constant.
 - For web startup level selection, pass the raw `level` query value to `WasmGameEngine.init(...)`; `WasmGameEngine` owns strict parsing and deterministic fallback-to-level-1 behavior.
 - `WasmGameEngine.init(...)` startup invariants should assert one `levelChanged` then one `frameChanged` event with no `engineError` for normalized query inputs, so startup behavior stays stable across parsing refactors.
+- Every `WasmGameEngine` path that creates a Rust engine (`init`/`loadLevel`/`nextLevel`/`resetLevel`) must call `getFrame()` immediately after `onFrame` registration and preserve event order `levelChanged` then `frameChanged`; keep the contract in `gsnake-web/packages/gsnake-web-app/engine/frame-emission.md`.
 - `LevelDefinition` schema changes must be made in `contracts/level-definition.schema.json` and validated with `npm run test:level-schema`; keep fixtures in `contracts/fixtures/` updated in the same change.
 - Optional-field and `totalFood` semantics for editor/server round-trips are centralized in `contracts/level-definition-semantics.md`; source code should link there instead of re-documenting semantics ad hoc.
 - For schema drift tests in submodules, resolve schema paths with monorepo-first and vendored-local fallback candidates so checks run in both monorepo CI and standalone submodule CI.
@@ -253,4 +254,15 @@ Started: Sun Feb 15 20:54:09 CET 2026
   - Patterns discovered: semantic contracts that span editor serialization and server validation should live under `contracts/` and be referenced from code entrypoints on both sides.
   - Gotchas encountered: optional arrays are schema-optional for compatibility, but editor serialization should still emit them explicitly to keep round-trip payloads stable.
   - Useful context: browser tooling is not configured in this environment; this story was documentation/source-linking only, so manual browser verification was not required.
+---
+## 2026-02-16 13:06:47 CET - US-023
+- Added a single authoritative frame-emission contract document at `gsnake-web/packages/gsnake-web-app/engine/frame-emission.md`, documenting required engine-create sequence and explicit `getFrame()` behavior.
+- Updated discovery links to the contract from `gsnake-web/README.md`, `gsnake-web/packages/gsnake-web-app/engine/WasmGameEngine.ts`, and `gsnake-web/packages/gsnake-web-app/engine/CLAUDE.md`.
+- Strengthened `WasmGameEngine` regression coverage to assert `getFrame()` is called once per engine creation path and that event order remains `levelChanged` then `frameChanged` across init/next/reset flows.
+- Ran `npm run check` and `npm test` in `gsnake-web`, plus `act -W .github/workflows/ci.yml -j typecheck --container-architecture linux/amd64` and `act -W .github/workflows/ci.yml -j test --container-architecture linux/amd64` in `gsnake-web` (all success).
+- Files changed: `gsnake-web/README.md`, `gsnake-web/packages/gsnake-web-app/engine/frame-emission.md`, `gsnake-web/packages/gsnake-web-app/engine/WasmGameEngine.ts`, `gsnake-web/packages/gsnake-web-app/engine/CLAUDE.md`, `gsnake-web/packages/gsnake-web-app/tests/unit/WasmGameEngine.test.ts`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`.
+- **Learnings for future iterations:**
+  - Patterns discovered: frame emission expectations should be maintained as a contract document plus unit tests, not just inline comments, so load/reset refactors cannot silently break first render.
+  - Gotchas encountered: init-only startup assertions are not enough; reset and next-level paths also construct engines and must keep the same `levelChanged` → `frameChanged` order.
+  - Useful context: browser tooling is not configured in this environment; this story changed docs/comments/tests only, so manual browser verification was not required.
 ---
