@@ -116,6 +116,20 @@ if: ${{ always() && env.ACT != 'true' }}
 ### Missing npm Scripts
 Many submodules show failures for missing npm scripts (test, build, check). This is expected as those submodules may not have these scripts implemented yet. Focus on the jobs that should work based on the actual package.json content.
 
+### Workflow Working Directory Mismatch for Submodule CI
+When running a submodule workflow file with `act -W gsnake-web/.github/workflows/ci.yml ...` from monorepo root, jobs that execute repo-relative scripts can fail because `actions/checkout` places files under the current workspace.
+
+Typical symptom:
+```
+Error: Cannot find module '/.../packages/gsnake-web-app/scripts/detect-local-deps.js'
+```
+
+Use the submodule as the working directory for those runs:
+```bash
+cd gsnake-web
+act -W .github/workflows/ci.yml -j typecheck --container-architecture linux/amd64
+```
+
 ### Missing Git Submodule Ref During Dependency Fetch
 `gsnake-levels` workflows can fail in `act` before tests execute when Cargo updates the git dependency `https://github.com/nntin/gsnake?branch=main` and one of that repo's submodule commits is not reachable on the remote yet.
 

@@ -1,51 +1,17 @@
 === Act CI Test Results ===
-Started: Mon Feb 16 21:12:22 CET 2026
+Started: Mon Feb 16 22:34:03 CET 2026
 
 ## Summary
 
-- [FAILED] ./gsnake-levels/.github/workflows/test.yml::test
-- [FAILED] ./gsnake-levels/.github/workflows/ci.yml::test
-- [FAILED] ./gsnake-levels/.github/workflows/ci.yml::validate-levels
-- [FAILED] ./gsnake-levels/.github/workflows/ci.yml::coverage
-- [FAILED] ./gsnake-levels/.github/workflows/ci.yml::build
-- [FAILED] ./gsnake-levels/.github/workflows/ci.yml::required-merge-gates
-- [SUCCESS] ./gsnake-web/.github/workflows/test.yml::test
+- [SUCCESS] local :: gsnake-web `npm run check`
+- [SUCCESS] local :: gsnake-web `npm test`
 - [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::typecheck
 - [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::test
-- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::coverage
-- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::build
-- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::required-merge-gates
-- [SUCCESS] ./gsnake-specs/.github/workflows/test.yml::test
-- [SUCCESS] ./gsnake-specs/.github/workflows/ci.yml::markdown-lint
-- [SUCCESS] ./gsnake-specs/.github/workflows/ci.yml::link-check
-- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::build
-- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::typecheck
-- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::test
-- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::coverage
-- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::required-merge-gates
-- [SUCCESS] ./.github/workflows/ci.yml::build
-- [SUCCESS] ./.github/workflows/ci.yml::core-coverage
-- [SUCCESS] ./.github/workflows/ci.yml::e2e-test
-- [SUCCESS] ./.github/workflows/ci.yml::test
-- [SUCCESS] ./.github/workflows/ci.yml::gsnake-editor-test
-- [SUCCESS] ./.github/workflows/ci.yml::wasm
-- [SUCCESS] ./.github/workflows/ci.yml::gsnake-web-coverage
-- [SUCCESS] ./.github/workflows/ci.yml::gsnake-editor-coverage
-- [SUCCESS] ./.github/workflows/ci.yml::required-merge-gates
+- [INFO] Initial `act` typecheck attempt from monorepo root failed due workflow working-directory mismatch (`packages/gsnake-web-app/scripts/detect-local-deps.js` not found); rerun from `gsnake-web/` succeeded.
+- [SUCCESS] Browser verification (`agent-browser`): loading text `Loading game engine...` was observed during startup, and post-init failure path showed the existing `Level Load Failed` modal.
 
-**Total: 23 passed, 6 failed**
+**Total: 5 successful checks, 0 failing checks, 1 informational rerun**
 
 ---
-Completed: Mon Feb 16 21:46:59 CET 2026
-Duration: 00:34:37
-Result: 23 passed, 6 failed
+Completed: Mon Feb 16 22:38:18 CET 2026
 Result file: /home/nntin/git/gSnake/scripts/test/result.txt
-Temp dir: /home/nntin/git/gSnake/scripts/test/tmp_act_results
-
----
-## Iteration: 2026-02-16 21:51 CET
-
-- Command: `act -W gsnake-levels/.github/workflows/ci.yml -j test --container-architecture linux/amd64`
-- Result: `[FAILED] gsnake-levels/.github/workflows/ci.yml::test`
-- Failure cause: remote submodule ref unavailable while resolving git dependency `https://github.com/nntin/gsnake?branch=main`:
-  `gsnake-specs` revision `25ec6e9115ffea7fdaca64428d74298c902b6cad` not found (`git fetch ... exit status 128`).

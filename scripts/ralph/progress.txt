@@ -4,6 +4,7 @@
 - In `gsnake-core/engine/bindings/cli`, never discard `GameEngine::process_move(...)` results; propagate errors with move-direction and level-id context so invariant failures surface as actionable CLI diagnostics.
 - Grid-size boundary tests should use `MAX_GRID_CELLS` directly (`1x1` minimum valid, `MAX_GRID_CELLS x 1` maximum valid, `(MAX_GRID_CELLS + 1) x 1` overflow) to lock behavior to the engine's safety cap constant.
 - For web startup level selection, pass the raw `level` query value to `WasmGameEngine.init(...)`; `WasmGameEngine` owns strict parsing and deterministic fallback-to-level-1 behavior.
+- In `gsnake-web/packages/gsnake-web-app/components/App.svelte`, keep startup loading transitions in the `init(...)` `finally` path so `data-element-id="engine-loading-indicator"` remains visible until initialization succeeds or fails, while existing error modals continue to surface unchanged after loading clears.
 - `WasmGameEngine.init(...)` startup invariants should assert one `levelChanged` then one `frameChanged` event with no `engineError` for normalized query inputs, so startup behavior stays stable across parsing refactors.
 - Every `WasmGameEngine` path that creates a Rust engine (`init`/`loadLevel`/`nextLevel`/`resetLevel`) must call `getFrame()` immediately after `onFrame` registration and preserve event order `levelChanged` then `frameChanged`; keep the contract in `gsnake-web/packages/gsnake-web-app/engine/frame-emission.md`.
 - `LevelDefinition` schema changes must be made in `contracts/level-definition.schema.json` and validated with `npm run test:level-schema`; keep fixtures in `contracts/fixtures/` updated in the same change.
@@ -116,4 +117,15 @@
   - Patterns discovered: keep playback writing logic shared between CLI and metadata generation to avoid schema/format divergence and subprocess overhead.
   - Gotchas encountered: fixture-based solver tests are more stable than synthetic handcrafted levels for compatibility assertions because engine rules can make minimal examples unintentionally unsolvable.
   - Useful context: browser verification was not required because this story only changed Rust CLI/tooling paths and docs.
+---
+## 2026-02-16 22:38:44 CET - US-009
+- Added explicit non-blocking startup UI state in `gsnake-web/packages/gsnake-web-app/components/App.svelte`: the app now shows `data-element-id="engine-loading-indicator"` while `WasmGameEngine.init(...)` is in flight and swaps to `GameContainer` only after init success or failure.
+- Preserved existing initialization error-handling behavior by keeping the prior `engineError`/`levelLoadError` catch paths and only clearing the loading state in `finally` so failure modals still render through the same flow.
+- Verified locally with `npm run check` and `npm test` in `gsnake-web`; verified CI parity with `act -W .github/workflows/ci.yml -j typecheck --container-architecture linux/amd64` and `act -W .github/workflows/ci.yml -j test --container-architecture linux/amd64` in `gsnake-web`.
+- Verified in browser with `agent-browser` against `http://localhost:3000/`: observed `Loading game engine...` during startup and confirmed existing `Level Load Failed` modal flow after initialization failure path.
+- Files changed: `gsnake-web/packages/gsnake-web-app/components/App.svelte`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`.
+- **Learnings for future iterations:**
+  - Patterns discovered: keep startup loading indicators tied to engine init lifecycle in `finally` so first paint is explicit and deterministic without suppressing existing error overlays.
+  - Gotchas encountered: `act -W gsnake-web/.github/workflows/ci.yml ...` must run from `gsnake-web/` workspace; running from monorepo root breaks the workflow's relative script paths.
+  - Useful context: `agent-browser` is available in this environment and can assert startup text via `agent-browser get text body` for quick UI verification.
 ---
