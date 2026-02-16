@@ -1,6 +1,6 @@
 use gsnake_core::{
-    CellType, ContractError, ContractErrorKind, Direction, Frame, GameState, GameStatus, GridSize,
-    LevelDefinition, Position,
+    engine::GameEngine, CellType, ContractError, ContractErrorKind, Direction, Frame, GameState,
+    GameStatus, GridSize, LevelDefinition, Position,
 };
 use std::collections::BTreeMap;
 use std::fs;
@@ -291,6 +291,128 @@ fn test_contracterror_roundtrip() {
 }
 
 // =============================================================================
+// 2.4 Stone Interaction Matrix Contract Tests
+// =============================================================================
+
+#[test]
+fn stone_push_matrix_horizontal_single_push_moves_snake_and_stone() {
+    let mut level = create_stone_matrix_level();
+    level.stones = vec![Position::new(2, 1)];
+
+    let mut engine = create_engine(level);
+    let result = engine.process_move(Direction::East).unwrap();
+
+    assert!(result, "horizontal push into free space should be accepted");
+    assert_eq!(engine.level_state().snake.segments[0], Position::new(2, 1));
+    assert_eq!(engine.level_state().stones, vec![Position::new(3, 1)]);
+    assert_eq!(engine.game_state().moves, 1);
+    assert_eq!(engine.game_state().status, GameStatus::Playing);
+}
+
+#[test]
+fn stone_push_matrix_horizontal_row_push_shifts_entire_row() {
+    let mut level = create_stone_matrix_level();
+    level.stones = vec![
+        Position::new(2, 1),
+        Position::new(3, 1),
+        Position::new(4, 1),
+    ];
+
+    let mut engine = create_engine(level);
+    let result = engine.process_move(Direction::East).unwrap();
+
+    assert!(result, "horizontal push should shift every connected stone");
+    assert_eq!(engine.level_state().snake.segments[0], Position::new(2, 1));
+    assert_eq!(
+        engine.level_state().stones,
+        vec![
+            Position::new(3, 1),
+            Position::new(4, 1),
+            Position::new(5, 1)
+        ]
+    );
+    assert_eq!(engine.game_state().moves, 1);
+}
+
+#[test]
+fn stone_push_matrix_horizontal_row_push_is_rejected_when_target_blocked() {
+    let mut level = create_stone_matrix_level();
+    level.stones = vec![Position::new(2, 1), Position::new(3, 1)];
+    level.obstacles.push(Position::new(4, 1));
+
+    let mut engine = create_engine(level);
+    let result = engine.process_move(Direction::East).unwrap();
+
+    assert!(
+        !result,
+        "horizontal push must be rejected if the row target cell is blocked"
+    );
+    assert_eq!(engine.level_state().snake.segments[0], Position::new(1, 1));
+    assert_eq!(
+        engine.level_state().stones,
+        vec![Position::new(2, 1), Position::new(3, 1)]
+    );
+    assert_eq!(engine.game_state().moves, 0);
+}
+
+#[test]
+fn stone_push_matrix_vertical_push_attempt_is_rejected_without_state_changes() {
+    let mut level = create_stone_matrix_level();
+    level.snake = vec![Position::new(2, 2)];
+    level.stones = vec![Position::new(2, 1)];
+
+    let mut engine = create_engine(level);
+    let result = engine.process_move(Direction::North).unwrap();
+
+    assert!(
+        !result,
+        "vertical moves into stones should be rejected instead of pushed"
+    );
+    assert_eq!(engine.level_state().snake.segments[0], Position::new(2, 2));
+    assert_eq!(engine.level_state().stones, vec![Position::new(2, 1)]);
+    assert_eq!(engine.game_state().moves, 0);
+}
+
+#[test]
+fn stone_push_matrix_horizontal_push_into_vertical_stack_moves_only_same_row_stone() {
+    let mut level = create_stone_matrix_level();
+    level.stones = vec![Position::new(2, 0), Position::new(2, 1)];
+
+    let mut engine = create_engine(level);
+    let result = engine.process_move(Direction::East).unwrap();
+
+    assert!(
+        result,
+        "horizontal push into vertical stack should still push the contacted row"
+    );
+    assert_eq!(engine.level_state().snake.segments[0], Position::new(2, 1));
+    assert!(
+        engine.level_state().stones.contains(&Position::new(2, 0)),
+        "stone above should not be shifted horizontally"
+    );
+    assert!(
+        engine.level_state().stones.contains(&Position::new(3, 1)),
+        "only the stone at snake level should move horizontally"
+    );
+    assert_eq!(engine.level_state().stones.len(), 2);
+}
+
+#[test]
+fn stone_push_matrix_push_onto_spike_destroys_stone() {
+    let mut level = create_stone_matrix_level();
+    level.stones = vec![Position::new(2, 1)];
+    level.spikes = vec![Position::new(3, 1)];
+
+    let mut engine = create_engine(level);
+    let result = engine.process_move(Direction::East).unwrap();
+
+    assert!(result, "push onto spike should still be accepted");
+    assert_eq!(engine.level_state().snake.segments[0], Position::new(2, 1));
+    assert!(engine.level_state().stones.is_empty());
+    assert_eq!(engine.game_state().moves, 1);
+}
+
+// =============================================================================
 // 3. Fixture Generation
 // =============================================================================
 
@@ -372,6 +494,27 @@ fn create_test_level() -> LevelDefinition {
         Position::new(4, 0),
         Direction::North,
     )
+}
+
+fn create_stone_matrix_level() -> LevelDefinition {
+    let mut level = LevelDefinition::new(
+        99,
+        "Stone Matrix Level".to_string(),
+        GridSize::new(8, 6),
+        vec![Position::new(1, 1)],
+        vec![],
+        vec![],
+        Position::new(7, 5),
+        Direction::East,
+    );
+
+    // Add a platform to isolate push semantics from gravity side effects.
+    level.obstacles = (0..8).map(|x| Position::new(x, 2)).collect();
+    level
+}
+
+fn create_engine(level: LevelDefinition) -> GameEngine {
+    GameEngine::new(level).expect("stone matrix fixture should construct a valid engine")
 }
 
 fn create_error(kind: ContractErrorKind) -> ContractError {

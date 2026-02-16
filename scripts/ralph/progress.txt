@@ -14,6 +14,7 @@
 - For interactive Svelte button components, keep native button semantics (`type="button"` and `disabled`) and add dedicated tests that assert enabled/disabled state via DOM attributes plus click side effects.
 - `KeyboardHandler` should forward rapid directional key events to `processMove` in order and leave lock/rejection decisions to the engine; tests should validate this via `attach()` + `window.dispatchEvent(...)`.
 - In `gsnake-web` contract tests, keep CellType coverage centralized with shared variant lists and pair `isFrame(...)` assertions with explicit invalid-cell diagnostics so enum drift (casing/whitespace/non-string payloads) fails with actionable messages.
+- In `gsnake-core` stone interaction contract tests, use a dedicated fixture level with a fixed obstacle platform row so gravity is deterministic and push-matrix assertions focus on interaction semantics rather than fall order side effects.
 
 # Ralph Progress Log
 Started: Sun Feb 15 20:54:09 CET 2026
@@ -175,4 +176,14 @@ Started: Sun Feb 15 20:54:09 CET 2026
   - Patterns discovered: contract tests are more durable when they assert both positive mixed-variant acceptance and deterministic invalid-cell diagnostics for drift-prone payload variants.
   - Gotchas encountered: `isFrame(...)` alone only returns a boolean, so pairing it with an explicit diagnostic helper in tests avoids opaque failures when enum strings drift.
   - Useful context: this iteration changed contract tests only; browser verification was not required.
+---
+## 2026-02-16 08:28:56 CET - US-016
+- Expanded `gsnake-core/engine/core/tests/contract_tests.rs` with a stone interaction matrix covering: single horizontal push success, horizontal row push success, blocked row push, vertical push rejection, horizontal push into vertical stack (only same-row stone moves), and stone destruction when pushed onto spike.
+- Added reusable test helpers (`create_stone_matrix_level`, `create_engine`) to keep matrix fixtures deterministic and make expected outcomes explicit in test names/assertions.
+- Ran `cargo test --manifest-path gsnake-core/engine/core/Cargo.toml` and `act -W .github/workflows/ci.yml -j test --container-architecture linux/amd64` (success).
+- Files changed: `gsnake-core/engine/core/tests/contract_tests.rs`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`.
+- **Learnings for future iterations:**
+  - Patterns discovered: stone matrix coverage is most stable when tests isolate push behavior from gravity with an explicit support platform.
+  - Gotchas encountered: root `test` workflow job recompiles contract tests and runs `generate_contract_fixtures`, so matrix changes must remain compatible with fixture-generation path.
+  - Useful context: this story changed core contract tests only; browser verification was not required.
 ---
