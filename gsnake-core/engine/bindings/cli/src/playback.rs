@@ -41,16 +41,22 @@ impl Playback {
     pub fn from_input_file(path: &Path) -> Result<Self> {
         let contents = fs::read_to_string(path)
             .with_context(|| format!("Failed to read input file: {}", path.display()))?;
-        let raw_steps: Vec<PlaybackFileStep> =
-            serde_json::from_str(&contents).with_context(|| "Failed to parse playback JSON")?;
+        let raw_steps: Vec<PlaybackFileStep> = serde_json::from_str(&contents)
+            .with_context(|| format!("Failed to parse playback JSON from {}", path.display()))?;
 
         if raw_steps.is_empty() {
             bail!("Playback input file is empty");
         }
 
         let mut steps = Vec::with_capacity(raw_steps.len());
-        for step in raw_steps {
-            let action = parse_key(&step.key)?;
+        for (index, step) in raw_steps.into_iter().enumerate() {
+            let action = parse_key(&step.key).with_context(|| {
+                format!(
+                    "Failed to parse key for playback step {} from {}",
+                    index,
+                    path.display()
+                )
+            })?;
             steps.push(PlaybackStep {
                 action,
                 delay: Duration::from_millis(step.delay_ms),
@@ -77,9 +83,10 @@ fn parse_string_char(ch: char) -> Result<Action> {
 
 fn parse_key(key: &str) -> Result<Action> {
     if key.len() == 1 {
-        let ch = key.chars().next().unwrap();
-        if matches!(ch, 'R' | 'D' | 'L' | 'U') {
-            return parse_string_char(ch);
+        if let Some(ch) = key.chars().next() {
+            if matches!(ch, 'R' | 'D' | 'L' | 'U') {
+                return parse_string_char(ch);
+            }
         }
     }
 
@@ -110,16 +117,21 @@ mod tests {
 
     impl TempPlaybackFile {
         fn new(contents: &str) -> Self {
-            let unique = SystemTime::now()
-                .duration_since(UNIX_EPOCH)
-                .expect("clock should be after epoch")
-                .as_nanos();
+            let unique = match SystemTime::now().duration_since(UNIX_EPOCH) {
+                Ok(duration) => duration.as_nanos(),
+                Err(_) => 0,
+            };
             let mut path = std::env::temp_dir();
             path.push(format!(
                 "gsnake-cli-playback-{}-{unique}.json",
                 std::process::id()
             ));
-            fs::write(&path, contents).expect("failed to create temp playback file");
+            if let Err(err) = fs::write(&path, contents) {
+                panic!(
+                    "failed to create temp playback file '{}': {err}",
+                    path.display()
+                );
+            }
             Self { path }
         }
 
@@ -135,21 +147,23 @@ mod tests {
     }
 
     #[test]
-    fn parse_string_input() {
-        let playback = Playback::from_input_string("RDLU q r", 200).unwrap();
+    fn parse_string_input() -> Result<()> {
+        let playback = Playback::from_input_string("RDLU q r", 200)?;
         assert_eq!(playback.steps.len(), 6);
         assert_eq!(playback.steps[0].action, Action::MoveEast);
         assert_eq!(playback.steps[4].action, Action::Quit);
         assert_eq!(playback.steps[5].action, Action::Reset);
+        Ok(())
     }
 
     #[test]
-    fn parse_file_key_variants() {
-        assert_eq!(parse_key("Right").unwrap(), Action::MoveEast);
-        assert_eq!(parse_key("U").unwrap(), Action::MoveNorth);
-        assert_eq!(parse_key("reset").unwrap(), Action::Reset);
-        assert_eq!(parse_key("q").unwrap(), Action::Quit);
-        assert_eq!(parse_key(" north ").unwrap(), Action::MoveNorth);
+    fn parse_file_key_variants() -> Result<()> {
+        assert_eq!(parse_key("Right")?, Action::MoveEast);
+        assert_eq!(parse_key("U")?, Action::MoveNorth);
+        assert_eq!(parse_key("reset")?, Action::Reset);
+        assert_eq!(parse_key("q")?, Action::Quit);
+        assert_eq!(parse_key(" north ")?, Action::MoveNorth);
+        Ok(())
     }
 
     #[test]
@@ -170,10 +184,10 @@ mod tests {
     #[test]
     fn parse_input_file_rejects_missing_file() {
         let mut missing_path = std::env::temp_dir();
-        let unique = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .expect("clock should be after epoch")
-            .as_nanos();
+        let unique = match SystemTime::now().duration_since(UNIX_EPOCH) {
+            Ok(duration) => duration.as_nanos(),
+            Err(_) => 0,
+        };
         missing_path.push(format!(
             "gsnake-cli-missing-playback-{}-{unique}.json",
             std::process::id()
@@ -192,7 +206,13 @@ mod tests {
 
         let err = Playback::from_input_file(playback_file.path()).unwrap_err();
         assert!(
-            err.to_string().contains("Failed to parse playback JSON"),
+            err.to_string()
+                .contains("Failed to parse playback JSON from"),
+            "unexpected error: {err}"
+        );
+        assert!(
+            err.to_string()
+                .contains(&playback_file.path().display().to_string()),
             "unexpected error: {err}"
         );
     }
@@ -210,19 +230,53 @@ mod tests {
         let playback_file = TempPlaybackFile::new(r#"[{"key":"Sideways","delay_ms":25}]"#);
 
         let err = Playback::from_input_file(playback_file.path()).unwrap_err();
-        assert!(err.to_string().contains("Invalid key 'Sideways'"));
+        let err_chain = format!("{err:#}");
+        assert!(
+            err.to_string()
+                .contains("Failed to parse key for playback step 0"),
+            "unexpected error: {err}"
+        );
+        assert!(
+            err_chain.contains("Invalid key 'Sideways'"),
+            "unexpected error: {err_chain}"
+        );
     }
 
     #[test]
-    fn parse_input_file_success_path() {
+    fn parse_input_file_rejects_invalid_key_with_index_context() {
+        let playback_file = TempPlaybackFile::new(
+            r#"[{"key":"Right","delay_ms":25},{"key":"Sideways","delay_ms":5}]"#,
+        );
+
+        let err = Playback::from_input_file(playback_file.path()).unwrap_err();
+        let err_chain = format!("{err:#}");
+        assert!(
+            err.to_string()
+                .contains("Failed to parse key for playback step 1"),
+            "unexpected error: {err}"
+        );
+        assert!(
+            err.to_string()
+                .contains(&playback_file.path().display().to_string()),
+            "unexpected error: {err}"
+        );
+        assert!(
+            err_chain.contains("Invalid key 'Sideways'"),
+            "unexpected error: {err_chain}"
+        );
+    }
+
+    #[test]
+    fn parse_input_file_success_path() -> Result<()> {
         let playback_file =
             TempPlaybackFile::new(r#"[{"key":"right","delay_ms":25},{"key":"Q","delay_ms":1}]"#);
 
-        let playback = Playback::from_input_file(playback_file.path()).unwrap();
+        let playback = Playback::from_input_file(playback_file.path())?;
         assert_eq!(playback.steps.len(), 2);
         assert_eq!(playback.steps[0].action, Action::MoveEast);
         assert_eq!(playback.steps[0].delay, Duration::from_millis(25));
         assert_eq!(playback.steps[1].action, Action::Quit);
         assert_eq!(playback.steps[1].delay, Duration::from_millis(1));
+        Ok(())
     }
 }

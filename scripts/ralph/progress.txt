@@ -15,6 +15,7 @@
 - `KeyboardHandler` should forward rapid directional key events to `processMove` in order and leave lock/rejection decisions to the engine; tests should validate this via `attach()` + `window.dispatchEvent(...)`.
 - In `gsnake-web` contract tests, keep CellType coverage centralized with shared variant lists and pair `isFrame(...)` assertions with explicit invalid-cell diagnostics so enum drift (casing/whitespace/non-string payloads) fails with actionable messages.
 - In `gsnake-core` stone interaction contract tests, use a dedicated fixture level with a fixed obstacle platform row so gravity is deterministic and push-matrix assertions focus on interaction semantics rather than fall order side effects.
+- CLI playback parsing should attach `anyhow::Context` at each stage (file read, JSON parse, per-step key parse with step index + file path) so malformed playback diagnostics are actionable without panics.
 
 # Ralph Progress Log
 Started: Sun Feb 15 20:54:09 CET 2026
@@ -186,4 +187,14 @@ Started: Sun Feb 15 20:54:09 CET 2026
   - Patterns discovered: stone matrix coverage is most stable when tests isolate push behavior from gravity with an explicit support platform.
   - Gotchas encountered: root `test` workflow job recompiles contract tests and runs `generate_contract_fixtures`, so matrix changes must remain compatible with fixture-generation path.
   - Useful context: this story changed core contract tests only; browser verification was not required.
+---
+## 2026-02-16 09:08:23 CET - US-017
+- Replaced panic-prone playback parsing paths in `gsnake-core/engine/bindings/cli/src/playback.rs` by removing runtime `unwrap` usage and adding structured `anyhow::Context` on JSON parse and per-step key parsing.
+- Added regression coverage to assert malformed playback errors include parse stage, step index, file path, and underlying invalid-key detail via the full error chain.
+- Ran `cargo test --manifest-path gsnake-core/engine/bindings/cli/Cargo.toml` and `act -W .github/workflows/ci.yml -j test --container-architecture linux/amd64` (success).
+- Files changed: `gsnake-core/engine/bindings/cli/src/playback.rs`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`.
+- **Learnings for future iterations:**
+  - Patterns discovered: when wrapping parse failures with `anyhow::Context`, assert nested diagnostics with `format!("{err:#}")` in tests to validate full error chains, not just top-level messages.
+  - Gotchas encountered: `Error::to_string()` only surfaces the outer context message, so direct string assertions can miss inner parse causes unless chain formatting is used.
+  - Useful context: this story affected CLI/tooling parsing only; browser verification was not required.
 ---
