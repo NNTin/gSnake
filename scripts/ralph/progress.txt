@@ -9,6 +9,7 @@
 - Editor server LevelDefinition validation must flow through `src/server/levelDefinitionValidator.ts` (Ajv + canonical schema) and return `details` as `{ field, keyword, message }` objects so API errors stay field-addressable.
 - E2E `LevelDefinition` contract guards should be centralized in `e2e/level-definition.ts`; API/E2E specs should import this helper instead of redefining local `isLevelDefinition` logic.
 - Editor API validation tests should assert `details` entries by `field` + `keyword` (including nested paths like `snake.0.x` and `additionalProperties` paths like `stones.0.z`) so schema-driven failures stay stable and actionable.
+- Svelte component unit tests in `gsnake-web-app` should use `// @vitest-environment jsdom`, instantiate components with `new Component({ target: document.body, props })`, and reset `document.body.innerHTML` between tests for deterministic DOM assertions.
 
 # Ralph Progress Log
 Started: Sun Feb 15 20:54:09 CET 2026
@@ -118,4 +119,14 @@ Started: Sun Feb 15 20:54:09 CET 2026
   - Patterns discovered: schema-driven server tests should validate `field` and `keyword` together to make Ajv path normalization regressions visible.
   - Gotchas encountered: negative coordinates are currently schema-valid for `position` fields, so edge-case coverage should explicitly assert acceptance semantics where intended.
   - Useful context: this story was API/test hardening only; browser verification was not required because no UI behavior changed.
+---
+## 2026-02-16 05:15:25 CET - US-011
+- Added a dedicated `Cell.svelte` unit test suite at `gsnake-web/packages/gsnake-web-app/tests/unit/Cell.test.ts` covering sprite reference rendering for representative gameplay cell variants.
+- Added opacity assertions for variant-specific visual output (`Spike`, `Stone`, `Obstacle`) plus default-opacity variants and a reactive update test validating DOM changes when `type` props change.
+- Ran `npm run check` and `npm test` in `gsnake-web/packages/gsnake-web-app`, plus `act -W .github/workflows/ci.yml -j typecheck --container-architecture linux/amd64` and `act -W .github/workflows/ci.yml -j test --container-architecture linux/amd64` in `gsnake-web` (all success).
+- Files changed: `gsnake-web/packages/gsnake-web-app/tests/unit/Cell.test.ts`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`.
+- **Learnings for future iterations:**
+  - Patterns discovered: for Svelte component-only tests, instantiate components directly and assert emitted DOM attributes/styles without pulling in extra UI testing libraries.
+  - Gotchas encountered: `gsnake-web` act jobs must be run from the `gsnake-web` submodule root so standalone dependency rewriting paths resolve correctly.
+  - Useful context: browser tooling is not configured in this environment, so manual browser verification is still needed for UI-story visual checks.
 ---
