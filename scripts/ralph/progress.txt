@@ -16,6 +16,7 @@
 - In `gsnake-web` contract tests, keep CellType coverage centralized with shared variant lists and pair `isFrame(...)` assertions with explicit invalid-cell diagnostics so enum drift (casing/whitespace/non-string payloads) fails with actionable messages.
 - In `gsnake-core` stone interaction contract tests, use a dedicated fixture level with a fixed obstacle platform row so gravity is deterministic and push-matrix assertions focus on interaction semantics rather than fall order side effects.
 - CLI playback parsing should attach `anyhow::Context` at each stage (file read, JSON parse, per-step key parse with step index + file path) so malformed playback diagnostics are actionable without panics.
+- In `gsnake-levels` tests that mutate process CWD, prefer lock helpers that return `Result` (`?`) over `expect(...)` on `cwd_mutex` so generation-path regressions surface as test errors instead of panic paths.
 
 # Ralph Progress Log
 Started: Sun Feb 15 20:54:09 CET 2026
@@ -197,4 +198,14 @@ Started: Sun Feb 15 20:54:09 CET 2026
   - Patterns discovered: when wrapping parse failures with `anyhow::Context`, assert nested diagnostics with `format!("{err:#}")` in tests to validate full error chains, not just top-level messages.
   - Gotchas encountered: `Error::to_string()` only surfaces the outer context message, so direct string assertions can miss inner parse causes unless chain formatting is used.
   - Useful context: this story affected CLI/tooling parsing only; browser verification was not required.
+---
+## 2026-02-16 09:46:35 CET - US-018
+- Replaced `expect(...)` panic paths in `gsnake-levels/src/generate.rs` tests (cwd mutex acquisition) with a shared `Result`-based lock helper, keeping generation-path tests aligned with graceful-error handling goals.
+- Hardened level JSON parse diagnostics in `load_level(...)` to include the failing file path context and added a regression test that asserts stable malformed-level error messaging.
+- Ran `cargo test` in `gsnake-levels` and `act -W .github/workflows/ci.yml -j test --container-architecture linux/amd64` in `gsnake-levels` (success).
+- Files changed: `gsnake-levels/src/generate.rs`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`.
+- **Learnings for future iterations:**
+  - Patterns discovered: generation-path failure tests are more actionable when assertions use chained diagnostics (`format!("{err:#}")`) and include the level file path.
+  - Gotchas encountered: `cwd_mutex().lock()` poison errors can be converted into `anyhow` once in a helper to avoid repeated panic-prone `expect(...)` calls across tests.
+  - Useful context: this story was generation command hardening + tests only; browser verification was not required.
 ---
