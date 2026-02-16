@@ -5,6 +5,7 @@ This directory holds the canonical `LevelDefinition` schema shared across gSnake
 ## Canonical Artifact
 
 - Schema: `contracts/level-definition.schema.json`
+- Semantics: `contracts/level-definition-semantics.md`
 - Fixtures: `contracts/fixtures/*.json`
 - Validation runner: `scripts/contracts/validate-level-definition-schema.mjs`
 

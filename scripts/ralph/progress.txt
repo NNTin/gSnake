@@ -5,6 +5,7 @@
 - For web startup level selection, pass the raw `level` query value to `WasmGameEngine.init(...)`; `WasmGameEngine` owns strict parsing and deterministic fallback-to-level-1 behavior.
 - `WasmGameEngine.init(...)` startup invariants should assert one `levelChanged` then one `frameChanged` event with no `engineError` for normalized query inputs, so startup behavior stays stable across parsing refactors.
 - `LevelDefinition` schema changes must be made in `contracts/level-definition.schema.json` and validated with `npm run test:level-schema`; keep fixtures in `contracts/fixtures/` updated in the same change.
+- Optional-field and `totalFood` semantics for editor/server round-trips are centralized in `contracts/level-definition-semantics.md`; source code should link there instead of re-documenting semantics ad hoc.
 - For schema drift tests in submodules, resolve schema paths with monorepo-first and vendored-local fallback candidates so checks run in both monorepo CI and standalone submodule CI.
 - Editor server LevelDefinition validation must flow through `src/server/levelDefinitionValidator.ts` (Ajv + canonical schema) and return `details` as `{ field, keyword, message }` objects so API errors stay field-addressable.
 - E2E `LevelDefinition` contract guards should be centralized in `e2e/level-definition.ts`; API/E2E specs should import this helper instead of redefining local `isLevelDefinition` logic.
@@ -242,4 +243,14 @@ Started: Sun Feb 15 20:54:09 CET 2026
   - Patterns discovered: physics-order docs are most effective when they pair the required sequencing rule with concrete test names that should fail on regressions.
   - Gotchas encountered: this area has no nearby `CLAUDE.md`, so reusable guidance should live in `gsnake-core/README.md` and `scripts/ralph/progress.txt`.
   - Useful context: browser verification was not required because this story changed Rust/docs only.
+---
+## 2026-02-16 12:28:42 CET - US-022
+- Added a single authoritative developer document for LevelDefinition optional-field and `totalFood` semantics at `contracts/level-definition-semantics.md`, including explicit editor/server round-trip expectations.
+- Linked semantics guidance from relevant editor/server source paths so maintainers can discover the contract directly from serialization and validation code.
+- Refreshed CI evidence with local quality checks plus `act` runs for `gsnake-editor` (`typecheck`, `test`).
+- Files changed: `contracts/level-definition-semantics.md`, `contracts/README.md`, `gsnake-editor/src/lib/levelModel.ts`, `gsnake-editor/src/lib/EditorLayout.svelte`, `gsnake-editor/src/server/levelDefinitionValidator.ts`, `gsnake-editor/server.ts`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`.
+- **Learnings for future iterations:**
+  - Patterns discovered: semantic contracts that span editor serialization and server validation should live under `contracts/` and be referenced from code entrypoints on both sides.
+  - Gotchas encountered: optional arrays are schema-optional for compatibility, but editor serialization should still emit them explicitly to keep round-trip payloads stable.
+  - Useful context: browser tooling is not configured in this environment; this story was documentation/source-linking only, so manual browser verification was not required.
 ---
