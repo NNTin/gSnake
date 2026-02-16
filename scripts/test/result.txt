@@ -1,17 +1,17 @@
 === Act CI Test Results ===
-Started: 2026-02-16 05:52:21 CET
+Started: Mon Feb 16 06:30:13 CET 2026
 
 ## Summary
 
+- [SUCCESS] local::gsnake-web::npm run check
+- [SUCCESS] local::gsnake-web::npm test
 - [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::typecheck
 - [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::test
 
-**Total: 2 passed, 0 failed**
+**Total: 4 passed, 0 failed**
 
 ---
-Completed: 2026-02-16 05:53:01 CET
-Duration: 00:00:40
-Result: 2 passed, 0 failed
-Executed via:
-- `act -W .github/workflows/ci.yml -j typecheck --container-architecture linux/amd64`
-- `act -W .github/workflows/ci.yml -j test --container-architecture linux/amd64`
+Completed: Mon Feb 16 06:31:43 CET 2026
+Duration: 00:01:30
+Result: 4 passed, 0 failed
+Result file: /home/nntin/git/gSnake/scripts/test/result.txt

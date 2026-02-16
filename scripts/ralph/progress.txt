@@ -11,6 +11,7 @@
 - Editor API validation tests should assert `details` entries by `field` + `keyword` (including nested paths like `snake.0.x` and `additionalProperties` paths like `stones.0.z`) so schema-driven failures stay stable and actionable.
 - Svelte component unit tests in `gsnake-web-app` should use `// @vitest-environment jsdom`, instantiate components with `new Component({ target: document.body, props })`, and reset `document.body.innerHTML` between tests for deterministic DOM assertions.
 - For composed Svelte UI units (for example `Header.svelte`), assert action wiring through `data-element-id` buttons and verify both store side effects and engine stub calls to keep interaction contracts stable.
+- For interactive Svelte button components, keep native button semantics (`type="button"` and `disabled`) and add dedicated tests that assert enabled/disabled state via DOM attributes plus click side effects.
 
 # Ralph Progress Log
 Started: Sun Feb 15 20:54:09 CET 2026
@@ -141,4 +142,14 @@ Started: Sun Feb 15 20:54:09 CET 2026
   - Patterns discovered: in composed component tests, assert both rendered state and side effects from child controls (`store` mutation + engine callback) to lock UI wiring contracts.
   - Gotchas encountered: focused `vitest --run` filters are relative to the package cwd; using repo-root paths reports `No test files found`.
   - Useful context: browser tooling is not configured in this environment, so manual browser verification is still needed for UI-story visual checks.
+---
+## 2026-02-16 06:31:12 CET - US-013
+- Added disabled-state support to `RestartButton.svelte` (`disabled` prop, native `disabled` attribute, and `aria-disabled`) while preserving existing restart behavior for enabled usage.
+- Added dedicated unit coverage in `tests/unit/RestartButton.test.ts` for default enabled rendering, disabled rendering, enabled click wiring (`restartLevel`), focus blur behavior, and reactive disabled toggling.
+- Ran `npm run check` and `npm test` in `gsnake-web`, plus `act -W .github/workflows/ci.yml -j typecheck --container-architecture linux/amd64` and `act -W .github/workflows/ci.yml -j test --container-architecture linux/amd64` in `gsnake-web` (all success).
+- Files changed: `gsnake-web/packages/gsnake-web-app/components/RestartButton.svelte`, `gsnake-web/packages/gsnake-web-app/tests/unit/RestartButton.test.ts`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`.
+- **Learnings for future iterations:**
+  - Patterns discovered: component-level button tests should assert native accessibility semantics (`type="button"`, `disabled`, `aria-disabled`) in addition to action callbacks.
+  - Gotchas encountered: when adding disabled behavior to a reused button component, keep default props backward-compatible so parent components need no wiring changes.
+  - Useful context: browser tooling is not configured in this environment, so manual browser verification is still needed for this UI-component story.
 ---
