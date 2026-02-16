@@ -5,6 +5,7 @@
 - For web startup level selection, pass the raw `level` query value to `WasmGameEngine.init(...)`; `WasmGameEngine` owns strict parsing and deterministic fallback-to-level-1 behavior.
 - `WasmGameEngine.init(...)` startup invariants should assert one `levelChanged` then one `frameChanged` event with no `engineError` for normalized query inputs, so startup behavior stays stable across parsing refactors.
 - `LevelDefinition` schema changes must be made in `contracts/level-definition.schema.json` and validated with `npm run test:level-schema`; keep fixtures in `contracts/fixtures/` updated in the same change.
+- Editor server LevelDefinition validation must flow through `src/server/levelDefinitionValidator.ts` (Ajv + canonical schema) and return `details` as `{ field, keyword, message }` objects so API errors stay field-addressable.
 
 # Ralph Progress Log
 Started: Sun Feb 15 20:54:09 CET 2026
@@ -71,4 +72,16 @@ Started: Sun Feb 15 20:54:09 CET 2026
   - Patterns discovered: the canonical contract lives at repo root (`contracts/`) so editor/web/e2e tooling can consume the same schema artifact.
   - Gotchas encountered: draft 2020-12 schemas require Ajv's 2020 runtime (`ajv/dist/2020.js`) for local fixture validation.
   - Useful context: this story changed shared contract artifacts/documentation only, so browser verification was not required.
+---
+## 2026-02-16 02:27:00 CET - US-007
+- Replaced `gsnake-editor/server.ts` manual LevelDefinition checks with schema-driven validation via new `src/server/levelDefinitionValidator.ts` using Ajv 2020 and canonical schema lookup.
+- Added structured field-level validation response details (`{ field, keyword, message }`) while keeping the existing top-level API error contract (`error: \"Invalid level payload\"`).
+- Added standalone-safe schema fallback by vendoring `gsnake-editor/contracts/level-definition.schema.json` and resolving schema path in both monorepo and standalone editor CI contexts.
+- Updated server API tests to assert structured validation errors and keyword/field mappings for malformed payloads.
+- Ran `npm run check`, `npm run lint`, `npm test` in `gsnake-editor`, plus `act -W .github/workflows/ci.yml -j typecheck --container-architecture linux/amd64` and `act -W .github/workflows/ci.yml -j test --container-architecture linux/amd64` in `gsnake-editor` (all success).
+- Files changed: `gsnake-editor/.gitignore`, `gsnake-editor/contracts/level-definition.schema.json`, `gsnake-editor/README.md`, `gsnake-editor/package.json`, `gsnake-editor/package-lock.json`, `gsnake-editor/server.ts`, `gsnake-editor/src/server/levelDefinitionValidator.ts`, `gsnake-editor/src/tests/server.test.ts`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`.
+- **Learnings for future iterations:**
+  - Patterns discovered: map Ajv `instancePath` + `required`/`additionalProperties` params into dot-path field identifiers so clients can tie validation failures directly to form inputs.
+  - Gotchas encountered: `server.ts` imports must omit `.ts` suffix because the editor typecheck path does not enable `allowImportingTsExtensions`.
+  - Useful context: editor standalone CI (`FORCE_GIT_DEPS=1`) cannot rely on monorepo-only paths; schema loading needs a local fallback artifact.
 ---

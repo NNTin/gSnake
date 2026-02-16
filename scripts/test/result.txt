@@ -1,47 +1,16 @@
 === Act CI Test Results ===
-Started: Mon Feb 16 01:08:58 CET 2026
+Started: Mon Feb 16 02:26:13 CET 2026
 
 ## Summary
 
-- [SUCCESS] ./gsnake-levels/.github/workflows/test.yml::test
-- [SUCCESS] ./gsnake-levels/.github/workflows/ci.yml::build
-- [SUCCESS] ./gsnake-levels/.github/workflows/ci.yml::test
-- [SUCCESS] ./gsnake-levels/.github/workflows/ci.yml::validate-levels
-- [SUCCESS] ./gsnake-levels/.github/workflows/ci.yml::coverage
-- [SUCCESS] ./gsnake-levels/.github/workflows/ci.yml::required-merge-gates
-- [SUCCESS] ./gsnake-web/.github/workflows/test.yml::test
-- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::test
-- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::coverage
-- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::build
-- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::typecheck
-- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::required-merge-gates
-- [SUCCESS] ./gsnake-specs/.github/workflows/test.yml::test
-- [SUCCESS] ./gsnake-specs/.github/workflows/ci.yml::link-check
-- [SUCCESS] ./gsnake-specs/.github/workflows/ci.yml::markdown-lint
-- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::build
-- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::typecheck
-- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::test
-- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::coverage
-- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::required-merge-gates
-- [SUCCESS] ./.github/workflows/ci.yml::test
-- [SUCCESS] ./.github/workflows/ci.yml::wasm
-- [SUCCESS] ./.github/workflows/ci.yml::core-coverage
-- [SUCCESS] ./.github/workflows/ci.yml::e2e-test
-- [SUCCESS] ./.github/workflows/ci.yml::gsnake-editor-test
-- [SUCCESS] ./.github/workflows/ci.yml::gsnake-editor-coverage
-- [SUCCESS] ./.github/workflows/ci.yml::gsnake-web-coverage
-- [SUCCESS] ./.github/workflows/ci.yml::build
-- [SUCCESS] ./.github/workflows/ci.yml::required-merge-gates
+- [SUCCESS] gsnake-editor/.github/workflows/ci.yml::build
+- [SUCCESS] gsnake-editor/.github/workflows/ci.yml::typecheck
+- [SUCCESS] gsnake-editor/.github/workflows/ci.yml::test
 
-**Total: 29 passed, 0 failed**
+**Total: 3 passed, 0 failed**
 
 ---
-Completed: Mon Feb 16 01:42:18 CET 2026
-Duration: 00:33:20
-Result: 29 passed, 0 failed
-Result file: /home/nntin/git/gSnake/scripts/test/result.txt
-Temp dir: /home/nntin/git/gSnake/scripts/test/tmp_act_results
-
-## Iteration 2026-02-16 01:47:25 CET - US-006
-- [SUCCESS] npm run test:level-schema
-- [SUCCESS] ./.github/workflows/ci.yml::test (act -W .github/workflows/ci.yml -j test --container-architecture linux/amd64)
+Completed: Mon Feb 16 02:28:28 CET 2026
+Duration: 00:02:15
+Result: 3 passed, 0 failed
+Scope: US-007 validation run (editor workflow jobs)
