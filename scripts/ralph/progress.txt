@@ -25,6 +25,7 @@
 - In `gsnake-levels` tests that mutate process CWD, prefer lock helpers that return `Result` (`?`) over `expect(...)` on `cwd_mutex` so generation-path regressions surface as test errors instead of panic paths.
 - In Rust tests that assert `Result<T, anyhow::Error>`, avoid `assert_eq!(result, Ok(...))` because `anyhow::Error` has no `PartialEq`; use explicit `match` assertions for Ok/Err paths.
 - `gsnake-levels validate-levels-toml` should aggregate issues with deterministic numbered output (`[io]`, `[parse]`, `[validation]`) and continue scanning all difficulties/entries in one run.
+- `gsnake-levels` solver baselines should use `cargo run --bin profile_solver -- --levels-root <...> --difficulties <...> --iterations <...> --max-depth <...>` with fixed arguments; the command scans sorted level JSON files and reports deterministic cumulative-time hotspots.
 - `act` runs for `gsnake-levels` can fail in dependency resolution when the remote `nntin/gsnake` git dependency references a submodule commit that is not yet reachable; treat local `cargo check`/`cargo test` as the reliable code-validation signal and log the exact missing-ref error in `scripts/test/result.txt`.
 - Before rerunning root `act` E2E (`.github/workflows/ci.yml::e2e-test`) after broad sudden failures, clear stale host Playwright processes (`pkill -f 'chromium_headless_shell|playwright_chromiumdev_profile' || true`); workflow cleanup relies on `fuser`, which may be unavailable in the act container.
 
@@ -344,4 +345,15 @@ Started: Sun Feb 15 20:54:09 CET 2026
   - Patterns discovered: for `validate-levels-toml`, keep issue ordering deterministic (difficulty order then entry order) so numbered CLI diagnostics stay testable and stable.
   - Gotchas encountered: `act` in `gsnake-levels` can fail before tests run if git dependency submodule refs are unavailable remotely; preserve this as CI-environment evidence and rely on local cargo checks for code validation.
   - Useful context: this story required validation-command/test verification only; no UI behavior changed, so browser verification was not required.
+---
+## 2026-02-16 21:10:42 CET - US-007
+- Added a shared solver module (`gsnake-levels/src/solver.rs`) and refactored `src/bin/solve_level.rs` to reuse it, establishing one implementation path for solve logic.
+- Added a repeatable benchmark command via new binary `src/bin/profile_solver.rs` that runs deterministic repeated solves over sorted level fixtures and reports wall time, per-difficulty totals, and top cumulative-time hotspots.
+- Documented reproducible benchmark usage and captured baseline metrics in `gsnake-levels/docs/solver-performance-baseline.md`, then linked rerun guidance from `gsnake-levels/README.md`.
+- Ran `cargo fmt` and `cargo test` in `gsnake-levels` (success). Ran `act -W gsnake-levels/.github/workflows/ci.yml -j test --container-architecture linux/amd64` (failed due external git dependency submodule ref `25ec6e9115ffea7fdaca64428d74298c902b6cad` not found on remote).
+- Files changed: `gsnake-levels/src/solver.rs`, `gsnake-levels/src/lib.rs`, `gsnake-levels/src/bin/solve_level.rs`, `gsnake-levels/src/bin/profile_solver.rs`, `gsnake-levels/docs/solver-performance-baseline.md`, `gsnake-levels/README.md`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`.
+- **Learnings for future iterations:**
+  - Patterns discovered: use `profile_solver` with fixed args to keep solver baseline comparisons stable over time and directly comparable between runs.
+  - Gotchas encountered: including harder difficulty sets at large depth/iteration values can make profiling runs impractically long; baseline docs should pin a representative bounded scope.
+  - Useful context: `act` failure in this area is currently dominated by remote submodule-ref availability in the git dependency chain, not local benchmark/solver code correctness.
 ---

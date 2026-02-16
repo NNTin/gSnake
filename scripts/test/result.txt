@@ -1,26 +1,20 @@
-=== Act CI Test Results ===
-Started: Mon Feb 16 20:20:00 CET 2026
+=== CI/Quality Results (US-007) ===
+Started: 2026-02-16 21:07:05 CET
 
-## Summary
+## Local Checks
+- [SUCCESS] gsnake-levels::cargo fmt
+- [SUCCESS] gsnake-levels::cargo test
 
-- [SUCCESS] gsnake-levels::cargo-check (local)
-- [SUCCESS] gsnake-levels::cargo-test (local)
-- [FAILED] ./gsnake-levels/.github/workflows/ci.yml::test
+## Act Checks
+- [FAILED] gsnake-levels/.github/workflows/ci.yml::test
 
-**Total: 2 passed, 1 failed**
+## Failure Detail
+`act -W gsnake-levels/.github/workflows/ci.yml -j test --container-architecture linux/amd64`
+failed while resolving git dependency `https://github.com/nntin/gsnake`:
+- submodule fetch failed for `https://github.com/NNTin/gsnake-specs.git`
+- missing ref: `25ec6e9115ffea7fdaca64428d74298c902b6cad`
 
-## Failure Details
+This is the known external remote-ref availability issue for gsnake-levels act runs.
+Local `cargo test` is the reliable validation signal for this iteration.
 
-### ./gsnake-levels/.github/workflows/ci.yml::test
-- `act` reached the test step, but dependency resolution failed before project tests ran.
-- Root cause reported by Cargo/git:
-  - failed to update `https://github.com/nntin/gsnake?branch=main`
-  - failed to update submodule `gsnake-specs`
-  - revision `25ec6e9115ffea7fdaca64428d74298c902b6cad` not found
-- This is an external remote-ref availability problem, not a local `validate-levels-toml` implementation/test failure.
-
----
-Completed: Mon Feb 16 20:22:30 CET 2026
-Duration: 00:02:30
-Result: 2 passed, 1 failed
-Result file: /home/nntin/git/gSnake/scripts/test/result.txt
+Completed: 2026-02-16 21:10:42 CET
