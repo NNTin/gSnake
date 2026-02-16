@@ -12,6 +12,7 @@
 - Svelte component unit tests in `gsnake-web-app` should use `// @vitest-environment jsdom`, instantiate components with `new Component({ target: document.body, props })`, and reset `document.body.innerHTML` between tests for deterministic DOM assertions.
 - For composed Svelte UI units (for example `Header.svelte`), assert action wiring through `data-element-id` buttons and verify both store side effects and engine stub calls to keep interaction contracts stable.
 - For interactive Svelte button components, keep native button semantics (`type="button"` and `disabled`) and add dedicated tests that assert enabled/disabled state via DOM attributes plus click side effects.
+- `KeyboardHandler` should forward rapid directional key events to `processMove` in order and leave lock/rejection decisions to the engine; tests should validate this via `attach()` + `window.dispatchEvent(...)`.
 
 # Ralph Progress Log
 Started: Sun Feb 15 20:54:09 CET 2026
@@ -152,4 +153,15 @@ Started: Sun Feb 15 20:54:09 CET 2026
   - Patterns discovered: component-level button tests should assert native accessibility semantics (`type="button"`, `disabled`, `aria-disabled`) in addition to action callbacks.
   - Gotchas encountered: when adding disabled behavior to a reused button component, keep default props backward-compatible so parent components need no wiring changes.
   - Useful context: browser tooling is not configured in this environment, so manual browser verification is still needed for this UI-component story.
+---
+## 2026-02-16 07:09:07 CET - US-014
+- Expanded `KeyboardHandler` unit coverage with rapid repeated key input assertions through the real `window` listener path, validating directional events are forwarded in order to `processMove`.
+- Added regression tests for modifier-key combinations (`ctrl`, `alt`, `shift`, `meta`) and non-movement key behavior (`Tab`, `Escape`, arbitrary keys) to ensure deterministic ignore/prevent-default behavior.
+- Updated engine module documentation with reusable KeyboardHandler testing/ownership guidance in `engine/CLAUDE.md`.
+- Ran `npm run check` and `npm test` in `gsnake-web`, plus `act -W .github/workflows/ci.yml -j typecheck --container-architecture linux/amd64` and `act -W .github/workflows/ci.yml -j test --container-architecture linux/amd64` in `gsnake-web` (all success).
+- Files changed: `gsnake-web/packages/gsnake-web-app/tests/unit/KeyboardHandler.test.ts`, `gsnake-web/packages/gsnake-web-app/engine/CLAUDE.md`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`.
+- **Learnings for future iterations:**
+  - Patterns discovered: KeyboardHandler coverage is strongest when tests dispatch real `window` keydown events after `attach()`, since that exercises listener wiring and prevent-default behavior together.
+  - Gotchas encountered: `gsnake-web` workspace does not define a root `lint` script, so quality checks for this area should use `npm run check` + `npm test` plus workflow `act` jobs.
+  - Useful context: input lock/rejection behavior is enforced by engine `processMove`; web handler tests should verify forwarding order, not local debounce/queue logic.
 ---
