@@ -3,6 +3,7 @@
 - `GameEngine::new` is a fallible constructor: propagate/annotate `EngineError` at app boundaries (CLI/WASM/tooling) instead of unwrapping, and include level identifiers in context strings for debuggability.
 - Grid-size boundary tests should use `MAX_GRID_CELLS` directly (`1x1` minimum valid, `MAX_GRID_CELLS x 1` maximum valid, `(MAX_GRID_CELLS + 1) x 1` overflow) to lock behavior to the engine's safety cap constant.
 - For web startup level selection, pass the raw `level` query value to `WasmGameEngine.init(...)`; `WasmGameEngine` owns strict parsing and deterministic fallback-to-level-1 behavior.
+- `WasmGameEngine.init(...)` startup invariants should assert one `levelChanged` then one `frameChanged` event with no `engineError` for normalized query inputs, so startup behavior stays stable across parsing refactors.
 
 # Ralph Progress Log
 Started: Sun Feb 15 20:54:09 CET 2026
@@ -48,4 +49,14 @@ Started: Sun Feb 15 20:54:09 CET 2026
   - Patterns discovered: URL-level sanitization should be engine-owned to keep every startup entrypoint consistent (query parsing and direct init calls).
   - Gotchas encountered: running `act` for submodule workflows from the monorepo root can break relative script paths; run from submodule root with local workflow path.
   - Useful context: browser tools were not available in this iteration, so manual browser verification is still needed for the URL-query startup path.
+---
+## 2026-02-16 01:06:40 CET - US-005
+- Expanded `WasmGameEngine` query-parameter regression coverage into deterministic permutation tests for valid integer, NaN, empty, decimal, text, below-range, and above-range inputs.
+- Added assertions for selected startup level identity and initialization consistency (`levelChanged` then `frameChanged`, no `engineError`) across each query-input scenario.
+- Ran `npm run check` and `npm test` in `gsnake-web`, plus `act -W .github/workflows/ci.yml -j typecheck --container-architecture linux/amd64` and `act -W .github/workflows/ci.yml -j test --container-architecture linux/amd64` in `gsnake-web` (all success).
+- Files changed: `gsnake-web/packages/gsnake-web-app/tests/unit/WasmGameEngine.test.ts`, `gsnake-web/packages/gsnake-web-app/engine/CLAUDE.md`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`.
+- **Learnings for future iterations:**
+  - Patterns discovered: query-input regression tests are most robust when they assert both loaded level identity and emitted startup events, not only fallback index.
+  - Gotchas encountered: if `act` runs against a submodule workflow, execute from that submodule directory so relative script paths resolve correctly.
+  - Useful context: this story required test and docs hardening only; browser verification was not required because no UI behavior changed.
 ---
