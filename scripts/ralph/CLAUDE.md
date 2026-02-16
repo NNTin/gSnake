@@ -95,6 +95,72 @@ If no browser tools are available, note in your progress report that manual brow
 
 - For `gsnake-levels validate-levels-toml`, keep validation output aggregated and deterministic (`[io]`, `[parse]`, `[validation]` with numbered lines) so one run reports all actionable issues and tests can assert stable CLI output.
 
+## Tooling for Agents
+
+### `chunkhound` (code search/research)
+
+Use `chunkhound` first when you need to find implementation details quickly across the repo.
+
+Recommended workflow:
+
+```bash
+# 1) Index a target directory (use a dedicated DB path for your task)
+chunkhound index . --db /tmp/chunkhound-task.duckdb --force-reindex
+
+# 2) Fast exact/pattern lookups (works with --no-embeddings indexes too)
+chunkhound search "Ralph Agent Instructions" . --regex --db /tmp/chunkhound-task.duckdb --page-size 10
+
+# 3) Semantic search (requires embedding provider configured)
+chunkhound search "where are commit requirements documented" . --semantic --db /tmp/chunkhound-task.duckdb --page-size 10
+
+# 4) Deep synthesis (requires BOTH LLM + embeddings/reranking configured)
+chunkhound research "What are the required CI and commit steps?" . --db /tmp/chunkhound-task.duckdb
+```
+
+Important caveats:
+- `--no-embeddings` is fine for indexing and `--regex` search, but `--semantic` and `research` will fail without embeddings.
+- `research` also requires an LLM provider (`llm` config or env vars), in addition to embeddings.
+- Avoid running multiple chunkhound commands against the same DuckDB file concurrently; it can fail with lock errors.
+- Use `--include` / `--exclude` on `index` and `--path-filter` on `search` to keep results focused and fast.
+- `chunkhound mcp --help` shows how to run it as an MCP server if you want tool-server integration.
+
+### `agent-browser` (webserver/browser interaction)
+
+Use `agent-browser` for live page interaction and verification (open, snapshot, click, fill, screenshot, etc.).
+
+Helpful setup + usage:
+
+```bash
+# Install browser binaries once per machine
+agent-browser install
+
+# Start a CDP-capable browser (example with Playwright-managed Chromium)
+CHROME_BIN=$(find ~/.cache/ms-playwright -type f -path '*/chrome-linux64/chrome' | sort | tail -n 1)
+"$CHROME_BIN" \
+  --headless=new \
+  --remote-debugging-port=9222 \
+  --no-first-run \
+  --no-default-browser-check \
+  --user-data-dir=/tmp/agent-browser-cdp
+
+# Connect agent-browser session to that running browser
+agent-browser --session demo connect 9222
+
+# Navigate and inspect
+agent-browser --session demo open https://example.com
+agent-browser --session demo snapshot -i -c -d 2
+agent-browser --session demo click @e1
+agent-browser --session demo get url
+agent-browser --session demo screenshot /tmp/demo.png
+agent-browser --session demo close
+```
+
+Agent-browser notes:
+- The command set is rich (`open`, `snapshot`, `click`, `fill`, `press`, `get`, `is`, `find`, `network`, `cookies`, `storage`, `tab`, `record`, `trace`).
+- Use refs from `snapshot` output (e.g. `@e1`) for reliable actions.
+- In this environment, connecting via `agent-browser connect <port|url>` to a running CDP browser is reliable for session startup.
+- Prefer `wait --load domcontentloaded|networkidle`, `wait --url`, or `wait --text` before asserting navigation-dependent state.
+
 ## Stop Condition
 
 The ralph loop is stopped automatically when `scripts/ralph/prd.json` has been completed.
