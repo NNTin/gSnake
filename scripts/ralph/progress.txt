@@ -1,6 +1,7 @@
 ## Codebase Patterns
 - `GameEngine::process_move` returns `Result<bool, EngineError>`: use `Ok(false)` for rejected-but-valid gameplay input and `Err(...)` for runtime invariant violations; bindings decide how to map/report engine errors.
 - `GameEngine::new` is a fallible constructor: propagate/annotate `EngineError` at app boundaries (CLI/WASM/tooling) instead of unwrapping, and include level identifiers in context strings for debuggability.
+- In `gsnake-core/engine/bindings/cli`, never discard `GameEngine::process_move(...)` results; propagate errors with move-direction and level-id context so invariant failures surface as actionable CLI diagnostics.
 - Grid-size boundary tests should use `MAX_GRID_CELLS` directly (`1x1` minimum valid, `MAX_GRID_CELLS x 1` maximum valid, `(MAX_GRID_CELLS + 1) x 1` overflow) to lock behavior to the engine's safety cap constant.
 - For web startup level selection, pass the raw `level` query value to `WasmGameEngine.init(...)`; `WasmGameEngine` owns strict parsing and deterministic fallback-to-level-1 behavior.
 - `WasmGameEngine.init(...)` startup invariants should assert one `levelChanged` then one `frameChanged` event with no `engineError` for normalized query inputs, so startup behavior stays stable across parsing refactors.
@@ -310,4 +311,15 @@ Started: Sun Feb 15 20:54:09 CET 2026
   - Patterns discovered: keep E2E validator consumption behind `e2e/level-definition.ts` so specs get schema-generated behavior via one typed wrapper.
   - Gotchas encountered: E2E helper type exports can drift unless they reuse `gsnake-web` model types rather than re-declaring `LevelDefinition`.
   - Useful context: this story changed E2E contract helper plumbing only; browser UI verification was covered by the root `e2e-test` workflow run.
+---
+## 2026-02-16 19:03:31 CET - US-004
+- Removed remaining panic-style `expect(...)` usage in CLI source tests (`levels.rs`) and strengthened CLI runtime error propagation for move processing by surfacing `process_move(...)` failures with direction + level-id context.
+- Hardened CLI level-loading diagnostics so malformed JSON errors include both parse stage and source file path for `load_levels(...)` and `load_level_from_file(...)`.
+- Added regression coverage for malformed level JSON paths in both level-loading module tests and CLI argument-path tests.
+- Ran `cargo test --manifest-path gsnake-core/engine/bindings/cli/Cargo.toml` and `act -W .github/workflows/ci.yml -j test --container-architecture linux/amd64` (success).
+- Files changed: `gsnake-core/engine/bindings/cli/src/main.rs`, `gsnake-core/engine/bindings/cli/src/levels.rs`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`.
+- **Learnings for future iterations:**
+  - Patterns discovered: CLI gameplay paths should treat `process_move(...)` errors as actionable runtime failures, not ignorable events.
+  - Gotchas encountered: parse-context assertions are more stable when tests check the full chained error (`format!("{err:#}")`) instead of only `to_string()`.
+  - Useful context: root `act` test job exercises `gsnake-core` contract tests plus fixture generation, so CLI binding error-handling changes are covered in that run.
 ---

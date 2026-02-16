@@ -268,31 +268,60 @@ fn apply_action(
         },
         Action::MoveNorth => {
             if frame.state.status == GameStatus::Playing {
-                let _ = engine.process_move(Direction::North);
-                *frame = engine.generate_frame();
+                process_move_action(
+                    engine,
+                    frame,
+                    Direction::North,
+                    levels[*current_level_index].id,
+                )?;
             }
         },
         Action::MoveSouth => {
             if frame.state.status == GameStatus::Playing {
-                let _ = engine.process_move(Direction::South);
-                *frame = engine.generate_frame();
+                process_move_action(
+                    engine,
+                    frame,
+                    Direction::South,
+                    levels[*current_level_index].id,
+                )?;
             }
         },
         Action::MoveEast => {
             if frame.state.status == GameStatus::Playing {
-                let _ = engine.process_move(Direction::East);
-                *frame = engine.generate_frame();
+                process_move_action(
+                    engine,
+                    frame,
+                    Direction::East,
+                    levels[*current_level_index].id,
+                )?;
             }
         },
         Action::MoveWest => {
             if frame.state.status == GameStatus::Playing {
-                let _ = engine.process_move(Direction::West);
-                *frame = engine.generate_frame();
+                process_move_action(
+                    engine,
+                    frame,
+                    Direction::West,
+                    levels[*current_level_index].id,
+                )?;
             }
         },
     }
 
     Ok(true)
+}
+
+fn process_move_action(
+    engine: &mut GameEngine,
+    frame: &mut gsnake_core::Frame,
+    direction: Direction,
+    level_id: u32,
+) -> Result<()> {
+    engine
+        .process_move(direction)
+        .with_context(|| format!("Failed to process move {direction:?} for level id {level_id}"))?;
+    *frame = engine.generate_frame();
+    Ok(())
 }
 
 fn finalize_exit(status: GameStatus, single_level_mode: bool) -> Result<()> {
@@ -467,6 +496,42 @@ impl PlaybackState {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::{
+        fs,
+        path::Path,
+        time::{SystemTime, UNIX_EPOCH},
+    };
+
+    struct TempLevelFile {
+        path: PathBuf,
+    }
+
+    impl TempLevelFile {
+        fn new(contents: &str) -> Result<Self> {
+            let unique = match SystemTime::now().duration_since(UNIX_EPOCH) {
+                Ok(duration) => duration.as_nanos(),
+                Err(_) => 0,
+            };
+            let mut path = std::env::temp_dir();
+            path.push(format!(
+                "gsnake-cli-main-level-test-{}-{unique}.json",
+                std::process::id()
+            ));
+            fs::write(&path, contents)
+                .with_context(|| format!("failed to write temp level file {}", path.display()))?;
+            Ok(Self { path })
+        }
+
+        fn path(&self) -> &Path {
+            &self.path
+        }
+    }
+
+    impl Drop for TempLevelFile {
+        fn drop(&mut self) {
+            let _ = fs::remove_file(&self.path);
+        }
+    }
 
     fn base_args() -> Args {
         Args {
@@ -518,5 +583,24 @@ mod tests {
 
         let err = load_requested_levels(&args).unwrap_err();
         assert_eq!(err.to_string(), "Level indices start at 1");
+    }
+
+    #[test]
+    fn load_requested_levels_rejects_malformed_level_file() -> Result<()> {
+        let malformed_level_file = TempLevelFile::new("{\"id\":1")?;
+        let mut args = base_args();
+        args.level_file = Some(malformed_level_file.path().to_path_buf());
+
+        let err = load_requested_levels(&args).unwrap_err();
+        let err_chain = format!("{err:#}");
+        assert!(
+            err_chain.contains("Failed to parse level JSON from"),
+            "unexpected error: {err_chain}"
+        );
+        assert!(
+            err_chain.contains(&malformed_level_file.path().display().to_string()),
+            "unexpected error: {err_chain}"
+        );
+        Ok(())
     }
 }
