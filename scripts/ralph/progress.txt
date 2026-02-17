@@ -34,6 +34,7 @@
 - `act` runs for `gsnake-levels` can fail in dependency resolution when the remote `nntin/gsnake` git dependency references a submodule commit that is not yet reachable; treat local `cargo check`/`cargo test` as the reliable code-validation signal and log the exact missing-ref error in `scripts/test/result.txt`.
 - Before rerunning root `act` E2E (`.github/workflows/ci.yml::e2e-test`) after broad sudden failures, clear stale host Playwright processes (`pkill -f 'chromium_headless_shell|playwright_chromiumdev_profile' || true`); workflow cleanup relies on `fuser`, which may be unavailable in the act container.
 - Dependency security checks are centralized in `.github/workflows/dependency-audit.yml`; keep new `package-lock.json`/`Cargo.lock` files added there, and generate `gsnake-core/Cargo.lock` in CI before running `cargo audit` because that lockfile is git-ignored.
+- In `gsnake-n8n`, avoid direct `$env` secrets in Code nodes: use workflow variables for Code-node-only secrets (for example `$vars.N8N_WEBHOOK_SECRET`) and credential-backed nodes (for example `discordWebhookApi`) for endpoint secrets.
 
 ## 2026-02-16 16:59:41 CET - US-001
 - Added a root generation workflow for a shared TypeScript LevelDefinition runtime validator (`scripts/contracts/generate-level-definition-validator.mjs`) that compiles `contracts/level-definition.schema.json` via Ajv standalone and emits `contracts/generated/level-definition-validator.ts`.
@@ -177,4 +178,15 @@
   - Patterns discovered: CORS policy should require exact origins and treat env overrides as the full allowlist so unlisted localhost ports are rejected deterministically.
   - Gotchas encountered: to test configurable CORS in-process, read `GSNAKE_EDITOR_ALLOWED_ORIGINS` at request time instead of only at module import time.
   - Useful context: this story changed server/config behavior only; browser verification was not required.
+---
+## 2026-02-17 02:32:36 CET - US-014
+- Audited `gsnake-n8n` workflow exports for direct secret reads and removed broad `$env` usage in the GitHub signature Code node by switching to workflow variable access (`$vars.N8N_WEBHOOK_SECRET`).
+- Replaced Discord delivery in `gsnake-n8n/tools/n8n-flows/github-discord-notify.json` from HTTP Request + env URL to a credential-backed Discord node (`n8n-nodes-base.discord`, `authentication: webhook`, `discordWebhookApi`).
+- Updated n8n docs/guidance to match hardened secret handling (`gsnake-n8n/workflows/n8n-webhook/notify-discord.md`, `gsnake-n8n/README.md`, `gsnake-n8n/CLAUDE.md`).
+- Ran validation checks: JSON parse sanity checks and `act -W .github/workflows/ci.yml -j test --container-architecture linux/amd64` (success).
+- Files changed: `gsnake-n8n/tools/n8n-flows/github-discord-notify.json`, `gsnake-n8n/workflows/n8n-webhook/notify-discord.md`, `gsnake-n8n/README.md`, `gsnake-n8n/CLAUDE.md`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`.
+- **Learnings for future iterations:**
+  - Patterns discovered: Code nodes in n8n cannot use credential-bound auth helpers directly, so secrets needed inside Code nodes should use workflow variables while external service auth should be moved to credential-capable nodes.
+  - Gotchas encountered: exported workflow credentials can safely use `id: null` with a credential `name` to indicate “bind in n8n UI” without hardcoding instance-specific credential IDs.
+  - Useful context: this story changed workflow JSON/docs only; browser verification was not required.
 ---
