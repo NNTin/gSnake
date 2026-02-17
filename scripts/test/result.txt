@@ -1,22 +1,14 @@
-=== Act CI Test Results ===
-Started: Tue Feb 17 00:41:14 CET 2026
+=== Ralph Iteration Test Results ===
+Story: US-013 - Restrict editor server CORS to explicit allowed ports
+Updated: Tue Feb 17 01:36:08 CET 2026
 
-## Summary
+## Local quality checks (gsnake-editor)
+- [SUCCESS] npm run check
+- [SUCCESS] npm run lint
+- [SUCCESS] npm test
 
-- [SUCCESS] ./.github/workflows/dependency-audit.yml::npm-audit
-- [SUCCESS] ./.github/workflows/dependency-audit.yml::cargo-audit
+## CI parity via act
+- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::typecheck
+- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::test
 
-**Total: 2 passed, 0 failed**
-
-## Notes
-
-- `npm-audit` currently reports moderate/low issues in `gsnake-web`, `gsnake-specs`, and `gsnake-editor`; job remains green because threshold is `--audit-level=high`.
-- `cargo-audit` reports allowed warnings (unmaintained/unsound advisories) in `gsnake-core` dependencies and no blocking vulnerabilities.
-- `cargo-audit` workflow now generates `gsnake-core/Cargo.lock` during CI because that lockfile is git-ignored in this repository.
-
----
-Completed: Tue Feb 17 00:54:04 CET 2026
-Duration: 00:12:50
-Result: 2 passed, 0 failed
-Result file: /home/nntin/git/gSnake/scripts/test/result.txt
-Temp dir: /home/nntin/git/gSnake/scripts/test/tmp_act_results
+Result: all executed checks passed

@@ -13,6 +13,7 @@
 - Optional-field and `totalFood` semantics for editor/server round-trips are centralized in `contracts/level-definition-semantics.md`; source code should link there instead of re-documenting semantics ad hoc.
 - For schema drift tests in submodules, resolve schema paths with monorepo-first and vendored-local fallback candidates so checks run in both monorepo CI and standalone submodule CI.
 - Editor server LevelDefinition validation must flow through `src/server/levelDefinitionValidator.ts` (Ajv + canonical schema) and return `details` as `{ field, keyword, message }` objects so API errors stay field-addressable.
+- Editor API CORS uses exact-origin allowlists (no localhost wildcard); configure local overrides with comma-separated `GSNAKE_EDITOR_ALLOWED_ORIGINS` and keep allow/reject coverage in `src/tests/server.test.ts`.
 - E2E `LevelDefinition` contract guards should be centralized in `e2e/level-definition.ts` as a typed wrapper around `contracts/generated/level-definition-validator.ts`; API/E2E specs should import this helper instead of redefining local `isLevelDefinition` logic.
 - Editor API validation tests should assert `details` entries by `field` + `keyword` (including nested paths like `snake.0.x` and `additionalProperties` paths like `stones.0.z`) so schema-driven failures stay stable and actionable.
 - Svelte component unit tests in `gsnake-web-app` should use `// @vitest-environment jsdom`, instantiate components with `new Component({ target: document.body, props })`, and reset `document.body.innerHTML` between tests for deterministic DOM assertions.
@@ -165,4 +166,15 @@
   - Patterns discovered: keep dependency audit coverage lockfile-driven and centralized in one workflow so new packages are added by updating a single matrix/scope list.
   - Gotchas encountered: `gsnake-core/Cargo.lock` is not tracked, so CI must generate it before `cargo audit` or runs fail with missing lockfile errors.
   - Useful context: audit runs currently surface non-blocking npm moderate/low findings and allowed cargo warnings; triage policy is documented in `docs/dependency-maintenance-policy.md`.
+---
+## 2026-02-17 01:36:08 CET - US-013
+- Replaced wildcard localhost CORS checks in `gsnake-editor/server.ts` with an exact-origin allowlist that defaults to known local ports and supports local override via `GSNAKE_EDITOR_ALLOWED_ORIGINS`.
+- Added structured CORS rejection handling (`403` with `{ error: "Not allowed by CORS" }`) and new server tests covering default allowed origin, rejected non-allowlisted localhost origin, and env-override behavior.
+- Documented CORS configuration in `gsnake-editor/README.md` and `gsnake-editor/.env.example`.
+- Ran `npm run check`, `npm run lint`, and `npm test` in `gsnake-editor`; ran `act -W .github/workflows/ci.yml -j typecheck --container-architecture linux/amd64` and `act -W .github/workflows/ci.yml -j test --container-architecture linux/amd64` in `gsnake-editor` (all success).
+- Files changed: `gsnake-editor/server.ts`, `gsnake-editor/src/tests/server.test.ts`, `gsnake-editor/README.md`, `gsnake-editor/.env.example`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`.
+- **Learnings for future iterations:**
+  - Patterns discovered: CORS policy should require exact origins and treat env overrides as the full allowlist so unlisted localhost ports are rejected deterministically.
+  - Gotchas encountered: to test configurable CORS in-process, read `GSNAKE_EDITOR_ALLOWED_ORIGINS` at request time instead of only at module import time.
+  - Useful context: this story changed server/config behavior only; browser verification was not required.
 ---
