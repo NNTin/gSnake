@@ -32,7 +32,7 @@
 - In `gsnake-levels`, keep playback generation and `solve_level` CLI output wiring through `solver::solve_level_to_playback(...)` so playback JSON format stays aligned while metadata sync avoids per-level subprocess overhead.
 - `gsnake-levels/build.rs` mode selection defaults to filesystem `auto` detection; use `GSNAKE_LEVELS_BUILD_MODE=local|standalone|auto` to force behavior when validating standalone vs monorepo workflows.
 - `act` runs for `gsnake-levels` can fail in dependency resolution when the remote `nntin/gsnake` git dependency references a submodule commit that is not yet reachable; treat local `cargo check`/`cargo test` as the reliable code-validation signal and log the exact missing-ref error in `scripts/test/result.txt`.
-- Before rerunning root `act` E2E (`.github/workflows/ci.yml::e2e-test`) after broad sudden failures, clear stale host Playwright processes (`pkill -f 'chromium_headless_shell|playwright_chromiumdev_profile' || true`); workflow cleanup relies on `fuser`, which may be unavailable in the act container.
+- In root `.github/workflows/ci.yml::e2e-test`, manage service lifecycle with PID files under `/tmp/gsnake-e2e` (`*.pid` + `*.log`), poll `/health` with retry loops that also check `kill -0`, and stop services in an `if: always()` teardown step by PID instead of broad `pkill`/`fuser`.
 - In root E2E CI, keep readiness probes on `http://localhost:3000/health`, `http://localhost:3003/health`, and `http://localhost:3001/health`; when Playwright still resolves `localhost` to `::1` under `act`, set `NODE_OPTIONS=--dns-result-order=ipv4first` in the E2E step.
 - Dependency security checks are centralized in `.github/workflows/dependency-audit.yml`; keep new `package-lock.json`/`Cargo.lock` files added there, and generate `gsnake-core/Cargo.lock` in CI before running `cargo audit` because that lockfile is git-ignored.
 - In `gsnake-n8n`, avoid direct `$env` secrets in Code nodes: use workflow variables for Code-node-only secrets (for example `$vars.N8N_WEBHOOK_SECRET`) and credential-backed nodes (for example `discordWebhookApi`) for endpoint secrets.
@@ -201,4 +201,14 @@
   - Patterns discovered: keep E2E readiness probes on explicit `/health` routes with stable payload assertions so startup diagnostics are deterministic.
   - Gotchas encountered: local `act` can still fail root E2E with Playwright API calls resolving `localhost` to `::1` and refusing `3001`, even when startup `/health` checks pass.
   - Useful context: browser verification was covered via root `act` E2E startup probes; full Playwright pass/fail remained tied to local `act` networking behavior.
+---
+## 2026-02-17 04:31:33 CET - US-016
+- Reworked root E2E workflow startup/teardown in `.github/workflows/ci.yml` to remove fixed startup sleeps and broad process cleanup; services are now started with recorded PID files and polled via `/health` readiness loops.
+- Added targeted lifecycle handling for web preview, editor UI, and editor API processes using `kill -0` liveness checks plus `if: always()` PID-based teardown, including per-service log tails for failure diagnostics.
+- Ran `act -W .github/workflows/ci.yml -j e2e-test --container-architecture linux/amd64` and confirmed `e2e-test` passes end-to-end (`22 passed` Playwright specs) with the new startup/teardown flow.
+- Files changed: `.github/workflows/ci.yml`, `scripts/test/CLAUDE.md`, `scripts/test/result.txt`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`.
+- **Learnings for future iterations:**
+  - Patterns discovered: for root E2E services, keep process ownership explicit by persisting PIDs and tearing down by PID in an `always()` step instead of pattern-based kill commands.
+  - Gotchas encountered: in this environment, probing preview/API/UI health should use `localhost` URLs; `127.0.0.1` can miss Vite-bound localhost listeners under `act`.
+  - Useful context: this story changed CI workflow orchestration only; browser verification was not required beyond the passing root `e2e-test` workflow run.
 ---

@@ -149,15 +149,13 @@ revision <sha> not found
 
 Treat this as an external remote-ref availability issue. Record the exact missing SHA in `result.txt`, and use local `cargo check`/`cargo test` as the reliable signal for code-validation in that iteration.
 
-### Root E2E False Negatives from Stale Playwright Processes
-For `.github/workflows/ci.yml::e2e-test`, broad sudden failures across many Playwright specs can be environmental in local `act` runs.  
-The workflow cleanup step uses `fuser`, but `fuser` may be unavailable in the act container image, leaving host-side Playwright processes alive.
+### Root E2E Service Lifecycle Pattern
+For `.github/workflows/ci.yml::e2e-test`, keep startup/teardown deterministic:
+- Start each service in background and persist PID files under `/tmp/gsnake-e2e/*.pid`
+- Poll each `/health` endpoint in a loop and also check `kill -0 <pid>` so early process exits fail fast with logs
+- Stop services in an `if: always()` step by PID (TERM, bounded wait, optional KILL fallback)
 
-If this happens, clear stale processes and rerun the job:
-```bash
-pkill -f 'chromium_headless_shell|playwright_chromiumdev_profile' || true
-act -W .github/workflows/ci.yml -j e2e-test --container-architecture linux/amd64
-```
+Avoid reintroducing broad `pkill`/`fuser` cleanup in this workflow; it is harder to reason about and can produce cross-process side effects in local `act` runs.
 
 ### Root E2E localhost IPv6 Resolution in Act
 In local `act` runs, Playwright API requests may resolve `localhost` to `::1` and fail with:

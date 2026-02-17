@@ -266,6 +266,8 @@ jobs:
   e2e-test:
     name: E2E Tests
     runs-on: ubuntu-latest
+    env:
+      E2E_RUNTIME_DIR: /tmp/gsnake-e2e
     steps:
       - name: Checkout repository with submodules
         uses: actions/checkout@v4
@@ -329,46 +331,128 @@ jobs:
         run: |
           npm --prefix gsnake-editor ci
 
-      - name: Clean up existing server processes
+      - name: Prepare E2E runtime directory
         run: |
-          # Kill any Node.js server processes
-          pkill -f "vite preview" || true
-          pkill -f "vite.*--port 3000" || true
-          pkill -f "npm.*run.*dev" || true
-          pkill -f "tsx server.ts" || true
-          pkill -f "gsnake-editor" || true
-          # Also try to kill by port if lsof/fuser available
-          fuser -k 3000/tcp || true
-          fuser -k 3001/tcp || true
-          fuser -k 3003/tcp || true
-          sleep 2
+          rm -rf "$E2E_RUNTIME_DIR"
+          mkdir -p "$E2E_RUNTIME_DIR"
 
-      - name: Start web preview server
+      - name: Start web preview server and wait for health
         run: |
-          nohup npm --prefix gsnake-web run preview -- --port 3000 --strictPort > /tmp/web-server.log 2>&1 &
-          sleep 5
-          curl --retry 10 --retry-delay 2 --retry-connrefused --fail --silent --show-error \
-            http://localhost:3000/health | grep -F "gsnake-web:ok"
+          set -euo pipefail
+          npm --prefix gsnake-web run preview -- --port 3000 --strictPort \
+            > "$E2E_RUNTIME_DIR/web-server.log" 2>&1 &
+          web_pid=$!
+          echo "$web_pid" > "$E2E_RUNTIME_DIR/web-server.pid"
 
-      - name: Start editor dev server
-        run: |
-          nohup npm --prefix gsnake-editor run dev:editor > /tmp/editor-dev.log 2>&1 &
-          sleep 5
-          curl --retry 10 --retry-delay 2 --retry-connrefused --fail --silent --show-error \
-            http://localhost:3003/health | grep -F "gsnake-editor-ui:ok"
+          for attempt in {1..60}; do
+            if curl --fail --silent --show-error http://localhost:3000/health \
+              | grep -F "gsnake-web:ok" >/dev/null; then
+              exit 0
+            fi
 
-      - name: Start editor API server
+            if ! kill -0 "$web_pid" >/dev/null 2>&1; then
+              echo "web preview server exited before becoming healthy"
+              cat "$E2E_RUNTIME_DIR/web-server.log"
+              exit 1
+            fi
+
+            sleep 1
+          done
+
+          echo "web preview server failed to become healthy in time"
+          tail -n 200 "$E2E_RUNTIME_DIR/web-server.log" || true
+          exit 1
+
+      - name: Start editor dev server and wait for health
         run: |
-          nohup npm --prefix gsnake-editor run dev:server > /tmp/editor-api.log 2>&1 &
-          sleep 5
-          curl --retry 10 --retry-delay 2 --retry-connrefused --fail --silent --show-error \
-            http://localhost:3001/health | grep -F '"status":"ok"' | grep -F '"service":"gsnake-editor-api"'
+          set -euo pipefail
+          npm --prefix gsnake-editor run dev:editor > "$E2E_RUNTIME_DIR/editor-dev.log" 2>&1 &
+          editor_dev_pid=$!
+          echo "$editor_dev_pid" > "$E2E_RUNTIME_DIR/editor-dev.pid"
+
+          for attempt in {1..60}; do
+            if curl --fail --silent --show-error http://localhost:3003/health \
+              | grep -F "gsnake-editor-ui:ok" >/dev/null; then
+              exit 0
+            fi
+
+            if ! kill -0 "$editor_dev_pid" >/dev/null 2>&1; then
+              echo "editor dev server exited before becoming healthy"
+              cat "$E2E_RUNTIME_DIR/editor-dev.log"
+              exit 1
+            fi
+
+            sleep 1
+          done
+
+          echo "editor dev server failed to become healthy in time"
+          tail -n 200 "$E2E_RUNTIME_DIR/editor-dev.log" || true
+          exit 1
+
+      - name: Start editor API server and wait for health
+        run: |
+          set -euo pipefail
+          npm --prefix gsnake-editor run dev:server > "$E2E_RUNTIME_DIR/editor-api.log" 2>&1 &
+          editor_api_pid=$!
+          echo "$editor_api_pid" > "$E2E_RUNTIME_DIR/editor-api.pid"
+
+          for attempt in {1..60}; do
+            if curl --fail --silent --show-error http://localhost:3001/health \
+              | grep -F '"status":"ok"' | grep -F '"service":"gsnake-editor-api"' >/dev/null; then
+              exit 0
+            fi
+
+            if ! kill -0 "$editor_api_pid" >/dev/null 2>&1; then
+              echo "editor API server exited before becoming healthy"
+              cat "$E2E_RUNTIME_DIR/editor-api.log"
+              exit 1
+            fi
+
+            sleep 1
+          done
+
+          echo "editor API server failed to become healthy in time"
+          tail -n 200 "$E2E_RUNTIME_DIR/editor-api.log" || true
+          exit 1
 
       - name: Run E2E tests
         env:
           CI: true
           NODE_OPTIONS: --dns-result-order=ipv4first
         run: npm run test:e2e
+
+      - name: Stop E2E services
+        if: ${{ always() }}
+        run: |
+          set +e
+          for service in editor-api editor-dev web-server; do
+            pid_file="$E2E_RUNTIME_DIR/${service}.pid"
+            log_file="$E2E_RUNTIME_DIR/${service}.log"
+            if [[ ! -f "$pid_file" ]]; then
+              continue
+            fi
+
+            pid="$(cat "$pid_file")"
+            if [[ -z "$pid" ]]; then
+              continue
+            fi
+
+            if kill -0 "$pid" >/dev/null 2>&1; then
+              kill "$pid" >/dev/null 2>&1 || true
+              for _ in {1..10}; do
+                if ! kill -0 "$pid" >/dev/null 2>&1; then
+                  break
+                fi
+                sleep 1
+              done
+              kill -9 "$pid" >/dev/null 2>&1 || true
+            fi
+
+            if [[ -f "$log_file" ]]; then
+              echo "=== ${service} log tail ==="
+              tail -n 40 "$log_file" || true
+            fi
+          done
 
   required-merge-gates:
     name: Required Merge Gates
