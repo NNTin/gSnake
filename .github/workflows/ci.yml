@@ -347,23 +347,27 @@ jobs:
         run: |
           nohup npm --prefix gsnake-web run preview -- --port 3000 --strictPort > /tmp/web-server.log 2>&1 &
           sleep 5
-          curl --retry 10 --retry-delay 2 --retry-connrefused http://localhost:3000
+          curl --retry 10 --retry-delay 2 --retry-connrefused --fail --silent --show-error \
+            http://localhost:3000/health | grep -F "gsnake-web:ok"
 
       - name: Start editor dev server
         run: |
           nohup npm --prefix gsnake-editor run dev:editor > /tmp/editor-dev.log 2>&1 &
           sleep 5
-          curl --retry 10 --retry-delay 2 --retry-connrefused http://localhost:3003
+          curl --retry 10 --retry-delay 2 --retry-connrefused --fail --silent --show-error \
+            http://localhost:3003/health | grep -F "gsnake-editor-ui:ok"
 
       - name: Start editor API server
         run: |
           nohup npm --prefix gsnake-editor run dev:server > /tmp/editor-api.log 2>&1 &
           sleep 5
-          curl --retry 10 --retry-delay 2 --retry-connrefused http://localhost:3001
+          curl --retry 10 --retry-delay 2 --retry-connrefused --fail --silent --show-error \
+            http://localhost:3001/health | grep -F '"status":"ok"' | grep -F '"service":"gsnake-editor-api"'
 
       - name: Run E2E tests
         env:
           CI: true
+          NODE_OPTIONS: --dns-result-order=ipv4first
         run: npm run test:e2e
 
   required-merge-gates:

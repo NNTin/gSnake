@@ -1,13 +1,27 @@
-=== Act CI Test Results ===
-Started: Tue Feb 17 02:29:22 CET 2026
+=== Iteration Test Results ===
+Started: Tue Feb 17 03:19:48 CET 2026
 
 ## Summary
 
-- [SUCCESS] ./.github/workflows/ci.yml::test
+- [SUCCESS] npm --prefix gsnake-editor run check
+- [SUCCESS] npm --prefix gsnake-editor run lint
+- [SUCCESS] npm --prefix gsnake-editor test
+- [SUCCESS] npm --prefix gsnake-web run check
+- [SUCCESS] npm --prefix gsnake-web test
+- [FAILED] act -W .github/workflows/ci.yml -j e2e-test --container-architecture linux/amd64
 
-**Total: 1 passed, 0 failed**
+## Notes
+
+- Root E2E startup health checks now pass with deterministic endpoint assertions:
+  - `http://localhost:3000/health` -> `gsnake-web:ok`
+  - `http://localhost:3003/health` -> `gsnake-editor-ui:ok`
+  - `http://localhost:3001/health` -> `{"status":"ok","service":"gsnake-editor-api"}`
+- `act` still fails Playwright in local environment after startup with repeated:
+  - `apiRequestContext.post: connect ECONNREFUSED ::1:3001`
+- Added workflow mitigation in `.github/workflows/ci.yml`:
+  - `NODE_OPTIONS=--dns-result-order=ipv4first` on E2E step
 
 ---
-Completed: Tue Feb 17 02:31:08 CET 2026
-Result: 1 passed, 0 failed
-Command: act -W .github/workflows/ci.yml -j test --container-architecture linux/amd64
+Completed: Tue Feb 17 03:38:34 CET 2026
+Result: 5 local checks passed, 1 act workflow job failed (local act networking behavior)
+Result file: /home/nntin/git/gSnake/scripts/test/result.txt

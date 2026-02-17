@@ -33,6 +33,7 @@
 - `gsnake-levels/build.rs` mode selection defaults to filesystem `auto` detection; use `GSNAKE_LEVELS_BUILD_MODE=local|standalone|auto` to force behavior when validating standalone vs monorepo workflows.
 - `act` runs for `gsnake-levels` can fail in dependency resolution when the remote `nntin/gsnake` git dependency references a submodule commit that is not yet reachable; treat local `cargo check`/`cargo test` as the reliable code-validation signal and log the exact missing-ref error in `scripts/test/result.txt`.
 - Before rerunning root `act` E2E (`.github/workflows/ci.yml::e2e-test`) after broad sudden failures, clear stale host Playwright processes (`pkill -f 'chromium_headless_shell|playwright_chromiumdev_profile' || true`); workflow cleanup relies on `fuser`, which may be unavailable in the act container.
+- In root E2E CI, keep readiness probes on `http://localhost:3000/health`, `http://localhost:3003/health`, and `http://localhost:3001/health`; when Playwright still resolves `localhost` to `::1` under `act`, set `NODE_OPTIONS=--dns-result-order=ipv4first` in the E2E step.
 - Dependency security checks are centralized in `.github/workflows/dependency-audit.yml`; keep new `package-lock.json`/`Cargo.lock` files added there, and generate `gsnake-core/Cargo.lock` in CI before running `cargo audit` because that lockfile is git-ignored.
 - In `gsnake-n8n`, avoid direct `$env` secrets in Code nodes: use workflow variables for Code-node-only secrets (for example `$vars.N8N_WEBHOOK_SECRET`) and credential-backed nodes (for example `discordWebhookApi`) for endpoint secrets.
 
@@ -189,4 +190,15 @@
   - Patterns discovered: Code nodes in n8n cannot use credential-bound auth helpers directly, so secrets needed inside Code nodes should use workflow variables while external service auth should be moved to credential-capable nodes.
   - Gotchas encountered: exported workflow credentials can safely use `id: null` with a credential `name` to indicate “bind in n8n UI” without hardcoding instance-specific credential IDs.
   - Useful context: this story changed workflow JSON/docs only; browser verification was not required.
+---
+## 2026-02-17 03:38:34 CET - US-015
+- Added explicit health contracts for all CI-served endpoints used by root E2E startup checks: editor API `GET /health` JSON response, editor UI dev-server `public/health`, and web preview `public/health`.
+- Updated root E2E workflow startup checks to call `/health` endpoints with deterministic response assertions and added `NODE_OPTIONS=--dns-result-order=ipv4first` to the Playwright step to reduce localhost IPv6 resolution drift in `act`.
+- Added editor API regression coverage for `GET /health` and documented expected health response contracts in `gsnake-editor/README.md` and `gsnake-web/README.md`.
+- Ran `npm --prefix gsnake-editor run check`, `npm --prefix gsnake-editor run lint`, `npm --prefix gsnake-editor test`, `npm --prefix gsnake-web run check`, `npm --prefix gsnake-web test`, and `act -W .github/workflows/ci.yml -j e2e-test --container-architecture linux/amd64` (workflow startup health checks passed; Playwright still failed in local `act` with `ECONNREFUSED ::1:3001`).
+- Files changed: `.github/workflows/ci.yml`, `gsnake-editor/server.ts`, `gsnake-editor/src/tests/server.test.ts`, `gsnake-editor/public/health`, `gsnake-editor/README.md`, `gsnake-web/packages/gsnake-web-app/public/health`, `gsnake-web/README.md`, `scripts/test/CLAUDE.md`, `scripts/test/result.txt`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`.
+- **Learnings for future iterations:**
+  - Patterns discovered: keep E2E readiness probes on explicit `/health` routes with stable payload assertions so startup diagnostics are deterministic.
+  - Gotchas encountered: local `act` can still fail root E2E with Playwright API calls resolving `localhost` to `::1` and refusing `3001`, even when startup `/health` checks pass.
+  - Useful context: browser verification was covered via root `act` E2E startup probes; full Playwright pass/fail remained tied to local `act` networking behavior.
 ---

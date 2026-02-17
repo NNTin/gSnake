@@ -159,6 +159,18 @@ pkill -f 'chromium_headless_shell|playwright_chromiumdev_profile' || true
 act -W .github/workflows/ci.yml -j e2e-test --container-architecture linux/amd64
 ```
 
+### Root E2E localhost IPv6 Resolution in Act
+In local `act` runs, Playwright API requests may resolve `localhost` to `::1` and fail with:
+```
+apiRequestContext.post: connect ECONNREFUSED ::1:3001
+```
+
+Keep the E2E step env override in `.github/workflows/ci.yml`:
+```yaml
+NODE_OPTIONS: --dns-result-order=ipv4first
+```
+and retain `/health` readiness probes for `3000`, `3003`, and `3001` so startup issues and DNS-resolution issues are diagnosable separately.
+
 ## Debugging Tips
 
 - Use `-v` flag for verbose output: `act -v -W ... -j ...`
