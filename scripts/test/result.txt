@@ -1,16 +1,414 @@
 === Act CI Test Results ===
-Started: Thu Feb 19 22:29:04 CET 2026
-Mode: job
+Started: Thu Feb 19 23:17:59 CET 2026
+Mode: single job
 
 ## Summary
 
 - [SUCCESS] ./.github/workflows/ci.yml::gsnake-editor-test
 
-**Total: 1 passed, 0 failed**
-
 ---
-Completed: Thu Feb 19 22:29:53 CET 2026
-Duration: 00:00:49
-Result: 1 passed, 0 failed
-Result file: /home/nntin/git/gSnake/scripts/test/result.txt
-Temp dir: /home/nntin/git/gSnake/scripts/test/tmp_act_results
+Completed: Thu Feb 19 23:18:32 CET 2026
+Result: SUCCESS
+
+## Raw Output
+[CI/gsnake-editor Tests] ⭐ Run Set up job
+[CI/gsnake-editor Tests] 🚀  Start image=ghcr.io/catthehacker/ubuntu:act-latest
+[CI/gsnake-editor Tests]   🐳  docker pull image=ghcr.io/catthehacker/ubuntu:act-latest platform=linux/amd64 username= forcePull=true
+[CI/gsnake-editor Tests]   🐳  docker create image=ghcr.io/catthehacker/ubuntu:act-latest platform=linux/amd64 entrypoint=["tail" "-f" "/dev/null"] cmd=[] network="host"
+[CI/gsnake-editor Tests]   🐳  docker run image=ghcr.io/catthehacker/ubuntu:act-latest platform=linux/amd64 entrypoint=["tail" "-f" "/dev/null"] cmd=[] network="host"
+[CI/gsnake-editor Tests]   🐳  docker exec cmd=[node --no-warnings -e console.log(process.execPath)] user= workdir=
+[CI/gsnake-editor Tests]   ✅  Success - Set up job
+[CI/gsnake-editor Tests]   ☁  git clone 'https://github.com/actions/setup-node' # ref=v4
+[CI/gsnake-editor Tests] Non-terminating error while running 'git clone': some refs were not updated
+[CI/gsnake-editor Tests] ⭐ Run Main Checkout repository with submodules
+[CI/gsnake-editor Tests]   🐳  docker cp src=/home/nntin/git/gSnake/. dst=/home/nntin/git/gSnake
+[CI/gsnake-editor Tests]   ✅  Success - Main Checkout repository with submodules [1.120763472s]
+[CI/gsnake-editor Tests] ⭐ Run Main Setup Node.js
+[CI/gsnake-editor Tests]   🐳  docker cp src=/home/nntin/.cache/act/actions-setup-node@v4/ dst=/var/run/act/actions/actions-setup-node@v4/
+[CI/gsnake-editor Tests]   🐳  docker exec cmd=[/opt/acttoolcache/node/24.13.1/x64/bin/node /var/run/act/actions/actions-setup-node@v4/dist/setup/index.js] user= workdir=
+[CI/gsnake-editor Tests]   | Found in cache @ /opt/hostedtoolcache/node/20.20.0/x64
+[CI/gsnake-editor Tests]   | (node:31) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+[CI/gsnake-editor Tests]   | (Use `node --trace-deprecation ...` to show where the warning was created)
+[CI/gsnake-editor Tests]   ❓  ::group::Environment details
+[CI/gsnake-editor Tests]   | node: v20.20.0
+[CI/gsnake-editor Tests]   | npm: 10.8.2
+[CI/gsnake-editor Tests]   | yarn: 
+[CI/gsnake-editor Tests]   ❓  ::endgroup::
+[CI/gsnake-editor Tests]   | [command]/opt/hostedtoolcache/node/20.20.0/x64/bin/npm config get cache
+[CI/gsnake-editor Tests]   | /root/.npm
+[CI/gsnake-editor Tests]   ⚙  ***
+[CI/gsnake-editor Tests]   | Cache Size: ~65 MB (68060738 B)
+[CI/gsnake-editor Tests]   | [command]/usr/bin/tar -xf /tmp/5ff12cd2-f552-4575-99dc-6b9d7ed7ab4b/cache.tzst -P -C /home/nntin/git/gSnake --use-compress-program unzstd
+[CI/gsnake-editor Tests]   | Cache restored successfully
+[CI/gsnake-editor Tests]   | Cache restored from key: node-cache-linux-x64-npm-fc04174c1a7f20b321cc96f9cc9d81614b1282b4da7ca359fa09bed3cfe69d9f
+[CI/gsnake-editor Tests]   ❓ add-matcher /run/act/actions/actions-setup-node@v4/.github/tsc.json
+[CI/gsnake-editor Tests]   ❓ add-matcher /run/act/actions/actions-setup-node@v4/.github/eslint-stylish.json
+[CI/gsnake-editor Tests]   ❓ add-matcher /run/act/actions/actions-setup-node@v4/.github/eslint-compact.json
+[CI/gsnake-editor Tests]   ✅  Success - Main Setup Node.js [5.703129796s]
+[CI/gsnake-editor Tests]   ⚙  ::set-output:: node-version=v20.20.0
+[CI/gsnake-editor Tests]   ⚙  ::set-output:: cache-hit=true
+[CI/gsnake-editor Tests]   ⚙  ::add-path:: /opt/hostedtoolcache/node/20.20.0/x64/bin
+[CI/gsnake-editor Tests] ⭐ Run Main Install gsnake-web dependencies
+[CI/gsnake-editor Tests]   🐳  docker exec cmd=[bash -e /var/run/act/workflow/2] user= workdir=gsnake-web
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | > gsnake-web@0.3.0 preinstall
+[CI/gsnake-editor Tests]   | > node scripts/detect-local-deps.js
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [detect-local-deps] Checking dependency context...
+[CI/gsnake-editor Tests]   | [detect-local-deps] FORCE_GIT_DEPS: false
+[CI/gsnake-editor Tests]   | [detect-local-deps] Root .git exists: true
+[CI/gsnake-editor Tests]   | [detect-local-deps] Workspace .git exists: true
+[CI/gsnake-editor Tests]   | [detect-local-deps] gsnake-core exists: true
+[CI/gsnake-editor Tests]   | [detect-local-deps] WASM pkg exists: true
+[CI/gsnake-editor Tests]   | [detect-local-deps] ✓ Root repository detected - using local WASM
+[CI/gsnake-editor Tests]   | [detect-local-deps] ✓ package.json already configured for local development
+[CI/gsnake-editor Tests]   | [detect-local-deps] ✓ package-lock.json already configured for local development
+[CI/gsnake-editor Tests]   | [detect-local-deps] Done
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | > gsnake-web@0.3.0 postinstall
+[CI/gsnake-editor Tests]   | > npm run build -w gsnake-web-ui
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | > gsnake-web-ui@0.1.0 prebuild
+[CI/gsnake-editor Tests]   | > node ../../scripts/validate-sprites.js
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | Sprite validation passed (10 CellType values, 10 sprite symbols).
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | > gsnake-web-ui@0.1.0 build
+[CI/gsnake-editor Tests]   | > node scripts/build-components.js
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [gsnake-web-ui] built Modal
+[CI/gsnake-editor Tests]   | [gsnake-web-ui] built Overlay
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | added 175 packages, and audited 179 packages in 4s
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | 35 packages are looking for funding
+[CI/gsnake-editor Tests]   |   run `npm fund` for details
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | 4 vulnerabilities (1 low, 3 moderate)
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | To address all issues, run:
+[CI/gsnake-editor Tests]   |   npm audit fix
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | Run `npm audit` for details.
+[CI/gsnake-editor Tests]   ✅  Success - Main Install gsnake-web dependencies [4.284827624s]
+[CI/gsnake-editor Tests] ⭐ Run Main Install dependencies
+[CI/gsnake-editor Tests]   🐳  docker exec cmd=[bash -e /var/run/act/workflow/3] user= workdir=gsnake-editor
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | > gsnake-editor@0.0.0 preinstall
+[CI/gsnake-editor Tests]   | > node scripts/detect-gsnake-web-ui.js
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [detect-gsnake-web-ui] Checking dependency context...
+[CI/gsnake-editor Tests]   | [detect-gsnake-web-ui] FORCE_GIT_DEPS: false
+[CI/gsnake-editor Tests]   | [detect-gsnake-web-ui] Root repository mode detected
+[CI/gsnake-editor Tests]   | [detect-gsnake-web-ui] local gsnake-web-ui already has precompiled dist output
+[CI/gsnake-editor Tests]   | [detect-gsnake-web-ui] Using local gsnake-web-ui dependency
+[CI/gsnake-editor Tests]   | [detect-gsnake-web-ui] package-lock.json already matches local gsnake-web-ui dependency
+[CI/gsnake-editor Tests]   | [detect-gsnake-web-ui] Done
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | added 402 packages, and audited 404 packages in 6s
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | 108 packages are looking for funding
+[CI/gsnake-editor Tests]   |   run `npm fund` for details
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | 16 vulnerabilities (2 low, 5 moderate, 9 high)
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | To address issues that do not require attention, run:
+[CI/gsnake-editor Tests]   |   npm audit fix
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | To address all issues (including breaking changes), run:
+[CI/gsnake-editor Tests]   |   npm audit fix --force
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | Run `npm audit` for details.
+[CI/gsnake-editor Tests]   ✅  Success - Main Install dependencies [6.902035243s]
+[CI/gsnake-editor Tests] ⭐ Run Main Run tests
+[CI/gsnake-editor Tests]   🐳  docker exec cmd=[bash -e /var/run/act/workflow/4] user= workdir=gsnake-editor
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | > gsnake-editor@0.0.0 test
+[CI/gsnake-editor Tests]   | > vitest run
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/home/nntin/git/gSnake/gsnake-editor[39m
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   |  [32m✓[39m src/tests/levelDefinitionSchemaDrift.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/server.test.ts[2m > [22m[2mServer API tests[2m > [22m[2mPOST /api/test-level[2m > [22m[2mshould return success with { success: true }
+[CI/gsnake-editor Tests]   | [22m[39mTest level stored successfully
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/server.test.ts[2m > [22m[2mServer API tests[2m > [22m[2mPOST /api/test-level[2m > [22m[2mshould accept negative coordinates that satisfy schema integer constraints
+[CI/gsnake-editor Tests]   | [22m[39mTest level stored successfully
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/server.test.ts[2m > [22m[2mServer API tests[2m > [22m[2mGET /api/test-level[2m > [22m[2mshould return the stored payload
+[CI/gsnake-editor Tests]   | [22m[39mTest level stored successfully
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   |  [32m✓[39m src/tests/server.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 134[2mms[22m[39m
+[CI/gsnake-editor Tests]   |  [32m✓[39m src/tests/types.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/integration.test.ts[2m > [22m[2mgsnake-web integration tests[2m > [22m[2mshould skip integration tests if GSNAKE_WEB_URL is unreachable
+[CI/gsnake-editor Tests]   | [22m[39mChecking connectivity to gsnake-web at: http://localhost:3000
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstderr[2m | src/tests/integration.test.ts[2m > [22m[2mgsnake-web integration tests[2m > [22m[2mshould skip integration tests if GSNAKE_WEB_URL is unreachable
+[CI/gsnake-editor Tests]   | [22m[39m⚠ gsnake-web is unreachable at http://localhost:3000: fetch failed
+[CI/gsnake-editor Tests]   |   Integration tests will be skipped. To run integration tests:
+[CI/gsnake-editor Tests]   |   1. Start gsnake-web: cd ../gsnake-web && npm run dev
+[CI/gsnake-editor Tests]   |   2. Or set VITE_GSNAKE_WEB_URL to a running instance
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstderr[2m | src/tests/integration.test.ts[2m > [22m[2mgsnake-web integration tests[2m > [22m[2mshould validate gsnake-web test endpoint if reachable
+[CI/gsnake-editor Tests]   | [22m[39m⚠ Skipping test endpoint validation - gsnake-web unreachable
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   |  [32m✓[39m src/tests/integration.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 25[2mms[22m[39m
+[CI/gsnake-editor Tests]   |  [32m✓[39m src/tests/SpriteLoader.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 54[2mms[22m[39m
+[CI/gsnake-editor Tests]   |  [32m✓[39m src/tests/LandingPage.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 199[2mms[22m[39m
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mopens save modal and exports a generated level payload
+[CI/gsnake-editor Tests]   | [22m[39mAdded snake segment 0 at (0, 0). Total segments: 1
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.gridInteractions.test.ts[2m > [22m[2mEditorLayout grid interactions[2m > [22m[2msupports placement and shift-click removal interactions on the grid
+[CI/gsnake-editor Tests]   | [22m[39mAdded snake segment 0 at (0, 0). Total segments: 1
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mopens save modal and exports a generated level payload
+[CI/gsnake-editor Tests]   | [22m[39mSelected entity: food
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mopens save modal and exports a generated level payload
+[CI/gsnake-editor Tests]   | [22m[39mPlaced food at (0, 1)
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.gridInteractions.test.ts[2m > [22m[2mEditorLayout grid interactions[2m > [22m[2msupports placement and shift-click removal interactions on the grid
+[CI/gsnake-editor Tests]   | [22m[39mSelected entity: food
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.gridInteractions.test.ts[2m > [22m[2mEditorLayout grid interactions[2m > [22m[2msupports placement and shift-click removal interactions on the grid
+[CI/gsnake-editor Tests]   | [22m[39mPlaced food at (1, 1)
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.gridInteractions.test.ts[2m > [22m[2mEditorLayout grid interactions[2m > [22m[2msupports placement and shift-click removal interactions on the grid
+[CI/gsnake-editor Tests]   | [22m[39mRemoved entity from (1, 1)
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mopens save modal and exports a generated level payload
+[CI/gsnake-editor Tests]   | [22m[39mSelected entity: exit
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mopens save modal and exports a generated level payload
+[CI/gsnake-editor Tests]   | [22m[39mPlaced exit at (0, 2)
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.gridInteractions.test.ts[2m > [22m[2mEditorLayout grid interactions[2m > [22m[2mreindexes snake segment labels when segments are removed and added during edits
+[CI/gsnake-editor Tests]   | [22m[39mAdded snake segment 0 at (0, 0). Total segments: 1
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.gridInteractions.test.ts[2m > [22m[2mEditorLayout grid interactions[2m > [22m[2mreindexes snake segment labels when segments are removed and added during edits
+[CI/gsnake-editor Tests]   | [22m[39mAdded snake segment 1 at (0, 1). Total segments: 2
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.gridInteractions.test.ts[2m > [22m[2mEditorLayout grid interactions[2m > [22m[2mreindexes snake segment labels when segments are removed and added during edits
+[CI/gsnake-editor Tests]   | [22m[39mAdded snake segment 2 at (0, 2). Total segments: 3
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.gridInteractions.test.ts[2m > [22m[2mEditorLayout grid interactions[2m > [22m[2mreindexes snake segment labels when segments are removed and added during edits
+[CI/gsnake-editor Tests]   | [22m[39mRemoved entity from (0, 1)
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mopens save modal and exports a generated level payload
+[CI/gsnake-editor Tests]   | [22m[39mSave clicked
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.gridInteractions.test.ts[2m > [22m[2mEditorLayout grid interactions[2m > [22m[2mreindexes snake segment labels when segments are removed and added during edits
+[CI/gsnake-editor Tests]   | [22m[39mAdded snake segment 2 at (0, 3). Total segments: 3
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstderr[2m | src/tests/App.loadExisting.test.ts[2m > [22m[2mApp load existing flow[2m > [22m[2mrejects an invalid level payload and stays on the landing page
+[CI/gsnake-editor Tests]   | [22m[39mFailed to load level: Error: Invalid level format: missing or invalid snake
+[CI/gsnake-editor Tests]   |     at validateLevelFileData [90m(/home/nntin/git/gSnake/gsnake-editor/[39msrc/lib/levelFileValidation.ts:19:11[90m)[39m
+[CI/gsnake-editor Tests]   |     at parseAndValidateLevelFileData [90m(/home/nntin/git/gSnake/gsnake-editor/[39msrc/lib/levelFileValidation.ts:37:3[90m)[39m
+[CI/gsnake-editor Tests]   |     at Object.handleLoadExisting [90m(/home/nntin/git/gSnake/gsnake-editor/[39msrc/App.svelte:26:49[90m)[39m
+[CI/gsnake-editor Tests]   | [90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)[39m
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.gridInteractions.test.ts[2m > [22m[2mEditorLayout grid interactions[2m > [22m[2mmaintains multi-step undo/redo history and clears redo after a new action
+[CI/gsnake-editor Tests]   | [22m[39mAdded snake segment 0 at (0, 0). Total segments: 1
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.gridInteractions.test.ts[2m > [22m[2mEditorLayout grid interactions[2m > [22m[2mmaintains multi-step undo/redo history and clears redo after a new action
+[CI/gsnake-editor Tests]   | [22m[39mAdded snake segment 1 at (0, 1). Total segments: 2
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mopens save modal and exports a generated level payload
+[CI/gsnake-editor Tests]   | [22m[39mExported level: Workflow Level hard
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   |  [32m✓[39m src/tests/App.loadExisting.test.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 683[2mms[22m[39m
+[CI/gsnake-editor Tests]   |      [33m[2m✓[22m[39m accepts a valid level payload and opens the editor [33m 622[2mms[22m[39m
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mdoes not show no-food warning when only floating food is placed
+[CI/gsnake-editor Tests]   | [22m[39mAdded snake segment 0 at (0, 0). Total segments: 1
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.gridInteractions.test.ts[2m > [22m[2mEditorLayout grid interactions[2m > [22m[2mmaintains multi-step undo/redo history and clears redo after a new action
+[CI/gsnake-editor Tests]   | [22m[39mSelected entity: food
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.gridInteractions.test.ts[2m > [22m[2mEditorLayout grid interactions[2m > [22m[2mmaintains multi-step undo/redo history and clears redo after a new action
+[CI/gsnake-editor Tests]   | [22m[39mPlaced food at (1, 1)
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.gridInteractions.test.ts[2m > [22m[2mEditorLayout grid interactions[2m > [22m[2mmaintains multi-step undo/redo history and clears redo after a new action
+[CI/gsnake-editor Tests]   | [22m[39mUndo performed
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.gridInteractions.test.ts[2m > [22m[2mEditorLayout grid interactions[2m > [22m[2mmaintains multi-step undo/redo history and clears redo after a new action
+[CI/gsnake-editor Tests]   | [22m[39mUndo performed
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.gridInteractions.test.ts[2m > [22m[2mEditorLayout grid interactions[2m > [22m[2mmaintains multi-step undo/redo history and clears redo after a new action
+[CI/gsnake-editor Tests]   | [22m[39mRedo performed
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.gridInteractions.test.ts[2m > [22m[2mEditorLayout grid interactions[2m > [22m[2mmaintains multi-step undo/redo history and clears redo after a new action
+[CI/gsnake-editor Tests]   | [22m[39mPlaced food at (2, 2)
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.gridInteractions.test.ts[2m > [22m[2mEditorLayout grid interactions[2m > [22m[2mdoes not clear existing snake segments when reselecting the snake tool
+[CI/gsnake-editor Tests]   | [22m[39mAdded snake segment 0 at (0, 0). Total segments: 1
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.gridInteractions.test.ts[2m > [22m[2mEditorLayout grid interactions[2m > [22m[2mdoes not clear existing snake segments when reselecting the snake tool
+[CI/gsnake-editor Tests]   | [22m[39mAdded snake segment 1 at (0, 1). Total segments: 2
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mdoes not show no-food warning when only floating food is placed
+[CI/gsnake-editor Tests]   | [22m[39mSelected entity: floating-food
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mdoes not show no-food warning when only floating food is placed
+[CI/gsnake-editor Tests]   | [22m[39mPlaced floating-food at (0, 1)
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.gridInteractions.test.ts[2m > [22m[2mEditorLayout grid interactions[2m > [22m[2mdoes not clear existing snake segments when reselecting the snake tool
+[CI/gsnake-editor Tests]   | [22m[39mSelected entity: food
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mdoes not show no-food warning when only floating food is placed
+[CI/gsnake-editor Tests]   | [22m[39mSelected entity: exit
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mdoes not show no-food warning when only floating food is placed
+[CI/gsnake-editor Tests]   | [22m[39mPlaced exit at (0, 2)
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.gridInteractions.test.ts[2m > [22m[2mEditorLayout grid interactions[2m > [22m[2mdoes not clear existing snake segments when reselecting the snake tool
+[CI/gsnake-editor Tests]   | [22m[39mSelected entity: snake
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   |  [32m✓[39m src/tests/EditorLayout.gridInteractions.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 942[2mms[22m[39m
+[CI/gsnake-editor Tests]   |      [33m[2m✓[22m[39m supports placement and shift-click removal interactions on the grid [33m 468[2mms[22m[39m
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mdoes not show no-food warning when only floating food is placed
+[CI/gsnake-editor Tests]   | [22m[39mSave clicked
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mloads a valid level file and renders the imported grid state
+[CI/gsnake-editor Tests]   | [22m[39mLoad clicked - opening file picker
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mloads a valid level file and renders the imported grid state
+[CI/gsnake-editor Tests]   | [22m[39mSuccessfully loaded level: Loaded Level
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mpreserves imported entities across sequential loads with different grid sizes
+[CI/gsnake-editor Tests]   | [22m[39mLoad clicked - opening file picker
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mpreserves imported entities across sequential loads with different grid sizes
+[CI/gsnake-editor Tests]   | [22m[39mSuccessfully loaded level: First Loaded Level
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mpreserves imported entities across sequential loads with different grid sizes
+[CI/gsnake-editor Tests]   | [22m[39mLoad clicked - opening file picker
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mpreserves imported entities across sequential loads with different grid sizes
+[CI/gsnake-editor Tests]   | [22m[39mSuccessfully loaded level: Second Loaded Level
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mrejects out-of-bounds coordinates instead of partially loading and dropping them
+[CI/gsnake-editor Tests]   | [22m[39mLoad clicked - opening file picker
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstderr[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mrejects out-of-bounds coordinates instead of partially loading and dropping them
+[CI/gsnake-editor Tests]   | [22m[39mFailed to load level: Error: Unsupported out-of-bounds coordinates for grid 6x6: food[0] at (-1, 2)
+[CI/gsnake-editor Tests]   |     at assertAllCoordinatesInBounds [90m(/home/nntin/git/gSnake/gsnake-editor/[39msrc/lib/EditorLayout.svelte:132:10[90m)[39m
+[CI/gsnake-editor Tests]   |     at placeEntitiesFromLevelData [90m(/home/nntin/git/gSnake/gsnake-editor/[39msrc/lib/EditorLayout.svelte:95:5[90m)[39m
+[CI/gsnake-editor Tests]   |     at HTMLInputElement.handleInputChange [90m(/home/nntin/git/gSnake/gsnake-editor/[39msrc/lib/EditorLayout.svelte:480:9[90m)[39m
+[CI/gsnake-editor Tests]   | [90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)[39m
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mcleans up hidden file input when load dialog is canceled
+[CI/gsnake-editor Tests]   | [22m[39mLoad clicked - opening file picker
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mposts a canonical export payload when testing a level
+[CI/gsnake-editor Tests]   | [22m[39mAdded snake segment 0 at (0, 0). Total segments: 1
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mposts a canonical export payload when testing a level
+[CI/gsnake-editor Tests]   | [22m[39mAdded snake segment 1 at (0, 1). Total segments: 2
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mposts a canonical export payload when testing a level
+[CI/gsnake-editor Tests]   | [22m[39mSelected entity: food
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mposts a canonical export payload when testing a level
+[CI/gsnake-editor Tests]   | [22m[39mPlaced food at (1, 1)
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mposts a canonical export payload when testing a level
+[CI/gsnake-editor Tests]   | [22m[39mSelected entity: floating-food
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mposts a canonical export payload when testing a level
+[CI/gsnake-editor Tests]   | [22m[39mPlaced floating-food at (1, 2)
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mposts a canonical export payload when testing a level
+[CI/gsnake-editor Tests]   | [22m[39mSelected entity: falling-food
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mposts a canonical export payload when testing a level
+[CI/gsnake-editor Tests]   | [22m[39mPlaced falling-food at (1, 3)
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mposts a canonical export payload when testing a level
+[CI/gsnake-editor Tests]   | [22m[39mSelected entity: stone
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mposts a canonical export payload when testing a level
+[CI/gsnake-editor Tests]   | [22m[39mPlaced stone at (2, 0)
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mposts a canonical export payload when testing a level
+[CI/gsnake-editor Tests]   | [22m[39mSelected entity: spike
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mposts a canonical export payload when testing a level
+[CI/gsnake-editor Tests]   | [22m[39mPlaced spike at (2, 1)
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mposts a canonical export payload when testing a level
+[CI/gsnake-editor Tests]   | [22m[39mSelected entity: obstacle
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mposts a canonical export payload when testing a level
+[CI/gsnake-editor Tests]   | [22m[39mPlaced obstacle at (2, 2)
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mposts a canonical export payload when testing a level
+[CI/gsnake-editor Tests]   | [22m[39mSelected entity: exit
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mposts a canonical export payload when testing a level
+[CI/gsnake-editor Tests]   | [22m[39mPlaced exit at (4, 4)
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mposts a canonical export payload when testing a level
+[CI/gsnake-editor Tests]   | [22m[39mSnake direction changed to: north
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mposts a canonical export payload when testing a level
+[CI/gsnake-editor Tests]   | [22m[39mTest clicked - preparing level for testing
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mposts a canonical export payload when testing a level
+[CI/gsnake-editor Tests]   | [22m[39mTest level stored: { success: [33mtrue[39m }
+[CI/gsnake-editor Tests]   | Opened gsnake-web in new tab for testing
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2muses configured VITE_GSNAKE_API_URL for test-level uploads
+[CI/gsnake-editor Tests]   | [22m[39mAdded snake segment 0 at (0, 0). Total segments: 1
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2muses configured VITE_GSNAKE_API_URL for test-level uploads
+[CI/gsnake-editor Tests]   | [22m[39mTest clicked - preparing level for testing
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2muses configured VITE_GSNAKE_API_URL for test-level uploads
+[CI/gsnake-editor Tests]   | [22m[39mTest level stored: { success: [33mtrue[39m }
+[CI/gsnake-editor Tests]   | Opened gsnake-web in new tab for testing
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mincludes resolved test endpoint guidance when test upload fails
+[CI/gsnake-editor Tests]   | [22m[39mAdded snake segment 0 at (0, 0). Total segments: 1
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mincludes resolved test endpoint guidance when test upload fails
+[CI/gsnake-editor Tests]   | [22m[39mTest clicked - preparing level for testing
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstderr[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mincludes resolved test endpoint guidance when test upload fails
+[CI/gsnake-editor Tests]   | [22m[39mFailed to test level: Error: Server responded with status: 503
+[CI/gsnake-editor Tests]   |     at HTMLButtonElement.handleTest [90m(/home/nntin/git/gSnake/gsnake-editor/[39msrc/lib/EditorLayout.svelte:677:11[90m)[39m
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mshows user-facing error feedback when loading an invalid level payload
+[CI/gsnake-editor Tests]   | [22m[39mLoad clicked - opening file picker
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstderr[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mshows user-facing error feedback when loading an invalid level payload
+[CI/gsnake-editor Tests]   | [22m[39mFailed to load level: Error: Invalid level format: missing or invalid snake
+[CI/gsnake-editor Tests]   |     at validateLevelFileData [90m(/home/nntin/git/gSnake/gsnake-editor/[39msrc/lib/levelFileValidation.ts:19:11[90m)[39m
+[CI/gsnake-editor Tests]   |     at parseAndValidateLevelFileData [90m(/home/nntin/git/gSnake/gsnake-editor/[39msrc/lib/levelFileValidation.ts:37:3[90m)[39m
+[CI/gsnake-editor Tests]   |     at HTMLInputElement.handleInputChange [90m(/home/nntin/git/gSnake/gsnake-editor/[39msrc/lib/EditorLayout.svelte:469:51[90m)[39m
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   |  [32m✓[39m src/tests/EditorLayout.saveLoad.test.ts [2m([22m[2m10 tests[22m[2m)[22m[33m 2502[2mms[22m[39m
+[CI/gsnake-editor Tests]   |      [33m[2m✓[22m[39m opens save modal and exports a generated level payload [33m 794[2mms[22m[39m
+[CI/gsnake-editor Tests]   |      [33m[2m✓[22m[39m does not show no-food warning when only floating food is placed [33m 332[2mms[22m[39m
+[CI/gsnake-editor Tests]   |      [33m[2m✓[22m[39m posts a canonical export payload when testing a level [33m 493[2mms[22m[39m
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [2m Test Files [22m [1m[32m9 passed[39m[22m[90m (9)[39m
+[CI/gsnake-editor Tests]   | [2m      Tests [22m [1m[32m50 passed[39m[22m[90m (50)[39m
+[CI/gsnake-editor Tests]   | [2m   Start at [22m 22:18:23
+[CI/gsnake-editor Tests]   | [2m   Duration [22m 4.75s[2m (transform 3.77s, setup 0ms, import 6.90s, tests 4.56s, environment 4.82s)[22m
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   ✅  Success - Main Run tests [5.703078177s]
+[CI/gsnake-editor Tests] ⭐ Run Post Setup Node.js
+[CI/gsnake-editor Tests]   🐳  docker exec cmd=[/opt/acttoolcache/node/24.13.1/x64/bin/node /var/run/act/actions/actions-setup-node@v4/dist/cache-save/index.js] user= workdir=
+[CI/gsnake-editor Tests]   | (node:441) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+[CI/gsnake-editor Tests]   | (Use `node --trace-deprecation ...` to show where the warning was created)
+[CI/gsnake-editor Tests]   | [command]/usr/bin/tar --posix -cf cache.tzst --exclude cache.tzst -P -C /home/nntin/git/gSnake --files-from manifest.txt --use-compress-program zstdmt
+[CI/gsnake-editor Tests]   | Cache Size: ~65 MB (68043091 B)
+[CI/gsnake-editor Tests]   | Cache saved successfully
+[CI/gsnake-editor Tests]   | Cache saved with the key: node-cache-Linux-x64-npm-fc04174c1a7f20b321cc96f9cc9d81614b1282b4da7ca359fa09bed3cfe69d9f
+[CI/gsnake-editor Tests]   ✅  Success - Post Setup Node.js [1.417652194s]
+[CI/gsnake-editor Tests] ⭐ Run Complete job
+[CI/gsnake-editor Tests] Cleaning up container for job gsnake-editor Tests
+[CI/gsnake-editor Tests]   ✅  Success - Complete job
+[CI/gsnake-editor Tests] 🏁  Job succeeded

@@ -146,6 +146,7 @@ See `gsnake-web/packages/gsnake-web-app/engine/CLAUDE.md` for the canonical fram
 - **Editor sprite safety** — `gsnake-editor/src/lib/SpriteLoader.svelte` must gate on `response.ok` + `image/svg+xml`, then sanitize parsed SVG before rendering; do not inject raw fetched markup.
 - **Editor API CORS determinism** — resolve `GSNAKE_EDITOR_ALLOWED_ORIGINS` once at startup in `gsnake-editor/server.ts`; do not read env vars per request.
 - **Editor grid reset ordering** — in `gsnake-editor/src/lib/EditorLayout.svelte`, keep grid reinitialization explicit via `resetGrid(width, height)` calls in load/placement flows; avoid broad reactive `cells` resets that can wipe entities after dimension updates.
+- **Editor test API endpoint config** — `gsnake-editor/src/lib/EditorLayout.svelte` should resolve test uploads from `VITE_GSNAKE_API_URL` (fallback `http://localhost:3001`) and normalize trailing slashes before appending `/api/test-level`.
 
 ## CI / Merge Gates
 

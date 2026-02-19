@@ -5,6 +5,7 @@ Started: Thu Feb 19 16:54:50 CET 2026
 - In `gsnake-editor`, tool-selection handlers should stay side-effect free for grid data; any state mutation that changes placed entities should go through the command/undo pipeline.
 - In `EditorLayout.handleLoad`, hidden file inputs must use idempotent cleanup and hook both `change` and picker-close signals (`cancel` plus `window` focus fallback) so canceled dialogs do not leak DOM nodes.
 - In `EditorLayout`, both export and test payloads should be built via `buildLevelExportPayload(...)` to keep `difficulty`, `snakeDirection`, and `totalFood` serialization rules aligned.
+- In `EditorLayout.handleTest`, build the test upload URL from `VITE_GSNAKE_API_URL` (fallback `http://localhost:3001`) and trim trailing slashes before appending `/api/test-level`.
 - In `EditorLayout` import paths, validate all entity coordinates against current grid bounds before mutating editor state so unsupported coordinates fail loudly instead of partially loading.
 - In `SpriteLoader`, treat `spritesUrl` as trusted only after validating `response.ok` and `content-type: image/svg+xml`, then sanitize parsed SVG content before rendering via `{@html}`.
 - In `gsnake-editor/server.ts`, resolve `GSNAKE_EDITOR_ALLOWED_ORIGINS` once at startup and keep per-request CORS checks bound to that frozen allowlist for deterministic policy behavior.
@@ -94,4 +95,17 @@ Started: Thu Feb 19 16:54:50 CET 2026
   - Grid-dimension transitions in `EditorLayout` are safest when reset and placement are co-located in explicit function calls, not broad reactive blocks.
   - For `gsnake-editor` browser automation, hidden file inputs can hang with direct `upload`; patching input `click` and dispatching a synthetic `change` event is a reliable fallback.
   - `EditorLayout.saveLoad.test.ts` is the right test surface for regressions that involve both file-load sequencing and post-resize entity preservation.
+---
+## [2026-02-19 23:19:49 CET] - US-009
+- Made level-test API uploads configurable in `EditorLayout.handleTest` via `VITE_GSNAKE_API_URL` with fallback to `http://localhost:3001`, including safe trailing-slash normalization before appending `/api/test-level`.
+- Updated test failure feedback to include the resolved endpoint and config guidance (`VITE_GSNAKE_API_URL`) instead of hardcoded localhost-only messaging.
+- Added regression coverage for default endpoint behavior, configured endpoint behavior, and failure-toast endpoint guidance.
+- Documented `VITE_GSNAKE_API_URL` in editor environment-variable docs.
+- Ran `npm --prefix gsnake-editor run check`, `npm --prefix gsnake-editor run lint`, `npm --prefix gsnake-editor run test`, then refreshed CI with `act -W .github/workflows/ci.yml -j gsnake-editor-test --container-architecture linux/amd64`.
+- Attempted `agent-browser` verification at `http://localhost:3003`, but the session loaded an empty DOM (`<html><head></head><body></body></html>`) despite Vite connection logs; screenshot captured at `artifacts/images/us-009-browser.png`, and manual browser verification is still recommended.
+- Files changed: `gsnake-editor/src/lib/EditorLayout.svelte`, `gsnake-editor/src/tests/EditorLayout.saveLoad.test.ts`, `gsnake-editor/README.md`, `CLAUDE.md`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`
+- **Learnings for future iterations:**
+  - Keep test endpoint resolution centralized in `EditorLayout` and expose endpoint changes through environment config, not hardcoded URLs.
+  - Endpoint helper logic should normalize trailing slashes so `VITE_GSNAKE_API_URL` works for both `http://host` and `http://host/`.
+  - `EditorLayout.saveLoad.test.ts` is the correct place to assert API URL configuration and user-facing test-upload error guidance.
 ---
