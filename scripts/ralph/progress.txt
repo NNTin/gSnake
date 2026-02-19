@@ -8,6 +8,7 @@ Started: Thu Feb 19 16:54:50 CET 2026
 - In `EditorLayout` import paths, validate all entity coordinates against current grid bounds before mutating editor state so unsupported coordinates fail loudly instead of partially loading.
 - In `SpriteLoader`, treat `spritesUrl` as trusted only after validating `response.ok` and `content-type: image/svg+xml`, then sanitize parsed SVG content before rendering via `{@html}`.
 - In `gsnake-editor/server.ts`, resolve `GSNAKE_EDITOR_ALLOWED_ORIGINS` once at startup and keep per-request CORS checks bound to that frozen allowlist for deterministic policy behavior.
+- In `gsnake-editor`, both landing-page and in-editor level-load paths should call shared `parseAndValidateLevelFileData(...)` from `src/lib/levelFileValidation.ts` so required-field and grid-size checks never drift.
 
 ## [2026-02-19 17:00:35 CET] - US-001
 - Implemented US-001 by removing implicit snake auto-clear on snake-tool selection in `EditorLayout`, so selecting Snake no longer destroys existing snake segments outside undo/redo commands.
@@ -70,4 +71,14 @@ Started: Thu Feb 19 16:54:50 CET 2026
   - CORS env configuration in `gsnake-editor/server.ts` is startup configuration, not runtime mutable state.
   - Server CORS regressions are best covered in `src/tests/server.test.ts` by asserting both allowed and rejected origins around env mutation scenarios.
   - Targeted root CI job `gsnake-editor-test` is sufficient to validate editor-side server/test changes in the Ralph loop.
+---
+## [2026-02-19 21:44:04 CET] - US-007
+- Implemented a shared level-file validation module (`parseAndValidateLevelFileData` / `validateLevelFileData`) and replaced duplicated load validation logic in both `App.handleLoadExisting` and `EditorLayout.handleLoad`.
+- Added App-level regression tests that exercise landing-page load acceptance (valid payload enters editor) and rejection (invalid payload stays on landing page), complementing existing in-editor load tests.
+- Ran `npm --prefix gsnake-editor run check`, `npm --prefix gsnake-editor run lint`, and `npm --prefix gsnake-editor run test`; refreshed CI via `act -W .github/workflows/ci.yml -j gsnake-editor-test --container-architecture linux/amd64`.
+- Files changed: `gsnake-editor/src/lib/levelFileValidation.ts`, `gsnake-editor/src/App.svelte`, `gsnake-editor/src/lib/EditorLayout.svelte`, `gsnake-editor/src/tests/App.loadExisting.test.ts`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`
+- **Learnings for future iterations:**
+  - `App.svelte` and `EditorLayout.svelte` should share level-file validation through a single helper to keep error semantics and accepted payload shape consistent across both entry points.
+  - Landing-page load regressions are easiest to test by intercepting the transient file input created in `LandingPage` and dispatching a synthetic `change` event with a file-like object.
+  - `svelte-5-french-toast` can require `window.matchMedia` in tests when an error toast path is exercised; provide a local stub in test setup for deterministic behavior.
 ---
