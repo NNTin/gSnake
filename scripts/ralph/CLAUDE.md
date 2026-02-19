@@ -128,39 +128,52 @@ Important caveats:
 ### `agent-browser` (webserver/browser interaction)
 
 Use `agent-browser` for live page interaction and verification (open, snapshot, click, fill, screenshot, etc.).
+Run `agent-browser --help` to see a list of available commands.
 
-Helpful setup + usage:
+#### `gsnake-editor` specific workflow (important)
+
+When testing level creation in `gsnake-editor`, use this flow because generic chained commands are flaky on this UI:
 
 ```bash
-# Install browser binaries once per machine
-agent-browser install
+# 1) Start editor services
+cd gsnake-editor
+npm run dev
+# Vite UI: http://localhost:3003
+# Test-level API: http://localhost:3001
 
-# Start a CDP-capable browser (example with Playwright-managed Chromium)
-CHROME_BIN=$(find ~/.cache/ms-playwright -type f -path '*/chrome-linux64/chrome' | sort | tail -n 1)
-"$CHROME_BIN" \
-  --headless=new \
-  --remote-debugging-port=9222 \
-  --no-first-run \
-  --no-default-browser-check \
-  --user-data-dir=/tmp/agent-browser-cdp
-
-# Connect agent-browser session to that running browser
-agent-browser --session demo connect 9222
-
-# Navigate and inspect
-agent-browser --session demo open https://example.com
-agent-browser --session demo snapshot -i -c -d 2
-agent-browser --session demo click @e1
-agent-browser --session demo get url
-agent-browser --session demo screenshot /tmp/demo.png
-agent-browser --session demo close
+# 2) Open editor and create a level in small steps
+agent-browser --session gsnake-editor open http://localhost:3003
+agent-browser --session gsnake-editor snapshot -i
+agent-browser --session gsnake-editor click @e1      # Create New Level
+agent-browser --session gsnake-editor snapshot -i
+agent-browser --session gsnake-editor fill @e3 10    # Width
+agent-browser --session gsnake-editor fill @e4 8     # Height
+agent-browser --session gsnake-editor click @e6      # Create
+agent-browser --session gsnake-editor wait 500
 ```
 
-Agent-browser notes:
-- The command set is rich (`open`, `snapshot`, `click`, `fill`, `press`, `get`, `is`, `find`, `network`, `cookies`, `storage`, `tab`, `record`, `trace`).
-- Use refs from `snapshot` output (e.g. `@e1`) for reliable actions.
-- In this environment, connecting via `agent-browser connect <port|url>` to a running CDP browser is reliable for session startup.
-- Prefer `wait --load domcontentloaded|networkidle`, `wait --url`, or `wait --text` before asserting navigation-dependent state.
+Rules that matter for this app:
+- Do not chain long sequences of `click @eX && click @eY ...` against the grid. Grid edits re-render and refs can become stale, causing hangs.
+- Prefer one action per command, with `snapshot -i` between edits when refs may have changed.
+- `find role ...` and strict text locators can be ambiguous in modals; `snapshot` refs are usually faster/more stable here.
+- Save screenshots to `artifacts/images/` during tests:
+  - `agent-browser --session gsnake-editor screenshot artifacts/images/<name>.png`
+- For grid placement, coordinate-based mouse actions are a reliable fallback when cells are unlabeled:
+  - select entity in palette
+  - `agent-browser --session gsnake-editor mouse move <x> <y>`
+  - `agent-browser --session gsnake-editor mouse down`
+  - `agent-browser --session gsnake-editor mouse up`
+
+Verification pattern for `gsnake-editor`:
+- After placing entities and clicking `Test`, confirm UI toast and also verify server payload:
+  - `curl -sS http://localhost:3001/api/test-level`
+- If test opens a new tab but it is `chrome-error://chromewebdata/`, editor upload still may be successful; validate with `/api/test-level`.
+- If visuals seem wrong, check `agent-browser --session gsnake-editor console` and `errors`; editor may log sprite/data-URL rendering errors while still persisting level data correctly.
+
+If an `agent-browser` command hangs:
+- Inspect running processes and kill only the stuck command:
+  - `ps -ef | rg 'agent-browser --session gsnake-editor'`
+  - `kill <pid>`
 
 ## Stop Condition
 

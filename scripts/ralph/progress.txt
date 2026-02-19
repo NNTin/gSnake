@@ -11,5 +11,4 @@ Started: Thu Feb 19 16:54:50 CET 2026
 - **Learnings for future iterations:**
   - `EntityPalette` emits `select` events; `EditorLayout.handleEntitySelect` should only update `selectedEntity` and avoid hidden grid mutations.
   - `EditorLayout.gridInteractions` tests are the right place for undo/tool-selection regressions affecting in-canvas behavior.
-  - Browser verification tooling is available (`agent-browser`), but this environment session repeatedly reset to landing state during grid interactions; manual browser re-check is still recommended.
 ---
