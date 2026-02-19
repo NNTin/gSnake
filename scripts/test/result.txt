@@ -1,55 +1,127 @@
 === Act CI Test Results ===
-Started: Tue Feb 17 20:14:54 CET 2026
+Started: Thu Feb 19 17:45:03 CET 2026
+Workflow: .github/workflows/ci.yml
+Job: gsnake-editor-test
+Status: SUCCESS
 
-## Summary
-
-- [SUCCESS] ./gsnake-levels/.github/workflows/test.yml::test
-- [SUCCESS] ./gsnake-levels/.github/workflows/ci.yml::build
-- [SUCCESS] ./gsnake-levels/.github/workflows/ci.yml::test
-- [SUCCESS] ./gsnake-levels/.github/workflows/ci.yml::validate-levels
-- [SUCCESS] ./gsnake-levels/.github/workflows/ci.yml::coverage
-- [FAILED] ./gsnake-levels/.github/workflows/ci.yml::required-merge-gates
-- [SUCCESS] ./gsnake-web/.github/workflows/test.yml::test
-- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::typecheck
-- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::test
-- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::coverage
-- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::build
-- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::required-merge-gates
-- [SUCCESS] ./gsnake-specs/.github/workflows/test.yml::test
-- [SUCCESS] ./gsnake-specs/.github/workflows/ci.yml::link-check
-- [SUCCESS] ./gsnake-specs/.github/workflows/ci.yml::markdown-lint
-- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::typecheck
-- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::test
-- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::coverage
-- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::build
-- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::required-merge-gates
-- [SUCCESS] ./.github/workflows/dependency-audit.yml::npm-audit
-- [SUCCESS] ./.github/workflows/dependency-audit.yml::cargo-audit
-- [SUCCESS] ./.github/workflows/ci.yml::wasm
-- [SUCCESS] ./.github/workflows/ci.yml::gsnake-editor-coverage
-- [SUCCESS] ./.github/workflows/ci.yml::e2e-test
-- [SUCCESS] ./.github/workflows/ci.yml::gsnake-editor-test
-- [SUCCESS] ./.github/workflows/ci.yml::build
-- [SUCCESS] ./.github/workflows/ci.yml::core-coverage
-- [SUCCESS] ./.github/workflows/ci.yml::test
-- [SUCCESS] ./.github/workflows/ci.yml::gsnake-web-coverage
-- [SUCCESS] ./.github/workflows/ci.yml::required-merge-gates
-
-**Total: 30 passed, 1 failed**
-
----
-Completed: Tue Feb 17 20:55:28 CET 2026
-Duration: 00:40:34
-Result: 30 passed, 1 failed
-Result file: /home/nntin/git/gSnake/scripts/test/result.txt
-Temp dir: /home/nntin/git/gSnake/scripts/test/tmp_act_results
-
----
-Refreshed: Thu Feb 19 16:58:32 CET 2026
-
-## Iteration Refresh Summary
-
-- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::test
-
-**Total: 1 passed, 0 failed**
-Command: `act -W .github/workflows/ci.yml -j test --container-architecture linux/amd64` (run from `gsnake-editor/`)
+--- Tail (last 120 lines) ---
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.gridInteractions.test.ts[2m > [22m[2mEditorLayout grid interactions[2m > [22m[2msupports placement and shift-click removal interactions on the grid
+[CI/gsnake-editor Tests]   | [22m[39mRemoved entity from (1, 1)
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mopens save modal and exports a generated level payload
+[CI/gsnake-editor Tests]   | [22m[39mSave clicked
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.gridInteractions.test.ts[2m > [22m[2mEditorLayout grid interactions[2m > [22m[2mreindexes snake segment labels when segments are removed and added during edits
+[CI/gsnake-editor Tests]   | [22m[39mAdded snake segment 0 at (0, 0). Total segments: 1
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.gridInteractions.test.ts[2m > [22m[2mEditorLayout grid interactions[2m > [22m[2mreindexes snake segment labels when segments are removed and added during edits
+[CI/gsnake-editor Tests]   | [22m[39mAdded snake segment 1 at (0, 1). Total segments: 2
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.gridInteractions.test.ts[2m > [22m[2mEditorLayout grid interactions[2m > [22m[2mreindexes snake segment labels when segments are removed and added during edits
+[CI/gsnake-editor Tests]   | [22m[39mAdded snake segment 2 at (0, 2). Total segments: 3
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.gridInteractions.test.ts[2m > [22m[2mEditorLayout grid interactions[2m > [22m[2mreindexes snake segment labels when segments are removed and added during edits
+[CI/gsnake-editor Tests]   | [22m[39mRemoved entity from (0, 1)
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.gridInteractions.test.ts[2m > [22m[2mEditorLayout grid interactions[2m > [22m[2mreindexes snake segment labels when segments are removed and added during edits
+[CI/gsnake-editor Tests]   | [22m[39mAdded snake segment 2 at (0, 3). Total segments: 3
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mopens save modal and exports a generated level payload
+[CI/gsnake-editor Tests]   | [22m[39mExported level: Workflow Level hard
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mdoes not show no-food warning when only floating food is placed
+[CI/gsnake-editor Tests]   | [22m[39mAdded snake segment 0 at (0, 0). Total segments: 1
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.gridInteractions.test.ts[2m > [22m[2mEditorLayout grid interactions[2m > [22m[2mmaintains multi-step undo/redo history and clears redo after a new action
+[CI/gsnake-editor Tests]   | [22m[39mAdded snake segment 0 at (0, 0). Total segments: 1
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.gridInteractions.test.ts[2m > [22m[2mEditorLayout grid interactions[2m > [22m[2mmaintains multi-step undo/redo history and clears redo after a new action
+[CI/gsnake-editor Tests]   | [22m[39mAdded snake segment 1 at (0, 1). Total segments: 2
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mdoes not show no-food warning when only floating food is placed
+[CI/gsnake-editor Tests]   | [22m[39mSelected entity: floating-food
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mdoes not show no-food warning when only floating food is placed
+[CI/gsnake-editor Tests]   | [22m[39mPlaced floating-food at (0, 1)
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.gridInteractions.test.ts[2m > [22m[2mEditorLayout grid interactions[2m > [22m[2mmaintains multi-step undo/redo history and clears redo after a new action
+[CI/gsnake-editor Tests]   | [22m[39mSelected entity: food
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.gridInteractions.test.ts[2m > [22m[2mEditorLayout grid interactions[2m > [22m[2mmaintains multi-step undo/redo history and clears redo after a new action
+[CI/gsnake-editor Tests]   | [22m[39mPlaced food at (1, 1)
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.gridInteractions.test.ts[2m > [22m[2mEditorLayout grid interactions[2m > [22m[2mmaintains multi-step undo/redo history and clears redo after a new action
+[CI/gsnake-editor Tests]   | [22m[39mUndo performed
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.gridInteractions.test.ts[2m > [22m[2mEditorLayout grid interactions[2m > [22m[2mmaintains multi-step undo/redo history and clears redo after a new action
+[CI/gsnake-editor Tests]   | [22m[39mUndo performed
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.gridInteractions.test.ts[2m > [22m[2mEditorLayout grid interactions[2m > [22m[2mmaintains multi-step undo/redo history and clears redo after a new action
+[CI/gsnake-editor Tests]   | [22m[39mRedo performed
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.gridInteractions.test.ts[2m > [22m[2mEditorLayout grid interactions[2m > [22m[2mmaintains multi-step undo/redo history and clears redo after a new action
+[CI/gsnake-editor Tests]   | [22m[39mPlaced food at (2, 2)
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mdoes not show no-food warning when only floating food is placed
+[CI/gsnake-editor Tests]   | [22m[39mSelected entity: exit
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mdoes not show no-food warning when only floating food is placed
+[CI/gsnake-editor Tests]   | [22m[39mPlaced exit at (0, 2)
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.gridInteractions.test.ts[2m > [22m[2mEditorLayout grid interactions[2m > [22m[2mdoes not clear existing snake segments when reselecting the snake tool
+[CI/gsnake-editor Tests]   | [22m[39mAdded snake segment 0 at (0, 0). Total segments: 1
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.gridInteractions.test.ts[2m > [22m[2mEditorLayout grid interactions[2m > [22m[2mdoes not clear existing snake segments when reselecting the snake tool
+[CI/gsnake-editor Tests]   | [22m[39mAdded snake segment 1 at (0, 1). Total segments: 2
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mdoes not show no-food warning when only floating food is placed
+[CI/gsnake-editor Tests]   | [22m[39mSave clicked
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.gridInteractions.test.ts[2m > [22m[2mEditorLayout grid interactions[2m > [22m[2mdoes not clear existing snake segments when reselecting the snake tool
+[CI/gsnake-editor Tests]   | [22m[39mSelected entity: food
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.gridInteractions.test.ts[2m > [22m[2mEditorLayout grid interactions[2m > [22m[2mdoes not clear existing snake segments when reselecting the snake tool
+[CI/gsnake-editor Tests]   | [22m[39mSelected entity: snake
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   |  [32m✓[39m src/tests/EditorLayout.gridInteractions.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 879[2mms[22m[39m
+[CI/gsnake-editor Tests]   |      [33m[2m✓[22m[39m supports placement and shift-click removal interactions on the grid [33m 426[2mms[22m[39m
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mloads a valid level file and renders the imported grid state
+[CI/gsnake-editor Tests]   | [22m[39mLoad clicked - opening file picker
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mloads a valid level file and renders the imported grid state
+[CI/gsnake-editor Tests]   | [22m[39mSuccessfully loaded level: Loaded Level
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mcleans up hidden file input when load dialog is canceled
+[CI/gsnake-editor Tests]   | [22m[39mLoad clicked - opening file picker
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstdout[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mshows user-facing error feedback when loading an invalid level payload
+[CI/gsnake-editor Tests]   | [22m[39mLoad clicked - opening file picker
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [90mstderr[2m | src/tests/EditorLayout.saveLoad.test.ts[2m > [22m[2mEditorLayout save/load workflow[2m > [22m[2mshows user-facing error feedback when loading an invalid level payload
+[CI/gsnake-editor Tests]   | [22m[39mFailed to load level: Error: Invalid level format: missing or invalid snake
+[CI/gsnake-editor Tests]   |     at HTMLInputElement.handleInputChange [90m(/home/nntin/git/gSnake/gsnake-editor/[39msrc/lib/EditorLayout.svelte:504:12[90m)[39m
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   |  [32m✓[39m src/tests/EditorLayout.saveLoad.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 1375[2mms[22m[39m
+[CI/gsnake-editor Tests]   |      [33m[2m✓[22m[39m opens save modal and exports a generated level payload [33m 700[2mms[22m[39m
+[CI/gsnake-editor Tests]   |      [33m[2m✓[22m[39m does not show no-food warning when only floating food is placed [33m 321[2mms[22m[39m
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   | [2m Test Files [22m [1m[32m7 passed[39m[22m[90m (7)[39m
+[CI/gsnake-editor Tests]   | [2m      Tests [22m [1m[32m39 passed[39m[22m[90m (39)[39m
+[CI/gsnake-editor Tests]   | [2m   Start at [22m 16:45:25
+[CI/gsnake-editor Tests]   | [2m   Duration [22m 3.73s[2m (transform 2.78s, setup 0ms, import 5.23s, tests 2.67s, environment 3.62s)[22m
+[CI/gsnake-editor Tests]   | 
+[CI/gsnake-editor Tests]   ✅  Success - Main Run tests [4.763655498s]
+[CI/gsnake-editor Tests] ⭐ Run Post Setup Node.js
+[CI/gsnake-editor Tests]   🐳  docker exec cmd=[/opt/acttoolcache/node/24.13.1/x64/bin/node /var/run/act/actions/actions-setup-node@v4/dist/cache-save/index.js] user= workdir=
+[CI/gsnake-editor Tests]   | (node:419) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+[CI/gsnake-editor Tests]   | (Use `node --trace-deprecation ...` to show where the warning was created)
+[CI/gsnake-editor Tests]   | [command]/usr/bin/tar --posix -cf cache.tzst --exclude cache.tzst -P -C /home/nntin/git/gSnake --files-from manifest.txt --use-compress-program zstdmt
+[CI/gsnake-editor Tests]   | Cache Size: ~65 MB (67955912 B)
+[CI/gsnake-editor Tests]   | Cache saved successfully
+[CI/gsnake-editor Tests]   | Cache saved with the key: node-cache-Linux-x64-npm-fc04174c1a7f20b321cc96f9cc9d81614b1282b4da7ca359fa09bed3cfe69d9f
+[CI/gsnake-editor Tests]   ✅  Success - Post Setup Node.js [1.518049726s]
+[CI/gsnake-editor Tests] ⭐ Run Complete job
+[CI/gsnake-editor Tests] Cleaning up container for job gsnake-editor Tests
+[CI/gsnake-editor Tests]   ✅  Success - Complete job
+[CI/gsnake-editor Tests] 🏁  Job succeeded

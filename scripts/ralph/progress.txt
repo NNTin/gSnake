@@ -3,6 +3,7 @@ Started: Thu Feb 19 16:54:50 CET 2026
 ---
 ## Codebase Patterns
 - In `gsnake-editor`, tool-selection handlers should stay side-effect free for grid data; any state mutation that changes placed entities should go through the command/undo pipeline.
+- In `EditorLayout.handleLoad`, hidden file inputs must use idempotent cleanup and hook both `change` and picker-close signals (`cancel` plus `window` focus fallback) so canceled dialogs do not leak DOM nodes.
 
 ## [2026-02-19 17:00:35 CET] - US-001
 - Implemented US-001 by removing implicit snake auto-clear on snake-tool selection in `EditorLayout`, so selecting Snake no longer destroys existing snake segments outside undo/redo commands.
@@ -11,4 +12,14 @@ Started: Thu Feb 19 16:54:50 CET 2026
 - **Learnings for future iterations:**
   - `EntityPalette` emits `select` events; `EditorLayout.handleEntitySelect` should only update `selectedEntity` and avoid hidden grid mutations.
   - `EditorLayout.gridInteractions` tests are the right place for undo/tool-selection regressions affecting in-canvas behavior.
+---
+## [2026-02-19 17:46:15 CET] - US-002
+- Implemented hidden file-input cleanup hardening in `EditorLayout.handleLoad` by introducing a single idempotent cleanup function wired to `change`, `cancel`, and a window-focus fallback for cancel flows.
+- Added regression coverage that simulates canceling the load picker and verifies the temporary hidden file input is removed from the DOM.
+- Refreshed CI artifact status via `act -W .github/workflows/ci.yml -j gsnake-editor-test --container-architecture linux/amd64` and updated `scripts/test/result.txt` with success output.
+- Files changed: `gsnake-editor/src/lib/EditorLayout.svelte`, `gsnake-editor/src/tests/EditorLayout.saveLoad.test.ts`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`
+- **Learnings for future iterations:**
+  - Load-picker flows should not rely solely on `onchange`; canceled dialogs can skip `change` and leak temporary DOM nodes.
+  - Cleanup helpers for transient DOM nodes should be idempotent (`parentNode` guard) because multiple completion paths can fire in browser and test environments.
+  - `EditorLayout.saveLoad` tests are the right location for regressions around file-load lifecycle and hidden input teardown.
 ---
