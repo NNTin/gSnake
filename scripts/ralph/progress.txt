@@ -9,6 +9,7 @@ Started: Thu Feb 19 16:54:50 CET 2026
 - In `SpriteLoader`, treat `spritesUrl` as trusted only after validating `response.ok` and `content-type: image/svg+xml`, then sanitize parsed SVG content before rendering via `{@html}`.
 - In `gsnake-editor/server.ts`, resolve `GSNAKE_EDITOR_ALLOWED_ORIGINS` once at startup and keep per-request CORS checks bound to that frozen allowlist for deterministic policy behavior.
 - In `gsnake-editor`, both landing-page and in-editor level-load paths should call shared `parseAndValidateLevelFileData(...)` from `src/lib/levelFileValidation.ts` so required-field and grid-size checks never drift.
+- In `EditorLayout`, grid reinitialization should happen through explicit `resetGrid(width, height)` calls in load/placement flows; avoid broad reactive resets that can wipe entities after dimension changes.
 
 ## [2026-02-19 17:00:35 CET] - US-001
 - Implemented US-001 by removing implicit snake auto-clear on snake-tool selection in `EditorLayout`, so selecting Snake no longer destroys existing snake segments outside undo/redo commands.
@@ -81,4 +82,16 @@ Started: Thu Feb 19 16:54:50 CET 2026
   - `App.svelte` and `EditorLayout.svelte` should share level-file validation through a single helper to keep error semantics and accepted payload shape consistent across both entry points.
   - Landing-page load regressions are easiest to test by intercepting the transient file input created in `LandingPage` and dispatching a synthetic `change` event with a file-like object.
   - `svelte-5-french-toast` can require `window.matchMedia` in tests when an error toast path is exercised; provide a local stub in test setup for deterministic behavior.
+---
+## [2026-02-19 22:34:04 CET] - US-008
+- Replaced the broad reactive `cells` reinitialization in `EditorLayout` with explicit `createEmptyGrid(...)` / `resetGrid(...)` control flow, and routed level placement through that explicit reset path.
+- Updated load sequencing to set dimensions and place entities without reactive-order dependence, preventing post-load grid wipes when dimensions change.
+- Added regression coverage for sequential loads with different grid sizes to assert imported entities remain intact after resize + reload ordering.
+- Verified in browser using `agent-browser` on `http://localhost:3003` by loading two payloads via the hidden-input path and confirming cell counts/entities transition `30 -> 35`; screenshot saved at `artifacts/images/us-008-sequential-load.png`.
+- Ran `npm run check`, `npm run lint`, `npm run test` in `gsnake-editor`, then refreshed CI status via `act -W .github/workflows/ci.yml -j gsnake-editor-test --container-architecture linux/amd64`.
+- Files changed: `gsnake-editor/src/lib/EditorLayout.svelte`, `gsnake-editor/src/tests/EditorLayout.saveLoad.test.ts`, `CLAUDE.md`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`
+- **Learnings for future iterations:**
+  - Grid-dimension transitions in `EditorLayout` are safest when reset and placement are co-located in explicit function calls, not broad reactive blocks.
+  - For `gsnake-editor` browser automation, hidden file inputs can hang with direct `upload`; patching input `click` and dispatching a synthetic `change` event is a reliable fallback.
+  - `EditorLayout.saveLoad.test.ts` is the right test surface for regressions that involve both file-load sequencing and post-resize entity preservation.
 ---
