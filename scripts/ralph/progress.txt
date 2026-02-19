@@ -6,6 +6,7 @@ Started: Thu Feb 19 16:54:50 CET 2026
 - In `EditorLayout.handleLoad`, hidden file inputs must use idempotent cleanup and hook both `change` and picker-close signals (`cancel` plus `window` focus fallback) so canceled dialogs do not leak DOM nodes.
 - In `EditorLayout`, both export and test payloads should be built via `buildLevelExportPayload(...)` to keep `difficulty`, `snakeDirection`, and `totalFood` serialization rules aligned.
 - In `EditorLayout` import paths, validate all entity coordinates against current grid bounds before mutating editor state so unsupported coordinates fail loudly instead of partially loading.
+- In `SpriteLoader`, treat `spritesUrl` as trusted only after validating `response.ok` and `content-type: image/svg+xml`, then sanitize parsed SVG content before rendering via `{@html}`.
 
 ## [2026-02-19 17:00:35 CET] - US-001
 - Implemented US-001 by removing implicit snake auto-clear on snake-tool selection in `EditorLayout`, so selecting Snake no longer destroys existing snake segments outside undo/redo commands.
@@ -46,4 +47,16 @@ Started: Thu Feb 19 16:54:50 CET 2026
   - `placeEntitiesFromLevelData(...)` should validate all incoming coordinates before clearing/rebuilding grid state, preventing partial imports on malformed payloads.
   - Regression tests for import validation belong in `EditorLayout.saveLoad.test.ts` and should assert both toast feedback and unchanged editor state.
   - For hidden file pickers in browser automation, direct `upload` may hang; fallback strategies are needed, and manual validation may still be required for picker-driven flows.
+---
+## [2026-02-19 20:09:57 CET] - US-005
+- Hardened `SpriteLoader` to require successful fetch responses and `image/svg+xml` content types before loading sprite assets.
+- Replaced raw sprite HTML injection with parse-and-sanitize flow that strips executable markup/attributes (`script`, `foreignObject`, `iframe`, `object`, `embed`, `on*`, `style`, `javascript:` URLs, non-fragment hrefs) before rendering.
+- Added dedicated `SpriteLoader` regression tests for successful sanitization, non-SVG content-type rejection, and non-2xx response rejection.
+- Verified in-browser with `agent-browser` on `http://localhost:3003`: sprite definitions load and `.sprite-loader svg` contains no script nodes, event attributes, or external href references.
+- Ran `npm run check`, `npm run lint`, `npm run test` in `gsnake-editor`, then refreshed CI status via `act -W .github/workflows/ci.yml -j gsnake-editor-test --container-architecture linux/amd64`.
+- Files changed: `gsnake-editor/src/lib/SpriteLoader.svelte`, `gsnake-editor/src/tests/SpriteLoader.test.ts`, `gsnake-editor/README.md`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`
+- **Learnings for future iterations:**
+  - For shared SVG sprite sheets, keep loader safety at the ingestion boundary: enforce response/content-type checks and sanitize SVG AST before render.
+  - `SpriteLoader` regression tests should assert both happy path availability (`symbol` defs present) and hard-failure behavior (`sprite-loader` remains empty) for invalid responses.
+  - `agent-browser eval` is effective for DOM-level security verification when visual assertions are insufficient.
 ---
