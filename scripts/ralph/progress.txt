@@ -7,6 +7,7 @@ Started: Thu Feb 19 16:54:50 CET 2026
 - In `EditorLayout`, both export and test payloads should be built via `buildLevelExportPayload(...)` to keep `difficulty`, `snakeDirection`, and `totalFood` serialization rules aligned.
 - In `EditorLayout` import paths, validate all entity coordinates against current grid bounds before mutating editor state so unsupported coordinates fail loudly instead of partially loading.
 - In `SpriteLoader`, treat `spritesUrl` as trusted only after validating `response.ok` and `content-type: image/svg+xml`, then sanitize parsed SVG content before rendering via `{@html}`.
+- In `gsnake-editor/server.ts`, resolve `GSNAKE_EDITOR_ALLOWED_ORIGINS` once at startup and keep per-request CORS checks bound to that frozen allowlist for deterministic policy behavior.
 
 ## [2026-02-19 17:00:35 CET] - US-001
 - Implemented US-001 by removing implicit snake auto-clear on snake-tool selection in `EditorLayout`, so selecting Snake no longer destroys existing snake segments outside undo/redo commands.
@@ -59,4 +60,14 @@ Started: Thu Feb 19 16:54:50 CET 2026
   - For shared SVG sprite sheets, keep loader safety at the ingestion boundary: enforce response/content-type checks and sanitize SVG AST before render.
   - `SpriteLoader` regression tests should assert both happy path availability (`symbol` defs present) and hard-failure behavior (`sprite-loader` remains empty) for invalid responses.
   - `agent-browser eval` is effective for DOM-level security verification when visual assertions are insufficient.
+---
+## [2026-02-19 20:56:06 CET] - US-006
+- Froze CORS allowlist resolution in `gsnake-editor/server.ts` by resolving `GSNAKE_EDITOR_ALLOWED_ORIGINS` once at module startup and reusing the frozen array for every request.
+- Updated server CORS tests to assert deterministic behavior when environment variables change after startup, and added parser coverage for comma-separated allowlist values.
+- Ran `npm run check`, `npm run lint`, `npm run test` in `gsnake-editor`, then refreshed CI status with `act -W .github/workflows/ci.yml -j gsnake-editor-test --container-architecture linux/amd64`.
+- Files changed: `gsnake-editor/server.ts`, `gsnake-editor/src/tests/server.test.ts`, `CLAUDE.md`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`
+- **Learnings for future iterations:**
+  - CORS env configuration in `gsnake-editor/server.ts` is startup configuration, not runtime mutable state.
+  - Server CORS regressions are best covered in `src/tests/server.test.ts` by asserting both allowed and rejected origins around env mutation scenarios.
+  - Targeted root CI job `gsnake-editor-test` is sufficient to validate editor-side server/test changes in the Ralph loop.
 ---

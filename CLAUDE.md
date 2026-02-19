@@ -143,6 +143,7 @@ See `gsnake-web/packages/gsnake-web-app/engine/CLAUDE.md` for the canonical fram
 - **Coverage threshold** — 80% line/statement in both `gsnake-web` and `gsnake-editor` (enforced as CI merge gate)
 - **Editor import safety** — `gsnake-editor` load flows must reject out-of-bounds coordinates before placement; never silently clip/drop entities during import.
 - **Editor sprite safety** — `gsnake-editor/src/lib/SpriteLoader.svelte` must gate on `response.ok` + `image/svg+xml`, then sanitize parsed SVG before rendering; do not inject raw fetched markup.
+- **Editor API CORS determinism** — resolve `GSNAKE_EDITOR_ALLOWED_ORIGINS` once at startup in `gsnake-editor/server.ts`; do not read env vars per request.
 
 ## CI / Merge Gates
 
