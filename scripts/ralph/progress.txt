@@ -1,0 +1,15 @@
+# Ralph Progress Log
+Started: Thu Feb 19 16:54:50 CET 2026
+---
+## Codebase Patterns
+- In `gsnake-editor`, tool-selection handlers should stay side-effect free for grid data; any state mutation that changes placed entities should go through the command/undo pipeline.
+
+## [2026-02-19 17:00:35 CET] - US-001
+- Implemented US-001 by removing implicit snake auto-clear on snake-tool selection in `EditorLayout`, so selecting Snake no longer destroys existing snake segments outside undo/redo commands.
+- Added regression coverage that places snake segments, switches to Food, reselects Snake, and asserts snake segments remain intact.
+- Files changed: `gsnake-editor/src/lib/EditorLayout.svelte`, `gsnake-editor/src/tests/EditorLayout.gridInteractions.test.ts`
+- **Learnings for future iterations:**
+  - `EntityPalette` emits `select` events; `EditorLayout.handleEntitySelect` should only update `selectedEntity` and avoid hidden grid mutations.
+  - `EditorLayout.gridInteractions` tests are the right place for undo/tool-selection regressions affecting in-canvas behavior.
+  - Browser verification tooling is available (`agent-browser`), but this environment session repeatedly reset to landing state during grid interactions; manual browser re-check is still recommended.
+---
