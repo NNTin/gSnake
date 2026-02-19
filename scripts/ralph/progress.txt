@@ -5,6 +5,7 @@ Started: Thu Feb 19 16:54:50 CET 2026
 - In `gsnake-editor`, tool-selection handlers should stay side-effect free for grid data; any state mutation that changes placed entities should go through the command/undo pipeline.
 - In `EditorLayout.handleLoad`, hidden file inputs must use idempotent cleanup and hook both `change` and picker-close signals (`cancel` plus `window` focus fallback) so canceled dialogs do not leak DOM nodes.
 - In `EditorLayout`, both export and test payloads should be built via `buildLevelExportPayload(...)` to keep `difficulty`, `snakeDirection`, and `totalFood` serialization rules aligned.
+- In `EditorLayout` import paths, validate all entity coordinates against current grid bounds before mutating editor state so unsupported coordinates fail loudly instead of partially loading.
 
 ## [2026-02-19 17:00:35 CET] - US-001
 - Implemented US-001 by removing implicit snake auto-clear on snake-tool selection in `EditorLayout`, so selecting Snake no longer destroys existing snake segments outside undo/redo commands.
@@ -34,4 +35,15 @@ Started: Thu Feb 19 16:54:50 CET 2026
   - `EditorLayout.handleTest` should treat payload construction as shared model logic; keep endpoint-specific behavior limited to transport (`fetch`) and launch UX.
   - For editor-side API payload regressions, `EditorLayout.saveLoad.test.ts` can validate real request bodies by mocking `fetch` and asserting serialized JSON directly.
   - Refreshing CI with targeted `act -W ... -j ...` runs is sufficient for story-level validation while keeping iteration time low.
+---
+## [2026-02-19 19:22:53 CET] - US-004
+- Implemented strict in-bounds coordinate validation for editor imports in `EditorLayout` and fail-fast error messaging so negative/out-of-range positions are rejected instead of silently dropped.
+- Added regression coverage that loads a level containing `food[0]` at `(-1, 2)` and verifies the editor rejects it with user-facing feedback while leaving the grid unchanged.
+- Ran `npm run check`, `npm run lint`, `npm run test` in `gsnake-editor`, then refreshed CI status via `act -W .github/workflows/ci.yml -j gsnake-editor-test --container-architecture linux/amd64`.
+- Attempted live `agent-browser` verification on `http://localhost:3003`; hidden file-input automation was flaky in headless mode for this flow, so manual browser verification is still recommended.
+- Files changed: `gsnake-editor/src/lib/EditorLayout.svelte`, `gsnake-editor/src/tests/EditorLayout.saveLoad.test.ts`, `CLAUDE.md`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`
+- **Learnings for future iterations:**
+  - `placeEntitiesFromLevelData(...)` should validate all incoming coordinates before clearing/rebuilding grid state, preventing partial imports on malformed payloads.
+  - Regression tests for import validation belong in `EditorLayout.saveLoad.test.ts` and should assert both toast feedback and unchanged editor state.
+  - For hidden file pickers in browser automation, direct `upload` may hang; fallback strategies are needed, and manual validation may still be required for picker-driven flows.
 ---

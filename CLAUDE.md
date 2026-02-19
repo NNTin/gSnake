@@ -141,6 +141,7 @@ See `gsnake-web/packages/gsnake-web-app/engine/CLAUDE.md` for the canonical fram
 - **Store assertions** — use `get(store)` from `svelte/store` to read current value in tests
 - **Vitest mocking** — use stub classes or `vi.fn()`, no external mocking libraries; WASM module is mocked with `vi.hoisted` + a `MockRustEngine` class
 - **Coverage threshold** — 80% line/statement in both `gsnake-web` and `gsnake-editor` (enforced as CI merge gate)
+- **Editor import safety** — `gsnake-editor` load flows must reject out-of-bounds coordinates before placement; never silently clip/drop entities during import.
 
 ## CI / Merge Gates
 
