@@ -11,6 +11,7 @@ Started: Thu Feb 19 16:54:50 CET 2026
 - In `gsnake-editor/server.ts`, resolve `GSNAKE_EDITOR_ALLOWED_ORIGINS` once at startup and keep per-request CORS checks bound to that frozen allowlist for deterministic policy behavior.
 - In `gsnake-editor`, both landing-page and in-editor level-load paths should call shared `parseAndValidateLevelFileData(...)` from `src/lib/levelFileValidation.ts` so required-field and grid-size checks never drift.
 - In `EditorLayout`, grid reinitialization should happen through explicit `resetGrid(width, height)` calls in load/placement flows; avoid broad reactive resets that can wipe entities after dimension changes.
+- In `EditorLayout`, any edit path that can reduce `snakeSegments` to zero should run through a shared helper that resets `snakeDirection` to the default `'east'` value.
 
 ## [2026-02-19 17:00:35 CET] - US-001
 - Implemented US-001 by removing implicit snake auto-clear on snake-tool selection in `EditorLayout`, so selecting Snake no longer destroys existing snake segments outside undo/redo commands.
@@ -108,4 +109,15 @@ Started: Thu Feb 19 16:54:50 CET 2026
   - Keep test endpoint resolution centralized in `EditorLayout` and expose endpoint changes through environment config, not hardcoded URLs.
   - Endpoint helper logic should normalize trailing slashes so `VITE_GSNAKE_API_URL` works for both `http://host` and `http://host/`.
   - `EditorLayout.saveLoad.test.ts` is the correct place to assert API URL configuration and user-facing test-upload error guidance.
+---
+## [2026-02-20 00:06:20 CET] - US-010
+- Implemented coherent snake-direction reset behavior by introducing a shared helper in `EditorLayout` that resets direction to `east` whenever edits clear snake segments to zero, and wired it into all snake-removal edit paths.
+- Added regression coverage for the clear-and-redraw flow: set direction to South, clear all snake segments via entity replacement, confirm direction resets to East immediately, then redraw snake and confirm East remains selected.
+- Ran `npm --prefix gsnake-editor run check`, `npm --prefix gsnake-editor run lint`, `npm --prefix gsnake-editor run test`, and `act -W .github/workflows/ci.yml -j gsnake-editor-test --container-architecture linux/amd64` (success); refreshed `scripts/test/result.txt`.
+- Browser verification was attempted with `agent-browser` against `http://localhost:3003`, but session interactions were flaky (stalled select action + unexpected return to landing state), so manual browser verification is still recommended.
+- Files changed: `gsnake-editor/src/lib/EditorLayout.svelte`, `gsnake-editor/src/tests/EditorLayout.gridInteractions.test.ts`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`
+- **Learnings for future iterations:**
+  - Direction/state coherence is easiest to maintain by centralizing snake-empty behavior in one helper instead of duplicating conditional resets in each edit handler.
+  - `EditorLayout.gridInteractions.test.ts` is the right surface for direction + snake lifecycle regressions that depend on toolbar state transitions.
+  - `agent-browser` sessions can become unstable on editor control interactions; when reproducibility drops, keep unit/regression coverage authoritative and note manual verification needs.
 ---
