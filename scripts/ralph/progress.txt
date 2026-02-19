@@ -12,6 +12,7 @@ Started: Thu Feb 19 16:54:50 CET 2026
 - In `gsnake-editor`, both landing-page and in-editor level-load paths should call shared `parseAndValidateLevelFileData(...)` from `src/lib/levelFileValidation.ts` so required-field and grid-size checks never drift.
 - In `EditorLayout`, grid reinitialization should happen through explicit `resetGrid(width, height)` calls in load/placement flows; avoid broad reactive resets that can wipe entities after dimension changes.
 - In `EditorLayout`, any edit path that can reduce `snakeSegments` to zero should run through a shared helper that resets `snakeDirection` to the default `'east'` value.
+- In `EditorLayout`, clear/reset helpers should always clear `entity`, `isSnakeSegment`, and `snakeSegmentIndex` together so snake metadata cannot drift on replacements/removals.
 
 ## [2026-02-19 17:00:35 CET] - US-001
 - Implemented US-001 by removing implicit snake auto-clear on snake-tool selection in `EditorLayout`, so selecting Snake no longer destroys existing snake segments outside undo/redo commands.
@@ -120,4 +121,14 @@ Started: Thu Feb 19 16:54:50 CET 2026
   - Direction/state coherence is easiest to maintain by centralizing snake-empty behavior in one helper instead of duplicating conditional resets in each edit handler.
   - `EditorLayout.gridInteractions.test.ts` is the right surface for direction + snake lifecycle regressions that depend on toolbar state transitions.
   - `agent-browser` sessions can become unstable on editor control interactions; when reproducibility drops, keep unit/regression coverage authoritative and note manual verification needs.
+---
+## [2026-02-20 00:53:05 CET] - US-011
+- Hardened snake-clear metadata handling in `EditorLayout` by routing clear/replace flows through shared `clearCell(...)` and `setCellEntity(...)` helpers so `snakeSegmentIndex` is always reset alongside `entity` and `isSnakeSegment`.
+- Added focused regression coverage that replaces a snake segment with Food and asserts stale `data-snake-segment-index` metadata is cleared while remaining segments are reindexed correctly.
+- Ran `npm --prefix gsnake-editor run check`, `npm --prefix gsnake-editor run lint`, `npm --prefix gsnake-editor run test`, and `act -W .github/workflows/ci.yml -j gsnake-editor-test --container-architecture linux/amd64` (success); refreshed `scripts/test/result.txt`.
+- Files changed: `gsnake-editor/src/lib/EditorLayout.svelte`, `gsnake-editor/src/lib/GridCanvas.svelte`, `gsnake-editor/src/tests/EditorLayout.gridInteractions.test.ts`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`
+- **Learnings for future iterations:**
+  - Snake metadata cleanup should be centralized in a helper so any future clear/replacement path cannot forget `snakeSegmentIndex` resets.
+  - `GridCanvas`-level metadata attributes can provide lightweight observability for regression tests that need to verify internal per-cell state.
+  - `EditorLayout.gridInteractions.test.ts` is the correct place for metadata-consistency regressions tied to interactive placement/replacement flows.
 ---
