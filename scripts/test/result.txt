@@ -1,15 +1,45 @@
 === Act CI Test Results ===
-Started: Tue Feb 17 04:26:07 CET 2026
+Started: Tue Feb 17 20:14:54 CET 2026
 
 ## Summary
 
+- [SUCCESS] ./gsnake-levels/.github/workflows/test.yml::test
+- [SUCCESS] ./gsnake-levels/.github/workflows/ci.yml::build
+- [SUCCESS] ./gsnake-levels/.github/workflows/ci.yml::test
+- [SUCCESS] ./gsnake-levels/.github/workflows/ci.yml::validate-levels
+- [SUCCESS] ./gsnake-levels/.github/workflows/ci.yml::coverage
+- [FAILED] ./gsnake-levels/.github/workflows/ci.yml::required-merge-gates
+- [SUCCESS] ./gsnake-web/.github/workflows/test.yml::test
+- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::typecheck
+- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::test
+- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::coverage
+- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::build
+- [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::required-merge-gates
+- [SUCCESS] ./gsnake-specs/.github/workflows/test.yml::test
+- [SUCCESS] ./gsnake-specs/.github/workflows/ci.yml::link-check
+- [SUCCESS] ./gsnake-specs/.github/workflows/ci.yml::markdown-lint
+- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::typecheck
+- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::test
+- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::coverage
+- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::build
+- [SUCCESS] ./gsnake-editor/.github/workflows/ci.yml::required-merge-gates
+- [SUCCESS] ./.github/workflows/dependency-audit.yml::npm-audit
+- [SUCCESS] ./.github/workflows/dependency-audit.yml::cargo-audit
+- [SUCCESS] ./.github/workflows/ci.yml::wasm
+- [SUCCESS] ./.github/workflows/ci.yml::gsnake-editor-coverage
 - [SUCCESS] ./.github/workflows/ci.yml::e2e-test
+- [SUCCESS] ./.github/workflows/ci.yml::gsnake-editor-test
+- [SUCCESS] ./.github/workflows/ci.yml::build
+- [SUCCESS] ./.github/workflows/ci.yml::core-coverage
+- [SUCCESS] ./.github/workflows/ci.yml::test
+- [SUCCESS] ./.github/workflows/ci.yml::gsnake-web-coverage
+- [SUCCESS] ./.github/workflows/ci.yml::required-merge-gates
 
-**Total: 1 passed, 0 failed**
+**Total: 30 passed, 1 failed**
 
 ---
-Completed: Tue Feb 17 04:31:33 CET 2026
-Duration: 00:05:26
-Result: 1 passed, 0 failed
+Completed: Tue Feb 17 20:55:28 CET 2026
+Duration: 00:40:34
+Result: 30 passed, 1 failed
 Result file: /home/nntin/git/gSnake/scripts/test/result.txt
-Command: act -W .github/workflows/ci.yml -j e2e-test --container-architecture linux/amd64
+Temp dir: /home/nntin/git/gSnake/scripts/test/tmp_act_results

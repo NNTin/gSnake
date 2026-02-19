@@ -1,244 +1,494 @@
 {
   "project": "gSnake",
-  "description": "Address open reliability findings from gsnake-specs/tasks/findings-codebase-reliability-hardening.md (revalidated 2026-02-16), focusing on contract-validation drift, panic-prone tooling paths, solver/runtime performance, CI robustness, and security hardening.",
+  "description": "Remediate the level-editor findings documented in gsnake-specs/tasks/code-review-editor.md, with priority on data-loss prevention, payload consistency, schema hardening, and security/UX reliability.",
   "userStories": [
     {
       "id": "US-001",
-      "title": "Generate a shared TypeScript LevelDefinition validator from canonical schema",
-      "description": "As a maintainer, I want one generated validator source so LevelDefinition validation logic does not drift across packages.",
+      "title": "Make snake-tool auto-clear behavior undoable or explicit",
+      "description": "As a level designer, I want snake-clearing behavior to be recoverable so accidental palette selections do not destroy my work.",
       "acceptanceCriteria": [
-        "Add a generation step that produces a runtime validator from contracts/level-definition.schema.json",
-        "Generated artifact is committed in a shared location and documented",
-        "Generation command is reproducible from repo root",
-        "Typecheck passes",
-        "Tests pass"
-      ],
-      "priority": 1,
-      "passes": true,
-      "notes": ""
-    },
-    {
-      "id": "US-002",
-      "title": "Adopt shared LevelDefinition validator in gsnake-web",
-      "description": "As a web maintainer, I want gsnake-web to use the shared validator so contract checks stay aligned with the canonical schema.",
-      "acceptanceCriteria": [
-        "Replace manual guard usage in gsnake-web with the shared/generated validator",
-        "Remove duplicated manual validation logic that is now redundant",
-        "Existing level-load error behavior remains stable for invalid payloads",
-        "Typecheck passes",
-        "Tests pass"
-      ],
-      "priority": 2,
-      "passes": true,
-      "notes": ""
-    },
-    {
-      "id": "US-003",
-      "title": "Adopt shared LevelDefinition validator in E2E tests",
-      "description": "As a test maintainer, I want E2E specs to reuse the shared validator so test-side contract logic cannot diverge.",
-      "acceptanceCriteria": [
-        "Replace e2e/level-definition.ts duplicate guard logic with imports from shared/generated validator",
-        "Update affected E2E specs to use the shared validator path",
-        "No local duplicate LevelDefinition guard remains in E2E test helpers",
-        "Typecheck passes",
-        "Tests pass"
-      ],
-      "priority": 3,
-      "passes": true,
-      "notes": ""
-    },
-    {
-      "id": "US-004",
-      "title": "Remove runtime unwrap/expect usage from CLI bindings",
-      "description": "As a CLI user, I want malformed playback and level inputs to return actionable errors instead of panics.",
-      "acceptanceCriteria": [
-        "Replace runtime-path unwrap/expect calls in gsnake-core/engine/bindings/cli/src with Result propagation",
-        "Error messages include context about failing file or parse step",
-        "Add regression tests for malformed input paths",
-        "Typecheck passes",
-        "Tests pass"
-      ],
-      "priority": 4,
-      "passes": true,
-      "notes": ""
-    },
-    {
-      "id": "US-005",
-      "title": "Remove runtime unwrap/expect usage from gsnake-levels command paths",
-      "description": "As a tooling user, I want gsnake-levels commands to fail gracefully so batch workflows are debuggable.",
-      "acceptanceCriteria": [
-        "Replace runtime-path unwrap/expect calls in gsnake-levels command modules with Result propagation",
-        "Preserve existing success-path output behavior",
-        "Add tests for representative failure scenarios",
-        "Typecheck passes",
-        "Tests pass"
-      ],
-      "priority": 5,
-      "passes": true,
-      "notes": ""
-    },
-    {
-      "id": "US-006",
-      "title": "Add aggregated error reporting to levels validation workflow",
-      "description": "As a maintainer, I want validation commands to report multiple issues in one run so remediation is faster.",
-      "acceptanceCriteria": [
-        "Implement aggregation for at least one high-impact levels validation command",
-        "Command output includes multiple validation failures in a single invocation",
-        "Add tests that assert multi-error output behavior",
-        "Typecheck passes",
-        "Tests pass"
-      ],
-      "priority": 6,
-      "passes": true,
-      "notes": ""
-    },
-    {
-      "id": "US-007",
-      "title": "Baseline solver performance with repeatable profiling",
-      "description": "As a maintainer, I want a reproducible solver performance baseline so optimization work is evidence-driven.",
-      "acceptanceCriteria": [
-        "Add a repeatable profiling or benchmark command for solve_level/playback generation",
-        "Capture baseline metrics (wall time and hotspot summary) in repo documentation",
-        "Document how to rerun profiling locally",
-        "Typecheck passes"
-      ],
-      "priority": 7,
-      "passes": true,
-      "notes": ""
-    },
-    {
-      "id": "US-008",
-      "title": "Eliminate per-level cargo process spawn in playback generation",
-      "description": "As a maintainer, I want playback generation to avoid spawning cargo per level so solver throughput improves.",
-      "acceptanceCriteria": [
-        "Refactor playback generation to call solving logic without running cargo for each level",
-        "Generated playback outputs remain format-compatible with current consumers",
-        "Performance is measurably improved versus baseline for a representative level set",
-        "Typecheck passes",
-        "Tests pass"
-      ],
-      "priority": 8,
-      "passes": true,
-      "notes": ""
-    },
-    {
-      "id": "US-009",
-      "title": "Add non-blocking WASM startup with explicit loading state",
-      "description": "As a player, I want immediate feedback during WASM initialization so first render does not appear stalled.",
-      "acceptanceCriteria": [
-        "Add explicit loading state for WASM initialization in gsnake-web app startup",
-        "UI renders a loading indicator until engine init completes or fails",
-        "Initialization errors still surface through existing error handling flow",
+        "Selecting the snake tool no longer destroys existing snake segments outside the command/undo path",
+        "If snake auto-clear remains, the action is recorded in undo/redo and can be restored with Ctrl+Z",
+        "Add regression coverage for selecting snake tool after snake segments already exist",
         "Typecheck passes",
         "Tests pass",
         "Verify in browser using dev-browser skill"
       ],
-      "priority": 9,
-      "passes": true,
-      "notes": ""
+      "priority": 1,
+      "passes": false,
+      "notes": "",
+      "additionalInformation": {
+        "severity": "High",
+        "file": [
+          "gsnake-editor/src/lib/EditorLayout.svelte:173-196"
+        ],
+        "issue": "Selecting the snake tool clears existing snake cells directly without going through captureState/executeCommand.",
+        "impact": "Users can lose their built snake with no undo recovery after an accidental tool switch.",
+        "suggestion": "Remove implicit auto-clear or wrap the clear in createCellModificationCommand/executeCommand so it is undoable."
+      }
     },
     {
-      "id": "US-010",
-      "title": "Document and reduce build.rs filesystem coupling in gsnake-levels",
-      "description": "As a maintainer, I want build mode selection to be explicit so repo-layout-dependent behavior is predictable.",
+      "id": "US-002",
+      "title": "Prevent hidden file-input leaks on canceled load dialogs",
+      "description": "As an editor user, I want repeated load cancellations to clean up DOM state so long sessions stay stable.",
       "acceptanceCriteria": [
-        "Document current build.rs mode-switch behavior in gsnake-levels README",
-        "Add an explicit override mechanism (flag or env var) for local-vs-standalone mode",
-        "Keep existing default behavior for current workflows unless override is used",
+        "Loading level files does not leave orphaned hidden file input elements when picker is canceled",
+        "Cleanup path is safe even if the element is already detached",
+        "Add regression coverage for canceling the file picker",
         "Typecheck passes",
         "Tests pass"
       ],
+      "priority": 2,
+      "passes": false,
+      "notes": "",
+      "additionalInformation": {
+        "severity": "High",
+        "file": [
+          "gsnake-editor/src/lib/EditorLayout.svelte:411-476"
+        ],
+        "issue": "handleLoad creates and appends a new file input each invocation but only removes it in onchange, which does not fire on cancel.",
+        "impact": "Canceled loads leak hidden DOM nodes and can make cleanup paths unreliable.",
+        "suggestion": "Handle cancel/focus cleanup or reuse a single persistent input element."
+      }
+    },
+    {
+      "id": "US-003",
+      "title": "Unify handleTest payload construction with level export model",
+      "description": "As a maintainer, I want one canonical payload builder so test and export behavior cannot drift.",
+      "acceptanceCriteria": [
+        "handleTest uses buildLevelExportPayload (or a shared wrapper) instead of duplicating serialization logic",
+        "Test payload includes difficulty and uses canonical snake direction conversion",
+        "Add regression coverage that test payload structure matches export payload rules",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "",
+      "additionalInformation": {
+        "severity": "High",
+        "file": [
+          "gsnake-editor/src/lib/EditorLayout.svelte:517-594",
+          "gsnake-editor/src/lib/levelModel.ts"
+        ],
+        "issue": "handleTest manually rebuilds level JSON and diverges from buildLevelExportPayload in direction conversion and difficulty inclusion.",
+        "impact": "Testing can run against a payload that differs from exported levels, causing silent mismatches.",
+        "suggestion": "Replace ad-hoc handleTest payload logic with buildLevelExportPayload and test-only ID/difficulty inputs."
+      }
+    },
+    {
+      "id": "US-004",
+      "title": "Fail loudly or support negative coordinates during import",
+      "description": "As a user importing external levels, I want unsupported coordinates surfaced clearly so data is not silently dropped.",
+      "acceptanceCriteria": [
+        "Loading a level with unsupported negative coordinates no longer silently drops entities",
+        "Editor either rejects with a clear validation error or explicitly supports mapped negative coordinates",
+        "Add regression coverage for negative-coordinate import behavior",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "",
+      "additionalInformation": {
+        "severity": "High",
+        "file": [
+          "gsnake-editor/src/lib/EditorLayout.svelte:68-99",
+          "contracts/level-definition.schema.json:103-115"
+        ],
+        "issue": "Schema/test path accepts negative positions, but placeEntitiesFromLevelData drops x<0 or y<0 entries silently.",
+        "impact": "Round-tripping levels with negative coordinates can corrupt files without warning.",
+        "suggestion": "Reject unsupported coordinates at load with explicit user feedback or implement full negative-coordinate support."
+      }
+    },
+    {
+      "id": "US-005",
+      "title": "Harden sprite injection pipeline against untrusted SVG",
+      "description": "As a security-conscious maintainer, I want sprite loading constrained to safe SVG content so runtime HTML injection risk is reduced.",
+      "acceptanceCriteria": [
+        "SpriteLoader validates fetch response success and content type before DOM injection",
+        "Injected SVG content path does not allow arbitrary script-bearing HTML",
+        "Document trust boundary for sprites asset source",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "",
+      "additionalInformation": {
+        "severity": "Medium",
+        "file": [
+          "gsnake-editor/src/lib/SpriteLoader.svelte:7-19"
+        ],
+        "issue": "Raw fetched sprite text is inserted via HTML injection without sanitization or integrity checks.",
+        "impact": "A compromised sprite URL/source could inject attacker-controlled script or markup.",
+        "suggestion": "Require image/svg+xml responses and parse/insert sanitized SVG nodes with documented trust assumptions."
+      }
+    },
+    {
+      "id": "US-006",
+      "title": "Freeze CORS allowlist resolution for deterministic runtime behavior",
+      "description": "As an API maintainer, I want CORS policy resolution stable per process so request handling is predictable.",
+      "acceptanceCriteria": [
+        "Allowed origins are resolved once at startup unless explicit hot-reload behavior is intentionally implemented",
+        "Per-request CORS checks reference the frozen allowlist",
+        "Server tests cover allowed and rejected origins with the new behavior",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": "",
+      "additionalInformation": {
+        "severity": "Medium",
+        "file": [
+          "gsnake-editor/server.ts:37-44"
+        ],
+        "issue": "resolveAllowedCorsOrigins reads env values for every incoming request.",
+        "impact": "Runtime env changes can alter CORS decisions mid-flight and create nondeterministic behavior.",
+        "suggestion": "Resolve and freeze allowlist at module load; only support runtime updates if explicitly designed and documented."
+      }
+    },
+    {
+      "id": "US-007",
+      "title": "Centralize level-file validation used by both load entry points",
+      "description": "As a maintainer, I want one shared level-file validator so both load paths enforce identical rules.",
+      "acceptanceCriteria": [
+        "Extract common level-file validation into a shared module used by App.svelte and EditorLayout.svelte",
+        "Both load paths produce consistent accept/reject behavior for the same input",
+        "Add regression tests that exercise both load paths against invalid and valid payloads",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": "",
+      "additionalInformation": {
+        "severity": "Medium",
+        "file": [
+          "gsnake-editor/src/App.svelte:29-45",
+          "gsnake-editor/src/lib/EditorLayout.svelte:429-445"
+        ],
+        "issue": "Validation logic is duplicated and can drift between landing-page and in-editor load paths.",
+        "impact": "Future rule changes can silently apply to only one path, allowing inconsistent invalid imports.",
+        "suggestion": "Create a single validateLevelFileData helper and call it from both load entry points."
+      }
+    },
+    {
+      "id": "US-008",
+      "title": "Replace implicit reactive grid reset with explicit reset control flow",
+      "description": "As a maintainer, I want grid reset timing explicit so entity placement cannot be wiped by reactive ordering side effects.",
+      "acceptanceCriteria": [
+        "Grid reset is moved from broad reactive statement to explicit resetGrid(width, height) calls",
+        "Load flow preserves placed entities after dimension updates",
+        "Add regression coverage for load and resize ordering behavior",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": "",
+      "additionalInformation": {
+        "severity": "Medium",
+        "file": [
+          "gsnake-editor/src/lib/EditorLayout.svelte:41-51"
+        ],
+        "issue": "Reactive grid-reset runs broadly and can wipe cells based on dependency access/order.",
+        "impact": "Future refactors can trigger post-placement wipes and produce blank-grid regressions.",
+        "suggestion": "Use explicit resetGrid calls at controlled points instead of order-sensitive reactive resets."
+      }
+    },
+    {
+      "id": "US-009",
+      "title": "Make level-test API endpoint configurable",
+      "description": "As a developer, I want test API URL configuration so level testing works outside localhost defaults.",
+      "acceptanceCriteria": [
+        "handleTest uses an environment-configurable API base URL with localhost:3001 fallback",
+        "User-facing error message references configured endpoint behavior",
+        "Document required environment variable in editor README or config docs",
+        "Typecheck passes",
+        "Tests pass"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": "",
+      "additionalInformation": {
+        "severity": "Medium",
+        "file": [
+          "gsnake-editor/src/lib/EditorLayout.svelte:598"
+        ],
+        "issue": "handleTest posts to a hardcoded http://localhost:3001/api/test-level URL.",
+        "impact": "Testing fails in non-default ports/hosts and presents potentially misleading errors.",
+        "suggestion": "Introduce VITE_GSNAKE_API_URL (or equivalent) and consume it in handleTest."
+      }
+    },
+    {
+      "id": "US-010",
+      "title": "Reset snake direction coherently when snake is auto-cleared",
+      "description": "As a user, I want snake direction state to stay consistent with snake presence so exports are predictable.",
+      "acceptanceCriteria": [
+        "When snake segments are auto-cleared, snakeDirection behavior is explicitly defined and implemented consistently",
+        "If direction is reset, UI reflects reset state immediately; if retained, behavior is documented and tested",
+        "Add regression test around clear-and-redraw snake flow",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser using dev-browser skill"
+      ],
       "priority": 10,
-      "passes": true,
-      "notes": ""
+      "passes": false,
+      "notes": "",
+      "additionalInformation": {
+        "severity": "Medium",
+        "file": [
+          "gsnake-editor/src/lib/EditorLayout.svelte:177-193"
+        ],
+        "issue": "Snake auto-clear leaves snakeDirection unchanged even when snakeSegments becomes empty.",
+        "impact": "Direction state can appear detached from current snake, producing surprising exports.",
+        "suggestion": "Reset direction when clearing or codify retained-direction behavior with explicit UX and tests."
+      }
     },
     {
       "id": "US-011",
-      "title": "Add property-based tests for gravity and stone invariants",
-      "description": "As a core maintainer, I want invariant-based coverage for gravity interactions so order-dependent regressions are caught.",
+      "title": "Clear stale snakeSegmentIndex metadata during snake clear",
+      "description": "As a maintainer, I want snake clear to reset all segment metadata so cell state is internally consistent.",
       "acceptanceCriteria": [
-        "Add property-based tests covering gravity/stone collision invariants in gsnake-core",
-        "Include invariants for bounds safety and deterministic outcomes across equivalent states",
-        "Tests run in CI without flaky behavior",
+        "Snake clear path sets snakeSegmentIndex to undefined alongside entity/isSnakeSegment reset",
+        "No cell can retain stale segment index after clear operations",
+        "Add focused regression test for post-clear cell metadata",
         "Typecheck passes",
         "Tests pass"
       ],
       "priority": 11,
-      "passes": true,
-      "notes": ""
+      "passes": false,
+      "notes": "",
+      "additionalInformation": {
+        "severity": "Medium",
+        "file": [
+          "gsnake-editor/src/lib/EditorLayout.svelte:181-190"
+        ],
+        "issue": "Clear loop resets entity flags but leaves snakeSegmentIndex untouched.",
+        "impact": "Transient or future logic that reads index can observe stale segment metadata.",
+        "suggestion": "Set snakeSegmentIndex to undefined for every cleared snake cell."
+      }
     },
     {
       "id": "US-012",
-      "title": "Define dependency update policy and automate security audits",
-      "description": "As a repo owner, I want a documented update policy with automated audits so dependency risk is continuously managed.",
+      "title": "Apply save-equivalent validation checks before level testing",
+      "description": "As a designer, I want invalid levels blocked before test launch so the runtime is not fed malformed payloads.",
       "acceptanceCriteria": [
-        "Add a dependency maintenance policy document with ownership and cadence",
-        "Automate npm and cargo security audit checks in CI or scheduled workflow",
-        "Document handling path for audit failures",
-        "Typecheck passes"
+        "handleTest enforces required entity validation (snake, food, exit) before POST",
+        "Validation feedback is shown to users before test request is sent",
+        "Add regression coverage for test attempts with missing snake/required entities",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 12,
-      "passes": true,
-      "notes": ""
+      "passes": false,
+      "notes": "",
+      "additionalInformation": {
+        "severity": "Medium",
+        "file": [
+          "gsnake-editor/src/lib/EditorLayout.svelte:517-637"
+        ],
+        "issue": "handleTest skips the preflight validation path used by handleSave.",
+        "impact": "Server can accept and forward invalid test payloads, including empty snake arrays.",
+        "suggestion": "Reuse save-path validation for test action and block posting when requirements fail."
+      }
     },
     {
       "id": "US-013",
-      "title": "Restrict editor server CORS to explicit allowed ports",
-      "description": "As a developer, I want CORS narrowed to known dev origins so localhost-wide trust is reduced.",
+      "title": "Strengthen schema constraints for snake presence and in-bounds coordinates",
+      "description": "As a contract owner, I want invalid level shapes rejected at the schema/API boundary so engine behavior is safer.",
       "acceptanceCriteria": [
-        "Replace wildcard localhost port allowance with explicit allowed origin list",
-        "Allowed origins are configurable for local development",
-        "Add server tests for allowed and rejected origin behavior",
+        "Schema enforces snake.minItems = 1",
+        "Coordinate bounds rules relative to grid are validated at schema or server-validation layer",
+        "Update validator generation and contract tests for new constraints",
         "Typecheck passes",
         "Tests pass"
       ],
       "priority": 13,
-      "passes": true,
-      "notes": ""
+      "passes": false,
+      "notes": "",
+      "additionalInformation": {
+        "severity": "Medium",
+        "file": [
+          "contracts/level-definition.schema.json:50-53"
+        ],
+        "issue": "Schema accepts empty snake arrays and does not constrain entity coordinates to grid bounds.",
+        "impact": "API accepts structurally valid but runtime-invalid levels that can crash or misbehave in engine paths.",
+        "suggestion": "Add snake minItems and enforce coordinate/grid consistency in contract or validator logic."
+      }
     },
     {
       "id": "US-014",
-      "title": "Harden n8n workflow secrets usage away from broad $env access",
-      "description": "As an operator, I want workflow secret handling to rely on scoped credentials so accidental env exposure risk is reduced.",
+      "title": "Constrain difficulty values in canonical level schema",
+      "description": "As a contract maintainer, I want difficulty typed as a fixed enum so external producers cannot submit unknown values.",
       "acceptanceCriteria": [
-        "Audit gsnake-n8n code nodes for direct $env secret reads",
-        "Move applicable secrets to n8n credential-backed access patterns",
-        "Update workflow docs to reflect the hardened secret access model",
-        "Typecheck passes"
+        "difficulty property in schema uses enum: easy, medium, hard",
+        "Generated validators and contract tests reflect enum enforcement",
+        "Typecheck passes",
+        "Tests pass"
       ],
       "priority": 14,
-      "passes": true,
-      "notes": ""
+      "passes": false,
+      "notes": "",
+      "additionalInformation": {
+        "severity": "Low",
+        "file": [
+          "contracts/level-definition.schema.json:30-32"
+        ],
+        "issue": "difficulty is currently any string in schema despite stricter TypeScript model.",
+        "impact": "Unknown difficulty values can pass API validation and reach runtime unexpectedly.",
+        "suggestion": "Add a strict enum for difficulty in the schema."
+      }
     },
     {
       "id": "US-015",
-      "title": "Add health endpoints for editor API and UI dev server checks",
-      "description": "As a CI maintainer, I want explicit health endpoints so readiness checks are deterministic.",
+      "title": "Use robust main-module detection in editor server entrypoint",
+      "description": "As a cross-platform maintainer, I want main-module checks path-normalized so startup behavior is consistent across OSes.",
       "acceptanceCriteria": [
-        "Expose a lightweight /health endpoint for editor API server",
-        "Expose or configure an equivalent deterministic health check for the editor/web server process used in CI",
-        "Document expected health response contract",
+        "Replace fragile string compare check with fileURLToPath(import.meta.url) comparison",
+        "Direct-run and imported module behavior remain correct in tests",
         "Typecheck passes",
         "Tests pass"
       ],
       "priority": 15,
-      "passes": true,
-      "notes": ""
+      "passes": false,
+      "notes": "",
+      "additionalInformation": {
+        "severity": "Low",
+        "file": [
+          "gsnake-editor/server.ts:144-145"
+        ],
+        "issue": "isMainModule logic compares import.meta.url and process.argv[1] as raw strings.",
+        "impact": "Server auto-start detection can fail on Windows/encoded paths or relative invocation.",
+        "suggestion": "Compare process.argv[1] against fileURLToPath(import.meta.url)."
+      }
     },
     {
       "id": "US-016",
-      "title": "Replace sleep-based CI startup waits with health-check polling and tighter process lifecycle",
-      "description": "As a CI maintainer, I want server startup and teardown to be controlled by readiness checks so E2E jobs are less flaky.",
+      "title": "Remove drag-image innerHTML construction in entity palette",
+      "description": "As a maintainer, I want SVG drag image nodes constructed safely so future dynamic sprite IDs cannot create XSS risk.",
       "acceptanceCriteria": [
-        "Update .github/workflows/ci.yml to wait on service health endpoints instead of fixed sleeps",
-        "Reduce broad pkill/fuser cleanup to targeted process lifecycle handling",
-        "E2E workflow runs successfully with the new startup/teardown logic",
+        "EntityPalette builds drag-image SVG via createElementNS/setAttribute rather than innerHTML",
+        "Drag preview behavior is unchanged for current entity set",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 16,
+      "passes": false,
+      "notes": "",
+      "additionalInformation": {
+        "severity": "Low",
+        "file": [
+          "gsnake-editor/src/lib/EntityPalette.svelte:41"
+        ],
+        "issue": "Drag preview markup is assembled with innerHTML using sprite identifiers.",
+        "impact": "Current static data is safe, but future dynamic sources could turn this into an injection vector.",
+        "suggestion": "Build SVG DOM nodes programmatically to eliminate innerHTML injection surface."
+      }
+    },
+    {
+      "id": "US-017",
+      "title": "Warn before destructive new-level navigation when edits exist",
+      "description": "As an editor user, I want a confirmation prompt before resetting so I do not lose unsaved work accidentally.",
+      "acceptanceCriteria": [
+        "Clicking New Level prompts for confirmation when unsaved changes are present",
+        "Canceling confirmation keeps current editor state intact",
+        "Add regression coverage for new-level confirmation behavior",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 17,
+      "passes": false,
+      "notes": "",
+      "additionalInformation": {
+        "severity": "Low",
+        "file": [
+          "gsnake-editor/src/lib/EditorLayout.svelte:403-406"
+        ],
+        "issue": "New Level dispatches immediately and clears editor context without confirmation.",
+        "impact": "Users can lose in-progress work from accidental clicks.",
+        "suggestion": "Gate new-level dispatch behind unsaved-work confirmation (e.g., undo stack signal)."
+      }
+    },
+    {
+      "id": "US-018",
+      "title": "Handle sprite fetch failures with explicit fallback and diagnostics",
+      "description": "As a user, I want sprite loading failures surfaced clearly so missing assets are diagnosable.",
+      "acceptanceCriteria": [
+        "SpriteLoader checks response.ok and catches fetch failures",
+        "Failure path logs actionable diagnostics and surfaces a user/developer-visible fallback signal",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 18,
+      "passes": false,
+      "notes": "",
+      "additionalInformation": {
+        "severity": "Low",
+        "file": [
+          "gsnake-editor/src/lib/SpriteLoader.svelte:7-10"
+        ],
+        "issue": "Sprite loading path has no error handling or response status checks.",
+        "impact": "Failed sprite fetches can leave palette visuals blank with unhandled promise errors.",
+        "suggestion": "Add try/catch, validate response status, and provide explicit error reporting/fallback handling."
+      }
+    },
+    {
+      "id": "US-019",
+      "title": "Harden handleLoad append/click cleanup path for file input",
+      "description": "As a maintainer, I want input append/click logic exception-safe so failed picker launches do not leak DOM nodes.",
+      "acceptanceCriteria": [
+        "appendChild plus input.click path is wrapped in safe cleanup logic",
+        "If click invocation fails, temporary input element is always removed",
         "Typecheck passes",
         "Tests pass"
       ],
-      "priority": 16,
-      "passes": true,
-      "notes": ""
+      "priority": 19,
+      "passes": false,
+      "notes": "",
+      "additionalInformation": {
+        "severity": "Low",
+        "file": [
+          "gsnake-editor/src/lib/EditorLayout.svelte:474-476"
+        ],
+        "issue": "Input is appended before click with no guarded cleanup if click throws.",
+        "impact": "Sandboxed/browser edge cases can leave orphaned hidden inputs.",
+        "suggestion": "Wrap append/click in try/catch/finally and remove element on all failure paths."
+      }
+    },
+    {
+      "id": "US-020",
+      "title": "Require integer grid dimensions in grid-size modal",
+      "description": "As a level designer, I want fractional grid sizes rejected so exported level dimensions remain schema-valid.",
+      "acceptanceCriteria": [
+        "Grid creation validation enforces Number.isInteger for width and height",
+        "Inputs use integer-only constraints (for example step=1) and reject fractional values",
+        "Add regression coverage for decimal dimension input",
+        "Typecheck passes",
+        "Tests pass",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 20,
+      "passes": false,
+      "notes": "",
+      "additionalInformation": {
+        "severity": "Low",
+        "file": [
+          "gsnake-editor/src/lib/GridSizeModal.svelte:20-28"
+        ],
+        "issue": "Current bounds checks allow decimal values that later truncate in grid allocation.",
+        "impact": "UI can export non-integer grid dimensions that violate schema contract.",
+        "suggestion": "Enforce integer validation and configure number inputs for whole-step values only."
+      }
     }
   ]
 }
