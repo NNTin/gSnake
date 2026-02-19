@@ -4,6 +4,7 @@ Started: Thu Feb 19 16:54:50 CET 2026
 ## Codebase Patterns
 - In `gsnake-editor`, tool-selection handlers should stay side-effect free for grid data; any state mutation that changes placed entities should go through the command/undo pipeline.
 - In `EditorLayout.handleLoad`, hidden file inputs must use idempotent cleanup and hook both `change` and picker-close signals (`cancel` plus `window` focus fallback) so canceled dialogs do not leak DOM nodes.
+- In `EditorLayout`, both export and test payloads should be built via `buildLevelExportPayload(...)` to keep `difficulty`, `snakeDirection`, and `totalFood` serialization rules aligned.
 
 ## [2026-02-19 17:00:35 CET] - US-001
 - Implemented US-001 by removing implicit snake auto-clear on snake-tool selection in `EditorLayout`, so selecting Snake no longer destroys existing snake segments outside undo/redo commands.
@@ -22,4 +23,15 @@ Started: Thu Feb 19 16:54:50 CET 2026
   - Load-picker flows should not rely solely on `onchange`; canceled dialogs can skip `change` and leak temporary DOM nodes.
   - Cleanup helpers for transient DOM nodes should be idempotent (`parentNode` guard) because multiple completion paths can fire in browser and test environments.
   - `EditorLayout.saveLoad` tests are the right location for regressions around file-load lifecycle and hidden input teardown.
+---
+## [2026-02-19 18:33:12 CET] - US-003
+- Replaced `EditorLayout.handleTest`’s ad-hoc payload assembly with `buildLevelExportPayload(...)` using test metadata (`id`, `name`, and default `difficulty`) so test uploads use the same canonical serializer as exports.
+- Added a regression test that clicks `Test`, captures the POST body for `/api/test-level`, and asserts canonical payload fields including `difficulty`, runtime snake-direction conversion, and `totalFood`.
+- Ran `npm run check`, `npm run lint`, `npm run test` in `gsnake-editor`, then refreshed CI status via `act -W .github/workflows/ci.yml -j gsnake-editor-test --container-architecture linux/amd64`.
+- Attempted live `agent-browser` verification on `http://localhost:3003`, but repeated command hangs while interacting with editor controls prevented reliable end-to-end browser confirmation; manual browser verification is still recommended.
+- Files changed: `gsnake-editor/src/lib/EditorLayout.svelte`, `gsnake-editor/src/tests/EditorLayout.saveLoad.test.ts`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`
+- **Learnings for future iterations:**
+  - `EditorLayout.handleTest` should treat payload construction as shared model logic; keep endpoint-specific behavior limited to transport (`fetch`) and launch UX.
+  - For editor-side API payload regressions, `EditorLayout.saveLoad.test.ts` can validate real request bodies by mocking `fetch` and asserting serialized JSON directly.
+  - Refreshing CI with targeted `act -W ... -j ...` runs is sufficient for story-level validation while keeping iteration time low.
 ---
