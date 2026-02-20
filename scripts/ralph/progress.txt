@@ -9,6 +9,7 @@ Started: Thu Feb 19 16:54:50 CET 2026
 - In `EditorLayout`, calculate required-entity validation once (snake, any food variant, exit) and reuse it in both Save and Test flows so preflight rules cannot drift.
 - In `EditorLayout` import paths, validate all entity coordinates against current grid bounds before mutating editor state so unsupported coordinates fail loudly instead of partially loading.
 - In `SpriteLoader`, treat `spritesUrl` as trusted only after validating `response.ok` and `content-type: image/svg+xml`, then sanitize parsed SVG content before rendering via `{@html}`.
+- In `SpriteLoader`, on sprite-load failure keep `spriteContent` empty, expose a visible fallback status, and store the root diagnostic in `data-sprite-load-error` for quick debugging.
 - In `gsnake-editor/server.ts`, resolve `GSNAKE_EDITOR_ALLOWED_ORIGINS` once at startup and keep per-request CORS checks bound to that frozen allowlist for deterministic policy behavior.
 - In Node ESM entrypoints like `gsnake-editor/server.ts`, detect direct execution by comparing `path.resolve(fileURLToPath(import.meta.url))` with `path.resolve(process.argv[1])`; avoid raw URL string checks.
 - In `gsnake-editor`, both landing-page and in-editor level-load paths should call shared `parseAndValidateLevelFileData(...)` from `src/lib/levelFileValidation.ts` so required-field and grid-size checks never drift.
@@ -202,4 +203,15 @@ Started: Thu Feb 19 16:54:50 CET 2026
   - Destructive toolbar navigation in `EditorLayout` should treat non-empty undo history as unsaved work and require explicit user confirmation before leaving.
   - For Svelte 5 tests, subscribe to component events in `render(...)` via mount `events` options (not `component.$on`, which is deprecated).
   - Keep New-Level confirmation regressions in `EditorLayout.gridInteractions.test.ts` so UI prompt behavior and cancel-state preservation stay covered together.
+---
+## [2026-02-20 06:21:13 CET] - US-018
+- Added explicit sprite-load failure state in `SpriteLoader`: failure now captures a diagnostic string, logs actionable context with source URL, and renders a visible fallback status badge with `data-sprite-load-error` for debugging.
+- Expanded `SpriteLoader` regression coverage to assert fallback rendering + diagnostics for non-SVG responses, non-OK HTTP responses, and rejected `fetch` (network failure).
+- Ran `npm --prefix gsnake-editor run check`, `npm --prefix gsnake-editor run lint`, `npm --prefix gsnake-editor run test`, and `act -W .github/workflows/ci.yml -j gsnake-editor-test --container-architecture linux/amd64` (success); refreshed `scripts/test/result.txt`.
+- Browser verification was attempted with `agent-browser` on `http://localhost:3003`: request interception for `sprites.svg` caused the app shell to render as an empty document in this environment, so fallback-path behavior is covered by automated tests and manual browser verification is still recommended.
+- Files changed: `gsnake-editor/src/lib/SpriteLoader.svelte`, `gsnake-editor/src/tests/SpriteLoader.test.ts`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`
+- **Learnings for future iterations:**
+  - Keep sprite-load failure UX explicit in `SpriteLoader` by pairing console diagnostics with a visible in-app fallback signal.
+  - `data-sprite-load-error` is a stable, testable hook for asserting diagnostics without coupling tests to exact visual styling.
+  - `agent-browser` network interception can blank the Vite app shell in this flow; when that happens, rely on regression tests and note manual browser follow-up.
 ---
