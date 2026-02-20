@@ -182,6 +182,7 @@ See `gsnake-web/packages/gsnake-web-app/engine/CLAUDE.md` for the canonical fram
 - **WASM onFrame diagnostics** — in `gsnake-core/engine/bindings/wasm/src/lib.rs`, keep `on_frame` returning `()` for JS compatibility, but log initial `emit_frame` failures with `web_sys::console::error_1` instead of discarding errors.
 - **WASM JsValue borrowing** — in `gsnake-core/engine/bindings/wasm/src/lib.rs`, prefer `&JsValue` for parse/dispatch paths that only inspect inputs; this avoids misleading no-op drops and keeps `clippy::needless_pass_by_value` clean under `-D warnings`.
 - **CellType contract exhaustiveness** — in `gsnake-core/engine/core/tests/contract_tests.rs`, keep `test_celltype_serialization` and `test_celltype_roundtrip` aligned with all `CellType` enum variants and explicit JSON string expectations.
+- **Cell opacity contract coverage** — in `gsnake-web/packages/gsnake-web-app/tests/unit/Cell.test.ts`, keep a table-driven `it.each` matrix covering all 10 `CellType` variants with explicit expected opacity values so style-scope regressions are visible.
 
 ## CI / Merge Gates
 

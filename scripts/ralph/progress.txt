@@ -17,6 +17,7 @@
 - For `gsnake-web-app` store-driven `snakeLength`, count only `SnakeHead` and `SnakeBody`; keep regression tests with mixed extended cell types (`Stone`, `Spike`, `FloatingFood`, `FallingFood`) and a zero-snake frame to prevent accidental overcounting.
 - For editor API contract E2E coverage, keep shared `POST`/`GET` `/api/test-level` assertions centralized in `e2e/workflow.spec.ts` and add only non-overlapping checks elsewhere to avoid duplicate maintenance and CI runtime.
 - For root Playwright startup, run `gsnake-editor` UI/API as separate `webServer` entries (`dev:editor` + `dev:server`) and keep a global `/health` preflight (`e2e/global-setup.ts`) so API-dependent specs fail early with service-specific diagnostics.
+- For `Cell` opacity coverage in `gsnake-web/packages/gsnake-web-app/tests/unit/Cell.test.ts`, keep an explicit table for all 10 `CellType` variants so style checks catch both default-opacity and special-opacity regressions.
 
 # Ralph Progress Log
 Started: Fri Feb 20 10:55:27 CET 2026
@@ -187,4 +188,13 @@ Started: Fri Feb 20 10:55:27 CET 2026
   - A single `npm --prefix gsnake-editor run dev` process can report UI readiness before API readiness; split startup commands when tests depend on both services.
   - Keep service-health validation centralized in Playwright `globalSetup` so missing dependencies fail early with actionable endpoint names.
   - `npx playwright test e2e/workflow.spec.ts e2e/snake-bugs.spec.ts --project=chromium --reporter=list` is a fast smoke check for editor API-dependent E2E paths.
+---
+## [2026-02-20 12:07:35 CET] - US-018
+- Made `Cell` opacity tests explicit with a full 10-variant `CellType` matrix and aligned case naming to show expected opacity per type.
+- Verified both special-opacity cells (`Spike`, `Stone`, `Obstacle`) and default-opacity cells are covered in one table-driven unit test.
+- Files changed: `gsnake-web/packages/gsnake-web-app/tests/unit/Cell.test.ts`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`.
+- **Learnings for future iterations:**
+  - Opacity tests should enumerate every `CellType` variant, not a partial sample, so enum additions require explicit styling decisions.
+  - Object-based `it.each` cases (`{ type, expectedOpacity }`) keep test names aligned with assertion scope and avoid placeholder-order mistakes.
+  - `npm --prefix gsnake-web/packages/gsnake-web-app run check && npm --prefix gsnake-web/packages/gsnake-web-app test` is the right local gate for `gsnake-web-app` unit-test updates.
 ---
