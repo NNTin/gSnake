@@ -1,6 +1,7 @@
 ## Codebase Patterns
 - For gsnake-web enum contract drift checks, keep runtime enum guard constants in `gsnake-web/packages/gsnake-web-app/contracts/enumGuards.ts` and assert parity against both generated TS unions (`types/models.ts`) and Rust wire enums (`gsnake-core/engine/core/src/models.rs`) so cross-language mismatch fails tests.
 - For `gsnake-wasm` in `WasmGameEngine.ts`, import as a namespace and treat the default initializer as optional because generated `pkg/gsnake_wasm.js` may omit a default export while unit-test mocks still provide one.
+- For `gsnake-editor/src/tests/integration.test.ts`, keep live endpoint checks opt-in with `GSNAKE_EDITOR_LIVE_INTEGRATION=1` and use explicit `it.skip` semantics by default, so CI avoids false-green placeholder assertions while enabled runs still enforce real HTTP contract checks.
 
 # Ralph Progress Log
 Started: Fri Feb 20 10:55:27 CET 2026
@@ -14,4 +15,13 @@ Started: Fri Feb 20 10:55:27 CET 2026
   - Runtime enum contract tests are strongest when they compare three sources: production guard arrays, generated TS bindings, and Rust enum wire values.
   - `gsnake-wasm` module shape can differ between generated artifacts and mocks; default initializer should be feature-detected before calling.
   - `npm run check` for `gsnake-web-app` catches module-shape/type issues that `vitest` can miss due to mocking.
+---
+
+## [2026-02-20 11:05:37 CET] - US-002
+- Reworked editor integration tests to remove unconditional pass fallbacks and replaced them with explicit opt-in skip semantics plus strict runtime assertions against `VITE_GSNAKE_WEB_URL` and `?test=true` route contracts.
+- Files changed: `gsnake-editor/src/tests/integration.test.ts`, `CLAUDE.md`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`.
+- **Learnings for future iterations:**
+  - Live cross-service checks in unit-test suites should be opt-in and skipped explicitly when the environment is not provisioned, instead of passing vacuously.
+  - Integration assertions should validate concrete response contracts (status/content-type/app shell marker) so endpoint regressions produce a hard failure.
+  - `npm --prefix gsnake-editor run check`, `npm --prefix gsnake-editor run lint`, and `npm --prefix gsnake-editor test` provide sufficient local quality gates for editor test-only changes.
 ---
