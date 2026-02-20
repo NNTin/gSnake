@@ -3,6 +3,7 @@
 - For `gsnake-wasm` in `WasmGameEngine.ts`, import as a namespace and treat the default initializer as optional because generated `pkg/gsnake_wasm.js` may omit a default export while unit-test mocks still provide one.
 - For `gsnake-editor/src/tests/integration.test.ts`, keep live endpoint checks opt-in with `GSNAKE_EDITOR_LIVE_INTEGRATION=1` and use explicit `it.skip` semantics by default, so CI avoids false-green placeholder assertions while enabled runs still enforce real HTTP contract checks.
 - For `e2e/contract.spec.ts`, load deterministic fixture levels through `levelsUrl` using a `data:application/json,...` URL when asserting `CellType` coverage so tests are not coupled to mutable default levels or the editor API test server.
+- For gameplay-flow E2E specs like `e2e/gravity.spec.ts`, keep deterministic fixture levels and fixture-owned solution key arrays in the spec, then assert move totals from `solutionKeys.length` so completion checks stay stable when default levels change.
 - In the `gsnake-core` workspace, run package-targeted checks with `cargo ... -p gsnake-core` (hyphenated package name); `gsnake_core` is the Rust crate import path, not the Cargo package ID.
 - For `KeyboardHandler` unit coverage, set `gameState` per status (`Playing`, `GameOver`, `LevelComplete`, `AllComplete`) and assert side-effect exclusivity (`processMove` vs `restartLevel` vs `loadLevel`) so shortcut regressions are caught at state boundaries.
 - For `WasmGameEngine`, treat `loadLevel(levelNumber)` as a 1-based public API and keep regression tests for both `loadLevel(2)` happy path events and `loadLevel(0)` invalid-index rejection (`Invalid level index: -1`) to catch boundary drift.
@@ -90,4 +91,15 @@ Started: Fri Feb 20 10:55:27 CET 2026
   - In popup-based Playwright flows, fixed sleeps are less reliable than selector-driven readiness checks tied to stable `data-element-id` hooks.
   - Keep one positive readiness assertion (`toBeVisible`) in addition to error-absence checks to avoid vacuous passes.
   - `npx playwright test e2e/editor-integration.spec.ts --project=chromium --reporter=list` is a fast targeted validation loop for this integration path.
+---
+
+## [2026-02-20 11:33:24 CET] - US-009
+- Reworked gravity gameplay E2E to use deterministic fixture levels loaded through `levelsUrl` instead of mutable default level content.
+- Replaced fixed `11` right-arrow loop with fixture-owned `LEVEL_ONE_SOLUTION_KEYS`, and asserted completion move count via `LEVEL_ONE_SOLUTION_KEYS.length`.
+- Kept progression/game-over/restart assertions while validating them against fixture level IDs (`1`, `2`) to preserve stable UI expectations.
+- Files changed: `e2e/gravity.spec.ts`, `CLAUDE.md`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`.
+- **Learnings for future iterations:**
+  - For E2E progression coverage, pair deterministic fixture levels with explicit per-level solution key arrays; this removes coupling to evolving default level design.
+  - If assertions read `[data-element-id=\"level-display\"]`, fixture IDs should align with expected displayed values (the UI shows level IDs, not ordinal index).
+  - `npx playwright test e2e/gravity.spec.ts --project=chromium --reporter=list` is a fast validation path for gravity-flow changes.
 ---
