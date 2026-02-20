@@ -425,6 +425,269 @@ mod tests {
         assert!(!is_settled_falling_food(Position::new(4, 4), &state, 0));
     }
 
+    // ── can_snake_fall: non-solid exit ────────────────────────────────────────
+
+    #[test]
+    fn test_snake_falls_through_non_solid_exit() {
+        let mut state = create_test_level_state();
+        state.exit = Position::new(5, 5);
+        state.exit_is_solid = false;
+        state.snake.direction = Some(Direction::East);
+
+        apply_gravity_to_snake(&mut state);
+
+        // Non-solid exit is not a platform; snake falls past it to the floor
+        assert_eq!(state.snake.segments[0].y, 9);
+    }
+
+    // ── can_object_fall: stone stops on various platforms ─────────────────────
+
+    #[test]
+    fn test_stone_stops_on_another_stone() {
+        let mut state = create_test_level_state();
+        // Two stacked stones; bottom one hits the obstacle floor
+        state.stones = vec![Position::new(3, 2), Position::new(3, 4)];
+        state.obstacles = vec![Position::new(3, 5)];
+
+        apply_gravity_to_stones(&mut state);
+
+        // Bottom stone stops above obstacle; top stone stops above bottom
+        assert!(state.stones.contains(&Position::new(3, 4)));
+        assert!(state.stones.contains(&Position::new(3, 3)));
+    }
+
+    #[test]
+    fn test_stone_stops_on_floating_food() {
+        let mut state = create_test_level_state();
+        state.stones = vec![Position::new(3, 2)];
+        state.floating_food = vec![Position::new(3, 5)];
+
+        apply_gravity_to_stones(&mut state);
+
+        assert_eq!(state.stones[0].y, 4);
+    }
+
+    #[test]
+    fn test_stone_stops_on_settled_falling_food() {
+        let mut state = create_test_level_state();
+        state.stones = vec![Position::new(3, 2)];
+        // Falling food at y=5 settled because obstacle at y=6
+        state.falling_food = vec![Position::new(3, 5)];
+        state.obstacles = vec![Position::new(3, 6)];
+
+        apply_gravity_to_stones(&mut state);
+
+        assert_eq!(state.stones[0].y, 4);
+    }
+
+    #[test]
+    fn test_stone_stops_on_food() {
+        let mut state = create_test_level_state();
+        state.stones = vec![Position::new(3, 2)];
+        state.food = vec![Position::new(3, 5)];
+
+        apply_gravity_to_stones(&mut state);
+
+        assert_eq!(state.stones[0].y, 4);
+    }
+
+    #[test]
+    fn test_stone_stops_on_snake_segment() {
+        let mut state = create_test_level_state();
+        // Stone above the default snake at (5, 2)
+        state.stones = vec![Position::new(5, 0)];
+
+        apply_gravity_to_stones(&mut state);
+
+        assert_eq!(state.stones[0].y, 1);
+    }
+
+    #[test]
+    fn test_stone_stops_on_solid_exit() {
+        let mut state = create_test_level_state();
+        state.stones = vec![Position::new(9, 2)];
+        state.exit = Position::new(9, 5);
+        state.exit_is_solid = true;
+
+        apply_gravity_to_stones(&mut state);
+
+        assert_eq!(state.stones[0].y, 4);
+    }
+
+    #[test]
+    fn test_stone_falls_through_non_solid_exit() {
+        let mut state = create_test_level_state();
+        state.stones = vec![Position::new(9, 2)];
+        state.exit = Position::new(9, 5);
+        state.exit_is_solid = false;
+
+        apply_gravity_to_stones(&mut state);
+
+        assert_eq!(state.stones[0].y, 9);
+    }
+
+    // ── can_object_fall: falling food stops on various platforms ──────────────
+
+    #[test]
+    fn test_falling_food_stops_on_stone() {
+        let mut state = create_test_level_state();
+        state.falling_food = vec![Position::new(3, 2)];
+        state.stones = vec![Position::new(3, 5)];
+
+        apply_gravity_to_falling_food(&mut state);
+
+        assert_eq!(state.falling_food[0].y, 4);
+    }
+
+    #[test]
+    fn test_falling_food_stops_on_floating_food() {
+        let mut state = create_test_level_state();
+        state.falling_food = vec![Position::new(3, 2)];
+        state.floating_food = vec![Position::new(3, 5)];
+
+        apply_gravity_to_falling_food(&mut state);
+
+        assert_eq!(state.falling_food[0].y, 4);
+    }
+
+    #[test]
+    fn test_falling_food_stops_on_settled_falling_food() {
+        let mut state = create_test_level_state();
+        // Bottom food settled on obstacle; top food stops above the settled one
+        state.falling_food = vec![Position::new(3, 2), Position::new(3, 6)];
+        state.obstacles = vec![Position::new(3, 7)];
+
+        apply_gravity_to_falling_food(&mut state);
+
+        assert!(state.falling_food.contains(&Position::new(3, 5)));
+        assert!(state.falling_food.contains(&Position::new(3, 6)));
+    }
+
+    #[test]
+    fn test_falling_food_stops_on_regular_food() {
+        let mut state = create_test_level_state();
+        state.falling_food = vec![Position::new(3, 2)];
+        state.food = vec![Position::new(3, 5)];
+
+        apply_gravity_to_falling_food(&mut state);
+
+        assert_eq!(state.falling_food[0].y, 4);
+    }
+
+    #[test]
+    fn test_falling_food_stops_on_spike() {
+        let mut state = create_test_level_state();
+        state.falling_food = vec![Position::new(3, 2)];
+        state.spikes = vec![Position::new(3, 5)];
+
+        apply_gravity_to_falling_food(&mut state);
+
+        assert_eq!(state.falling_food[0].y, 4);
+    }
+
+    #[test]
+    fn test_falling_food_stops_on_solid_exit() {
+        let mut state = create_test_level_state();
+        state.falling_food = vec![Position::new(9, 2)];
+        state.exit = Position::new(9, 5);
+        state.exit_is_solid = true;
+
+        apply_gravity_to_falling_food(&mut state);
+
+        assert_eq!(state.falling_food[0].y, 4);
+    }
+
+    #[test]
+    fn test_falling_food_falls_through_non_solid_exit() {
+        let mut state = create_test_level_state();
+        state.falling_food = vec![Position::new(9, 2)];
+        state.exit = Position::new(9, 5);
+        state.exit_is_solid = false;
+
+        apply_gravity_to_falling_food(&mut state);
+
+        assert_eq!(state.falling_food[0].y, 9);
+    }
+
+    // ── is_settled_falling_food: each support type ────────────────────────────
+
+    #[test]
+    fn test_is_settled_falling_food_on_stone() {
+        let mut state = create_test_level_state();
+        state.falling_food = vec![Position::new(4, 4)];
+        state.stones = vec![Position::new(4, 5)];
+
+        assert!(is_settled_falling_food(Position::new(4, 4), &state, 0));
+    }
+
+    #[test]
+    fn test_is_settled_falling_food_on_floating_food() {
+        let mut state = create_test_level_state();
+        state.falling_food = vec![Position::new(4, 4)];
+        state.floating_food = vec![Position::new(4, 5)];
+
+        assert!(is_settled_falling_food(Position::new(4, 4), &state, 0));
+    }
+
+    #[test]
+    fn test_is_settled_falling_food_on_regular_food() {
+        let mut state = create_test_level_state();
+        state.falling_food = vec![Position::new(4, 4)];
+        state.food = vec![Position::new(4, 5)];
+
+        assert!(is_settled_falling_food(Position::new(4, 4), &state, 0));
+    }
+
+    #[test]
+    fn test_is_settled_falling_food_on_snake_segment() {
+        let mut state = create_test_level_state();
+        // Snake is at (5, 2) by default; place falling food directly above it
+        state.falling_food = vec![Position::new(5, 1)];
+
+        assert!(is_settled_falling_food(Position::new(5, 1), &state, 0));
+    }
+
+    #[test]
+    fn test_is_settled_falling_food_on_spike() {
+        let mut state = create_test_level_state();
+        state.falling_food = vec![Position::new(4, 4)];
+        state.spikes = vec![Position::new(4, 5)];
+
+        assert!(is_settled_falling_food(Position::new(4, 4), &state, 0));
+    }
+
+    #[test]
+    fn test_is_settled_falling_food_on_solid_exit() {
+        let mut state = create_test_level_state();
+        state.falling_food = vec![Position::new(9, 8)];
+        state.exit = Position::new(9, 9);
+        state.exit_is_solid = true;
+
+        assert!(is_settled_falling_food(Position::new(9, 8), &state, 0));
+    }
+
+    #[test]
+    fn test_is_settled_falling_food_at_floor() {
+        let mut state = create_test_level_state();
+        // y=9 is the last row; below is y=10 which is >= grid height of 10
+        state.falling_food = vec![Position::new(4, 9)];
+
+        assert!(is_settled_falling_food(Position::new(4, 9), &state, 0));
+    }
+
+    #[test]
+    fn test_is_settled_falling_food_recursive_chain() {
+        let mut state = create_test_level_state();
+        // Stack: (4,7) → (4,8) → (4,9) at floor; each is settled through the chain
+        state.falling_food = vec![
+            Position::new(4, 7),
+            Position::new(4, 8),
+            Position::new(4, 9),
+        ];
+
+        assert!(is_settled_falling_food(Position::new(4, 7), &state, 0));
+    }
+
     #[test]
     fn test_deep_falling_food_column_hits_depth_cap_without_stack_overflow() {
         let mut state = create_test_level_state();

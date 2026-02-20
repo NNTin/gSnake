@@ -995,6 +995,95 @@ mod tests {
     }
 
     #[test]
+    fn test_frame_generation_zero_height_returns_empty() {
+        let mut engine = create_engine(create_test_level());
+        engine.level_state.grid_size = GridSize::new(5, 0);
+        let frame = engine.generate_frame();
+        assert!(frame.grid.is_empty());
+    }
+
+    #[test]
+    fn test_frame_generation_cell_count_exceeds_max_returns_empty() {
+        let mut engine = create_engine(create_test_level());
+        // width = MAX+1, height = 1: cell_count = MAX+1 which exceeds limit
+        engine.level_state.grid_size = GridSize::new((MAX_GRID_CELLS as i32) + 1, 1);
+        let frame = engine.generate_frame();
+        assert!(frame.grid.is_empty());
+    }
+
+    #[test]
+    fn test_frame_generation_renders_spikes_stones_floating_and_falling_food() {
+        let mut level = create_test_level();
+        level.grid_size = GridSize::new(6, 6);
+        level.snake = vec![Position::new(0, 0)];
+        level.food = vec![];
+        level.spikes = vec![Position::new(1, 1)];
+        level.stones = vec![Position::new(2, 2)];
+        level.floating_food = vec![Position::new(3, 3)];
+        level.falling_food = vec![Position::new(4, 4)];
+        level.exit = Position::new(5, 5);
+        level.obstacles = vec![];
+
+        let engine = create_engine(level);
+        let frame = engine.generate_frame();
+
+        assert_eq!(frame.grid[1][1], CellType::Spike);
+        assert_eq!(frame.grid[2][2], CellType::Stone);
+        assert_eq!(frame.grid[3][3], CellType::FloatingFood);
+        assert_eq!(frame.grid[4][4], CellType::FallingFood);
+        assert_eq!(frame.grid[5][5], CellType::Exit);
+        assert_eq!(frame.grid[0][0], CellType::SnakeHead);
+    }
+
+    #[test]
+    fn test_engine_creation_rejects_negative_height() {
+        let mut level = create_test_level();
+        level.grid_size = GridSize::new(1, -1);
+
+        let error = GameEngine::new(level).expect_err("negative height should fail");
+        assert_eq!(
+            error,
+            EngineError::InvalidGridSize {
+                width: 1,
+                height: -1
+            }
+        );
+    }
+
+    #[test]
+    fn test_new_with_total_levels_clamps_when_given_lower_than_current() {
+        let mut level = create_test_level();
+        level.id = 5;
+        level.snake = vec![Position::new(9, 8)];
+        level.food = vec![];
+        level.floating_food = vec![];
+        level.falling_food = vec![];
+        level.exit = Position::new(9, 9);
+        // total_levels=2 < current_level=5, so it clamps to 5
+        let mut engine = GameEngine::new_with_total_levels(level, 2).expect("valid grid");
+        engine.game_state.food_collected = engine.game_state.total_food;
+
+        engine.process_move(Direction::South).unwrap();
+
+        // current_level=5, total_levels clamped to 5, so AllComplete
+        assert_eq!(engine.game_state().status, GameStatus::AllComplete);
+    }
+
+    #[test]
+    fn test_process_move_rejected_when_level_complete() {
+        let level = create_test_level();
+        let mut engine = create_engine(level);
+        engine.game_state.status = GameStatus::LevelComplete;
+
+        let result = engine
+            .process_move(Direction::North)
+            .expect("valid snake state should not fail");
+
+        assert!(!result);
+        assert_eq!(engine.game_state().moves, 0);
+    }
+
+    #[test]
     fn test_frame_generation_ignores_out_of_bounds_entities() {
         let mut level = create_test_level();
         level.grid_size = GridSize::new(4, 4);

@@ -304,4 +304,70 @@ mod tests {
         let stones = vec![Position::new(3, 5), Position::new(3, 4)];
         let _ = find_stone_row(Position::new(3, 5), Direction::North, &stones);
     }
+
+    #[test]
+    fn test_south_push_rejected() {
+        let mut state = create_test_level_state();
+        let result = try_push_stone(Position::new(3, 5), Direction::South, &mut state);
+
+        assert_eq!(result, PushResult::VerticalPushAttempt);
+        assert!(state.stones.contains(&Position::new(3, 5)));
+    }
+
+    #[test]
+    fn test_push_west_single_stone() {
+        let mut state = create_test_level_state();
+        state.stones = vec![Position::new(5, 3)];
+        state.obstacles = vec![];
+
+        let result = try_push_stone(Position::new(5, 3), Direction::West, &mut state);
+
+        assert_eq!(result, PushResult::Success);
+        assert!(state.stones.contains(&Position::new(4, 3)));
+        assert!(!state.stones.contains(&Position::new(5, 3)));
+    }
+
+    #[test]
+    fn test_push_west_multiple_stones() {
+        let mut state = create_test_level_state();
+        state.stones = vec![
+            Position::new(5, 3),
+            Position::new(4, 3),
+            Position::new(3, 3),
+        ];
+        state.obstacles = vec![];
+
+        let result = try_push_stone(Position::new(5, 3), Direction::West, &mut state);
+
+        assert_eq!(result, PushResult::Success);
+        assert!(state.stones.contains(&Position::new(4, 3)));
+        assert!(state.stones.contains(&Position::new(3, 3)));
+        assert!(state.stones.contains(&Position::new(2, 3)));
+        assert!(!state.stones.contains(&Position::new(5, 3)));
+    }
+
+    #[test]
+    fn test_push_west_blocked_by_wall() {
+        let mut state = create_test_level_state();
+        state.stones = vec![Position::new(0, 5)];
+
+        // Target would be x=-1, which is out of bounds
+        let result = try_push_stone(Position::new(0, 5), Direction::West, &mut state);
+
+        assert_eq!(result, PushResult::Blocked(Position::new(0, 5)));
+        assert!(state.stones.contains(&Position::new(0, 5)));
+    }
+
+    #[test]
+    fn test_stone_push_blocked_by_snake_segment() {
+        let mut state = create_test_level_state();
+        state.stones = vec![Position::new(3, 5)];
+        // Place a snake body segment at the target position (4, 5)
+        state.snake = Snake::new(vec![Position::new(1, 5), Position::new(4, 5)]);
+
+        let result = try_push_stone(Position::new(3, 5), Direction::East, &mut state);
+
+        assert_eq!(result, PushResult::Blocked(Position::new(3, 5)));
+        assert!(state.stones.contains(&Position::new(3, 5)));
+    }
 }
