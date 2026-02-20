@@ -1,22 +1,15 @@
-import { test, expect, APIRequestContext } from '@playwright/test';
+import { test, expect, type APIRequestContext, type Page } from '@playwright/test';
+import type { LevelDefinition } from './level-definition';
 
 type Position = { x: number; y: number };
-
-type LevelDefinition = {
-  id: number;
-  name: string;
-  gridSize: { width: number; height: number };
+type SnakeRenderSnapshot = {
+  head: Position[];
+  body: Position[];
   snake: Position[];
-  obstacles: Position[];
-  food: Position[];
-  exit: Position;
-  snakeDirection: 'North' | 'South' | 'East' | 'West';
-  floatingFood?: Position[];
-  fallingFood?: Position[];
-  stones?: Position[];
-  spikes?: Position[];
-  totalFood: number;
+  totalCells: number;
 };
+
+const CELL_SELECTOR = '[data-element-id="game-field"] .cell';
 
 async function uploadTestLevel(request: APIRequestContext, levelData: LevelDefinition) {
   const response = await request.post('http://localhost:3001/api/test-level', {
@@ -29,19 +22,84 @@ async function uploadTestLevel(request: APIRequestContext, levelData: LevelDefin
   expect(response.status()).toBe(200);
 }
 
-async function fetchTestLevel(request: APIRequestContext) {
-  const response = await request.get('http://localhost:3001/api/test-level', {
-    headers: {
-      Origin: 'http://localhost:3000'
+function sortPositions(positions: Position[]): Position[] {
+  return [...positions].sort((a, b) => (a.y - b.y) || (a.x - b.x));
+}
+
+async function readRenderedSnake(page: Page, width: number): Promise<SnakeRenderSnapshot> {
+  const renderedTypes = await page.$$eval(CELL_SELECTOR, (cells) =>
+    cells.map((cell) => {
+      const use = cell.querySelector('use');
+      const href = use?.getAttribute('href') ?? use?.getAttribute('xlink:href') ?? '';
+      return href.startsWith('#') ? href.slice(1) : href;
+    })
+  );
+
+  const head: Position[] = [];
+  const body: Position[] = [];
+
+  renderedTypes.forEach((type, index) => {
+    if (type !== 'SnakeHead' && type !== 'SnakeBody') {
+      return;
     }
+
+    const coordinate = { x: index % width, y: Math.floor(index / width) };
+    if (type === 'SnakeHead') {
+      head.push(coordinate);
+      return;
+    }
+    body.push(coordinate);
   });
 
-  expect(response.status()).toBe(200);
-  return (await response.json()) as LevelDefinition;
+  const normalizedHead = sortPositions(head);
+  const normalizedBody = sortPositions(body);
+
+  return {
+    head: normalizedHead,
+    body: normalizedBody,
+    snake: sortPositions([...normalizedHead, ...normalizedBody]),
+    totalCells: renderedTypes.length
+  };
+}
+
+async function openTestLevel(page: Page, runId: string): Promise<void> {
+  await page.goto(`/?test=true&run=${runId}`);
+  await expect(page.locator('[data-element-id="game-field"]')).toBeVisible();
+  await expect(page.locator(CELL_SELECTOR).first()).toBeVisible();
+}
+
+async function expectRenderedSnake(page: Page, levelData: LevelDefinition): Promise<SnakeRenderSnapshot> {
+  const snakeHead = levelData.snake[0];
+  if (!snakeHead) {
+    throw new Error('Fixture level must include at least one snake segment');
+  }
+
+  const expectedHead = sortPositions([snakeHead]);
+  const expectedBody = sortPositions(levelData.snake.slice(1));
+
+  await expect
+    .poll(
+      async () => {
+        const snapshot = await readRenderedSnake(page, levelData.gridSize.width);
+        return {
+          head: snapshot.head,
+          body: snapshot.body,
+          totalCells: snapshot.totalCells
+        };
+      },
+      { timeout: 10000 }
+    )
+    .toEqual({
+      head: expectedHead,
+      body: expectedBody,
+      totalCells: levelData.gridSize.width * levelData.gridSize.height
+    });
+
+  return readRenderedSnake(page, levelData.gridSize.width);
 }
 
 test.describe('Snake drawing bug fixes', () => {
-  test('snake appears on first draw and clears on second draw', async ({ request }) => {
+  test('renders snake markers and clears stale snake cells after level replacement', async ({ page, request }) => {
     const firstSnake: LevelDefinition = {
       id: 999999,
       name: 'Test Level - First Snake',
@@ -62,10 +120,11 @@ test.describe('Snake drawing bug fixes', () => {
       totalFood: 1
     };
 
-    await test.step('Upload initial snake', async () => {
+    await test.step('Upload and render first snake', async () => {
       await uploadTestLevel(request, firstSnake);
-      const testLevel = await fetchTestLevel(request);
-      expect(testLevel.snake.length).toBe(3);
+      await openTestLevel(page, 'first');
+      const firstSnapshot = await expectRenderedSnake(page, firstSnake);
+      expect(firstSnapshot.snake).toEqual(sortPositions(firstSnake.snake));
     });
 
     const secondSnake: LevelDefinition = {
@@ -90,28 +149,16 @@ test.describe('Snake drawing bug fixes', () => {
       totalFood: 1
     };
 
-    await test.step('Upload new snake and ensure old snake is cleared', async () => {
+    await test.step('Upload second snake and ensure stale cells are cleared', async () => {
       await uploadTestLevel(request, secondSnake);
-      const testLevel = await fetchTestLevel(request);
+      await openTestLevel(page, 'second');
 
-      expect(testLevel.snake.length).toBe(5);
-      expect(testLevel.snake[0].x).toBe(10);
-      expect(testLevel.snake[0].y).toBe(10);
+      const secondSnapshot = await expectRenderedSnake(page, secondSnake);
+      expect(secondSnapshot.snake).toEqual(sortPositions(secondSnake.snake));
 
-      const hasOldSnake = testLevel.snake.some(seg => seg.x === 5 && seg.y === 5);
-      expect(hasOldSnake).toBe(false);
-    });
-
-    await test.step('Snake data structure is valid', async () => {
-      const testLevel = await fetchTestLevel(request);
-      const validSnake = testLevel.snake.every(seg =>
-        typeof seg.x === 'number' &&
-        typeof seg.y === 'number' &&
-        Number.isFinite(seg.x) &&
-        Number.isFinite(seg.y)
-      );
-
-      expect(validSnake).toBe(true);
+      for (const staleSegment of firstSnake.snake) {
+        expect(secondSnapshot.snake).not.toContainEqual(staleSegment);
+      }
     });
   });
 });

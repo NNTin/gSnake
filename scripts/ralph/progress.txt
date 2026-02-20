@@ -10,6 +10,7 @@
 - For `CompletionTracker`, treat localStorage as untrusted I/O: parse failures or non-array payloads should resolve to `[]`, and `markCompleted(...)` must catch `setItem` write failures instead of throwing.
 - For Playwright popup flows in `e2e/*`, avoid `waitForTimeout(...)`; wait on `domcontentloaded` plus a deterministic ready selector such as `[data-element-id="game-field"]` and pair it with a positive visibility assertion.
 - For `e2e/contract.spec.ts` keyboard-ordering checks, synchronize opposite-direction keypresses on deterministic frame progress (`frame.state.moves` increment via `waitForFunction`) instead of fixed sleeps to keep CI timing stable.
+- For rendered-grid E2E checks in `e2e/snake-bugs.spec.ts`, extract `SnakeHead`/`SnakeBody` from `[data-element-id="game-field"] .cell use[href]` and map row-major DOM indices back to coordinates (`x = idx % width`, `y = floor(idx / width)`) so tests assert visual state instead of only API payloads.
 
 # Ralph Progress Log
 Started: Fri Feb 20 10:55:27 CET 2026
@@ -113,4 +114,14 @@ Started: Fri Feb 20 10:55:27 CET 2026
   - For keyboard sequencing checks, capture `initialMoves` and wait for `moves + 1` before sending a second directional input to avoid flaky ordering caused by variable frame timing.
   - Root-level `npx playwright test e2e/contract.spec.ts --project=chromium --reporter=list` is a fast validation loop for contract payload and error-path changes.
   - Pair E2E validation with `npm --prefix gsnake-web run check` so type regressions are caught even when the changed file is test-only.
+---
+
+## [2026-02-20 11:39:47 CET] - US-011
+- Reworked `e2e/snake-bugs.spec.ts` from API-only verification to browser rendering assertions by reading rendered `SnakeHead`/`SnakeBody` markers from the game grid and matching their coordinates against fixture snake segments.
+- Added explicit stale-cell regression coverage by uploading a replacement test level, reopening `/?test=true`, and asserting level-A snake coordinates are absent while level-B coordinates render exactly.
+- Files changed: `e2e/snake-bugs.spec.ts`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`.
+- **Learnings for future iterations:**
+  - In web-game E2E, `.cell > use[href="#CellType"]` is the most stable rendering contract for asserting which entity type is actually drawn.
+  - When asserting rendered coordinates, convert flattened DOM cell index back to grid coordinates using fixture width (`x = idx % width`, `y = floor(idx / width)`).
+  - `npx playwright test e2e/snake-bugs.spec.ts --project=chromium --reporter=list` is a fast targeted loop for snake-draw regression checks.
 ---
