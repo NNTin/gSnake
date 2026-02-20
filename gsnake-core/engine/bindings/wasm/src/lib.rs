@@ -39,7 +39,15 @@ impl WasmGameEngine {
     #[wasm_bindgen(js_name = onFrame)]
     pub fn on_frame(&mut self, callback: Function) {
         self.on_frame_callback = Some(callback);
-        let _ = self.emit_frame();
+        if let Err(error) = self.emit_frame() {
+            web_sys::console::error_1(
+                &format!(
+                    "Failed to emit initial frame in onFrame: {}",
+                    js_error_message(&error)
+                )
+                .into(),
+            );
+        }
     }
 
     /// Processes a move in the given direction
