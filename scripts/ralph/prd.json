@@ -1,493 +1,345 @@
 {
   "project": "gSnake",
-  "description": "Remediate the level-editor findings documented in gsnake-specs/tasks/code-review-editor.md, with priority on data-loss prevention, payload consistency, schema hardening, and security/UX reliability.",
+  "description": "Remediate the Rust game engine findings documented in gsnake-specs/tasks/code-review-rust-engine.md, with priority on gameplay correctness bugs, memory safety, API reliability, and type-system clarity.",
   "userStories": [
     {
       "id": "US-001",
-      "title": "Make snake-tool auto-clear behavior undoable or explicit",
-      "description": "As a level designer, I want snake-clearing behavior to be recoverable so accidental palette selections do not destroy my work.",
+      "title": "Block stone pushes into food cells and the exit tile",
+      "description": "As a player, I want stones to be blocked by food items and the exit so that pushing a stone cannot corrupt level state or soft-lock the exit.",
       "acceptanceCriteria": [
-        "Selecting the snake tool no longer destroys existing snake segments outside the command/undo path",
-        "If snake auto-clear remains, the action is recorded in undo/redo and can be restored with Ctrl+Z",
-        "Add regression coverage for selecting snake tool after snake segments already exist",
-        "Typecheck passes",
-        "Tests pass",
-        "Verify in browser using dev-browser skill"
+        "`is_space_available` in `stone_mechanics.rs` returns false when the target position contains regular food, floating food, falling food, or the exit cell",
+        "A stone pushed toward a food cell is blocked and the food remains uncorrupted",
+        "A stone pushed toward the exit tile is blocked regardless of `exit_is_solid` (mirrors the blocking logic already applied by `can_object_fall` in gravity.rs)",
+        "Add regression tests: pushing a stone into a food cell is blocked, pushing a stone into the exit tile is blocked",
+        "Existing stone-push tests continue to pass",
+        "Tests pass"
       ],
       "priority": 1,
-      "passes": true,
+      "passes": false,
       "notes": "",
       "additionalInformation": {
         "severity": "High",
         "file": [
-          "gsnake-editor/src/lib/EditorLayout.svelte:173-196"
+          "gsnake-core/engine/core/src/stone_mechanics.rs:110-145"
         ],
-        "issue": "Selecting the snake tool clears existing snake cells directly without going through captureState/executeCommand.",
-        "impact": "Users can lose their built snake with no undo recovery after an accidental tool switch.",
-        "suggestion": "Remove implicit auto-clear or wrap the clear in createCellModificationCommand/executeCommand so it is undoable."
+        "issue": "`is_space_available` checks only obstacles, other stones, and snake segments. It does not check regular food, floating food, falling food, or the exit cell. A stone can therefore be pushed horizontally into a cell that contains any food variant or the exit tile without any detection.",
+        "impact": "Wrong game behavior reachable from valid player input. A stone pushed onto a food cell creates a corrupted state where both objects visually overlap and the food is still collectable while the stone occupies the same cell. A stone pushed onto the exit can soft-lock the level permanently with no indication to the player.",
+        "suggestion": "Add food, floating food, falling food, and exit (when the exit is present) to the blocking checks inside `is_space_available`. Mirror the checks that `can_object_fall` already applies in `gravity.rs` — those checks already treat food as a platform, so the logic precedent exists."
       }
     },
     {
       "id": "US-002",
-      "title": "Prevent hidden file-input leaks on canceled load dialogs",
-      "description": "As an editor user, I want repeated load cancellations to clean up DOM state so long sessions stay stable.",
+      "title": "Remove unmaintained wee_alloc WASM allocator",
+      "description": "As a maintainer, I want the WASM binary to use a maintained memory allocator so prolonged game sessions do not risk heap fragmentation or correctness issues.",
       "acceptanceCriteria": [
-        "Loading level files does not leave orphaned hidden file input elements when picker is canceled",
-        "Cleanup path is safe even if the element is already detached",
-        "Add regression coverage for canceling the file picker",
-        "Typecheck passes",
+        "Remove `wee_alloc = \"0.4\"` dependency from `gsnake-core/engine/bindings/wasm/Cargo.toml`",
+        "Remove the `#[global_allocator]` static declaration and its `use wee_alloc::WeeAlloc` import from the WASM binding source",
+        "WASM build succeeds: `wasm-pack build --target bundler` completes without error",
         "Tests pass"
       ],
       "priority": 2,
-      "passes": true,
+      "passes": false,
       "notes": "",
       "additionalInformation": {
-        "severity": "High",
+        "severity": "Medium",
         "file": [
-          "gsnake-editor/src/lib/EditorLayout.svelte:411-476"
+          "gsnake-core/engine/bindings/wasm/Cargo.toml:21",
+          "gsnake-core/engine/bindings/wasm/src/lib.rs"
         ],
-        "issue": "handleLoad creates and appends a new file input each invocation but only removes it in onchange, which does not fire on cancel.",
-        "impact": "Canceled loads leak hidden DOM nodes and can make cleanup paths unreliable.",
-        "suggestion": "Handle cancel/focus cleanup or reuse a single persistent input element."
+        "issue": "`wee_alloc = \"0.4\"` is set as the global WASM allocator. The `wee_alloc` crate has been formally unmaintained since 2022, has known memory fragmentation and correctness issues under sustained allocation patterns, and is no longer recommended by the `wasm-bindgen` team.",
+        "impact": "In a game engine that allocates `Vec` frequently for snake segments, food lists, and stone lists during gameplay, prolonged sessions may exhibit gradual heap fragmentation or memory growth in WASM environments. There is no security patch path for future `wee_alloc` vulnerabilities.",
+        "suggestion": "Remove `wee_alloc` and its `#[global_allocator]` declaration, relying on the default Rust allocator (which maps to `dlmalloc` in WASM targets). Binary size impact is negligible given `opt-level = \"z\"` and LTO are already enabled in `[profile.release]`."
       }
     },
     {
       "id": "US-003",
-      "title": "Unify handleTest payload construction with level export model",
-      "description": "As a maintainer, I want one canonical payload builder so test and export behavior cannot drift.",
+      "title": "Log on_frame emit_frame errors to browser console instead of silently discarding",
+      "description": "As a developer, I want initial-frame delivery failures surfaced in the browser console so serialization errors or JS callback failures are diagnosable at runtime.",
       "acceptanceCriteria": [
-        "handleTest uses buildLevelExportPayload (or a shared wrapper) instead of duplicating serialization logic",
-        "Test payload includes difficulty and uses canonical snake direction conversion",
-        "Add regression coverage that test payload structure matches export payload rules",
-        "Typecheck passes",
+        "`on_frame` in `gsnake-core/engine/bindings/wasm/src/lib.rs` logs the `emit_frame` result error via `web_sys::console::error_1` when `emit_frame` returns `Err`",
+        "The `let _ = self.emit_frame()` discard is replaced by explicit error handling",
+        "The public API signature of `on_frame` remains unchanged (`pub fn on_frame(&mut self, callback: Function)` returning `()`)",
         "Tests pass"
       ],
       "priority": 3,
-      "passes": true,
+      "passes": false,
       "notes": "",
       "additionalInformation": {
-        "severity": "High",
+        "severity": "Medium",
         "file": [
-          "gsnake-editor/src/lib/EditorLayout.svelte:517-594",
-          "gsnake-editor/src/lib/levelModel.ts"
+          "gsnake-core/engine/bindings/wasm/src/lib.rs:44-47"
         ],
-        "issue": "handleTest manually rebuilds level JSON and diverges from buildLevelExportPayload in direction conversion and difficulty inclusion.",
-        "impact": "Testing can run against a payload that differs from exported levels, causing silent mismatches.",
-        "suggestion": "Replace ad-hoc handleTest payload logic with buildLevelExportPayload and test-only ID/difficulty inputs."
+        "issue": "The `on_frame` method emits an initial frame to the newly registered callback via `emit_frame()`, but its `Result` is discarded with `let _ =`. If `emit_frame` fails (e.g., JSON serialization of the initial frame fails, or the JS callback throws), the caller receives no indication.",
+        "impact": "Serialization failures or JS callback errors during initial frame delivery are invisible to the JS caller. The UI may observe that `onFrame` returned `undefined` and believe the callback was registered successfully and the initial frame was delivered, when in fact it was not — causing the grid to display a stale or empty state with no error to act on.",
+        "suggestion": "Change the `let _ = self.emit_frame()` line to match on the result and call `web_sys::console::error_1(&format!(...).into())` on the `Err` branch. This preserves the stable `()` return type while making failures visible in DevTools. Avoid changing the public signature since the WASM API is part of the TypeScript contract."
       }
     },
     {
       "id": "US-004",
-      "title": "Fail loudly or support negative coordinates during import",
-      "description": "As a user importing external levels, I want unsupported coordinates surfaced clearly so data is not silently dropped.",
+      "title": "Change total_food to Option<u32> to disambiguate zero-food levels",
+      "description": "As a level designer, I want to express zero required food items unambiguously so levels without food are not mistakenly auto-counted.",
       "acceptanceCriteria": [
-        "Loading a level with unsupported negative coordinates no longer silently drops entities",
-        "Editor either rejects with a clear validation error or explicitly supports mapped negative coordinates",
-        "Add regression coverage for negative-coordinate import behavior",
-        "Typecheck passes",
-        "Tests pass",
-        "Verify in browser using dev-browser skill"
+        "`total_food` field in `LevelDefinition` is changed from `u32` to `Option<u32>`",
+        "`None` means auto-count from food vectors; `Some(n)` means exactly n items are required (including `Some(0)` for zero-food levels)",
+        "JSON deserialisation: absent `totalFood` key deserializes to `None`; explicit `\"totalFood\": 0` deserializes to `Some(0)`",
+        "`LevelState::from_definition` (or the relevant construction site in `engine.rs`) branches on the `Option` instead of comparing to zero",
+        "`LevelDefinition::new()` initializes `total_food: None` so programmatic level creation defaults to auto-count",
+        "All existing tests that set `total_food` are updated to use `Some(n)`",
+        "Contract fixtures are regenerated if `total_food` appears in any fixture JSON",
+        "Tests pass"
       ],
       "priority": 4,
-      "passes": true,
+      "passes": false,
       "notes": "",
       "additionalInformation": {
-        "severity": "High",
+        "severity": "Medium",
         "file": [
-          "gsnake-editor/src/lib/EditorLayout.svelte:68-99",
-          "contracts/level-definition.schema.json:103-115"
+          "gsnake-core/engine/core/src/engine.rs:25-29",
+          "gsnake-core/engine/core/src/models.rs:183"
         ],
-        "issue": "Schema/test path accepts negative positions, but placeEntitiesFromLevelData drops x<0 or y<0 entries silently.",
-        "impact": "Round-tripping levels with negative coordinates can corrupt files without warning.",
-        "suggestion": "Reject unsupported coordinates at load with explicit user feedback or implement full negative-coordinate support."
+        "issue": "The engine uses `total_food == 0` as a sentinel to trigger auto-counting. A level definition that explicitly sets `total_food: 0` intending to require no food cannot be distinguished from the default unset value. The `LevelDefinition::new()` constructor always sets `total_food: 0`, yet the engine comment says 'if total_food is explicitly set (non-zero), use it' — the distinction between explicitly set to zero and default zero is unenforceable from the type system alone.",
+        "impact": "Level definitions that legitimately need zero required food items (e.g., a puzzle where the snake only needs to reach the exit) cannot express this unambiguously. If those levels contain non-empty food vectors for cosmetic reasons, the win condition calculation is silently broken regardless of the designer's explicit intent.",
+        "suggestion": "Change `total_food` to `Option<u32>` in `LevelDefinition`. `None` means 'auto-count'; `Some(n)` means 'exactly n items required, including zero'. Update the JSON deserialization: use `#[serde(default)]` so absent keys become `None`. Update `engine.rs` to match on the `Option`. This aligns the type system with the actual semantics."
       }
     },
     {
       "id": "US-005",
-      "title": "Harden sprite injection pipeline against untrusted SVG",
-      "description": "As a security-conscious maintainer, I want sprite loading constrained to safe SVG content so runtime HTML injection risk is reduced.",
+      "title": "Resolve GameStatus::AllComplete — implement or remove and document",
+      "description": "As a maintainer, I want the AllComplete game status variant either implemented with a clear engine transition or removed and replaced with documented JS-layer responsibility so the type surface is not misleading.",
       "acceptanceCriteria": [
-        "SpriteLoader validates fetch response success and content type before DOM injection",
-        "Injected SVG content path does not allow arbitrary script-bearing HTML",
-        "Document trust boundary for sprites asset source",
-        "Typecheck passes",
-        "Tests pass",
-        "Verify in browser using dev-browser skill"
+        "Decision is made: either implement `AllComplete` in the engine or remove the variant",
+        "If removed: `GameStatus` enum no longer contains `AllComplete`; WASM bindings, TypeScript-generated types, and all test sites are updated; a code comment at the `LevelComplete` arm in `engine.rs` documents that the JS host is responsible for tracking all-levels completion",
+        "If implemented: engine transitions to `AllComplete` on the final level's `LevelComplete` (requires passing a total-level-count to the engine); a test covers the transition",
+        "No dead variant remains in the enum without documentation or a test",
+        "Tests pass"
       ],
       "priority": 5,
-      "passes": true,
+      "passes": false,
       "notes": "",
       "additionalInformation": {
         "severity": "Medium",
         "file": [
-          "gsnake-editor/src/lib/SpriteLoader.svelte:7-19"
+          "gsnake-core/engine/core/src/models.rs:40",
+          "gsnake-core/engine/core/src/engine.rs"
         ],
-        "issue": "Raw fetched sprite text is inserted via HTML injection without sanitization or integrity checks.",
-        "impact": "A compromised sprite URL/source could inject attacker-controlled script or markup.",
-        "suggestion": "Require image/svg+xml responses and parse/insert sanitized SVG nodes with documented trust assumptions."
+        "issue": "`GameStatus` includes an `AllComplete` variant, but `GameEngine` only ever sets `GameStatus::Playing`, `GameStatus::GameOver`, and `GameStatus::LevelComplete`. No code path in `engine.rs` transitions to `AllComplete`. The WASM binding, the CLI binding, and all tests deal only with `LevelComplete`.",
+        "impact": "Either the final-level win condition is silently missing (the engine never signals 'all done'), or the enum carries a dead variant that inflates the JS-side type surface with a value that will never arrive from the engine. Both outcomes mislead future developers about system behavior.",
+        "suggestion": "Remove the variant from the core `GameStatus` enum and let the JS layer handle the 'all done' state by tracking `LevelComplete` events itself. Document this decision with a comment at the `LevelComplete` arm in `engine.rs`. Alternatively, if the engine should own this transition, pass the total level count at construction and add the transition + test."
       }
     },
     {
       "id": "US-006",
-      "title": "Freeze CORS allowlist resolution for deterministic runtime behavior",
-      "description": "As an API maintainer, I want CORS policy resolution stable per process so request handling is predictable.",
+      "title": "Extend CellType serialization contract tests to cover all 10 variants",
+      "description": "As a maintainer, I want the wire-format contract tests to enumerate all CellType variants so renames or serde changes are caught before reaching the JS frontend.",
       "acceptanceCriteria": [
-        "Allowed origins are resolved once at startup unless explicit hot-reload behavior is intentionally implemented",
-        "Per-request CORS checks reference the frozen allowlist",
-        "Server tests cover allowed and rejected origins with the new behavior",
-        "Typecheck passes",
+        "`test_celltype_serialization` in `contract_tests.rs` covers all 10 variants: `Empty`, `SnakeHead`, `SnakeBody`, `Food`, `Obstacle`, `Exit`, `FloatingFood`, `FallingFood`, `Stone`, `Spike`",
+        "`test_celltype_roundtrip` also covers all 10 variants",
+        "Each new variant's expected JSON string is explicitly asserted (not just 'it serializes to something')",
         "Tests pass"
       ],
       "priority": 6,
-      "passes": true,
+      "passes": false,
       "notes": "",
       "additionalInformation": {
         "severity": "Medium",
         "file": [
-          "gsnake-editor/server.ts:37-44"
+          "gsnake-core/engine/core/tests/contract_tests.rs:28-47",
+          "gsnake-core/engine/core/tests/contract_tests.rs:234-250"
         ],
-        "issue": "resolveAllowedCorsOrigins reads env values for every incoming request.",
-        "impact": "Runtime env changes can alter CORS decisions mid-flight and create nondeterministic behavior.",
-        "suggestion": "Resolve and freeze allowlist at module load; only support runtime updates if explicitly designed and documented."
+        "issue": "Both `test_celltype_serialization` (line 28) and `test_celltype_roundtrip` (line 234) enumerate only six `CellType` variants: `Empty`, `SnakeHead`, `SnakeBody`, `Food`, `Obstacle`, `Exit`. The four newer variants — `FloatingFood`, `FallingFood`, `Stone`, and `Spike` — are completely absent from the serialization contract tests.",
+        "impact": "If the string representation of any of these variants changes (e.g., a rename, a typo fix, or a `#[serde(rename_all)]` change), no test will catch the regression before it reaches the JS frontend. The frontend would silently receive unrecognized cell types and render empty or wrong cells without any build-time or test-time warning.",
+        "suggestion": "Extend both test functions to cover all 10 `CellType` variants. Assert the exact JSON string for each (e.g., `\"FloatingFood\"`, `\"FallingFood\"`, `\"Stone\"`, `\"Spike\"`). The exhaustive list also makes future additions visible as a test gap the moment the enum grows."
       }
     },
     {
       "id": "US-007",
-      "title": "Centralize level-file validation used by both load entry points",
-      "description": "As a maintainer, I want one shared level-file validator so both load paths enforce identical rules.",
+      "title": "Restrict find_stone_row to horizontal directions only",
+      "description": "As a maintainer, I want find_stone_row to enforce horizontal-only input so the contiguous-row invariant is explicit and future callers cannot accidentally invoke it with vertical directions.",
       "acceptanceCriteria": [
-        "Extract common level-file validation into a shared module used by App.svelte and EditorLayout.svelte",
-        "Both load paths produce consistent accept/reject behavior for the same input",
-        "Add regression tests that exercise both load paths against invalid and valid payloads",
-        "Typecheck passes",
+        "`find_stone_row` in `stone_mechanics.rs` accepts only horizontal directions (either by changing its parameter to a horizontal-direction enum/type or by adding a `debug_assert!` that panics on vertical input in tests)",
+        "Existing call sites in `try_push_stone` pass a horizontal direction",
+        "A test asserts that vertical direction input is rejected (if using assertion) or that the function signature prevents it at compile time (if using a type)",
         "Tests pass"
       ],
       "priority": 7,
-      "passes": true,
+      "passes": false,
       "notes": "",
       "additionalInformation": {
         "severity": "Medium",
         "file": [
-          "gsnake-editor/src/App.svelte:29-45",
-          "gsnake-editor/src/lib/EditorLayout.svelte:429-445"
+          "gsnake-core/engine/core/src/stone_mechanics.rs:57-68"
         ],
-        "issue": "Validation logic is duplicated and can drift between landing-page and in-editor load paths.",
-        "impact": "Future rule changes can silently apply to only one path, allowing inconsistent invalid imports.",
-        "suggestion": "Create a single validateLevelFileData helper and call it from both load entry points."
+        "issue": "`can_push_stones` checks only the last stone's target position, which is correct because `find_stone_row` only adds a stone to the row when the very next cell contains a stone. However, `find_stone_row` uses `get_next_position` which handles all four directions including North and South. The vertical guard exists only at the `try_push_stone` call site; if `find_stone_row` were ever called from another site without that guard, North/South offsets could silently produce an incorrect row.",
+        "impact": "Low immediate risk since the contiguous-row invariant holds at the current call site. The concern is future maintainability: a developer adding a second call site to `find_stone_row` might not realize the function is only safe for horizontal directions, leading to a subtle ordering or position bug.",
+        "suggestion": "Restrict `find_stone_row` to only accept horizontal directions. The simplest approach is a `debug_assert!` at the function entry that panics in test builds if the direction is vertical. A stronger approach is creating a `HorizontalDirection` enum that only has `East` and `West` variants, making the invariant enforced by the type system at compile time."
       }
     },
     {
       "id": "US-008",
-      "title": "Replace implicit reactive grid reset with explicit reset control flow",
-      "description": "As a maintainer, I want grid reset timing explicit so entity placement cannot be wiped by reactive ordering side effects.",
+      "title": "Add depth bound to is_settled_falling_food recursion",
+      "description": "As a maintainer, I want the recursive falling-food settlement check to have a depth cap so adversarial or malformed levels with tall food stacks cannot cause a stack overflow.",
       "acceptanceCriteria": [
-        "Grid reset is moved from broad reactive statement to explicit resetGrid(width, height) calls",
-        "Load flow preserves placed entities after dimension updates",
-        "Add regression coverage for load and resize ordering behavior",
-        "Typecheck passes",
-        "Tests pass",
-        "Verify in browser using dev-browser skill"
+        "`is_settled_falling_food` in `gravity.rs` accepts a `depth` parameter (or uses an internal counter) that limits recursion",
+        "The depth cap is at least the configured maximum grid height (or a safe constant that covers all realistic grid sizes)",
+        "When the depth cap is reached, the function returns a safe value (treats the item as settled or not-settled — document the chosen behavior)",
+        "Add a test with a vertical column of stacked falling food items that would previously overflow; the test must complete without a stack overflow",
+        "Existing gravity tests continue to pass",
+        "Tests pass"
       ],
       "priority": 8,
-      "passes": true,
+      "passes": false,
       "notes": "",
       "additionalInformation": {
         "severity": "Medium",
         "file": [
-          "gsnake-editor/src/lib/EditorLayout.svelte:41-51"
+          "gsnake-core/engine/core/src/gravity.rs:158-181"
         ],
-        "issue": "Reactive grid-reset runs broadly and can wipe cells based on dependency access/order.",
-        "impact": "Future refactors can trigger post-placement wipes and produce blank-grid regressions.",
-        "suggestion": "Use explicit resetGrid calls at controlled points instead of order-sensitive reactive resets."
+        "issue": "`is_settled_falling_food` determines whether a falling food item at position `pos` has solid support by checking what is at `pos.y + 1`. If that cell also contains a falling food item, the function calls itself recursively without any depth limit. For a column of N stacked falling food items, the recursion depth equals N.",
+        "impact": "In practice game levels will have at most a handful of falling food items, making a stack overflow unreachable from real gameplay. However, the function is called inside `can_object_fall` which is called inside a loop in `apply_gravity_to_falling_food`, so unbounded recursion runs per gravity step. A malformed or programmatically generated level with a very tall column of falling food items could cause a stack overflow that crashes the WASM module.",
+        "suggestion": "Add a `depth: usize` parameter to `is_settled_falling_food` and pass `depth + 1` in the recursive call. Add a guard at the top: if `depth > MAX_GRID_DIMENSION` (or a reasonable constant like 1000), return a safe default. Update all call sites to pass `0` as the initial depth."
       }
     },
     {
       "id": "US-009",
-      "title": "Make level-test API endpoint configurable",
-      "description": "As a developer, I want test API URL configuration so level testing works outside localhost defaults.",
+      "title": "Document gravity food-consumption semantics and multi-segment edge case",
+      "description": "As a maintainer, I want explicit comments in gravity.rs documenting that food is only consumed by deliberate moves — not gravity falls — so the intentional design is clear and not confused with a missing check.",
       "acceptanceCriteria": [
-        "handleTest uses an environment-configurable API base URL with localhost:3001 fallback",
-        "User-facing error message references configured endpoint behavior",
-        "Document required environment variable in editor README or config docs",
-        "Typecheck passes",
+        "Add a doc-comment or inline comment near `can_snake_fall` in `gravity.rs` that explicitly states: food consumption only occurs through `check_and_eat_food` after deliberate horizontal moves, not after gravity-induced falls",
+        "Add a comment explaining the food-as-platform invariant and the multi-segment edge case (food beside a non-head segment after a fall is never consumed)",
+        "No runtime behavior is changed",
         "Tests pass"
       ],
       "priority": 9,
-      "passes": true,
+      "passes": false,
       "notes": "",
       "additionalInformation": {
-        "severity": "Medium",
+        "severity": "High",
         "file": [
-          "gsnake-editor/src/lib/EditorLayout.svelte:598"
+          "gsnake-core/engine/core/src/gravity.rs:74-112",
+          "gsnake-core/engine/core/src/engine.rs:111"
         ],
-        "issue": "handleTest posts to a hardcoded http://localhost:3001/api/test-level URL.",
-        "impact": "Testing fails in non-default ports/hosts and presents potentially misleading errors.",
-        "suggestion": "Introduce VITE_GSNAKE_API_URL (or equivalent) and consume it in handleTest."
+        "issue": "`can_snake_fall` stops the snake above food (treating food as a platform), but the `check_and_eat_food` call in `engine.rs` line 111 only checks the new head position after an explicit horizontal move — it does not run after gravity-induced falls. With a multi-segment snake, segments at varying columns stop independently; food beside a non-head segment acts as a floor but is never eaten even if the snake slides along it.",
+        "impact": "Food beside a non-head snake segment can become permanently unreachable if the snake body settles next to it after a gravity fall. The current comment at lines 91-97 describes food as 'acting as platform for snake' but does not document that the food-consumption path is intentionally not triggered by gravity. A future developer could easily add a gravity-path food check without realizing the design intent, breaking level behavior.",
+        "suggestion": "Document at the relevant code part that food is only consumed by deliberate moves, not by gravity, and reflect this design decision in the level design guidelines. The comment should explain: (1) food stops the snake above it via `can_snake_fall`; (2) `check_and_eat_food` is only called after explicit `processMove` horizontal steps; (3) level designers should not rely on gravity to consume food."
       }
     },
     {
       "id": "US-010",
-      "title": "Reset snake direction coherently when snake is auto-cleared",
-      "description": "As a user, I want snake direction state to stay consistent with snake presence so exports are predictable.",
+      "title": "Remove no-op drop(direction) from WASM process_move binding",
+      "description": "As a maintainer, I want the no-op drop call removed so the code does not suggest an ownership pattern that has no effect in this synchronous WASM context.",
       "acceptanceCriteria": [
-        "When snake segments are auto-cleared, snakeDirection behavior is explicitly defined and implemented consistently",
-        "If direction is reset, UI reflects reset state immediately; if retained, behavior is documented and tested",
-        "Add regression test around clear-and-redraw snake flow",
-        "Typecheck passes",
-        "Tests pass",
-        "Verify in browser using dev-browser skill"
+        "The `drop(direction)` call at line 147 of `gsnake-core/engine/bindings/wasm/src/lib.rs` is removed",
+        "The surrounding code is unchanged — `direction_str` extraction and `parse_direction_str` call remain intact",
+        "Tests pass"
       ],
       "priority": 10,
-      "passes": true,
+      "passes": false,
       "notes": "",
       "additionalInformation": {
-        "severity": "Medium",
+        "severity": "Low",
         "file": [
-          "gsnake-editor/src/lib/EditorLayout.svelte:177-193"
+          "gsnake-core/engine/bindings/wasm/src/lib.rs:147"
         ],
-        "issue": "Snake auto-clear leaves snakeDirection unchanged even when snakeSegments becomes empty.",
-        "impact": "Direction state can appear detached from current snake, producing surprising exports.",
-        "suggestion": "Reset direction when clearing or codify retained-direction behavior with explicit UX and tests."
+        "issue": "`direction` (a `JsValue`) is on the stack and would be dropped automatically when the function returns. The explicit `drop(direction)` call has no semantic effect on the JS side — the reference count in the WASM JS glue is managed by `wasm-bindgen` and is decremented when the Rust binding function returns. The comment-free `drop` suggests the author intended to 'release' the JS object early, but `JsValue` does not hold a live handle that benefits from early release within a synchronous function.",
+        "impact": "No runtime impact. Minor readability confusion — future developers may assume the explicit `drop` is necessary for correctness and preserve it through refactors, or spend time investigating why it is there.",
+        "suggestion": "Remove the `drop(direction)` call. If the original intent was to clarify that `direction` is no longer used after `direction_str` is extracted, a comment `// direction is consumed; use direction_str hereafter` is clearer if any documentation is needed at all."
       }
     },
     {
       "id": "US-011",
-      "title": "Clear stale snakeSegmentIndex metadata during snake clear",
-      "description": "As a maintainer, I want snake clear to reset all segment metadata so cell state is internally consistent.",
+      "title": "Clarify exit_is_solid None vs Some(true) semantics in LevelDefinition",
+      "description": "As a maintainer, I want the exit_is_solid field semantics documented or the constructor default aligned with the deserializer fallback so the two paths cannot diverge.",
       "acceptanceCriteria": [
-        "Snake clear path sets snakeSegmentIndex to undefined alongside entity/isSnakeSegment reset",
-        "No cell can retain stale segment index after clear operations",
-        "Add focused regression test for post-clear cell metadata",
-        "Typecheck passes",
+        "Either: `LevelDefinition::new()` sets `exit_is_solid: None` (so both programmatic and JSON-deserialized levels use the same `unwrap_or(true)` default path), OR a doc-comment on the `exit_is_solid` field in `models.rs` explicitly states that `None` and `Some(true)` are semantically equivalent and that `new()` intentionally emits `Some(true)`",
+        "If the default is changed to `None`: existing tests that call `LevelDefinition::new()` and assert on `exit_is_solid` behavior continue to pass without modification (since `unwrap_or(true)` produces the same result)",
         "Tests pass"
       ],
       "priority": 11,
-      "passes": true,
+      "passes": false,
       "notes": "",
       "additionalInformation": {
-        "severity": "Medium",
+        "severity": "Low",
         "file": [
-          "gsnake-editor/src/lib/EditorLayout.svelte:181-190"
+          "gsnake-core/engine/core/src/models.rs:182",
+          "gsnake-core/engine/core/src/models.rs:219"
         ],
-        "issue": "Clear loop resets entity flags but leaves snakeSegmentIndex untouched.",
-        "impact": "Transient or future logic that reads index can observe stale segment metadata.",
-        "suggestion": "Set snakeSegmentIndex to undefined for every cleared snake cell."
+        "issue": "`LevelDefinition::new()` always sets `exit_is_solid: Some(true)`. `LevelState::from_definition` uses `unwrap_or(true)` to handle a `None` value. Since the constructor never produces `None`, the `unwrap_or` fallback is unreachable from any level created via `new()`. The field is meaningful only for levels deserialized from JSON where `exitIsSolid` is absent.",
+        "impact": "No current bug. Future code relying on `exit_is_solid` being `None` to detect 'not specified by the designer' (e.g., to apply different default behavior) will be surprised that `new()` always emits `Some(true)`. The asymmetry between the constructor and the JSON path creates a subtle API contract that is not documented anywhere.",
+        "suggestion": "Change `new()` to set `exit_is_solid: None`, relying on `unwrap_or(true)` as the single source of the default. This aligns the constructor behavior with the JSON-deserialized behavior. Alternatively, add a doc-comment on the field stating that `None` and `Some(true)` are treated identically by `from_definition` and that `new()` uses `Some(true)` by convention."
       }
     },
     {
       "id": "US-012",
-      "title": "Apply save-equivalent validation checks before level testing",
-      "description": "As a designer, I want invalid levels blocked before test launch so the runtime is not fed malformed payloads.",
+      "title": "Add stone collision check to check_collision or document intentional omission",
+      "description": "As a maintainer, I want the check_collision function to either detect stone collisions or carry an explicit comment about why they are intentionally excluded so the call-order dependency is not a hidden invariant.",
       "acceptanceCriteria": [
-        "handleTest enforces required entity validation (snake, food, exit) before POST",
-        "Validation feedback is shown to users before test request is sent",
-        "Add regression coverage for test attempts with missing snake/required entities",
-        "Typecheck passes",
-        "Tests pass",
-        "Verify in browser using dev-browser skill"
+        "Either: `check_collision` in `engine.rs` includes a stone-presence check and a corresponding test for head-on-stone collision detection, OR an inline comment at the stones omission site explicitly explains the call-order dependency (stone-push guard at line 92-107 ensures the snake head can never occupy a stone cell at the time `check_collision` runs)",
+        "The chosen approach is consistent with the existing collision oracle pattern",
+        "Tests pass"
       ],
       "priority": 12,
-      "passes": true,
+      "passes": false,
       "notes": "",
       "additionalInformation": {
-        "severity": "Medium",
+        "severity": "Low",
         "file": [
-          "gsnake-editor/src/lib/EditorLayout.svelte:517-637"
+          "gsnake-core/engine/core/src/engine.rs:276-299"
         ],
-        "issue": "handleTest skips the preflight validation path used by handleSave.",
-        "impact": "Server can accept and forward invalid test payloads, including empty snake arrays.",
-        "suggestion": "Reuse save-path validation for test action and block posting when requirements fail."
+        "issue": "`check_collision` tests for spikes, out-of-bounds, obstacles, and self-collision, but not for stones. After gravity runs and the snake's head stops above a stone (via `can_snake_fall`), no collision is detected because stones act as platforms. The current code is safe due to the call-order dependency: the stone-push guard at lines 92-107 rejects any move that would place the snake head directly on a stone before `check_collision` is called.",
+        "impact": "Low. Currently safe due to call-order dependency. However, `check_collision` reads as an exhaustive collision oracle but silently omits stones. If the stone-push guard were relaxed, reordered, or bypassed in a future refactor, the snake could land on a stone without any collision being detected — a silent correctness regression.",
+        "suggestion": "Add an inline comment at the relevant location in `check_collision` that says: 'Stones are not checked here because the stone-push guard in `try_push_stone` (called before `check_collision`) ensures the snake head can never occupy a stone cell post-move.' This documents the hidden invariant and prevents future developers from inadvertently breaking it."
       }
     },
     {
       "id": "US-013",
-      "title": "Strengthen schema constraints for snake presence and in-bounds coordinates",
-      "description": "As a contract owner, I want invalid level shapes rejected at the schema/API boundary so engine behavior is safer.",
+      "title": "Document generate_frame empty-grid invariant with a doc-comment",
+      "description": "As a maintainer, I want generate_frame's empty-grid return behavior documented so callers know the function can return an empty grid and can guard against it if needed.",
       "acceptanceCriteria": [
-        "Schema enforces snake.minItems = 1",
-        "Coordinate bounds rules relative to grid are validated at schema or server-validation layer",
-        "Update validator generation and contract tests for new constraints",
-        "Typecheck passes",
+        "Add a doc-comment (`///`) to `generate_frame` in `engine.rs` that describes the empty-grid return contract: if `level_state.grid_size` is invalid at runtime (non-positive dimensions or cell count exceeds `MAX_GRID_CELLS`), the function returns `Frame::new(Vec::new(), ...)` instead of panicking",
+        "The doc-comment references the existing test `test_frame_generation_invalid_runtime_grid_is_safe` so readers know the behavior is intentional and tested",
+        "No runtime behavior changes",
         "Tests pass"
       ],
       "priority": 13,
-      "passes": true,
+      "passes": false,
       "notes": "",
       "additionalInformation": {
-        "severity": "Medium",
+        "severity": "Low",
         "file": [
-          "contracts/level-definition.schema.json:50-53"
+          "gsnake-core/engine/core/src/engine.rs:155-169"
         ],
-        "issue": "Schema accepts empty snake arrays and does not constrain entity coordinates to grid bounds.",
-        "impact": "API accepts structurally valid but runtime-invalid levels that can crash or misbehave in engine paths.",
-        "suggestion": "Add snake minItems and enforce coordinate/grid consistency in contract or validator logic."
+        "issue": "If `level_state.grid_size` is invalid at runtime (non-positive dimensions or cell count exceeds `MAX_GRID_CELLS`), `generate_frame` silently returns `Frame::new(Vec::new(), self.game_state.clone())`. The engine validates grid size at construction via `validate_grid_size`, but the runtime `grid_size` field is `pub` and can be mutated by tests or future code. The empty-grid return is intentional (covered by `test_frame_generation_invalid_runtime_grid_is_safe`), but it is not documented.",
+        "impact": "No current runtime impact. The WASM binding at line 72 sends the frame to JS without checking whether the grid is empty. If a caller — including a future integration path or the JS layer — receives an empty grid, it may interpret this as a valid 0×0 level rather than a runtime-state error. The silent return is indistinguishable from a normal call result.",
+        "suggestion": "Add a doc-comment (`/// # Panics / Empty Grid`) to `generate_frame` explaining: (1) the function never panics on invalid grid sizes; (2) it returns an empty grid `Vec` instead; (3) this is intentional for robustness — callers that care about this case should check `frame.grid.is_empty()`. Reference the test by name so the contract is clearly intentional."
       }
     },
     {
       "id": "US-014",
-      "title": "Constrain difficulty values in canonical level schema",
-      "description": "As a contract maintainer, I want difficulty typed as a fixed enum so external producers cannot submit unknown values.",
+      "title": "Replace explicit position field comparisons with PartialEq across engine, gravity, and stone_mechanics",
+      "description": "As a maintainer, I want position equality to use the derived PartialEq implementation so comparisons are concise and a future Position field addition cannot be silently omitted from equality checks.",
       "acceptanceCriteria": [
-        "difficulty property in schema uses enum: easy, medium, hard",
-        "Generated validators and contract tests reflect enum enforcement",
-        "Typecheck passes",
+        "All explicit `o.x == pos.x && o.y == pos.y` position comparisons in `engine.rs`, `gravity.rs`, and `stone_mechanics.rs` are replaced with `*o == pos` or `o == &pos`",
+        "All 12+ call sites are updated (search for `\\.x ==` and `\\.y ==` patterns to find them all)",
+        "No new position-field comparisons are introduced",
         "Tests pass"
       ],
       "priority": 14,
-      "passes": true,
+      "passes": false,
       "notes": "",
       "additionalInformation": {
         "severity": "Low",
         "file": [
-          "contracts/level-definition.schema.json:30-32"
+          "gsnake-core/engine/core/src/engine.rs:253",
+          "gsnake-core/engine/core/src/engine.rs:294",
+          "gsnake-core/engine/core/src/engine.rs:324",
+          "gsnake-core/engine/core/src/engine.rs:332",
+          "gsnake-core/engine/core/src/engine.rs:340",
+          "gsnake-core/engine/core/src/gravity.rs",
+          "gsnake-core/engine/core/src/stone_mechanics.rs"
         ],
-        "issue": "difficulty is currently any string in schema despite stricter TypeScript model.",
-        "impact": "Unknown difficulty values can pass API validation and reach runtime unexpectedly.",
-        "suggestion": "Add a strict enum for difficulty in the schema."
-      }
-    },
-    {
-      "id": "US-015",
-      "title": "Use robust main-module detection in editor server entrypoint",
-      "description": "As a cross-platform maintainer, I want main-module checks path-normalized so startup behavior is consistent across OSes.",
-      "acceptanceCriteria": [
-        "Replace fragile string compare check with fileURLToPath(import.meta.url) comparison",
-        "Direct-run and imported module behavior remain correct in tests",
-        "Typecheck passes",
-        "Tests pass"
-      ],
-      "priority": 15,
-      "passes": true,
-      "notes": "",
-      "additionalInformation": {
-        "severity": "Low",
-        "file": [
-          "gsnake-editor/server.ts:144-145"
-        ],
-        "issue": "isMainModule logic compares import.meta.url and process.argv[1] as raw strings.",
-        "impact": "Server auto-start detection can fail on Windows/encoded paths or relative invocation.",
-        "suggestion": "Compare process.argv[1] against fileURLToPath(import.meta.url)."
-      }
-    },
-    {
-      "id": "US-016",
-      "title": "Remove drag-image innerHTML construction in entity palette",
-      "description": "As a maintainer, I want SVG drag image nodes constructed safely so future dynamic sprite IDs cannot create XSS risk.",
-      "acceptanceCriteria": [
-        "EntityPalette builds drag-image SVG via createElementNS/setAttribute rather than innerHTML",
-        "Drag preview behavior is unchanged for current entity set",
-        "Typecheck passes",
-        "Tests pass",
-        "Verify in browser using dev-browser skill"
-      ],
-      "priority": 16,
-      "passes": true,
-      "notes": "",
-      "additionalInformation": {
-        "severity": "Low",
-        "file": [
-          "gsnake-editor/src/lib/EntityPalette.svelte:41"
-        ],
-        "issue": "Drag preview markup is assembled with innerHTML using sprite identifiers.",
-        "impact": "Current static data is safe, but future dynamic sources could turn this into an injection vector.",
-        "suggestion": "Build SVG DOM nodes programmatically to eliminate innerHTML injection surface."
-      }
-    },
-    {
-      "id": "US-017",
-      "title": "Warn before destructive new-level navigation when edits exist",
-      "description": "As an editor user, I want a confirmation prompt before resetting so I do not lose unsaved work accidentally.",
-      "acceptanceCriteria": [
-        "Clicking New Level prompts for confirmation when unsaved changes are present",
-        "Canceling confirmation keeps current editor state intact",
-        "Add regression coverage for new-level confirmation behavior",
-        "Typecheck passes",
-        "Tests pass",
-        "Verify in browser using dev-browser skill"
-      ],
-      "priority": 17,
-      "passes": true,
-      "notes": "",
-      "additionalInformation": {
-        "severity": "Low",
-        "file": [
-          "gsnake-editor/src/lib/EditorLayout.svelte:403-406"
-        ],
-        "issue": "New Level dispatches immediately and clears editor context without confirmation.",
-        "impact": "Users can lose in-progress work from accidental clicks.",
-        "suggestion": "Gate new-level dispatch behind unsaved-work confirmation (e.g., undo stack signal)."
-      }
-    },
-    {
-      "id": "US-018",
-      "title": "Handle sprite fetch failures with explicit fallback and diagnostics",
-      "description": "As a user, I want sprite loading failures surfaced clearly so missing assets are diagnosable.",
-      "acceptanceCriteria": [
-        "SpriteLoader checks response.ok and catches fetch failures",
-        "Failure path logs actionable diagnostics and surfaces a user/developer-visible fallback signal",
-        "Typecheck passes",
-        "Tests pass",
-        "Verify in browser using dev-browser skill"
-      ],
-      "priority": 18,
-      "passes": true,
-      "notes": "",
-      "additionalInformation": {
-        "severity": "Low",
-        "file": [
-          "gsnake-editor/src/lib/SpriteLoader.svelte:7-10"
-        ],
-        "issue": "Sprite loading path has no error handling or response status checks.",
-        "impact": "Failed sprite fetches can leave palette visuals blank with unhandled promise errors.",
-        "suggestion": "Add try/catch, validate response status, and provide explicit error reporting/fallback handling."
-      }
-    },
-    {
-      "id": "US-019",
-      "title": "Harden handleLoad append/click cleanup path for file input",
-      "description": "As a maintainer, I want input append/click logic exception-safe so failed picker launches do not leak DOM nodes.",
-      "acceptanceCriteria": [
-        "appendChild plus input.click path is wrapped in safe cleanup logic",
-        "If click invocation fails, temporary input element is always removed",
-        "Typecheck passes",
-        "Tests pass"
-      ],
-      "priority": 19,
-      "passes": true,
-      "notes": "",
-      "additionalInformation": {
-        "severity": "Low",
-        "file": [
-          "gsnake-editor/src/lib/EditorLayout.svelte:474-476"
-        ],
-        "issue": "Input is appended before click with no guarded cleanup if click throws.",
-        "impact": "Sandboxed/browser edge cases can leave orphaned hidden inputs.",
-        "suggestion": "Wrap append/click in try/catch/finally and remove element on all failure paths."
-      }
-    },
-    {
-      "id": "US-020",
-      "title": "Require integer grid dimensions in grid-size modal",
-      "description": "As a level designer, I want fractional grid sizes rejected so exported level dimensions remain schema-valid.",
-      "acceptanceCriteria": [
-        "Grid creation validation enforces Number.isInteger for width and height",
-        "Inputs use integer-only constraints (for example step=1) and reject fractional values",
-        "Add regression coverage for decimal dimension input",
-        "Typecheck passes",
-        "Tests pass",
-        "Verify in browser using dev-browser skill"
-      ],
-      "priority": 20,
-      "passes": true,
-      "notes": "",
-      "additionalInformation": {
-        "severity": "Low",
-        "file": [
-          "gsnake-editor/src/lib/GridSizeModal.svelte:20-28"
-        ],
-        "issue": "Current bounds checks allow decimal values that later truncate in grid allocation.",
-        "impact": "UI can export non-integer grid dimensions that violate schema contract.",
-        "suggestion": "Enforce integer validation and configure number inputs for whole-step values only."
+        "issue": "Throughout the codebase, position equality is checked with explicit field comparisons (`o.x == pos.x && o.y == pos.y`) at approximately 12 call sites across three files. `Position` derives `PartialEq`, making these checks redundant and verbose.",
+        "impact": "No correctness impact in the current codebase. The risk is future maintainability: if `Position` ever gains a third field (e.g., `z` for a future layer or depth dimension), every explicit field comparison would silently omit the new field, producing incorrect equality results with no compile-time warning. The `PartialEq` derivation would automatically include the new field.",
+        "suggestion": "Use `PartialEq` comparisons uniformly: replace `.any(|o| o.x == pos.x && o.y == pos.y)` with `.any(|o| *o == pos)` at all 12+ call sites. Consider enabling the `clippy::nonminimal_bool` lint or a custom `clippy` allow/deny to enforce this going forward."
       }
     }
   ]
