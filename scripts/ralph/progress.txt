@@ -15,6 +15,7 @@
 - For `e2e/contract.spec.ts` keyboard-ordering checks, synchronize opposite-direction keypresses on deterministic frame progress (`frame.state.moves` increment via `waitForFunction`) instead of fixed sleeps to keep CI timing stable.
 - For rendered-grid E2E checks in `e2e/snake-bugs.spec.ts`, extract `SnakeHead`/`SnakeBody` from `[data-element-id="game-field"] .cell use[href]` and map row-major DOM indices back to coordinates (`x = idx % width`, `y = floor(idx / width)`) so tests assert visual state instead of only API payloads.
 - For `gsnake-web-app` store-driven `snakeLength`, count only `SnakeHead` and `SnakeBody`; keep regression tests with mixed extended cell types (`Stone`, `Spike`, `FloatingFood`, `FallingFood`) and a zero-snake frame to prevent accidental overcounting.
+- For editor API contract E2E coverage, keep shared `POST`/`GET` `/api/test-level` assertions centralized in `e2e/workflow.spec.ts` and add only non-overlapping checks elsewhere to avoid duplicate maintenance and CI runtime.
 
 # Ralph Progress Log
 Started: Fri Feb 20 10:55:27 CET 2026
@@ -167,4 +168,13 @@ Started: Fri Feb 20 10:55:27 CET 2026
   - The current wasm constructor (`new(level_json)`) does not receive total-level context, so web should own final-level `LevelComplete` -> `AllComplete` normalization.
   - Keep `nextLevel()` semantics explicit in tests: reaching terminal index must be a no-op with stable event counts.
   - When Playwright uses `vite preview`, rebuild `gsnake-web-app` before E2E runs after source changes to avoid stale dist behavior.
+---
+## [2026-02-20 12:00:45 CET] - US-016
+- Consolidated shared `/api/test-level` upload/fetch/CORS assertions into `e2e/workflow.spec.ts` and removed duplicate overlap in `e2e/complete-workflow.spec.ts`.
+- Preserved unique API checks by adding runtime schema validation (`isLevelDefinition`) and `totalFood` consistency assertions in the consolidated spec.
+- Files changed: `e2e/workflow.spec.ts`, `e2e/complete-workflow.spec.ts`, `CLAUDE.md`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`.
+- **Learnings for future iterations:**
+  - Keep shared API workflow assertions in one Playwright spec to avoid drift between duplicate tests.
+  - Preserve non-overlapping checks as dedicated test steps in the consolidated spec (for example schema guards and derived-field assertions).
+  - `npx playwright test e2e/workflow.spec.ts --project=chromium --reporter=list` is a fast targeted validation loop for editor API workflow coverage.
 ---
