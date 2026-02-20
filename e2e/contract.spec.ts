@@ -1,4 +1,55 @@
 import { test, expect } from '@playwright/test';
+import type { LevelDefinition } from './level-definition';
+
+const ALL_CELL_TYPES = [
+  'Empty',
+  'SnakeHead',
+  'SnakeBody',
+  'Food',
+  'FloatingFood',
+  'FallingFood',
+  'Stone',
+  'Spike',
+  'Obstacle',
+  'Exit',
+] as const;
+
+const EXTENDED_VARIANT_FIXTURE_LEVEL: LevelDefinition = {
+  id: 990001,
+  name: 'E2E Extended CellType Fixture',
+  gridSize: { width: 8, height: 8 },
+  snake: [
+    { x: 1, y: 5 },
+    { x: 0, y: 5 },
+  ],
+  obstacles: [
+    { x: 0, y: 6 },
+    { x: 1, y: 6 },
+    { x: 4, y: 6 },
+    { x: 5, y: 6 },
+    { x: 0, y: 7 },
+    { x: 1, y: 7 },
+    { x: 2, y: 7 },
+    { x: 3, y: 7 },
+    { x: 4, y: 7 },
+    { x: 5, y: 7 },
+    { x: 6, y: 7 },
+    { x: 7, y: 7 },
+  ],
+  food: [{ x: 2, y: 5 }],
+  exit: { x: 7, y: 5 },
+  snakeDirection: 'East',
+  floatingFood: [{ x: 3, y: 5 }],
+  fallingFood: [{ x: 4, y: 5 }],
+  stones: [{ x: 5, y: 5 }],
+  spikes: [{ x: 6, y: 5 }],
+  totalFood: 3,
+};
+
+function getFixtureLevelsUrl(levels: LevelDefinition[]): string {
+  const payload = encodeURIComponent(JSON.stringify(levels));
+  return `data:application/json,${payload}`;
+}
 
 test.describe('Contract Payloads', () => {
   test('Cell types are strict enum strings', async ({ page }) => {
@@ -14,17 +65,7 @@ test.describe('Contract Payloads', () => {
       })
     );
 
-    const allowed = new Set([
-      'Empty',
-      'SnakeHead',
-      'SnakeBody',
-      'Food',
-      'FloatingFood',
-      'Stone',
-      'Spike',
-      'Obstacle',
-      'Exit'
-    ]);
+    const allowed = new Set(ALL_CELL_TYPES);
 
     const unknownTypes = cellTypes.filter(type => !allowed.has(type));
     expect(unknownTypes).toEqual([]);
@@ -168,13 +209,28 @@ test.describe('Boundary Tests', () => {
     await page.waitForFunction(() => (window as any).__gsnakeContract?.frame);
 
     const frame = await page.evaluate(() => (window as any).__gsnakeContract.frame);
-    const validCellTypes = ['Empty', 'SnakeHead', 'SnakeBody', 'Food', 'Obstacle', 'Exit'];
+    const validCellTypes = ALL_CELL_TYPES;
 
     frame.grid.forEach((row: string[], rowIdx: number) => {
       row.forEach((cell: string, colIdx: number) => {
         expect(validCellTypes).toContain(cell);
       });
     });
+  });
+
+  test('fixture level renders all extended CellType variants', async ({ page }) => {
+    const levelsUrl = encodeURIComponent(getFixtureLevelsUrl([EXTENDED_VARIANT_FIXTURE_LEVEL]));
+    await page.goto(`/?level=1&contractTest=1&levelsUrl=${levelsUrl}`);
+
+    await page.waitForFunction(() => (window as any).__gsnakeContract?.frame);
+
+    const frame = await page.evaluate(() => (window as any).__gsnakeContract.frame);
+    const allCells = frame.grid.flat() as string[];
+
+    expect(allCells.filter((cell) => cell === 'FloatingFood').length).toBeGreaterThan(0);
+    expect(allCells.filter((cell) => cell === 'FallingFood').length).toBeGreaterThan(0);
+    expect(allCells.filter((cell) => cell === 'Stone').length).toBeGreaterThan(0);
+    expect(allCells.filter((cell) => cell === 'Spike').length).toBeGreaterThan(0);
   });
 
   test('GameState uses camelCase field names', async ({ page }) => {

@@ -138,6 +138,7 @@ See `gsnake-web/packages/gsnake-web-app/engine/CLAUDE.md` for the canonical fram
 - **TypeScript strict mode** — no implicit any; use `import type` for type-only imports
 - **Error type** — errors are normalized to `ContractError { kind, message, context? }` and emitted as `engineError` events
 - **Test pattern** — `beforeEach` creates fresh instances; `afterEach` detaches listeners and restores mocks; use factory functions (`createLevel()`, `createFrame()`) for test data
+- **E2E custom-level determinism** — for Playwright coverage of specific `CellType` variants, load fixture levels through `levelsUrl` with a `data:application/json,...` URL in `e2e/contract.spec.ts` so tests are independent of mutable default levels and editor API availability.
 - **Store assertions** — use `get(store)` from `svelte/store` to read current value in tests
 - **Vitest mocking** — use stub classes or `vi.fn()`, no external mocking libraries; WASM module is mocked with `vi.hoisted` + a `MockRustEngine` class
 - **Coverage threshold** — 80% line/statement in both `gsnake-web` and `gsnake-editor` (enforced as CI merge gate)

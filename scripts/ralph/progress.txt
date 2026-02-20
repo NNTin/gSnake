@@ -2,6 +2,7 @@
 - For gsnake-web enum contract drift checks, keep runtime enum guard constants in `gsnake-web/packages/gsnake-web-app/contracts/enumGuards.ts` and assert parity against both generated TS unions (`types/models.ts`) and Rust wire enums (`gsnake-core/engine/core/src/models.rs`) so cross-language mismatch fails tests.
 - For `gsnake-wasm` in `WasmGameEngine.ts`, import as a namespace and treat the default initializer as optional because generated `pkg/gsnake_wasm.js` may omit a default export while unit-test mocks still provide one.
 - For `gsnake-editor/src/tests/integration.test.ts`, keep live endpoint checks opt-in with `GSNAKE_EDITOR_LIVE_INTEGRATION=1` and use explicit `it.skip` semantics by default, so CI avoids false-green placeholder assertions while enabled runs still enforce real HTTP contract checks.
+- For `e2e/contract.spec.ts`, load deterministic fixture levels through `levelsUrl` using a `data:application/json,...` URL when asserting `CellType` coverage so tests are not coupled to mutable default levels or the editor API test server.
 
 # Ralph Progress Log
 Started: Fri Feb 20 10:55:27 CET 2026
@@ -24,4 +25,13 @@ Started: Fri Feb 20 10:55:27 CET 2026
   - Live cross-service checks in unit-test suites should be opt-in and skipped explicitly when the environment is not provisioned, instead of passing vacuously.
   - Integration assertions should validate concrete response contracts (status/content-type/app shell marker) so endpoint regressions produce a hard failure.
   - `npm --prefix gsnake-editor run check`, `npm --prefix gsnake-editor run lint`, and `npm --prefix gsnake-editor test` provide sufficient local quality gates for editor test-only changes.
+---
+
+## [2026-02-20 11:10:35 CET] - US-003
+- Expanded `e2e/contract.spec.ts` CellType allowlists to the full 10-variant contract set and added a dedicated fixture-level E2E scenario that asserts `FloatingFood`, `FallingFood`, `Stone`, and `Spike` each appear in the runtime frame.
+- Files changed: `e2e/contract.spec.ts`, `CLAUDE.md`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`.
+- **Learnings for future iterations:**
+  - Use `levelsUrl` with a `data:application/json,...` fixture in Playwright when you need deterministic level content without relying on `/api/test-level`.
+  - Keep CellType allowlists centralized (for example `ALL_CELL_TYPES`) to prevent partial-contract drift across E2E scenarios.
+  - `npx playwright test e2e/contract.spec.ts --project=chromium --reporter=list` is a fast targeted validation loop for contract-grid changes.
 ---
