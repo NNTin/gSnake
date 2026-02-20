@@ -14,6 +14,7 @@ Started: Fri Feb 20 09:53:43 CET 2026
 - In `gsnake-core/engine/core/tests/contract_tests.rs`, keep `CellType` wire-format tests exhaustive: serialization and roundtrip suites must include all enum variants with explicit expected JSON names.
 - In `gsnake-core/engine/core/src/gravity.rs`, keep `is_settled_falling_food` recursion bounded (`depth` + `MAX_SETTLED_FALLING_FOOD_DEPTH`) and fail closed at the cap so malformed deep columns cannot cause stack overflows.
 - In `gsnake-core` movement flow, keep food consumption tied to `GameEngine::check_and_eat_food` during deliberate `process_move` input only; gravity (`can_snake_fall`) treats food as support and must not auto-consume adjacent body-segment food.
+- In `gsnake-core/engine/core/src/engine.rs`, keep `process_move` stone handling ordered before `check_collision`; `check_collision` intentionally omits stones because `try_push_stone` rejects any move where the head would occupy an unpushable stone.
 ---
 ## [2026-02-20 09:55:34 CET] - US-001
 - Implemented US-001 by updating `stone_mechanics::is_space_available` to block stone pushes into regular food, floating food, falling food, and the exit tile.
@@ -127,4 +128,14 @@ Started: Fri Feb 20 09:53:43 CET 2026
   - Optional level-definition fields with serde defaults should be initialized as `None` in constructors when runtime logic already applies `unwrap_or(...)`, so constructor and JSON paths cannot drift.
   - `cargo test -p gsnake-core` runs `generate_contract_fixtures`; constructor default changes can intentionally update committed fixture JSON.
   - Keep `exitIsSolid` omitted in fixture JSON unless a level explicitly overrides the default behavior.
+---
+## [2026-02-20 10:31:55 CET] - US-012
+- Implemented US-012 by documenting the intentional stone omission in `check_collision`: stones are guarded earlier in `process_move` via `try_push_stone`, and blocked/vertical stone interactions return before collision checks.
+- Kept runtime behavior unchanged and preserved the existing collision-oracle pattern while making the call-order dependency explicit in code.
+- Ran quality checks in `gsnake-core`: `cargo fmt --all`, `cargo clippy -p gsnake-core --all-targets -- -D warnings`, and `cargo test -p gsnake-core`.
+- Files changed: `gsnake-core/engine/core/src/engine.rs`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `CLAUDE.md`
+- **Learnings for future iterations:**
+  - `check_collision` in `engine.rs` is intentionally not exhaustive for stones; correctness depends on `process_move` performing stone push/rejection before collision evaluation.
+  - When refactoring move flow, preserve the order: compute new head -> resolve stone interaction -> then call `check_collision`.
+  - Comment-only safety clarifications should still pass the standard `cargo fmt/clippy/test` quality gate for `gsnake-core`.
 ---

@@ -311,6 +311,11 @@ impl GameEngine {
             return true;
         }
 
+        // Stones are intentionally excluded from this collision oracle.
+        // `process_move` runs `try_push_stone` before inserting the new head,
+        // and blocked/vertical stone interactions return early, so the head
+        // cannot occupy a stone cell when `check_collision` executes.
+
         // Check self collision (skip first segment which is the head)
         for segment in self.level_state.snake.segments.iter().skip(1) {
             if segment.x == head.x && segment.y == head.y {
