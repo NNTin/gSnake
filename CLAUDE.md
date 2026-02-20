@@ -159,6 +159,7 @@ See `gsnake-web/packages/gsnake-web-app/engine/CLAUDE.md` for the canonical fram
 - **Editor Save/Test required-entity parity** — keep snake/food/exit validation centralized in shared helpers in `gsnake-editor/src/lib/EditorLayout.svelte` so Save warnings and Test preflight blocking rules cannot drift.
 - **Editor drag preview safety** — in `gsnake-editor/src/lib/EntityPalette.svelte`, build drag-image SVGs with DOM APIs (`createElementNS`/`setAttribute`) instead of `innerHTML`, and keep dragstart behavior (`setData`, `setDragImage` offsets, cleanup) covered by `src/tests/EntityPalette.test.ts`.
 - **Stone push occupancy parity** — in `gsnake-core/engine/core/src/stone_mechanics.rs`, keep `is_space_available` aligned with gravity semantics by treating `food`, `floating_food`, `falling_food`, and the `exit` tile as blocking cells for horizontal stone pushes.
+- **WASM pkg sync** — when changing `gsnake-core/engine/bindings/wasm` Rust code or dependencies, run `wasm-pack build --target bundler` so checked-in `engine/bindings/wasm/pkg/*` artifacts remain in sync.
 
 ## CI / Merge Gates
 

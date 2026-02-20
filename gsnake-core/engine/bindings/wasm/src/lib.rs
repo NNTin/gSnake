@@ -6,10 +6,6 @@ use js_sys::Function;
 use serde_wasm_bindgen::{from_value, to_value};
 use wasm_bindgen::prelude::*;
 
-// Use wee_alloc as the global allocator for smaller binary size
-#[global_allocator]
-static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
-
 const LEVELS_JSON: &str = include_str!("../../../core/data/levels.json");
 type FrameCallback<'a> = &'a mut dyn FnMut(&Frame) -> Result<(), String>;
 
