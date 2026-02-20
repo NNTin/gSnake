@@ -4,6 +4,7 @@ Started: Fri Feb 20 09:53:43 CET 2026
 - For `gsnake-levels validate-levels-toml`, keep validation output aggregated and deterministic (`[io]`, `[parse]`, `[validation]` with numbered lines) so one run reports all actionable issues and tests can assert stable CLI output.
 - For `gsnake-levels` playback generation, keep `sync-metadata` and `solve_level` aligned through `solver::solve_level_to_playback(...)` so playback JSON format cannot drift and per-level `cargo` subprocess overhead is avoided.
 - In `gsnake-core` stone push logic, keep `stone_mechanics::is_space_available` aligned with gravity occupancy rules by treating all food variants plus the exit tile as blocking cells.
+- In `gsnake-core/engine/core/src/stone_mechanics.rs`, keep `find_stone_row` horizontal-only with an in-function `debug_assert!` so new call sites cannot silently pass vertical directions.
 - In `gsnake-core/engine/bindings/wasm`, regenerate committed `pkg/` artifacts with `wasm-pack build --target bundler` whenever Rust binding code or dependency wiring changes.
 - In `gsnake-core/engine/bindings/wasm`, keep `on_frame` callback registration non-throwing for JS by preserving `()` return type and logging initial `emit_frame` failures via `web_sys::console::error_1`.
 - In `gsnake-core` level definitions, keep `total_food` typed as `Option<u32>` where `None` auto-counts all food vectors and `Some(0)` is an explicit zero-food requirement.
@@ -71,4 +72,14 @@ Started: Fri Feb 20 09:53:43 CET 2026
   - `CellType` wire-format contract tests should be treated as exhaustive snapshots of enum variants; missing a variant weakens frontend compatibility guarantees.
   - Pair explicit serialization-string assertions with roundtrip coverage so rename regressions are caught before TS/Svelte integrations consume changed values.
   - `cargo test -p gsnake-core` is sufficient to validate these contract-test changes because it runs `contract_tests.rs` and fixture generation checks.
+---
+## [2026-02-20 10:15:47 CET] - US-007
+- Implemented US-007 by enforcing a horizontal-direction invariant in `stone_mechanics::find_stone_row` via `debug_assert!`, making misuse fail fast in debug/test builds.
+- Added a regression test that verifies `find_stone_row` panics when called with a vertical direction.
+- Ran quality checks in `gsnake-core`: `cargo fmt --all`, `cargo clippy -p gsnake-core --all-targets -- -D warnings`, and `cargo test -p gsnake-core`.
+- Files changed: `gsnake-core/engine/core/src/stone_mechanics.rs`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`
+- **Learnings for future iterations:**
+  - Keep internal helper invariants close to the function body (`debug_assert!`) even when the current public call path already guards inputs.
+  - For panic/guard regressions on private helpers, colocated unit tests in the same module are the most direct coverage path.
+  - `cargo test -p gsnake-core` remains the right full validation pass for engine-only safety hardening changes.
 ---

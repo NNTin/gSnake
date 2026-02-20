@@ -162,7 +162,7 @@
         "Tests pass"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": "",
       "additionalInformation": {
         "severity": "Medium",

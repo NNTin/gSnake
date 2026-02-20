@@ -37,6 +37,11 @@ pub fn try_push_stone(
 
 /// Find all connected stones in a horizontal row in the given direction
 fn find_stone_row(start: Position, direction: Direction, stones: &[Position]) -> Vec<Position> {
+    debug_assert!(
+        matches!(direction, Direction::East | Direction::West),
+        "find_stone_row only supports horizontal directions"
+    );
+
     let mut row = vec![start];
     let mut current = start;
 
@@ -309,5 +314,12 @@ mod tests {
         assert_eq!(result, PushResult::Blocked(Position::new(3, 5)));
         assert_eq!(state.stones, vec![Position::new(3, 5)]);
         assert_eq!(state.exit, Position::new(4, 5));
+    }
+
+    #[test]
+    #[should_panic(expected = "find_stone_row only supports horizontal directions")]
+    fn test_find_stone_row_rejects_vertical_direction() {
+        let stones = vec![Position::new(3, 5), Position::new(3, 4)];
+        let _ = find_stone_row(Position::new(3, 5), Direction::North, &stones);
     }
 }
