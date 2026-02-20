@@ -1,0 +1,22 @@
+{
+  "id": 103,
+  "name": "Fixture: Invalid Difficulty Value",
+  "difficulty": "expert",
+  "gridSize": {
+    "width": 12,
+    "height": 10
+  },
+  "snake": [
+    { "x": 5, "y": 6 },
+    { "x": 4, "y": 6 }
+  ],
+  "obstacles": [
+    { "x": 2, "y": 2 }
+  ],
+  "food": [
+    { "x": 8, "y": 5 }
+  ],
+  "exit": { "x": 11, "y": 8 },
+  "snakeDirection": "East",
+  "totalFood": 1
+}

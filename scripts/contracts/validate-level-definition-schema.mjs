@@ -35,6 +35,10 @@ const fixtureCases = [
     file: "level-definition.invalid-negative-coordinate.json",
     expectedValid: false,
   },
+  {
+    file: "level-definition.invalid-difficulty-value.json",
+    expectedValid: false,
+  },
 ];
 
 const schema = JSON.parse(readFileSync(schemaPath, "utf8"));

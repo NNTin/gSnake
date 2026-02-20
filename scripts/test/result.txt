@@ -1,16 +1,15 @@
 === Act CI Test Results ===
-Started: Fri Feb 20 02:25:02 CET 2026
-Mode: targeted-jobs
+Started: Fri Feb 20 03:13:28 CET 2026
+Mode: job
 
 ## Summary
 
-- [SUCCESS] ./.github/workflows/ci.yml::gsnake-editor-test
 - [SUCCESS] ./gsnake-web/.github/workflows/ci.yml::test
+- [SUCCESS] ./.github/workflows/ci.yml::gsnake-editor-test
 
 **Total: 2 passed, 0 failed**
 
 ---
-Completed: Fri Feb 20 02:26:23 CET 2026
-Duration: 00:01:21
+Completed: Fri Feb 20 03:14:39 CET 2026
 Result: 2 passed, 0 failed
 Result file: /home/nntin/git/gSnake/scripts/test/result.txt

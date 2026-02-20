@@ -15,6 +15,7 @@ Started: Thu Feb 19 16:54:50 CET 2026
 - In `EditorLayout`, any edit path that can reduce `snakeSegments` to zero should run through a shared helper that resets `snakeDirection` to the default `'east'` value.
 - In `EditorLayout`, clear/reset helpers should always clear `entity`, `isSnakeSegment`, and `snakeSegmentIndex` together so snake metadata cannot drift on replacements/removals.
 - Keep `LevelDefinition` bounds enforcement split by concern: schema guarantees `snake.minItems >= 1` and non-negative coordinates, while `gsnake-editor` API validation enforces `x < gridSize.width` / `y < gridSize.height`.
+- Keep `LevelDefinition.difficulty` constrained as schema enum (`easy|medium|hard`) to match TypeScript unions, and include an explicit invalid-difficulty drift/fixture case so downstream validator mismatches fail fast.
 
 ## [2026-02-19 17:00:35 CET] - US-001
 - Implemented US-001 by removing implicit snake auto-clear on snake-tool selection in `EditorLayout`, so selecting Snake no longer destroys existing snake segments outside undo/redo commands.
@@ -156,4 +157,14 @@ Started: Thu Feb 19 16:54:50 CET 2026
   - Keep schema-level constraints focused on shape and absolute bounds (`minItems`, non-negative positions), then enforce grid-relative bounds in API validators where `gridSize` context is available.
   - Update both drift suites (`gsnake-editor` and `gsnake-web`) whenever LevelDefinition constraints change so consumer parity checks fail fast.
   - Regenerate canonical validator artifacts first, then mirror to `gsnake-web/contracts/generated` to avoid hidden consumer drift.
+---
+## [2026-02-20 03:16:00 CET] - US-014
+- Constrained `difficulty` in the canonical LevelDefinition schema to enum values (`easy`, `medium`, `hard`) and mirrored the same schema change into `gsnake-editor/contracts` and `gsnake-web/contracts`.
+- Added schema regression coverage for invalid difficulty values via a new invalid fixture and updated schema validation/drift tests in both editor and web consumers.
+- Regenerated `contracts/generated/level-definition-validator.ts`, synchronized `gsnake-web/contracts/generated/level-definition-validator.ts`, and validated through local checks plus targeted Act CI jobs.
+- Files changed: `contracts/level-definition.schema.json`, `contracts/fixtures/level-definition.invalid-difficulty-value.json`, `contracts/generated/level-definition-validator.ts`, `scripts/contracts/validate-level-definition-schema.mjs`, `gsnake-editor/contracts/level-definition.schema.json`, `gsnake-editor/src/tests/levelDefinitionSchemaDrift.test.ts`, `gsnake-web/contracts/level-definition.schema.json`, `gsnake-web/contracts/generated/level-definition-validator.ts`, `gsnake-web/packages/gsnake-web-app/tests/contract/levelDefinitionSchemaDrift.test.ts`, `CLAUDE.md`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`
+- **Learnings for future iterations:**
+  - Whenever LevelDefinition schema constraints tighten, add an explicit invalid fixture plus editor/web drift cases for the same rule so validator drift is caught immediately.
+  - Regenerate the canonical validator first (`npm run generate:level-validator`) and only then mirror it to `gsnake-web/contracts/generated` to avoid stale consumer validators.
+  - For this contract scope, targeted `act` runs on `gsnake-web/.github/workflows/ci.yml::test` and root `ci.yml::gsnake-editor-test` are effective CI refresh points.
 ---
