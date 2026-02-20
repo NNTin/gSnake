@@ -76,7 +76,16 @@ pub fn apply_gravity_to_falling_food(level_state: &mut LevelState) {
     }
 }
 
-/// Check if the snake can fall further
+/// Check if the snake can fall further.
+///
+/// Design contract:
+/// - Food is consumed only by `GameEngine::check_and_eat_food` after deliberate
+///   input-driven movement in `GameEngine::process_move`.
+/// - Gravity does not consume food; food tiles (regular, floating, settled falling)
+///   are support platforms that stop downward movement.
+/// - With multi-segment snakes, a body segment can settle beside food after a fall.
+///   That food is intentionally not consumed until a later deliberate move places
+///   the head on that tile.
 fn can_snake_fall(level_state: &LevelState) -> bool {
     for segment in &level_state.snake.segments {
         let next_y = segment.y + 1;
@@ -93,7 +102,7 @@ fn can_snake_fall(level_state: &LevelState) -> bool {
             return false;
         }
 
-        // Check food (all types act as platform for snake)
+        // Food is support only during gravity resolution; this path never consumes it.
         if is_food(next_pos, level_state)
             || is_floating_food(next_pos, level_state)
             || is_settled_falling_food(next_pos, level_state, 0)

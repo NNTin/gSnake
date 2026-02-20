@@ -121,7 +121,8 @@ impl GameEngine {
             }
         }
 
-        // Check if snake eats any type of food
+        // Food consumption is intentional and input-driven: only this deliberate
+        // move path calls `check_and_eat_food`; gravity passes do not.
         let food_eaten = self.check_and_eat_food(new_head);
 
         // Add new head to front of segments
