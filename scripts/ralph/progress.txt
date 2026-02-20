@@ -10,6 +10,7 @@ Started: Thu Feb 19 16:54:50 CET 2026
 - In `EditorLayout` import paths, validate all entity coordinates against current grid bounds before mutating editor state so unsupported coordinates fail loudly instead of partially loading.
 - In `SpriteLoader`, treat `spritesUrl` as trusted only after validating `response.ok` and `content-type: image/svg+xml`, then sanitize parsed SVG content before rendering via `{@html}`.
 - In `gsnake-editor/server.ts`, resolve `GSNAKE_EDITOR_ALLOWED_ORIGINS` once at startup and keep per-request CORS checks bound to that frozen allowlist for deterministic policy behavior.
+- In Node ESM entrypoints like `gsnake-editor/server.ts`, detect direct execution by comparing `path.resolve(fileURLToPath(import.meta.url))` with `path.resolve(process.argv[1])`; avoid raw URL string checks.
 - In `gsnake-editor`, both landing-page and in-editor level-load paths should call shared `parseAndValidateLevelFileData(...)` from `src/lib/levelFileValidation.ts` so required-field and grid-size checks never drift.
 - In `EditorLayout`, grid reinitialization should happen through explicit `resetGrid(width, height)` calls in load/placement flows; avoid broad reactive resets that can wipe entities after dimension changes.
 - In `EditorLayout`, any edit path that can reduce `snakeSegments` to zero should run through a shared helper that resets `snakeDirection` to the default `'east'` value.
@@ -167,4 +168,14 @@ Started: Thu Feb 19 16:54:50 CET 2026
   - Whenever LevelDefinition schema constraints tighten, add an explicit invalid fixture plus editor/web drift cases for the same rule so validator drift is caught immediately.
   - Regenerate the canonical validator first (`npm run generate:level-validator`) and only then mirror it to `gsnake-web/contracts/generated` to avoid stale consumer validators.
   - For this contract scope, targeted `act` runs on `gsnake-web/.github/workflows/ci.yml::test` and root `ci.yml::gsnake-editor-test` are effective CI refresh points.
+---
+## [2026-02-20 04:01:43 CET] - US-015
+- Implemented robust entrypoint detection in `gsnake-editor/server.ts` by replacing fragile raw-string checks with an `isMainModule(...)` helper that compares normalized filesystem paths via `fileURLToPath(import.meta.url)` and `process.argv[1]`.
+- Added server regression coverage for direct-run detection, relative entry paths, missing entry path handling, and mismatched entry/module paths.
+- Ran `npm --prefix gsnake-editor run check`, `npm --prefix gsnake-editor run lint`, `npm --prefix gsnake-editor run test`, and refreshed CI status with `act -W .github/workflows/ci.yml -j gsnake-editor-test --container-architecture linux/amd64` (success).
+- Files changed: `gsnake-editor/server.ts`, `gsnake-editor/src/tests/server.test.ts`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`
+- **Learnings for future iterations:**
+  - For Node ESM executables, always convert `import.meta.url` through `fileURLToPath` before comparing with CLI entrypoint paths.
+  - Keep main-module detection logic in a small exported helper so runtime behavior is testable without spawning child processes.
+  - `src/tests/server.test.ts` is the right place for entrypoint/CORS/API contract regressions in `gsnake-editor`.
 ---
