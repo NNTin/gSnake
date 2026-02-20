@@ -3,6 +3,11 @@ set -euo pipefail
 
 mkdir -p target/llvm-cov
 
+# Ensure deterministic coverage in CI even when gsnake-core/target is restored
+# from cache. Stale profraw/profdata from previous commits can otherwise skew
+# line counts and trip fail-under gates.
+cargo llvm-cov clean --workspace
+
 # Temporarily disable exit-on-error so we can capture failure
 set +e
 cargo llvm-cov \

@@ -192,10 +192,8 @@ impl GameEngine {
             Ok(value) if value > 0 => value,
             _ => return Frame::new(Vec::new(), self.game_state.clone()),
         };
-        let Some(cell_count) = width.checked_mul(height) else {
-            return Frame::new(Vec::new(), self.game_state.clone());
-        };
-        if cell_count > MAX_GRID_CELLS {
+        let cell_count = (width as u128) * (height as u128);
+        if cell_count > (MAX_GRID_CELLS as u128) {
             return Frame::new(Vec::new(), self.game_state.clone());
         }
 
@@ -405,14 +403,8 @@ impl GameEngine {
             usize::try_from(width).map_err(|_| EngineError::InvalidGridSize { width, height })?;
         let height_usize =
             usize::try_from(height).map_err(|_| EngineError::InvalidGridSize { width, height })?;
-        let Some(cell_count) = width_usize.checked_mul(height_usize) else {
-            return Err(EngineError::GridSizeExceedsMaxCells {
-                width,
-                height,
-                max_cells: MAX_GRID_CELLS,
-            });
-        };
-        if cell_count > MAX_GRID_CELLS {
+        let cell_count = (width_usize as u128) * (height_usize as u128);
+        if cell_count > (MAX_GRID_CELLS as u128) {
             return Err(EngineError::GridSizeExceedsMaxCells {
                 width,
                 height,

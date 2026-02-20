@@ -1,15 +1,23 @@
+#[cfg(target_arch = "wasm32")]
+use gsnake_core::levels::parse_levels_json;
+#[cfg(any(test, target_arch = "wasm32"))]
 use gsnake_core::{
-    engine::GameEngine, levels::parse_levels_json, ContractError, ContractErrorKind, Direction,
-    Frame, LevelDefinition,
+    engine::GameEngine, ContractError, ContractErrorKind, Direction, Frame, LevelDefinition,
 };
+#[cfg(any(test, target_arch = "wasm32"))]
 use js_sys::Function;
+#[cfg(target_arch = "wasm32")]
 use serde_wasm_bindgen::{from_value, to_value};
+#[cfg(any(test, target_arch = "wasm32"))]
 use wasm_bindgen::prelude::*;
 
+#[cfg(target_arch = "wasm32")]
 const LEVELS_JSON: &str = include_str!("../../../core/data/levels.json");
+#[cfg(any(test, target_arch = "wasm32"))]
 type FrameCallback<'a> = &'a mut dyn FnMut(&Frame) -> Result<(), String>;
 
 /// Initialize panic hook for better error messages in the browser console
+#[cfg(target_arch = "wasm32")]
 #[wasm_bindgen(start)]
 pub fn init_panic_hook() {
     console_error_panic_hook::set_once();
@@ -17,15 +25,18 @@ pub fn init_panic_hook() {
 
 /// WASM wrapper around the Rust `GameEngine`
 /// Provides JS-friendly interface for the web frontend
+#[cfg(any(test, target_arch = "wasm32"))]
 #[wasm_bindgen]
 pub struct WasmGameEngine {
     engine: GameEngine,
     on_frame_callback: Option<Function>,
 }
 
+#[cfg(any(test, target_arch = "wasm32"))]
 #[wasm_bindgen]
 impl WasmGameEngine {
     /// Creates a new WASM game engine from serialized level JSON
+    #[cfg(target_arch = "wasm32")]
     #[wasm_bindgen(constructor)]
     pub fn new(level_json: JsValue) -> Result<WasmGameEngine, JsValue> {
         let level = parse_level_result(from_value(level_json).map_err(|e| e.to_string()))
@@ -36,6 +47,7 @@ impl WasmGameEngine {
 
     /// Registers a JavaScript callback to be invoked whenever the game state changes
     /// The callback receives a Frame object containing the grid and game state
+    #[cfg(target_arch = "wasm32")]
     #[wasm_bindgen(js_name = onFrame)]
     pub fn on_frame(&mut self, callback: Function) {
         self.on_frame_callback = Some(callback);
@@ -53,6 +65,7 @@ impl WasmGameEngine {
     /// Processes a move in the given direction
     /// Returns a Frame on success; failures return a `ContractError`
     /// Automatically invokes the onFrame callback with the new state
+    #[cfg(target_arch = "wasm32")]
     #[wasm_bindgen(js_name = processMove)]
     pub fn process_move(&mut self, direction: &JsValue) -> Result<JsValue, JsValue> {
         let direction = parse_direction_js_value(direction)?;
@@ -71,6 +84,7 @@ impl WasmGameEngine {
 
     /// Gets the current game frame (grid + state)
     /// Returns a JS object with grid and state properties
+    #[cfg(target_arch = "wasm32")]
     #[wasm_bindgen(js_name = getFrame)]
     pub fn get_frame(&self) -> Result<JsValue, JsValue> {
         let frame = self.engine.generate_frame();
@@ -78,6 +92,7 @@ impl WasmGameEngine {
     }
 
     /// Gets the current game state as a JS object
+    #[cfg(target_arch = "wasm32")]
     #[wasm_bindgen(js_name = getGameState)]
     pub fn get_game_state(&self) -> Result<JsValue, JsValue> {
         to_value(self.engine.game_state())
@@ -85,6 +100,7 @@ impl WasmGameEngine {
     }
 
     /// Gets the current level data as a JS object
+    #[cfg(target_arch = "wasm32")]
     #[wasm_bindgen(js_name = getLevel)]
     pub fn get_level(&self) -> Result<JsValue, JsValue> {
         to_value(self.engine.level_definition())
@@ -92,6 +108,7 @@ impl WasmGameEngine {
     }
 
     /// Emits the current frame to the registered callback
+    #[cfg(target_arch = "wasm32")]
     fn emit_frame(&self) -> Result<(), JsValue> {
         if let Some(callback) = &self.on_frame_callback {
             let frame = self.engine.generate_frame();
@@ -105,6 +122,7 @@ impl WasmGameEngine {
 }
 
 /// Returns all levels embedded in the WASM package.
+#[cfg(target_arch = "wasm32")]
 #[wasm_bindgen(js_name = getLevels)]
 pub fn get_levels() -> Result<JsValue, JsValue> {
     let levels = parse_levels_json(LEVELS_JSON)
@@ -114,16 +132,19 @@ pub fn get_levels() -> Result<JsValue, JsValue> {
 }
 
 /// Logs a message to the browser console (for debugging)
+#[cfg(target_arch = "wasm32")]
 #[wasm_bindgen]
 pub fn log(s: &str) {
     web_sys::console::log_1(&JsValue::from_str(s));
 }
 
+#[cfg(target_arch = "wasm32")]
 fn serialize_frame(frame: &Frame) -> Result<JsValue, JsValue> {
     to_value(frame)
         .map_err(|e| contract_error(ContractErrorKind::SerializationFailed, &e.to_string()))
 }
 
+#[cfg(any(test, target_arch = "wasm32"))]
 fn initialize_engine(level: LevelDefinition) -> Result<WasmGameEngine, ContractError> {
     let engine = GameEngine::new(level).map_err(|error| {
         build_contract_error(ContractErrorKind::InitializationFailed, &error.to_string())
@@ -135,12 +156,14 @@ fn initialize_engine(level: LevelDefinition) -> Result<WasmGameEngine, ContractE
     })
 }
 
+#[cfg(any(test, target_arch = "wasm32"))]
 fn parse_level_result(
     level_result: Result<LevelDefinition, String>,
 ) -> Result<LevelDefinition, ContractError> {
     level_result.map_err(|message| build_contract_error(ContractErrorKind::InvalidInput, &message))
 }
 
+#[cfg(target_arch = "wasm32")]
 fn parse_direction_js_value(direction: &JsValue) -> Result<Direction, JsValue> {
     let direction_str = direction.as_string().ok_or_else(|| {
         contract_error(
@@ -151,6 +174,7 @@ fn parse_direction_js_value(direction: &JsValue) -> Result<Direction, JsValue> {
     parse_direction_str(&direction_str).map_err(|error| contract_error_from_data(&error))
 }
 
+#[cfg(any(test, target_arch = "wasm32"))]
 fn parse_direction_str(direction: &str) -> Result<Direction, ContractError> {
     match direction {
         "North" => Ok(Direction::North),
@@ -164,6 +188,7 @@ fn parse_direction_str(direction: &str) -> Result<Direction, ContractError> {
     }
 }
 
+#[cfg(any(test, target_arch = "wasm32"))]
 fn process_move_on_engine(
     engine: &mut GameEngine,
     direction: Direction,
@@ -181,6 +206,7 @@ fn process_move_on_engine(
     Ok(engine.generate_frame())
 }
 
+#[cfg(any(test, target_arch = "wasm32"))]
 fn emit_frame_with_callback(
     frame: &Frame,
     callback: Option<FrameCallback<'_>>,
@@ -193,6 +219,7 @@ fn emit_frame_with_callback(
     Ok(())
 }
 
+#[cfg(target_arch = "wasm32")]
 fn invoke_js_callback(callback: &Function, frame: &Frame) -> Result<(), String> {
     let frame_js = serialize_frame(frame).map_err(|error| js_error_message(&error))?;
     callback
@@ -201,10 +228,12 @@ fn invoke_js_callback(callback: &Function, frame: &Frame) -> Result<(), String> 
     Ok(())
 }
 
+#[cfg(target_arch = "wasm32")]
 fn js_error_message(error: &JsValue) -> String {
     error.as_string().unwrap_or_else(|| format!("{error:?}"))
 }
 
+#[cfg(any(test, target_arch = "wasm32"))]
 fn build_contract_error(kind: ContractErrorKind, message: &str) -> ContractError {
     ContractError {
         kind,
@@ -214,11 +243,13 @@ fn build_contract_error(kind: ContractErrorKind, message: &str) -> ContractError
     }
 }
 
+#[cfg(target_arch = "wasm32")]
 fn contract_error(kind: ContractErrorKind, message: &str) -> JsValue {
     let error = build_contract_error(kind, message);
     contract_error_from_data(&error)
 }
 
+#[cfg(target_arch = "wasm32")]
 fn contract_error_from_data(error: &ContractError) -> JsValue {
     if let Ok(value) = to_value(&error) {
         value
@@ -239,6 +270,7 @@ fn contract_error_from_data(error: &ContractError) -> JsValue {
     }
 }
 
+#[cfg(any(test, target_arch = "wasm32"))]
 fn contract_error_kind_str(kind: ContractErrorKind) -> &'static str {
     match kind {
         ContractErrorKind::InvalidInput => "invalidInput",
@@ -253,7 +285,7 @@ fn contract_error_kind_str(kind: ContractErrorKind) -> &'static str {
 mod tests {
     use super::*;
     use gsnake_core::{GridSize, Position};
-    use std::cell::Cell;
+    use std::cell::{Cell, RefCell};
 
     #[test]
     fn test_initialize_engine_sets_empty_callback() {
@@ -292,6 +324,14 @@ mod tests {
         let level = create_level();
         let parsed = parse_level_result(Ok(level.clone())).expect("valid level should parse");
         assert_eq!(parsed, level);
+    }
+
+    #[test]
+    fn test_parse_level_result_allows_empty_error_message() {
+        let error =
+            parse_level_result(Err(String::new())).expect_err("empty message should still error");
+        assert_eq!(error.kind, ContractErrorKind::InvalidInput);
+        assert!(error.message.is_empty());
     }
 
     #[test]
@@ -343,6 +383,35 @@ mod tests {
     }
 
     #[test]
+    fn test_process_move_on_engine_rejection_does_not_increment_moves() {
+        let mut engine =
+            GameEngine::new(create_level()).expect("test level should have a valid grid size");
+
+        let before = engine.game_state().moves;
+        let _ = process_move_on_engine(&mut engine, Direction::West)
+            .expect_err("opposite direction should be rejected");
+        let after = engine.game_state().moves;
+
+        assert_eq!(before, 0);
+        assert_eq!(after, 0, "rejected moves should not mutate move count");
+    }
+
+    #[test]
+    fn test_process_move_on_engine_multiple_valid_moves_increment_count() {
+        let mut engine =
+            GameEngine::new(create_level()).expect("test level should have a valid grid size");
+
+        let first = process_move_on_engine(&mut engine, Direction::North)
+            .expect("first move should succeed");
+        let second = process_move_on_engine(&mut engine, Direction::East)
+            .expect("second move should succeed");
+
+        assert_eq!(first.state.moves, 1);
+        assert_eq!(second.state.moves, 2);
+        assert_eq!(engine.game_state().moves, 2);
+    }
+
+    #[test]
     fn test_process_move_on_engine_maps_malformed_state_to_internal_error() {
         let mut level = create_level();
         level.snake = vec![];
@@ -382,6 +451,22 @@ mod tests {
     }
 
     #[test]
+    fn test_emit_frame_with_callback_provides_current_frame_data() {
+        let frame = GameEngine::new(create_level())
+            .expect("test level should have a valid grid size")
+            .generate_frame();
+        let observed_moves = RefCell::new(None);
+        let mut callback = |current: &Frame| {
+            observed_moves.replace(Some(current.state.moves));
+            Ok(())
+        };
+
+        emit_frame_with_callback(&frame, Some(&mut callback)).expect("callback should succeed");
+
+        assert_eq!(*observed_moves.borrow(), Some(frame.state.moves));
+    }
+
+    #[test]
     fn test_emit_frame_with_callback_maps_callback_errors() {
         let frame = GameEngine::new(create_level())
             .expect("test level should have a valid grid size")
@@ -393,6 +478,15 @@ mod tests {
         assert_eq!(error.message, "callback failed");
     }
 
+    #[cfg(target_arch = "wasm32")]
+    #[test]
+    fn test_emit_frame_without_registered_callback_is_ok() {
+        let engine = initialize_engine(create_level()).expect("valid level should initialize");
+        engine
+            .emit_frame()
+            .expect("emit_frame should be a no-op when callback is missing");
+    }
+
     #[test]
     fn test_build_contract_error_shape() {
         let error =
@@ -401,6 +495,22 @@ mod tests {
         assert_eq!(error.message, "serialize failed");
         assert!(error.context.is_none());
         assert!(error.rejection_reason.is_none());
+    }
+
+    #[test]
+    fn test_parse_level_result_preserves_message_verbatim() {
+        let original = "bad payload: unexpected token at column 7".to_string();
+        let error =
+            parse_level_result(Err(original.clone())).expect_err("invalid payload should fail");
+        assert_eq!(error.kind, ContractErrorKind::InvalidInput);
+        assert_eq!(error.message, original);
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    #[test]
+    fn test_js_error_message_prefers_string_payload() {
+        let message = js_error_message(&JsValue::from_str("boom"));
+        assert_eq!(message, "boom");
     }
 
     #[test]

@@ -362,6 +362,32 @@ mod tests {
     }
 
     #[test]
+    fn test_snake_head_empty_returns_none() {
+        let snake = Snake::new(vec![]);
+        assert_eq!(snake.head(), None);
+    }
+
+    #[test]
+    fn test_grid_size_and_frame_creation() {
+        let grid_size = GridSize::new(3, 2);
+        assert_eq!(grid_size.width, 3);
+        assert_eq!(grid_size.height, 2);
+
+        let frame = Frame::new(
+            vec![
+                vec![CellType::SnakeHead, CellType::Empty, CellType::Food],
+                vec![CellType::SnakeBody, CellType::Obstacle, CellType::Exit],
+            ],
+            GameState::new(2, 1),
+        );
+
+        assert_eq!(frame.grid.len(), 2);
+        assert_eq!(frame.grid[0][0], CellType::SnakeHead);
+        assert_eq!(frame.state.current_level, 2);
+        assert_eq!(frame.state.total_food, 1);
+    }
+
+    #[test]
     fn test_serialization() {
         let pos = Position::new(5, 10);
         let json = serde_json::to_string(&pos).unwrap();
@@ -405,14 +431,8 @@ mod tests {
         assert_eq!(level.exit_is_solid, None);
 
         let json = serde_json::to_value(&level).unwrap();
-        assert!(
-            json.get("totalFood").is_none(),
-            "totalFood should be omitted when unset"
-        );
-        assert!(
-            json.get("exitIsSolid").is_none(),
-            "exitIsSolid should be omitted when unset"
-        );
+        assert!(json.get("totalFood").is_none());
+        assert!(json.get("exitIsSolid").is_none());
     }
 
     #[test]
@@ -453,6 +473,42 @@ mod tests {
     }
 
     #[test]
+    fn test_level_state_from_definition_maps_runtime_fields() {
+        let mut level = LevelDefinition::new(
+            7,
+            "Runtime Mapping".to_string(),
+            GridSize::new(8, 6),
+            vec![Position::new(1, 1), Position::new(1, 2)],
+            vec![Position::new(2, 2)],
+            vec![Position::new(3, 2)],
+            Position::new(7, 5),
+            Direction::North,
+        );
+        level.floating_food = vec![Position::new(4, 2)];
+        level.falling_food = vec![Position::new(5, 2)];
+        level.stones = vec![Position::new(6, 2)];
+        level.spikes = vec![Position::new(0, 5)];
+        level.exit_is_solid = Some(false);
+
+        let state = LevelState::from_definition(&level);
+
+        assert_eq!(state.grid_size, GridSize::new(8, 6));
+        assert_eq!(
+            state.snake.segments,
+            vec![Position::new(1, 1), Position::new(1, 2)]
+        );
+        assert_eq!(state.snake.direction, Some(Direction::North));
+        assert_eq!(state.obstacles, vec![Position::new(2, 2)]);
+        assert_eq!(state.food, vec![Position::new(3, 2)]);
+        assert_eq!(state.exit, Position::new(7, 5));
+        assert_eq!(state.floating_food, vec![Position::new(4, 2)]);
+        assert_eq!(state.falling_food, vec![Position::new(5, 2)]);
+        assert_eq!(state.stones, vec![Position::new(6, 2)]);
+        assert_eq!(state.spikes, vec![Position::new(0, 5)]);
+        assert!(!state.exit_is_solid);
+    }
+
+    #[test]
     fn test_level_definition_deserializes_missing_total_food_as_none() {
         let json = r#"{
             "id": 1,
@@ -488,6 +544,60 @@ mod tests {
     }
 
     #[test]
+    fn test_contract_error_serialization_with_context_and_rejection_reason() {
+        let mut context = std::collections::BTreeMap::new();
+        context.insert("expected".to_string(), "North|South|East|West".to_string());
+        context.insert("received".to_string(), "Upward".to_string());
+
+        let error = ContractError {
+            kind: ContractErrorKind::InputRejected,
+            message: "Move rejected".to_string(),
+            context: Some(context),
+            rejection_reason: Some(RejectionReason {
+                reason: "Blocked by obstacle".to_string(),
+                position: Some(Position::new(2, 3)),
+            }),
+        };
+
+        let json = serde_json::to_value(&error).unwrap();
+        assert_eq!(json["kind"], "inputRejected");
+        assert_eq!(json["rejectionReason"]["reason"], "Blocked by obstacle");
+        assert_eq!(json["rejectionReason"]["position"]["x"], 2);
+        assert_eq!(json["rejectionReason"]["position"]["y"], 3);
+        assert!(json.get("context").is_some());
+
+        let decoded: ContractError = serde_json::from_value(json).unwrap();
+        assert_eq!(decoded, error);
+    }
+
+    #[test]
+    fn test_engine_error_display_messages() {
+        assert_eq!(
+            EngineError::SnakeHasNoSegments.to_string(),
+            "Invalid snake state: expected at least one segment, found 0"
+        );
+
+        assert_eq!(
+            EngineError::InvalidGridSize {
+                width: 0,
+                height: -1,
+            }
+            .to_string(),
+            "Invalid grid size: width=0, height=-1. Both dimensions must be positive."
+        );
+
+        assert_eq!(
+            EngineError::GridSizeExceedsMaxCells {
+                width: 100,
+                height: 100,
+                max_cells: 1000,
+            }
+            .to_string(),
+            "Invalid grid size: width=100, height=100 exceeds safe cell cap (1000 cells)"
+        );
+    }
+
+    #[test]
     fn test_enum_string_values() {
         assert_eq!(
             serde_json::to_string(&Direction::North).unwrap(),
@@ -504,6 +614,22 @@ mod tests {
         assert_eq!(
             serde_json::to_string(&ContractErrorKind::InvalidInput).unwrap(),
             "\"invalidInput\""
+        );
+        assert_eq!(
+            serde_json::to_string(&ContractErrorKind::InputRejected).unwrap(),
+            "\"inputRejected\""
+        );
+        assert_eq!(
+            serde_json::to_string(&ContractErrorKind::SerializationFailed).unwrap(),
+            "\"serializationFailed\""
+        );
+        assert_eq!(
+            serde_json::to_string(&ContractErrorKind::InitializationFailed).unwrap(),
+            "\"initializationFailed\""
+        );
+        assert_eq!(
+            serde_json::to_string(&ContractErrorKind::InternalError).unwrap(),
+            "\"internalError\""
         );
     }
 }
