@@ -172,7 +172,16 @@ impl GameEngine {
         Ok(true)
     }
 
-    /// Generates a Frame representing the current game state
+    /// Generates a [`Frame`] representing the current game state.
+    ///
+    /// This function does not panic if `level_state.grid_size` is invalid at runtime.
+    /// If width/height are non-positive, conversion fails, multiplication overflows,
+    /// or the computed cell count exceeds [`MAX_GRID_CELLS`], it returns
+    /// `Frame::new(Vec::new(), self.game_state.clone())`.
+    ///
+    /// Callers that treat an empty grid as exceptional should guard with
+    /// `frame.grid.is_empty()`. This behavior is intentional and covered by
+    /// `test_frame_generation_invalid_runtime_grid_is_safe`.
     #[must_use]
     pub fn generate_frame(&self) -> Frame {
         let width = match usize::try_from(self.level_state.grid_size.width) {

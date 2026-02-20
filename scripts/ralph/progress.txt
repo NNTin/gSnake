@@ -15,6 +15,7 @@ Started: Fri Feb 20 09:53:43 CET 2026
 - In `gsnake-core/engine/core/src/gravity.rs`, keep `is_settled_falling_food` recursion bounded (`depth` + `MAX_SETTLED_FALLING_FOOD_DEPTH`) and fail closed at the cap so malformed deep columns cannot cause stack overflows.
 - In `gsnake-core` movement flow, keep food consumption tied to `GameEngine::check_and_eat_food` during deliberate `process_move` input only; gravity (`can_snake_fall`) treats food as support and must not auto-consume adjacent body-segment food.
 - In `gsnake-core/engine/core/src/engine.rs`, keep `process_move` stone handling ordered before `check_collision`; `check_collision` intentionally omits stones because `try_push_stone` rejects any move where the head would occupy an unpushable stone.
+- In `gsnake-core/engine/core/src/engine.rs`, treat runtime-invalid `grid_size` in `generate_frame` as a non-panicking empty-grid fallback and keep the rustdoc contract aligned with `test_frame_generation_invalid_runtime_grid_is_safe`.
 ---
 ## [2026-02-20 09:55:34 CET] - US-001
 - Implemented US-001 by updating `stone_mechanics::is_space_available` to block stone pushes into regular food, floating food, falling food, and the exit tile.
@@ -138,4 +139,14 @@ Started: Fri Feb 20 09:53:43 CET 2026
   - `check_collision` in `engine.rs` is intentionally not exhaustive for stones; correctness depends on `process_move` performing stone push/rejection before collision evaluation.
   - When refactoring move flow, preserve the order: compute new head -> resolve stone interaction -> then call `check_collision`.
   - Comment-only safety clarifications should still pass the standard `cargo fmt/clippy/test` quality gate for `gsnake-core`.
+---
+## [2026-02-20 10:34:58 CET] - US-013
+- Implemented US-013 by adding a rustdoc contract to `GameEngine::generate_frame` that documents the intentional empty-grid fallback for runtime-invalid grid sizes instead of panicking.
+- Referenced `test_frame_generation_invalid_runtime_grid_is_safe` directly in the doc-comment so maintainers can trace the behavior to regression coverage.
+- Ran quality checks in `gsnake-core`: `cargo fmt --all`, `cargo clippy -p gsnake-core --all-targets -- -D warnings`, and `cargo test -p gsnake-core`.
+- Files changed: `gsnake-core/engine/core/src/engine.rs`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`
+- **Learnings for future iterations:**
+  - For defensive runtime fallbacks in core engine paths, document the contract in rustdoc and point to the guarding regression test to prevent accidental behavior changes.
+  - `generate_frame` is intentionally fail-safe for mutated/invalid runtime `grid_size`; consumers that care about this path should check `frame.grid.is_empty()`.
+  - Comment-only engine changes should still pass the standard `cargo fmt/clippy/test` quality gate.
 ---
