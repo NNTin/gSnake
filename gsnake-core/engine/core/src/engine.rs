@@ -11,6 +11,7 @@ pub struct GameEngine {
     level_definition: LevelDefinition,
     level_state: LevelState,
     game_state: GameState,
+    total_levels: Option<u32>,
     input_locked: bool,
 }
 
@@ -36,8 +37,20 @@ impl GameEngine {
             game_state: GameState::new(current_level, total_food),
             level_definition: level,
             level_state,
+            total_levels: None,
             input_locked: false,
         })
+    }
+
+    /// Creates a new game engine and configures the total number of levels in the pack.
+    /// When set, reaching the exit on the last level transitions to `GameStatus::AllComplete`.
+    pub fn new_with_total_levels(
+        level: LevelDefinition,
+        total_levels: u32,
+    ) -> Result<Self, EngineError> {
+        let mut engine = Self::new(level)?;
+        engine.total_levels = Some(total_levels.max(engine.game_state.current_level));
+        Ok(engine)
     }
 
     /// Returns a reference to the current game state
@@ -127,7 +140,14 @@ impl GameEngine {
             && self.game_state.food_collected >= self.game_state.total_food
         {
             // Win condition is evaluated before any gravity effects.
-            self.game_state.status = GameStatus::LevelComplete;
+            if self
+                .total_levels
+                .is_some_and(|total_levels| self.game_state.current_level >= total_levels)
+            {
+                self.game_state.status = GameStatus::AllComplete;
+            } else {
+                self.game_state.status = GameStatus::LevelComplete;
+            }
         } else {
             // Apply gravity to snake
             let hit_spike = gravity::apply_gravity_to_snake(&mut self.level_state);
@@ -779,6 +799,27 @@ mod tests {
             .expect("valid snake state should not fail");
 
         assert_eq!(engine.game_state().status, GameStatus::LevelComplete);
+    }
+
+    #[test]
+    fn test_all_complete_when_total_levels_marks_current_level_as_final() {
+        let mut level = create_test_level();
+        level.id = 3;
+        level.snake = vec![Position::new(9, 8)];
+        level.food = vec![];
+        level.floating_food = vec![];
+        level.falling_food = vec![];
+        level.exit = Position::new(9, 9);
+
+        let mut engine = GameEngine::new_with_total_levels(level, 3)
+            .expect("test level should have a valid grid size");
+        engine.game_state.food_collected = engine.game_state.total_food;
+
+        engine
+            .process_move(Direction::South)
+            .expect("valid snake state should not fail");
+
+        assert_eq!(engine.game_state().status, GameStatus::AllComplete);
     }
 
     #[test]
