@@ -3,6 +3,7 @@
 - For `gsnake-wasm` in `WasmGameEngine.ts`, import as a namespace and treat the default initializer as optional because generated `pkg/gsnake_wasm.js` may omit a default export while unit-test mocks still provide one.
 - For `gsnake-editor/src/tests/integration.test.ts`, keep live endpoint checks opt-in with `GSNAKE_EDITOR_LIVE_INTEGRATION=1` and use explicit `it.skip` semantics by default, so CI avoids false-green placeholder assertions while enabled runs still enforce real HTTP contract checks.
 - For `gsnake-editor/src/lib/levelModel.ts` export payload generation, treat `exit` as optional (`null` when absent), preserve `snake: []` when no segments are provided, and document duplicate-exit resolution as "last encountered exit wins" in row-major grid traversal.
+- For `gsnake-editor` load/render assertions, prefer sprite-level checks on each target cell (`.cell-sprite use[href*="#<SpriteId>"]`) instead of generic `.has-entity` so entity-type regressions are detectable.
 - For `e2e/contract.spec.ts`, load deterministic fixture levels through `levelsUrl` using a `data:application/json,...` URL when asserting `CellType` coverage so tests are not coupled to mutable default levels or the editor API test server.
 - For gameplay-flow E2E specs like `e2e/gravity.spec.ts`, keep deterministic fixture levels and fixture-owned solution key arrays in the spec, then assert move totals from `solutionKeys.length` so completion checks stay stable when default levels change.
 - In the `gsnake-core` workspace, run package-targeted checks with `cargo ... -p gsnake-core` (hyphenated package name); `gsnake_core` is the Rust crate import path, not the Cargo package ID.
@@ -135,4 +136,14 @@ Started: Fri Feb 20 10:55:27 CET 2026
   - `buildLevelExportPayload(...)` intentionally preserves `snake: []` when `snakeSegments` is empty; downstream validation should decide whether that payload is acceptable.
   - Missing exit cells are serialized as `exit: null`, which must stay aligned with consumers expecting optional exit in editor export flows.
   - Duplicate exit entities are not deduplicated; export uses the last exit visited during row-major scan (`y` ascending, then `x` ascending).
+---
+
+## [2026-02-20 11:45:40 CET] - US-013
+- Expanded `EditorLayout.saveLoad.test.ts` load assertions to validate exact sprite markers for `FloatingFood`, `FallingFood`, `Stone`, and `Spike` at their imported coordinates.
+- Added a reusable helper for coordinate-based sprite verification and applied it to sequential-load optional-entity checks so assertions stay entity-specific.
+- Files changed: `gsnake-editor/src/tests/EditorLayout.saveLoad.test.ts`, `CLAUDE.md`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`.
+- **Learnings for future iterations:**
+  - In editor grid tests, `has-entity` confirms occupancy only; validate optional entity type by asserting the cell sprite `<use href>` suffix (for example `#FloatingFood`).
+  - Keep coordinate assertions row/column explicit (`data-row`, `data-col`) so loaded-entity placement regressions are easy to diagnose.
+  - `npm --prefix gsnake-editor run check && npm --prefix gsnake-editor run lint && npm --prefix gsnake-editor test` is the appropriate quality gate for editor test updates.
 ---
