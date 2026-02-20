@@ -370,4 +370,40 @@ mod tests {
         assert_eq!(result, PushResult::Blocked(Position::new(3, 5)));
         assert!(state.stones.contains(&Position::new(3, 5)));
     }
+
+    #[test]
+    fn test_can_push_stones_rejects_empty_row() {
+        let state = create_test_level_state();
+        assert!(!can_push_stones(&[], Direction::East, &state));
+    }
+
+    #[test]
+    fn test_get_next_position_supports_vertical_directions() {
+        let pos = Position::new(3, 3);
+        assert_eq!(
+            get_next_position(pos, Direction::North),
+            Position::new(3, 2)
+        );
+        assert_eq!(
+            get_next_position(pos, Direction::South),
+            Position::new(3, 4)
+        );
+    }
+
+    #[test]
+    fn test_is_space_available_rejects_stone_and_falling_food() {
+        let mut state = create_test_level_state();
+        state.obstacles = vec![];
+        state.food = vec![];
+        state.floating_food = vec![];
+        state.snake = Snake::new(vec![Position::new(0, 0)]);
+
+        state.stones = vec![Position::new(4, 4)];
+        state.falling_food = vec![];
+        assert!(!is_space_available(Position::new(4, 4), &state));
+
+        state.stones = vec![];
+        state.falling_food = vec![Position::new(4, 4)];
+        assert!(!is_space_available(Position::new(4, 4), &state));
+    }
 }

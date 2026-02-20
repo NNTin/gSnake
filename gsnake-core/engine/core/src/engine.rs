@@ -1109,4 +1109,28 @@ mod tests {
             .flatten()
             .all(|cell| *cell != CellType::SnakeHead));
     }
+
+    #[test]
+    fn test_frame_generation_with_empty_snake_renders_no_snake_cells() {
+        let mut level = create_test_level();
+        level.grid_size = GridSize::new(4, 4);
+        level.snake = vec![];
+        level.obstacles = vec![];
+        level.food = vec![];
+        level.floating_food = vec![];
+        level.falling_food = vec![];
+        level.stones = vec![];
+        level.spikes = vec![];
+        level.exit = Position::new(3, 3);
+
+        let engine = create_engine(level);
+        let frame = engine.generate_frame();
+
+        assert_eq!(frame.grid[3][3], CellType::Exit);
+        assert!(frame
+            .grid
+            .iter()
+            .flatten()
+            .all(|cell| *cell != CellType::SnakeHead && *cell != CellType::SnakeBody));
+    }
 }

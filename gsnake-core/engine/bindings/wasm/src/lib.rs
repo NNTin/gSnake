@@ -427,6 +427,124 @@ mod tests {
         );
     }
 
+    #[cfg(target_arch = "wasm32")]
+    #[test]
+    fn test_parse_direction_js_value_accepts_string() {
+        let direction = parse_direction_js_value(&JsValue::from_str("North"))
+            .expect("North string should parse");
+        assert_eq!(direction, Direction::North);
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    #[test]
+    fn test_parse_direction_js_value_rejects_non_string() {
+        let error = parse_direction_js_value(&JsValue::from_f64(42.0))
+            .expect_err("non-string direction should fail");
+        let parsed: ContractError = serde_wasm_bindgen::from_value(error)
+            .expect("error payload should deserialize as ContractError");
+        assert_eq!(parsed.kind, ContractErrorKind::InvalidInput);
+        assert_eq!(parsed.message, "Direction must be a string");
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    #[test]
+    fn test_contract_error_serializes_to_js_value() {
+        let value = contract_error(ContractErrorKind::InputRejected, "move rejected");
+        let parsed: ContractError = serde_wasm_bindgen::from_value(value)
+            .expect("contract_error should produce serializable ContractError value");
+        assert_eq!(parsed.kind, ContractErrorKind::InputRejected);
+        assert_eq!(parsed.message, "move rejected");
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    #[test]
+    fn test_contract_error_from_data_roundtrip() {
+        let source = build_contract_error(ContractErrorKind::InternalError, "boom");
+        let value = contract_error_from_data(&source);
+        let parsed: ContractError = serde_wasm_bindgen::from_value(value)
+            .expect("contract_error_from_data should roundtrip");
+        assert_eq!(parsed, source);
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    #[test]
+    fn test_wasm_engine_constructor_getters_and_move() {
+        let level = create_level();
+        let level_js = serde_wasm_bindgen::to_value(&level)
+            .expect("level should serialize to JsValue for constructor");
+        let mut engine = WasmGameEngine::new(level_js).expect("constructor should succeed");
+
+        // Exercise internal frame emit path without callback.
+        engine
+            .emit_frame()
+            .expect("emit_frame should be a no-op when callback is not set");
+
+        let frame_js = engine.get_frame().expect("get_frame should succeed");
+        let frame: Frame = serde_wasm_bindgen::from_value(frame_js)
+            .expect("frame should deserialize from JsValue");
+        assert_eq!(frame.state.moves, 0);
+
+        let game_state_js = engine
+            .get_game_state()
+            .expect("get_game_state should succeed");
+        let game_state: gsnake_core::GameState = serde_wasm_bindgen::from_value(game_state_js)
+            .expect("game state should deserialize from JsValue");
+        assert_eq!(game_state.current_level, 1);
+
+        let level_js = engine.get_level().expect("get_level should succeed");
+        let level_out: LevelDefinition = serde_wasm_bindgen::from_value(level_js)
+            .expect("level should deserialize from JsValue");
+        assert_eq!(level_out.id, level.id);
+
+        let moved_js = engine
+            .process_move(&JsValue::from_str("North"))
+            .expect("valid move should succeed");
+        let moved_frame: Frame =
+            serde_wasm_bindgen::from_value(moved_js).expect("moved frame should deserialize");
+        assert_eq!(moved_frame.state.moves, 1);
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    #[test]
+    fn test_wasm_engine_process_move_rejects_invalid_direction() {
+        let level_js = serde_wasm_bindgen::to_value(&create_level())
+            .expect("level should serialize to JsValue");
+        let mut engine = WasmGameEngine::new(level_js).expect("constructor should succeed");
+
+        let error_js = engine
+            .process_move(&JsValue::from_str("Diagonal"))
+            .expect_err("invalid direction token should fail");
+        let error: ContractError =
+            serde_wasm_bindgen::from_value(error_js).expect("error payload should deserialize");
+        assert_eq!(error.kind, ContractErrorKind::InvalidInput);
+        assert_eq!(error.message, "Invalid direction: Diagonal");
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    #[test]
+    fn test_wasm_engine_process_move_rejects_non_string_direction() {
+        let level_js = serde_wasm_bindgen::to_value(&create_level())
+            .expect("level should serialize to JsValue");
+        let mut engine = WasmGameEngine::new(level_js).expect("constructor should succeed");
+
+        let error_js = engine
+            .process_move(&JsValue::from_f64(7.0))
+            .expect_err("non-string direction should fail");
+        let error: ContractError =
+            serde_wasm_bindgen::from_value(error_js).expect("error payload should deserialize");
+        assert_eq!(error.kind, ContractErrorKind::InvalidInput);
+        assert_eq!(error.message, "Direction must be a string");
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    #[test]
+    fn test_get_levels_returns_embedded_levels() {
+        let levels_js = get_levels().expect("embedded levels should parse and serialize");
+        let levels: Vec<LevelDefinition> =
+            serde_wasm_bindgen::from_value(levels_js).expect("levels payload should deserialize");
+        assert!(!levels.is_empty(), "embedded levels should not be empty");
+    }
+
     fn create_level() -> LevelDefinition {
         LevelDefinition::new(
             1,
