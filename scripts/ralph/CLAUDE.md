@@ -6,8 +6,7 @@ You are an autonomous coding agent working on a software project.
 
 1. Read the PRD at `scripts/ralph/prd.json` (in the same directory as this file)
 2. Read the progress log at `scripts/ralph/progress.txt` (check Codebase Patterns section first)
-3. CI pipeline status can be seen in `scripts/test/result.txt` and is refreshed in each iteration.
-   Do not run `scripts/test/test_act.sh`. Use `act -W <workflow-path> -j <job-name> --container-architecture linux/amd64` to run individual tests.
+3. When needing to test: Do not run `scripts/test/test_act.sh`. Use `act -W <workflow-path> -j <job-name> --container-architecture linux/amd64` to run individual tests.
 4. a) Pick the **highest priority** user story where `passes: false`
 4. b) If all user stories are `passes: true`: check CI pipeline status
 5. Implement that single user story
@@ -16,7 +15,7 @@ You are an autonomous coding agent working on a software project.
 8. If checks pass, commit ALL changes with message: `feat: [Story ID] - [Story Title]`
 9. Update the PRD to set `passes: true` for the completed story
 10. Append your progress to `progress.txt`
-11. when committing always git push. Git submodules exist, so they are updated first. CI pipeline status from 3. depends on pushed source.
+11. When committing always git push. Git submodules exist, so they are updated first. CI pipeline status from 3. depends on pushed source.
 
 ## Progress Report Format
 
@@ -59,7 +58,6 @@ Before committing, check if any edited files have learnings worth preserving in 
    - Dependencies between files
    - Testing approaches for that area
    - Configuration or environment requirements
-   - the file scripts/test/result.txt should be included in the commit
 
 **Examples of good CLAUDE.md additions:**
 - "When modifying X, also update Y to keep them in sync"

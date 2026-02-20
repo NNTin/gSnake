@@ -108,9 +108,9 @@ for i in $(seq 1 $MAX_ITERATIONS); do
   fi
 
   # Run act tests between iterations; never fail the loop if tests fail.
-  if [ -f "$TEST_ACT_SCRIPT" ]; then
-    bash "$TEST_ACT_SCRIPT" || true
-  fi
+  # if [ -f "$TEST_ACT_SCRIPT" ]; then
+  #   bash "$TEST_ACT_SCRIPT" || true
+  # fi
   
   echo "Iteration $i complete. Continuing..."
   sleep 2

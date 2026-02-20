@@ -46,3 +46,4 @@ scripts/test/tmp_act_results/
 scripts/ralph/archive/
 
 .playwright-mcp/
+scripts/test/result.txt
