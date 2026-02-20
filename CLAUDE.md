@@ -186,6 +186,16 @@ See `gsnake-web/packages/gsnake-web-app/engine/CLAUDE.md` for the canonical fram
 - **CellType contract exhaustiveness** — in `gsnake-core/engine/core/tests/contract_tests.rs`, keep `test_celltype_serialization` and `test_celltype_roundtrip` aligned with all `CellType` enum variants and explicit JSON string expectations.
 - **Cell opacity contract coverage** — in `gsnake-web/packages/gsnake-web-app/tests/unit/Cell.test.ts`, keep a table-driven `it.each` matrix covering all 10 `CellType` variants with explicit expected opacity values so style-scope regressions are visible.
 
+## Playwright MCP
+
+When investigating failing E2E tests, use the Playwright MCP tools (`mcp__playwright__browser_*`) to reproduce the test flow interactively before reading code:
+
+1. **Install browser first** — call `browser_install` if you get "browser not installed" errors.
+2. **Start dev servers first** — the editor runs on port 3003, web player on 3000. Start them with `npm --prefix gsnake-editor run dev` (background) and wait for HTTP 200 before navigating.
+3. **Use `browser_snapshot`** for accessibility-tree inspection (faster than screenshots for understanding UI state).
+4. **Use `browser_run_code`** for multi-step flows or when you need to capture dialog events — wrap steps in `async (page) => { ... }` and attach `page.once('dialog', ...)` handlers before triggering actions.
+5. **Native `window.confirm` dialogs** — Playwright auto-dismisses `confirm()` dialogs if no handler is registered. This is the key difference from real users, who would accept them. 
+
 ## CI / Merge Gates
 
 Required checks for PRs (`.github/workflows/ci.yml`):
