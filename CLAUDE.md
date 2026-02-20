@@ -153,6 +153,7 @@ See `gsnake-web/packages/gsnake-web-app/engine/CLAUDE.md` for the canonical fram
 - **Editor snake metadata cleanup** — in `gsnake-editor/src/lib/EditorLayout.svelte`, clear snake cells through a shared helper that resets `entity`, `isSnakeSegment`, and `snakeSegmentIndex` together so per-cell metadata cannot drift.
 - **Editor test API endpoint config** — `gsnake-editor/src/lib/EditorLayout.svelte` should resolve test uploads from `VITE_GSNAKE_API_URL` (fallback `http://localhost:3001`) and normalize trailing slashes before appending `/api/test-level`.
 - **Editor Save/Test required-entity parity** — keep snake/food/exit validation centralized in shared helpers in `gsnake-editor/src/lib/EditorLayout.svelte` so Save warnings and Test preflight blocking rules cannot drift.
+- **Editor drag preview safety** — in `gsnake-editor/src/lib/EntityPalette.svelte`, build drag-image SVGs with DOM APIs (`createElementNS`/`setAttribute`) instead of `innerHTML`, and keep dragstart behavior (`setData`, `setDragImage` offsets, cleanup) covered by `src/tests/EntityPalette.test.ts`.
 
 ## CI / Merge Gates
 

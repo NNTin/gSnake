@@ -17,6 +17,7 @@ Started: Thu Feb 19 16:54:50 CET 2026
 - In `EditorLayout`, clear/reset helpers should always clear `entity`, `isSnakeSegment`, and `snakeSegmentIndex` together so snake metadata cannot drift on replacements/removals.
 - Keep `LevelDefinition` bounds enforcement split by concern: schema guarantees `snake.minItems >= 1` and non-negative coordinates, while `gsnake-editor` API validation enforces `x < gridSize.width` / `y < gridSize.height`.
 - Keep `LevelDefinition.difficulty` constrained as schema enum (`easy|medium|hard`) to match TypeScript unions, and include an explicit invalid-difficulty drift/fixture case so downstream validator mismatches fail fast.
+- In `EntityPalette.handleDragStart`, build drag-preview SVG nodes via `createElementNS` + `setAttribute` (no `innerHTML`) and preserve `dataTransfer.setData('entityType', ...)` / `setDragImage(..., 16, 16)` behavior with dedicated tests.
 
 ## [2026-02-19 17:00:35 CET] - US-001
 - Implemented US-001 by removing implicit snake auto-clear on snake-tool selection in `EditorLayout`, so selecting Snake no longer destroys existing snake segments outside undo/redo commands.
@@ -178,4 +179,15 @@ Started: Thu Feb 19 16:54:50 CET 2026
   - For Node ESM executables, always convert `import.meta.url` through `fileURLToPath` before comparing with CLI entrypoint paths.
   - Keep main-module detection logic in a small exported helper so runtime behavior is testable without spawning child processes.
   - `src/tests/server.test.ts` is the right place for entrypoint/CORS/API contract regressions in `gsnake-editor`.
+---
+## [2026-02-20 04:48:35 CET] - US-016
+- Replaced `EntityPalette` drag-preview `innerHTML` construction with explicit SVG DOM-node creation (`createElementNS` + `setAttribute`) so drag image rendering no longer depends on HTML string injection.
+- Added `EntityPalette` regression coverage that asserts dragstart payload (`entityType`), drag-image offsets, SVG/use `href`, and cleanup removal after the scheduled timeout.
+- Verified in browser with `agent-browser` on `http://localhost:3003` by dispatching a real `dragstart` event via `eval` and confirming `effectAllowed: copy`, `setData('entityType','food')`, drag image `href: #Food`, and post-timeout DOM cleanup; screenshot saved at `artifacts/images/us-016-entity-palette.png`.
+- Ran `npm --prefix gsnake-editor run check`, `npm --prefix gsnake-editor run lint`, `npm --prefix gsnake-editor run test`, and `act -W .github/workflows/ci.yml -j gsnake-editor-test --container-architecture linux/amd64` (success); refreshed `scripts/test/result.txt`.
+- Files changed: `gsnake-editor/src/lib/EntityPalette.svelte`, `gsnake-editor/src/tests/EntityPalette.test.ts`, `CLAUDE.md`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`
+- **Learnings for future iterations:**
+  - Drag-preview visuals in `EntityPalette` should be constructed with DOM APIs and validated through behavior-level tests (`setData`, `setDragImage`, cleanup), not HTML-string snapshots.
+  - For this editor UI, `agent-browser eval` is a reliable fallback for verifying drag-event internals when ref-based drag commands are flaky.
+  - Keep targeted root CI validation on `ci.yml::gsnake-editor-test` after editor-only UI/security changes.
 ---
