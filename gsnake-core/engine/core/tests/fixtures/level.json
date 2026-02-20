@@ -44,6 +44,5 @@
   "fallingFood": [],
   "stones": [],
   "spikes": [],
-  "exitIsSolid": true,
-  "totalFood": 0
+  "exitIsSolid": true
 }

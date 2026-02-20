@@ -19,13 +19,14 @@ impl GameEngine {
     pub fn new(level: LevelDefinition) -> Result<Self, EngineError> {
         Self::validate_grid_size(level.grid_size)?;
 
-        // Calculate total food requirement
-        // If total_food is explicitly set (non-zero), use it
-        // Otherwise, count all food items (regular + floating + falling)
-        let total_food = if level.total_food > 0 {
-            level.total_food
-        } else {
-            (level.food.len() + level.floating_food.len() + level.falling_food.len()) as u32
+        // Calculate total food requirement.
+        // None = auto-count all food items (regular + floating + falling).
+        // Some(n) = use the explicit level requirement, including Some(0).
+        let total_food = match level.total_food {
+            Some(total_food) => total_food,
+            None => {
+                (level.food.len() + level.floating_food.len() + level.falling_food.len()) as u32
+            },
         };
 
         let current_level = if level.id == 0 { 1 } else { level.id };
@@ -451,12 +452,28 @@ mod tests {
         ];
         level.floating_food = vec![Position::new(4, 4)];
         level.falling_food = vec![Position::new(5, 5)];
-        level.total_food = 9;
+        level.total_food = Some(9);
 
         let engine = create_engine(level);
 
         assert_eq!(engine.game_state().current_level, 1);
         assert_eq!(engine.game_state().total_food, 9);
+    }
+
+    #[test]
+    fn test_engine_uses_explicit_zero_total_food() {
+        let mut level = create_test_level();
+        level.food = vec![
+            Position::new(1, 1),
+            Position::new(2, 2),
+            Position::new(3, 3),
+        ];
+        level.floating_food = vec![Position::new(4, 4)];
+        level.falling_food = vec![Position::new(5, 5)];
+        level.total_food = Some(0);
+
+        let engine = create_engine(level);
+        assert_eq!(engine.game_state().total_food, 0);
     }
 
     #[test]

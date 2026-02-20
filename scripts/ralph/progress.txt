@@ -6,6 +6,7 @@ Started: Fri Feb 20 09:53:43 CET 2026
 - In `gsnake-core` stone push logic, keep `stone_mechanics::is_space_available` aligned with gravity occupancy rules by treating all food variants plus the exit tile as blocking cells.
 - In `gsnake-core/engine/bindings/wasm`, regenerate committed `pkg/` artifacts with `wasm-pack build --target bundler` whenever Rust binding code or dependency wiring changes.
 - In `gsnake-core/engine/bindings/wasm`, keep `on_frame` callback registration non-throwing for JS by preserving `()` return type and logging initial `emit_frame` failures via `web_sys::console::error_1`.
+- In `gsnake-core` level definitions, keep `total_food` typed as `Option<u32>` where `None` auto-counts all food vectors and `Some(0)` is an explicit zero-food requirement.
 ---
 ## [2026-02-20 09:55:34 CET] - US-001
 - Implemented US-001 by updating `stone_mechanics::is_space_available` to block stone pushes into regular food, floating food, falling food, and the exit tile.
@@ -36,4 +37,15 @@ Started: Fri Feb 20 09:53:43 CET 2026
   - WASM callback-registration APIs that return `()` should log startup/frame emission failures instead of silently discarding them, so JS integrations can diagnose initialization issues.
   - Existing `gsnake-wasm` unit tests are sufficient to validate non-API-breaking internal error-handling tweaks in `on_frame` when behavior changes are limited to logging paths.
   - The package-local profile warning from Cargo in `engine/bindings/wasm/Cargo.toml` is expected during clippy/test runs and should not be treated as a failure.
+---
+## [2026-02-20 10:04:33 CET] - US-004
+- Implemented US-004 by changing `LevelDefinition.total_food` from `u32` to `Option<u32>` and updating `GameEngine::new` to treat `None` as auto-count and `Some(n)` (including `Some(0)`) as explicit required food.
+- Added regression coverage for JSON semantics (`totalFood` omitted => `None`, `totalFood: 0` => `Some(0)`), default constructor behavior, and explicit-zero engine initialization behavior.
+- Regenerated contract fixture output so `tests/fixtures/level.json` omits `totalFood` when unset.
+- Ran quality checks in `gsnake-core`: `cargo fmt --all`, `cargo clippy -p gsnake-core --all-targets -- -D warnings`, and `cargo test -p gsnake-core`.
+- Files changed: `gsnake-core/engine/core/src/models.rs`, `gsnake-core/engine/core/src/engine.rs`, `gsnake-core/engine/core/tests/fixtures/level.json`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `CLAUDE.md`
+- **Learnings for future iterations:**
+  - `LevelDefinition::new()` should keep `total_food` unset (`None`) so auto-count is the default for programmatic level creation and serialized fixtures.
+  - For level JSON contracts, `totalFood` must only be present when overriding auto-count; explicit `0` is now a meaningful value and should not be conflated with missing.
+  - `cargo test -p gsnake-core` includes `generate_contract_fixtures`, so fixture drift can be caught and refreshed while validating engine changes.
 ---

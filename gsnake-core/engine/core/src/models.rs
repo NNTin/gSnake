@@ -148,8 +148,8 @@ pub struct LevelDefinition {
     pub spikes: Vec<Position>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub exit_is_solid: Option<bool>,
-    #[serde(default)]
-    pub total_food: u32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub total_food: Option<u32>,
 }
 
 impl LevelDefinition {
@@ -180,7 +180,7 @@ impl LevelDefinition {
             stones: Vec::new(),
             spikes: Vec::new(),
             exit_is_solid: Some(true),
-            total_food: 0,
+            total_food: None,
         }
     }
 }
@@ -386,6 +386,63 @@ mod tests {
         let json = serde_json::to_string(&error).unwrap();
         let deserialized: ContractError = serde_json::from_str(&json).unwrap();
         assert_eq!(error, deserialized);
+    }
+
+    #[test]
+    fn test_level_definition_new_defaults_total_food_to_none() {
+        let level = LevelDefinition::new(
+            1,
+            "Test Level".to_string(),
+            GridSize::new(5, 5),
+            vec![Position::new(1, 1)],
+            vec![],
+            vec![Position::new(2, 2)],
+            Position::new(4, 4),
+            Direction::East,
+        );
+
+        assert_eq!(level.total_food, None);
+
+        let json = serde_json::to_value(&level).unwrap();
+        assert!(
+            json.get("totalFood").is_none(),
+            "totalFood should be omitted when unset"
+        );
+    }
+
+    #[test]
+    fn test_level_definition_deserializes_missing_total_food_as_none() {
+        let json = r#"{
+            "id": 1,
+            "name": "Test Level",
+            "gridSize": { "width": 5, "height": 5 },
+            "snake": [{ "x": 1, "y": 1 }],
+            "obstacles": [],
+            "food": [{ "x": 2, "y": 2 }],
+            "exit": { "x": 4, "y": 4 },
+            "snakeDirection": "East"
+        }"#;
+
+        let level: LevelDefinition = serde_json::from_str(json).unwrap();
+        assert_eq!(level.total_food, None);
+    }
+
+    #[test]
+    fn test_level_definition_deserializes_explicit_zero_total_food() {
+        let json = r#"{
+            "id": 1,
+            "name": "Test Level",
+            "gridSize": { "width": 5, "height": 5 },
+            "snake": [{ "x": 1, "y": 1 }],
+            "obstacles": [],
+            "food": [{ "x": 2, "y": 2 }],
+            "exit": { "x": 4, "y": 4 },
+            "snakeDirection": "East",
+            "totalFood": 0
+        }"#;
+
+        let level: LevelDefinition = serde_json::from_str(json).unwrap();
+        assert_eq!(level.total_food, Some(0));
     }
 
     #[test]
