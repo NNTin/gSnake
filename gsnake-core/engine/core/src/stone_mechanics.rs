@@ -131,6 +131,28 @@ fn is_space_available(pos: Position, level_state: &LevelState) -> bool {
         return false;
     }
 
+    // Check for food items
+    if level_state
+        .food
+        .iter()
+        .any(|f| f.x == pos.x && f.y == pos.y)
+        || level_state
+            .floating_food
+            .iter()
+            .any(|f| f.x == pos.x && f.y == pos.y)
+        || level_state
+            .falling_food
+            .iter()
+            .any(|f| f.x == pos.x && f.y == pos.y)
+    {
+        return false;
+    }
+
+    // Exit tile is always blocked for horizontal stone pushes
+    if level_state.exit.x == pos.x && level_state.exit.y == pos.y {
+        return false;
+    }
+
     // Check for snake segments
     if level_state
         .snake
@@ -234,5 +256,58 @@ mod tests {
 
         assert_eq!(result, PushResult::Success);
         assert!(state.stones.is_empty()); // Stone was destroyed
+    }
+
+    #[test]
+    fn test_stone_push_blocked_by_food() {
+        let mut state = create_test_level_state();
+        state.stones = vec![Position::new(3, 5)];
+        state.food = vec![Position::new(4, 5)];
+
+        let result = try_push_stone(Position::new(3, 5), Direction::East, &mut state);
+
+        assert_eq!(result, PushResult::Blocked(Position::new(3, 5)));
+        assert_eq!(state.stones, vec![Position::new(3, 5)]);
+        assert_eq!(state.food, vec![Position::new(4, 5)]);
+    }
+
+    #[test]
+    fn test_stone_push_blocked_by_floating_food() {
+        let mut state = create_test_level_state();
+        state.stones = vec![Position::new(3, 5)];
+        state.floating_food = vec![Position::new(4, 5)];
+
+        let result = try_push_stone(Position::new(3, 5), Direction::East, &mut state);
+
+        assert_eq!(result, PushResult::Blocked(Position::new(3, 5)));
+        assert_eq!(state.stones, vec![Position::new(3, 5)]);
+        assert_eq!(state.floating_food, vec![Position::new(4, 5)]);
+    }
+
+    #[test]
+    fn test_stone_push_blocked_by_falling_food() {
+        let mut state = create_test_level_state();
+        state.stones = vec![Position::new(3, 5)];
+        state.falling_food = vec![Position::new(4, 5)];
+
+        let result = try_push_stone(Position::new(3, 5), Direction::East, &mut state);
+
+        assert_eq!(result, PushResult::Blocked(Position::new(3, 5)));
+        assert_eq!(state.stones, vec![Position::new(3, 5)]);
+        assert_eq!(state.falling_food, vec![Position::new(4, 5)]);
+    }
+
+    #[test]
+    fn test_stone_push_blocked_by_exit_even_when_exit_not_solid() {
+        let mut state = create_test_level_state();
+        state.stones = vec![Position::new(3, 5)];
+        state.exit = Position::new(4, 5);
+        state.exit_is_solid = false;
+
+        let result = try_push_stone(Position::new(3, 5), Direction::East, &mut state);
+
+        assert_eq!(result, PushResult::Blocked(Position::new(3, 5)));
+        assert_eq!(state.stones, vec![Position::new(3, 5)]);
+        assert_eq!(state.exit, Position::new(4, 5));
     }
 }
