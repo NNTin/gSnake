@@ -1,4 +1,5 @@
 ## Codebase Patterns
+- For `gsnake-editor` Svelte 5 component-event unit tests, attach handlers via `render(Component, { events: { ... } })` rather than `component.$on(...)`, because testing-library exports no longer expose legacy component event APIs.
 - For gsnake-web enum contract drift checks, keep runtime enum guard constants in `gsnake-web/packages/gsnake-web-app/contracts/enumGuards.ts` and assert parity against both generated TS unions (`types/models.ts`) and Rust wire enums (`gsnake-core/engine/core/src/models.rs`) so cross-language mismatch fails tests.
 - For `gsnake-wasm` in `WasmGameEngine.ts`, import as a namespace and treat the default initializer as optional because generated `pkg/gsnake_wasm.js` may omit a default export while unit-test mocks still provide one.
 - For `gsnake-editor/src/tests/integration.test.ts`, keep live endpoint checks opt-in with `GSNAKE_EDITOR_LIVE_INTEGRATION=1` and use explicit `it.skip` semantics by default, so CI avoids false-green placeholder assertions while enabled runs still enforce real HTTP contract checks.
@@ -197,4 +198,13 @@ Started: Fri Feb 20 10:55:27 CET 2026
   - Opacity tests should enumerate every `CellType` variant, not a partial sample, so enum additions require explicit styling decisions.
   - Object-based `it.each` cases (`{ type, expectedOpacity }`) keep test names aligned with assertion scope and avoid placeholder-order mistakes.
   - `npm --prefix gsnake-web/packages/gsnake-web-app run check && npm --prefix gsnake-web/packages/gsnake-web-app test` is the right local gate for `gsnake-web-app` unit-test updates.
+---
+## [2026-02-20 15:37:44 CET] - US-019
+- Added `LandingPage` interaction coverage for both primary actions by asserting `createNew` dispatch on button click and `loadExisting` dispatch after selecting a JSON file.
+- Kept file-selection behavior testable by capturing the hidden `<input type="file">` created at click time and triggering its `change` event with a concrete `File`.
+- Files changed: `gsnake-editor/src/tests/LandingPage.test.ts`, `CLAUDE.md`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`.
+- **Learnings for future iterations:**
+  - In this Svelte 5 stack, component event assertions should use `render(..., { events })`; `component.$on(...)` throws `component_api_changed`.
+  - For hidden file-picker flows, spying on `document.createElement` is a stable way to capture the generated input and drive `files` + `change` assertions.
+  - `npm --prefix gsnake-editor run check && npm --prefix gsnake-editor run lint && npm --prefix gsnake-editor test` is the correct local quality gate for editor component-test changes.
 ---
