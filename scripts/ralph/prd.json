@@ -1,516 +1,334 @@
 {
   "project": "gSnake",
-  "description": "Remediate the test-suite findings in gsnake-specs/tasks/code-review-tests.md by eliminating tautological tests, adding missing contract/gameplay coverage, and hardening E2E reliability across web/editor/engine boundaries.",
+  "description": "Remediate TypeScript engine-layer code review findings from gsnake-specs/tasks/code-review-ts-engine.md, prioritizing initialization safety, event lifecycle correctness, keyboard state handling, and robustness improvements.",
   "userStories": [
     {
       "id": "US-001",
-      "title": "Replace tautological enum contract tests with runtime contract assertions",
-      "description": "As a maintainer, I want enum contract tests to validate runtime contract data rather than hardcoded literal arrays so cross-language enum drift is caught before release.",
+      "title": "Prevent concurrent WasmGameEngine init race conditions",
+      "description": "As a maintainer, I want `init()` to be concurrency-safe so duplicate initialization cannot run in parallel and leave engine state non-deterministic.",
       "acceptanceCriteria": [
-        "`gsnake-web/packages/gsnake-web-app/tests/contract/enums.test.ts` no longer relies on literal `const valid = [...]` arrays that only assert their own length",
-        "Direction, CellType, and GameStatus checks assert equality against a runtime source of truth (generated bindings output or production guard arrays)",
-        "CellType assertions enforce the full 10-value set including `FloatingFood`, `FallingFood`, `Stone`, and `Spike`",
-        "A variant mismatch between Rust/TS causes this test file to fail",
+        "`WasmGameEngine.init()` sets an in-progress or initialized guard before the first await",
+        "A second `init()` call during in-flight initialization is rejected or returns early without re-running wasm setup",
+        "Guard state is reset correctly when initialization fails",
         "Typecheck passes",
         "Tests pass"
       ],
       "priority": 1,
-      "passes": true,
+      "passes": false,
       "notes": "",
       "additionalInformation": {
-        "Severity": "Critical",
+        "Severity": "High",
         "File": [
-          "gsnake-web/packages/gsnake-web-app/tests/contract/enums.test.ts:10",
-          "gsnake-web/packages/gsnake-web-app/tests/contract/enums.test.ts:29",
-          "gsnake-web/packages/gsnake-web-app/tests/contract/enums.test.ts:80"
+          "/home/nntin/git/gSnake/gsnake-web/packages/gsnake-web-app/engine/WasmGameEngine.ts:26-78"
         ],
-        "Issue": "The tests assert properties of hardcoded literal arrays (`toHaveLength`, `toContain`) instead of validating production runtime values. These assertions are type-system tautologies and can pass without exercising contract code.",
-        "Impact": "Cross-language enum contract drift can slip through with false confidence. For example, a Rust-side `CellType` addition or rename may not be detected by this suite.",
-        "Suggestion": "Use runtime-derived expected sets from generated bindings or production guard constants, or remove this file if `types.test.ts` already provides complete runtime type-guard coverage."
+        "Issue": "The initialized guard is checked before async work but `this.initialized = true` is set only after the await chain, allowing a second concurrent `init()` call to pass the guard and run in parallel.",
+        "Impact": "Parallel init calls can create multiple wasm engines, duplicate event emissions, leaked instances, and last-writer-wins store corruption.",
+        "Suggestion": "Set initialized or initInProgress immediately before the first await and clear it on failure."
       }
     },
     {
       "id": "US-002",
-      "title": "Remove always-pass integration placeholders in editor tests",
-      "description": "As a maintainer, I want editor integration tests to provide real pass/fail signal so CI catches integration regressions instead of silently passing.",
+      "title": "Validate getLevels wasm payload at runtime before use",
+      "description": "As a maintainer, I want `getLevels()` output validated with runtime guards so wasm/type drift fails fast with a clear contract error.",
       "acceptanceCriteria": [
-        "`gsnake-editor/src/tests/integration.test.ts` no longer contains unconditional `expect(true).toBe(true)` fallback branches",
-        "Unreachable environment behavior is handled via explicit skip/todo semantics or by migrating checks to Playwright E2E where services are controlled",
-        "At least one integration assertion fails when the expected endpoint contract is broken",
+        "`WasmGameEngine.init()` no longer relies on `as unknown as LevelDefinition[]` without runtime validation",
+        "`getLevels()` output is validated with `isLevelArray` (or equivalent guard) before assignment",
+        "Invalid payload emits a clear initialization/contract error path",
         "Typecheck passes",
         "Tests pass"
       ],
       "priority": 2,
-      "passes": true,
+      "passes": false,
       "notes": "",
       "additionalInformation": {
-        "Severity": "Critical",
+        "Severity": "Medium",
         "File": [
-          "gsnake-editor/src/tests/integration.test.ts:38",
-          "gsnake-editor/src/tests/integration.test.ts:65"
+          "/home/nntin/git/gSnake/gsnake-web/packages/gsnake-web-app/engine/WasmGameEngine.ts:52"
         ],
-        "Issue": "Both tests pass through unconditional `expect(true).toBe(true)` in normal CI conditions where `GSNAKE_WEB_URL` is unavailable. They do not use true test skipping and therefore validate nothing meaningful.",
-        "Impact": "Regressions in CORS/editor API/server startup behavior produce no test signal while the suite appears green.",
-        "Suggestion": "Replace placeholders with real assertions under controlled service fixtures (prefer Playwright integration for cross-service flows)."
+        "Issue": "`getLevels() as unknown as LevelDefinition[]` bypasses type checking and trusts wasm output shape with no runtime guard.",
+        "Impact": "Schema drift between Rust and TS can surface as opaque runtime failures instead of explicit contract violations.",
+        "Suggestion": "Run `getLevels()` through `isLevelArray` and emit an initialization error when validation fails."
       }
     },
     {
       "id": "US-003",
-      "title": "Expand E2E CellType allowlist and verify extended variants render",
-      "description": "As a maintainer, I want E2E grid CellType validation to cover every contract variant so rendering/mapping regressions for extended cells are detected.",
+      "title": "Harden level-switch callback lifecycle for replaced RustEngine instances",
+      "description": "As a maintainer, I want stale `onFrame` callbacks from previous RustEngine instances to be ignored or cleaned up so old levels cannot overwrite current frame state.",
       "acceptanceCriteria": [
-        "`e2e/contract.spec.ts` allowlist for valid grid cell types includes all 10 `CellType` values",
-        "Existing test `all grid cells contain valid CellType values` fails if any rendered cell uses an unknown/missing contract type",
-        "A dedicated E2E scenario asserts that at least one `FloatingFood`, `FallingFood`, `Stone`, and `Spike` cell appears on a known fixture level",
+        "`loadLevelByIndex` prevents stale callbacks from previously replaced engine instances from mutating stores",
+        "Old engine instance is explicitly cleaned up or safely detached when replaced",
+        "Level transitions cannot emit frame updates from prior generations",
         "Typecheck passes",
         "Tests pass"
       ],
       "priority": 3,
-      "passes": true,
+      "passes": false,
       "notes": "",
       "additionalInformation": {
-        "Severity": "Critical",
+        "Severity": "High",
         "File": [
-          "e2e/contract.spec.ts:171"
+          "/home/nntin/git/gSnake/gsnake-web/packages/gsnake-web-app/engine/WasmGameEngine.ts:98-130"
         ],
-        "Issue": "The current allowlist only has six values (`Empty`, `SnakeHead`, `SnakeBody`, `Food`, `Obstacle`, `Exit`) and excludes four production variants.",
-        "Impact": "Extended-cell mapping/rendering regressions are unverified in E2E and may pass unnoticed.",
-        "Suggestion": "Add the missing four variants to the runtime allowlist and add a fixture-level assertion proving those variants render at least once."
+        "Issue": "Old RustEngine `onFrame` callbacks are not unregistered before replacing `this.wasmEngine`, relying on a behavioral wasm assumption.",
+        "Impact": "Stale callbacks can inject wrong-level frames and potentially leak old engine resources.",
+        "Suggestion": "Detach/free old engine when available, or gate frame callbacks with a generation token so obsolete callbacks become no-ops."
       }
     },
     {
       "id": "US-004",
-      "title": "Cover all CellType variants in Rust serialization and round-trip tests",
-      "description": "As a maintainer, I want Rust contract tests to exhaustively cover all CellType wire values so serde rename/casing drift is caught before frontend breakage.",
+      "title": "Handle LevelComplete keyboard state with exhaustive status switching",
+      "description": "As a player, I want keyboard input to work in `LevelComplete` state so I can continue/reset consistently after finishing a level.",
       "acceptanceCriteria": [
-        "`test_celltype_serialization` includes all 10 `CellType` variants with explicit expected JSON strings",
-        "`test_celltype_roundtrip` iterates all 10 variants",
-        "`FloatingFood`, `FallingFood`, `Stone`, and `Spike` are explicitly covered",
+        "`KeyboardHandler.handleKeyPress` adds explicit `LevelComplete` behavior",
+        "Switch on `GameStatus` includes an exhaustiveness guard to fail compile-time on missing cases",
+        "Keyboard behavior for LevelComplete is covered by unit tests",
         "Typecheck passes",
-        "Tests pass"
+        "Tests pass",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 4,
-      "passes": true,
+      "passes": false,
       "notes": "",
       "additionalInformation": {
         "Severity": "High",
         "File": [
-          "gsnake-core/engine/core/tests/contract_tests.rs:28",
-          "gsnake-core/engine/core/tests/contract_tests.rs:234"
+          "/home/nntin/git/gSnake/gsnake-web/packages/gsnake-web-app/engine/KeyboardHandler.ts:62-73"
         ],
-        "Issue": "Rust contract tests currently enumerate only six legacy CellType variants and omit four extended variants.",
-        "Impact": "Contract-string drift on omitted variants can break TS fixtures/runtime parsing without a Rust-side test failure.",
-        "Suggestion": "Extend both tests to the complete 10-variant set and assert exact serialized strings."
+        "Issue": "`GameStatus` includes `LevelComplete` but the keyboard switch has no `case \"LevelComplete\"`, so keypresses are silently dropped in that state.",
+        "Impact": "Players can become unable to proceed via keyboard after level completion in normal gameplay flows.",
+        "Suggestion": "Add a `LevelComplete` case and include a `never` exhaustiveness guard for future statuses."
       }
     },
     {
       "id": "US-005",
-      "title": "Add missing KeyboardHandler coverage for playing shortcuts and LevelComplete",
-      "description": "As a maintainer, I want keyboard-state behavior fully tested so restart/quit shortcuts and LevelComplete key handling cannot regress silently.",
+      "title": "Add store-bridge listener cleanup to avoid duplicate subscriptions",
+      "description": "As a maintainer, I want `connectGameEngineToStores` to support teardown so repeated calls do not accumulate listeners and duplicate updates.",
       "acceptanceCriteria": [
-        "`KeyboardHandler.test.ts` adds a case for `r` in `Playing` state expecting `restartLevel`",
-        "`KeyboardHandler.test.ts` adds a case for `q` in `Playing` state expecting `loadLevel(1)`",
-        "`KeyboardHandler.test.ts` adds a `LevelComplete` keypress case asserting no move/restart/load side effects",
+        "`WasmGameEngine` exposes listener removal or equivalent deduplication behavior",
+        "`connectGameEngineToStores` returns or uses cleanup so repeated connects do not stack listeners",
+        "Repeated connection flows no longer cause duplicate frame/state store writes",
         "Typecheck passes",
         "Tests pass"
       ],
       "priority": 5,
-      "passes": true,
+      "passes": false,
       "notes": "",
       "additionalInformation": {
-        "Severity": "High",
+        "Severity": "Medium",
         "File": [
-          "gsnake-web/packages/gsnake-web-app/tests/unit/KeyboardHandler.test.ts",
-          "gsnake-web/packages/gsnake-web-app/src/lib/KeyboardHandler.ts:75"
+          "/home/nntin/git/gSnake/gsnake-web/packages/gsnake-web-app/stores/stores.ts:49-68"
         ],
-        "Issue": "Existing tests do not cover `r`/`q` handling in `Playing` or the `LevelComplete` state's no-op behavior.",
-        "Impact": "Shortcut regressions and post-win key handling bugs can ship unnoticed.",
-        "Suggestion": "Add explicit per-state keyboard behavior tests for `r`, `q`, and LevelComplete passthrough."
+        "Issue": "`connectGameEngineToStores` always adds listeners and there is no remove API, so reconnects stack handlers.",
+        "Impact": "HMR or repeated setup can cause multi-fire store updates, re-render churn, and inconsistent derived values.",
+        "Suggestion": "Add `removeEventListener` and return cleanup from the store bridge, or move to a single-listener model."
       }
     },
     {
       "id": "US-006",
-      "title": "Test WasmGameEngine loadLevel API, init guard, and out-of-range handling",
-      "description": "As a maintainer, I want direct tests for WasmGameEngine public level-loading behavior so level-switch and initialization regressions are caught.",
+      "title": "Cancel engine-to-store side effects when App.svelte unmounts during init",
+      "description": "As a maintainer, I want mount lifecycle cancellation around initialization so unmounted components cannot leave zombie engines mutating global stores.",
       "acceptanceCriteria": [
-        "`WasmGameEngine.test.ts` calls `engine.loadLevel(2)` in a two-level setup and verifies expected level-changed/frame behavior",
-        "`WasmGameEngine.test.ts` verifies double `init()` does not reinitialize the WASM bridge",
-        "`WasmGameEngine.test.ts` covers out-of-range level input such as `loadLevel(0)` and asserts expected error/rejection path",
+        "`App.svelte` tracks cancellation or abort for in-flight init",
+        "Engine/store listeners are detached or made inert after `onDestroy`",
+        "Unmount during initialization does not leave ongoing frame/level store writes",
         "Typecheck passes",
-        "Tests pass"
+        "Tests pass",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 6,
-      "passes": true,
+      "passes": false,
       "notes": "",
       "additionalInformation": {
-        "Severity": "High",
+        "Severity": "Medium",
         "File": [
-          "gsnake-web/packages/gsnake-web-app/tests/unit/WasmGameEngine.test.ts"
+          "/home/nntin/git/gSnake/gsnake-web/packages/gsnake-web-app/components/App.svelte:17-71"
         ],
-        "Issue": "The suite exercises internal paths (`nextLevel`, `resetLevel`) but not the public `loadLevel` API, init idempotency guard, or invalid level-number boundaries.",
-        "Impact": "1-based/0-based conversion bugs, double initialization issues, or range handling regressions may evade tests.",
-        "Suggestion": "Add direct public API tests for `loadLevel`, `init` idempotency, and out-of-range behavior."
+        "Issue": "If destroy occurs before `init()` resolves, local UI state guard is respected but engine/store side effects can continue after unmount.",
+        "Impact": "Hot-reload or interrupted mount can leave zombie engine instances writing to global stores until refresh.",
+        "Suggestion": "Use abort/cancel signaling and ensure the engine-to-store listener path is torn down on destroy."
       }
     },
     {
       "id": "US-007",
-      "title": "Add CompletionTracker tests for corrupted storage formats and write failures",
-      "description": "As a maintainer, I want CompletionTracker to be resiliently tested against invalid localStorage payloads and quota failures.",
+      "title": "Route async loadLevel/restartLevel failures through engine error handling",
+      "description": "As a maintainer, I want public async keyboard-triggered actions to handle rejections consistently so failures do not become unhandled promise rejections.",
       "acceptanceCriteria": [
-        "`CompletionTracker.test.ts` verifies non-array JSON payloads (for example `42`, `{}`, `null`) return an empty completed-level list",
-        "`CompletionTracker.test.ts` verifies malformed JSON parse failures return an empty list",
-        "`CompletionTracker.test.ts` mocks `localStorage.setItem` throwing and verifies `markCompleted` does not propagate",
+        "`loadLevel` and `restartLevel` error paths are awaited/handled or internally normalized",
+        "Failures from invalid level requests are routed through engine error event flow",
+        "No unhandled promise rejection occurs from keyboard-triggered level actions",
         "Typecheck passes",
         "Tests pass"
       ],
       "priority": 7,
-      "passes": true,
+      "passes": false,
       "notes": "",
       "additionalInformation": {
-        "Severity": "High",
+        "Severity": "Low",
         "File": [
-          "gsnake-web/packages/gsnake-web-app/tests/unit/CompletionTracker.test.ts"
+          "/home/nntin/git/gSnake/gsnake-web/packages/gsnake-web-app/engine/WasmGameEngine.ts:81-87"
         ],
-        "Issue": "Current tests cover filtering invalid values inside arrays but do not cover non-array parse results, malformed JSON, or write exceptions.",
-        "Impact": "Refactors could remove defensive guards with no failing tests; storage failures could regress silently.",
-        "Suggestion": "Add explicit cases for parse success/non-array, parse failure, and setItem throw handling."
+        "Issue": "`loadLevel`/`restartLevel` are async wrappers called by keyboard code without await/catch, allowing silent rejected promises.",
+        "Impact": "Range or other async failures can bypass structured engine error reporting and surface only as console-level unhandled rejections.",
+        "Suggestion": "Either await and catch in keyboard flows or catch internally in wrappers and forward via `handleContractError`."
       }
     },
     {
       "id": "US-008",
-      "title": "Remove fixed sleep from editor integration E2E and assert positive ready state",
-      "description": "As a maintainer, I want editor popup E2E to use event-driven waits and positive assertions so CI is fast and reliable.",
+      "title": "Guard CompletionTracker writes against localStorage setItem exceptions",
+      "description": "As a maintainer, I want `markCompleted` to handle write failures safely so storage quota/private-mode errors do not crash reactive updates.",
       "acceptanceCriteria": [
-        "`e2e/editor-integration.spec.ts` no longer uses `waitForTimeout(2000)`",
-        "Test waits for a deterministic readiness selector (for example `[data-element-id=\"game-field\"]`) with timeout",
-        "Test uses a positive visibility assertion for successful load rather than only checking absence of an error string",
+        "`CompletionTracker.markCompleted` wraps `localStorage.setItem` in try/catch",
+        "When persistence fails, method behavior is deterministic and does not throw uncaught errors",
+        "Storage write-failure path is covered by unit tests",
         "Typecheck passes",
         "Tests pass"
       ],
       "priority": 8,
-      "passes": true,
+      "passes": false,
       "notes": "",
       "additionalInformation": {
-        "Severity": "High",
+        "Severity": "Medium",
         "File": [
-          "e2e/editor-integration.spec.ts:57"
+          "/home/nntin/git/gSnake/gsnake-web/packages/gsnake-web-app/engine/CompletionTracker.ts:23-30"
         ],
-        "Issue": "The test uses unconditional sleep and inverted error-text logic, which can pass vacuously and fail intermittently under load.",
-        "Impact": "Slow/fragile CI behavior and weak confidence that the game actually loaded.",
-        "Suggestion": "Use selector-based waits and explicit `toBeVisible()` readiness assertions."
+        "Issue": "`markCompleted` calls `setItem` without try/catch even though `getCompletedLevels` already treats storage access as fallible.",
+        "Impact": "Quota/private-mode failures can produce uncaught DOMExceptions and destabilize reactive update flows.",
+        "Suggestion": "Wrap `setItem` in try/catch consistent with read-path error handling."
       }
     },
     {
       "id": "US-009",
-      "title": "Stabilize gravity E2E by using deterministic fixture level instead of hardcoded move count",
-      "description": "As a maintainer, I want gravity gameplay E2E to assert engine behavior independent of mutable level-design data.",
+      "title": "Simplify normalizeStartLevel behavior documentation and branch clarity",
+      "description": "As a maintainer, I want explicit normalization intent for numeric vs string start-level inputs so fractional and non-positive handling is unsurprising.",
       "acceptanceCriteria": [
-        "`e2e/gravity.spec.ts` no longer assumes level 1 is solved by exactly 11 right-arrow presses",
-        "Test loads a known deterministic fixture level (or test-only injected level) and derives completion actions from that fixture",
-        "Assertions explicitly validate completion and move count relative to fixture expectations",
-        "Typecheck passes",
-        "Tests pass"
+        "`normalizeStartLevel` behavior for fractional numeric input is documented inline",
+        "Implementation or comments explain parity between numeric and string validation branches",
+        "Typecheck passes"
       ],
       "priority": 9,
-      "passes": true,
+      "passes": false,
       "notes": "",
       "additionalInformation": {
-        "Severity": "High",
+        "Severity": "Medium",
         "File": [
-          "e2e/gravity.spec.ts:33"
+          "/home/nntin/git/gSnake/gsnake-web/packages/gsnake-web-app/engine/WasmGameEngine.ts:140-156"
         ],
-        "Issue": "The test is coupled to mutable level-1 content via fixed move count assumptions.",
-        "Impact": "Legitimate level edits break the test in confusing ways and reduce signal on actual engine behavior.",
-        "Suggestion": "Use test fixture levels controlled by the test harness and assert against deterministic expectations."
+        "Issue": "Numeric and string normalization paths are correct but subtly different and under-documented, especially for fractional numeric values.",
+        "Impact": "Future callers may misinterpret accepted inputs and introduce maintenance bugs around start-level parsing.",
+        "Suggestion": "Add comments clarifying intentional rejection of fractional numeric input and optionally consolidate parsing strategy."
       }
     },
     {
       "id": "US-010",
-      "title": "Replace 180-degree-turn timing sleep with state-driven synchronization",
-      "description": "As a maintainer, I want the 180-degree rejection E2E to wait on frame state transitions instead of fixed delays so it is deterministic on CI.",
+      "title": "Remove unreachable fallback branch in handleContractError",
+      "description": "As a maintainer, I want `handleContractError` control flow to match normalization guarantees so logging behavior is clear and dead code is eliminated.",
       "acceptanceCriteria": [
-        "`e2e/contract.spec.ts` removes `waitForTimeout(100)` from the 180-degree turn scenario",
-        "The test waits for `moves` increment (or equivalent contract frame condition) before sending the opposite direction input",
-        "The test remains green on repeated runs without timing flakiness",
+        "Unreachable fallback branch in `handleContractError` is removed or made meaningfully reachable by documented behavior",
+        "Error emission and logging behavior remains intentional and covered by tests",
         "Typecheck passes",
         "Tests pass"
       ],
       "priority": 10,
-      "passes": true,
+      "passes": false,
       "notes": "",
       "additionalInformation": {
         "Severity": "Medium",
         "File": [
-          "e2e/contract.spec.ts:83"
+          "/home/nntin/git/gSnake/gsnake-web/packages/gsnake-web-app/engine/WasmGameEngine.ts:221-240"
         ],
-        "Issue": "A fixed 100ms wait is used to sequence keypresses, which is sensitive to load/latency.",
-        "Impact": "Intermittent false negatives in CI and weaker confidence in input-order behavior.",
-        "Suggestion": "Use `waitForFunction` on frame state (as done elsewhere in the file) before issuing the second keypress."
+        "Issue": "`normalizeContractError` always returns a value, making the `contractError === null` console fallback branch dead code.",
+        "Impact": "Dead code obscures true error-handling behavior and confuses future maintenance.",
+        "Suggestion": "Remove the unreachable branch or explicitly support/document a null-return scenario."
       }
     },
     {
       "id": "US-011",
-      "title": "Convert snake rendering bug test from API persistence check to browser regression",
-      "description": "As a maintainer, I want the snake-draw regression test to verify rendered cell state so UI regressions are caught.",
+      "title": "Make keyboard preventDefault flow explicit for movement keys",
+      "description": "As a maintainer, I want movement key prevention logic to be simple and explicit so future changes do not leave redundant or dead branches.",
       "acceptanceCriteria": [
-        "`e2e/snake-bugs.spec.ts` opens the game UI and validates rendered snake cells before and after level replacement",
-        "The test asserts stale snake cells from level A are cleared after loading level B",
-        "API persistence checks are kept only if they support the visual regression assertion, not as sole validation",
+        "Movement key `preventDefault` behavior is defined in one clear path",
+        "Redundant conditional prevent-default branch in `handlePlayingState` is simplified",
+        "Keyboard movement behavior remains unchanged in tests",
         "Typecheck passes",
         "Tests pass"
       ],
       "priority": 11,
-      "passes": true,
+      "passes": false,
       "notes": "",
       "additionalInformation": {
-        "Severity": "Medium",
+        "Severity": "Low",
         "File": [
-          "e2e/snake-bugs.spec.ts:44"
+          "/home/nntin/git/gSnake/gsnake-web/packages/gsnake-web-app/engine/KeyboardHandler.ts:89-95"
         ],
-        "Issue": "The current test validates API payload replacement only; it never inspects DOM/canvas rendering despite claiming to test a draw-clearing bug.",
-        "Impact": "Rendering regressions can reappear while this test still passes.",
-        "Suggestion": "Use browser assertions on rendered snake classes/markers after switching levels."
+        "Issue": "WASD and arrow-key preventDefault handling is split between unconditional and conditional paths, creating unnecessary complexity.",
+        "Impact": "Not explicitly stated in the source review; inferred impact is maintainability risk and potential dead-branch confusion in future edits.",
+        "Suggestion": "Include WASD in the unconditional prevent-default list and simplify to an unconditional call in playing-state handling."
       }
     },
     {
       "id": "US-012",
-      "title": "Add buildLevelExportPayload edge-case coverage for missing exit and empty snake",
-      "description": "As a maintainer, I want export-payload tests to lock behavior for null-exit and empty-snake scenarios.",
+      "title": "Document intentional keyboard-to-store coupling in KeyboardHandler",
+      "description": "As a maintainer, I want the direct store subscription in `KeyboardHandler` to be explicitly documented so architectural coupling is understood and test setup assumptions stay clear.",
       "acceptanceCriteria": [
-        "`gsnake-editor/src/tests/types.test.ts` includes a case where no snake segments produce `snake: []`",
-        "`gsnake-editor/src/tests/types.test.ts` includes a case where no exit cell yields `exit: null`",
-        "If duplicate exits are allowed, behavior is documented and tested (for example, last encountered exit wins)",
-        "Typecheck passes",
-        "Tests pass"
+        "`KeyboardHandler` includes a concise comment documenting why it subscribes to `gameState` directly",
+        "Comment explains tradeoff and test implication for `currentStatus` source",
+        "Typecheck passes"
       ],
       "priority": 12,
-      "passes": true,
+      "passes": false,
       "notes": "",
       "additionalInformation": {
-        "Severity": "Medium",
+        "Severity": "Low",
         "File": [
-          "gsnake-editor/src/tests/types.test.ts"
+          "/home/nntin/git/gSnake/gsnake-web/packages/gsnake-web-app/engine/KeyboardHandler.ts:28-31"
         ],
-        "Issue": "Only a happy-path export is currently tested; edge cases (missing exit, empty snake, duplicate exits) are not covered.",
-        "Impact": "Downstream failures from null/empty conditions can appear without prior test detection.",
-        "Suggestion": "Add focused unit cases for these edge conditions and lock expected behavior."
+        "Issue": "Engine layer class directly depends on store module subscription, creating tight coupling and test sensitivity to store defaults.",
+        "Impact": "Low-risk architectural coupling can cause brittle tests and hidden assumptions if store defaults change.",
+        "Suggestion": "Keep current design but add explicit inline rationale for direct store subscription."
       }
     },
     {
       "id": "US-013",
-      "title": "Verify all optional entity types in editor save/load rendering test",
-      "description": "As a maintainer, I want load/render tests to assert every imported optional entity type so entity-specific regressions are visible.",
+      "title": "Plan direct snakeLength exposure from engine state to avoid grid scans",
+      "description": "As a maintainer, I want snake length exposed directly from engine state so UI updates avoid full-grid scans each frame as levels scale.",
       "acceptanceCriteria": [
-        "`EditorLayout.saveLoad.test.ts` asserts loaded rendering for floating food, falling food, stone, and spike coordinates in addition to existing checks",
-        "Assertions use the most specific available CSS/entity marker classes rather than generic `has-entity` only",
-        "Typecheck passes",
-        "Tests pass"
+        "A documented implementation path exists to provide snake length directly from engine/game state",
+        "Store derivation path can consume direct snake length when available",
+        "Typecheck passes"
       ],
       "priority": 13,
-      "passes": true,
+      "passes": false,
       "notes": "",
       "additionalInformation": {
-        "Severity": "Medium",
+        "Severity": "Low",
         "File": [
-          "gsnake-editor/src/tests/EditorLayout.saveLoad.test.ts:185"
+          "/home/nntin/git/gSnake/gsnake-web/packages/gsnake-web-app/stores/stores.ts:70-79"
         ],
-        "Issue": "The test loads multiple optional entities but only asserts a subset, leaving several imported types unverified.",
-        "Impact": "Entity-specific load/render regressions (especially stone/spike/falling/floating food) can slip by.",
-        "Suggestion": "Assert each optional entity's expected grid location and rendered class semantics."
+        "Issue": "`snakeLength` is derived by scanning all grid cells on each frame instead of reading a direct engine-provided value.",
+        "Impact": "Current impact is negligible on small grids but introduces avoidable per-frame CPU overhead for larger grids.",
+        "Suggestion": "Expose `snakeLength` in `GameState` from Rust and consume it directly in stores."
       }
     },
     {
       "id": "US-014",
-      "title": "Add countSnakeSegments coverage for zero and mixed extended-cell frames",
-      "description": "As a maintainer, I want snake-length derivation tests to cover mixed grids and zero-snake frames so counting logic remains correct.",
+      "title": "Reduce repeated localStorage parse churn in CompletionTracker.isCompleted",
+      "description": "As a maintainer, I want `isCompleted` lookups to avoid repeated full storage reads/parses so completion checks remain efficient and aligned with store state.",
       "acceptanceCriteria": [
-        "`stores.test.ts` includes a frame with a multi-row 5-segment snake and verifies `snakeLength === 5`",
-        "`stores.test.ts` includes a frame with no snake cells and verifies `snakeLength === 0`",
-        "`stores.test.ts` includes frames with extended non-snake cell types (`Stone`, `Spike`, `FloatingFood`, `FallingFood`) and verifies they are not counted",
-        "Typecheck passes",
-        "Tests pass"
+        "`CompletionTracker.isCompleted` avoids repeated parse-on-every-call behavior or explicitly defers UI callers to store state",
+        "Two-source-of-truth behavior between localStorage and store is documented or reduced",
+        "Typecheck passes"
       ],
       "priority": 14,
-      "passes": true,
-      "notes": "",
-      "additionalInformation": {
-        "Severity": "Medium",
-        "File": [
-          "gsnake-web/packages/gsnake-web-app/tests/unit/stores.test.ts:97"
-        ],
-        "Issue": "Current snake-length assertion covers only a simple two-cell snake row and does not challenge mixed/extended type handling.",
-        "Impact": "Counting regressions can occur without failing tests, especially around extended cell variants.",
-        "Suggestion": "Add multi-shape/mixed-type frame fixtures with explicit expected snake lengths."
-      }
-    },
-    {
-      "id": "US-015",
-      "title": "Add AllComplete transition coverage at wrapper and E2E layers",
-      "description": "As a maintainer, I want all-level-complete behavior tested end-to-end so final-game status transitions remain stable.",
-      "acceptanceCriteria": [
-        "`WasmGameEngine.test.ts` covers behavior after `nextLevel()` at final level and verifies expected no-op/event semantics",
-        "An E2E test verifies final-level completion UI/state (`AllComplete` flow) and keyboard return path (`q` to level 1)",
-        "Test expectations document whether `AllComplete` is wrapper-owned or engine-owned behavior",
-        "Typecheck passes",
-        "Tests pass"
-      ],
-      "priority": 15,
-      "passes": true,
-      "notes": "",
-      "additionalInformation": {
-        "Severity": "Medium",
-        "File": [
-          "gsnake-core/engine/core/src/engine.rs",
-          "gsnake-web/packages/gsnake-web-app/tests/unit/WasmGameEngine.test.ts"
-        ],
-        "Issue": "`AllComplete` is serialized but not exercised by transition tests; current coverage does not validate final-level wrapper behavior.",
-        "Impact": "End-of-game flow can regress without explicit tests for terminal-level transitions and shortcuts.",
-        "Suggestion": "Add wrapper unit + E2E tests around last-level completion and restart-to-level-1 behavior."
-      }
-    },
-    {
-      "id": "US-016",
-      "title": "Deduplicate overlapping workflow API E2E specs",
-      "description": "As a maintainer, I want duplicated workflow tests consolidated so API contract checks stay consistent and CI stays lean.",
-      "acceptanceCriteria": [
-        "Common POST/GET `/api/test-level` assertions are centralized in one spec",
-        "Unique checks (for example schema validation and multi-port CORS) are preserved in clear targeted tests",
-        "One duplicate file is removed or reduced to only non-overlapping coverage",
-        "Typecheck passes",
-        "Tests pass"
-      ],
-      "priority": 16,
-      "passes": true,
-      "notes": "",
-      "additionalInformation": {
-        "Severity": "Medium",
-        "File": [
-          "e2e/workflow.spec.ts",
-          "e2e/complete-workflow.spec.ts"
-        ],
-        "Issue": "Two specs repeat the same upload/retrieve contract flow with only small differences.",
-        "Impact": "Higher maintenance overhead and longer CI for largely duplicate coverage.",
-        "Suggestion": "Consolidate into one thorough spec and retain only genuinely unique checks in dedicated tests."
-      }
-    },
-    {
-      "id": "US-017",
-      "title": "Add editor API service readiness to Playwright startup strategy",
-      "description": "As a maintainer, I want Playwright runs to guarantee required services are up so local and CI E2E failures are actionable.",
-      "acceptanceCriteria": [
-        "Playwright startup includes readiness for editor API (`http://localhost:3001`) or global preflight wait logic",
-        "Specs that call editor API no longer fail with immediate connection errors when launched via standard `npx playwright test`",
-        "Startup failure messages clearly identify missing service when unavailable",
-        "Typecheck passes",
-        "Tests pass"
-      ],
-      "priority": 17,
-      "passes": true,
-      "notes": "",
-      "additionalInformation": {
-        "Severity": "Medium",
-        "File": [
-          "playwright.config.ts:33",
-          "e2e/workflow.spec.ts",
-          "e2e/complete-workflow.spec.ts",
-          "e2e/snake-bugs.spec.ts"
-        ],
-        "Issue": "Playwright config starts web/editor UI servers but not the editor API server required by several tests.",
-        "Impact": "Local E2E runs can fail cryptically unless users manually start the API service.",
-        "Suggestion": "Add API server to `webServer` config or add a global endpoint readiness fixture used by all API-dependent specs."
-      }
-    },
-    {
-      "id": "US-018",
-      "title": "Make Cell opacity test matrix explicit for supported CellType set",
-      "description": "As a maintainer, I want opacity tests to clearly cover intended cell types so style regressions and missing cases are visible.",
-      "acceptanceCriteria": [
-        "`Cell.test.ts` either validates opacity expectations for all 10 `CellType` values or explicitly validates only documented non-default types",
-        "Test naming and expectation table align with actual assertion scope",
-        "Typecheck passes",
-        "Tests pass"
-      ],
-      "priority": 18,
-      "passes": true,
+      "passes": false,
       "notes": "",
       "additionalInformation": {
         "Severity": "Low",
         "File": [
-          "gsnake-web/packages/gsnake-web-app/tests/unit/Cell.test.ts:51"
+          "/home/nntin/git/gSnake/gsnake-web/packages/gsnake-web-app/engine/CompletionTracker.ts:19-21"
         ],
-        "Issue": "Opacity checks cover an incomplete subset and rely on incidental expectations rather than explicit type coverage strategy.",
-        "Impact": "Mostly cosmetic regressions may go untested for omitted types.",
-        "Suggestion": "Use a complete `it.each` matrix or clearly document/test only intentionally non-default opacity types."
-      }
-    },
-    {
-      "id": "US-019",
-      "title": "Add LandingPage interaction tests for primary actions",
-      "description": "As a maintainer, I want LandingPage tests to verify button behavior so disconnected click handlers are caught.",
-      "acceptanceCriteria": [
-        "`LandingPage.test.ts` includes a click test for `Create New Level` and verifies expected navigation/event/callback",
-        "`LandingPage.test.ts` includes a click test for `Load Existing Level` and verifies expected navigation/event/callback",
-        "Typecheck passes",
-        "Tests pass"
-      ],
-      "priority": 19,
-      "passes": true,
-      "notes": "",
-      "additionalInformation": {
-        "Severity": "Low",
-        "File": [
-          "gsnake-editor/src/tests/LandingPage.test.ts"
-        ],
-        "Issue": "Current assertions verify static presence only and do not validate interaction behavior.",
-        "Impact": "Broken click wiring can ship despite passing unit tests.",
-        "Suggestion": "Add interaction-level assertions for both primary buttons."
-      }
-    },
-    {
-      "id": "US-020",
-      "title": "Correct fixtures context-key casing test to validate key naming",
-      "description": "As a maintainer, I want fixture context casing tests to assert key format directly so naming-contract regressions are caught.",
-      "acceptanceCriteria": [
-        "`fixtures.test.ts` camelCase check validates keys with a camelCase regex rather than validating value types only",
-        "The test fails when a snake_case key appears in `error.context`",
-        "Typecheck passes",
-        "Tests pass"
-      ],
-      "priority": 20,
-      "passes": true,
-      "notes": "",
-      "additionalInformation": {
-        "Severity": "Low",
-        "File": [
-          "gsnake-web/packages/gsnake-web-app/tests/contract/fixtures.test.ts:165"
-        ],
-        "Issue": "The test title claims camelCase-key validation but current assertions only check that context values are strings.",
-        "Impact": "Context-key naming drift is not actually tested.",
-        "Suggestion": "Assert `Object.keys(error.context)` against a camelCase pattern such as `^[a-z][a-zA-Z0-9]*$`."
-      }
-    },
-    {
-      "id": "US-021",
-      "title": "Clarify or tighten negative-coordinate contract in server tests",
-      "description": "As a maintainer, I want server coordinate constraints explicitly intentional so API contract tests match design intent.",
-      "acceptanceCriteria": [
-        "`server.test.ts` documents intent if negative coordinates are allowed, including rationale in test/schema comments",
-        "If negative coordinates are not intentional, schema adds minimum bounds and test expectation is updated to rejection",
-        "Coordinate constraint behavior is consistent between schema and test naming",
-        "Typecheck passes",
-        "Tests pass"
-      ],
-      "priority": 21,
-      "passes": true,
-      "notes": "",
-      "additionalInformation": {
-        "Severity": "Low",
-        "File": [
-          "gsnake-editor/src/tests/server.test.ts:165"
-        ],
-        "Issue": "The test currently confirms acceptance of negative coordinates but does not establish whether this is intended design or schema gap.",
-        "Impact": "Ambiguous contract can mislead downstream assumptions about valid playfield coordinates.",
-        "Suggestion": "Either document intentional acceptance clearly or enforce non-negative constraints in schema and align tests accordingly."
+        "Issue": "`isCompleted` re-reads and parses localStorage on every call even though a completion store already exists in UI state.",
+        "Impact": "Minor performance overhead and maintainability risk from duplicated sources of truth.",
+        "Suggestion": "Memoize reads or prefer store-driven UI checks where appropriate."
       }
     }
   ]
