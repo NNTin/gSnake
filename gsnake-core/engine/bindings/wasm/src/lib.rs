@@ -54,7 +54,7 @@ impl WasmGameEngine {
     /// Returns a Frame on success; failures return a `ContractError`
     /// Automatically invokes the onFrame callback with the new state
     #[wasm_bindgen(js_name = processMove)]
-    pub fn process_move(&mut self, direction: JsValue) -> Result<JsValue, JsValue> {
+    pub fn process_move(&mut self, direction: &JsValue) -> Result<JsValue, JsValue> {
         let direction = parse_direction_js_value(direction)?;
         let frame = process_move_on_engine(&mut self.engine, direction)
             .map_err(|error| contract_error_from_data(&error))?;
@@ -141,14 +141,13 @@ fn parse_level_result(
     level_result.map_err(|message| build_contract_error(ContractErrorKind::InvalidInput, &message))
 }
 
-fn parse_direction_js_value(direction: JsValue) -> Result<Direction, JsValue> {
+fn parse_direction_js_value(direction: &JsValue) -> Result<Direction, JsValue> {
     let direction_str = direction.as_string().ok_or_else(|| {
         contract_error(
             ContractErrorKind::InvalidInput,
             "Direction must be a string",
         )
     })?;
-    drop(direction);
     parse_direction_str(&direction_str).map_err(|error| contract_error_from_data(&error))
 }
 

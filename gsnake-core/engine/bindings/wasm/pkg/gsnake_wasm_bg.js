@@ -209,6 +209,9 @@ export function __wbg_error_7534b8e9a36f1ab4(arg0, arg1) {
         wasm.__wbindgen_free(deferred0_0, deferred0_1, 1);
     }
 }
+export function __wbg_error_9a7fe3f932034cde(arg0) {
+    console.error(arg0);
+}
 export function __wbg_get_9b94d73e6221f75c(arg0, arg1) {
     const ret = arg0[arg1 >>> 0];
     return ret;

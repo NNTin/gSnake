@@ -166,6 +166,7 @@ See `gsnake-web/packages/gsnake-web-app/engine/CLAUDE.md` for the canonical fram
 - **Gravity food-consumption contract** — in `gsnake-core`, keep food consumption on deliberate moves only (`GameEngine::check_and_eat_food` in `process_move`); `gravity::can_snake_fall` treats food as platform support and must not consume food during falls.
 - **WASM pkg sync** — when changing `gsnake-core/engine/bindings/wasm` Rust code or dependencies, run `wasm-pack build --target bundler` so checked-in `engine/bindings/wasm/pkg/*` artifacts remain in sync.
 - **WASM onFrame diagnostics** — in `gsnake-core/engine/bindings/wasm/src/lib.rs`, keep `on_frame` returning `()` for JS compatibility, but log initial `emit_frame` failures with `web_sys::console::error_1` instead of discarding errors.
+- **WASM JsValue borrowing** — in `gsnake-core/engine/bindings/wasm/src/lib.rs`, prefer `&JsValue` for parse/dispatch paths that only inspect inputs; this avoids misleading no-op drops and keeps `clippy::needless_pass_by_value` clean under `-D warnings`.
 - **CellType contract exhaustiveness** — in `gsnake-core/engine/core/tests/contract_tests.rs`, keep `test_celltype_serialization` and `test_celltype_roundtrip` aligned with all `CellType` enum variants and explicit JSON string expectations.
 
 ## CI / Merge Gates

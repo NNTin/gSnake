@@ -7,6 +7,7 @@ Started: Fri Feb 20 09:53:43 CET 2026
 - In `gsnake-core/engine/core/src/stone_mechanics.rs`, keep `find_stone_row` horizontal-only with an in-function `debug_assert!` so new call sites cannot silently pass vertical directions.
 - In `gsnake-core/engine/bindings/wasm`, regenerate committed `pkg/` artifacts with `wasm-pack build --target bundler` whenever Rust binding code or dependency wiring changes.
 - In `gsnake-core/engine/bindings/wasm`, keep `on_frame` callback registration non-throwing for JS by preserving `()` return type and logging initial `emit_frame` failures via `web_sys::console::error_1`.
+- In `gsnake-core/engine/bindings/wasm/src/lib.rs`, prefer borrowing `&JsValue` where ownership is unnecessary so `cargo clippy -D warnings` stays clean without no-op early-drop patterns.
 - In `gsnake-core` level definitions, keep `total_food` typed as `Option<u32>` where `None` auto-counts all food vectors and `Some(0)` is an explicit zero-food requirement.
 - In `gsnake-core`, use `GameEngine::new_with_total_levels(...)` from host/binding multi-level flows so the final-level exit can emit `GameStatus::AllComplete`; keep `GameEngine::new(...)` for single-level or host-managed progression.
 - In `gsnake-core/engine/core/tests/contract_tests.rs`, keep `CellType` wire-format tests exhaustive: serialization and roundtrip suites must include all enum variants with explicit expected JSON names.
@@ -105,4 +106,14 @@ Started: Fri Feb 20 09:53:43 CET 2026
   - Food collection in the engine is intentionally tied to `GameEngine::process_move` via `check_and_eat_food`; gravity resolution should remain non-collecting.
   - `can_snake_fall` treating food as support is a gameplay contract, not a missing consumption check.
   - Comment-only semantic clarifications in core engine code should still run the standard `cargo fmt/clippy/test` gate to prevent incidental regressions.
+---
+## [2026-02-20 10:26:02 CET] - US-010
+- Implemented US-010 by removing the no-op `drop(direction)` from the WASM move path and keeping direction parsing behavior unchanged (`direction_str` extraction followed by `parse_direction_str`).
+- Updated `process_move`/`parse_direction_js_value` to borrow `&JsValue` where ownership is unnecessary, preserving behavior while satisfying strict clippy settings.
+- Ran quality checks in `gsnake-core`: `cargo fmt --all`, `cargo clippy -p gsnake-wasm --all-targets -- -D warnings`, `cargo test -p gsnake-wasm`, and `wasm-pack build --target bundler`.
+- Files changed: `gsnake-core/engine/bindings/wasm/src/lib.rs`, `gsnake-core/engine/bindings/wasm/pkg/gsnake_wasm_bg.js`, `gsnake-core/engine/bindings/wasm/pkg/gsnake_wasm_bg.wasm`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `CLAUDE.md`
+- **Learnings for future iterations:**
+  - In wasm-bindgen entrypoints, prefer borrowing `&JsValue` when the value is only inspected; this avoids no-op explicit drops and keeps `clippy::needless_pass_by_value` from failing `-D warnings` builds.
+  - Even tiny Rust binding changes should run `wasm-pack build --target bundler` so committed `pkg/` outputs stay synchronized with generated glue.
+  - `cargo test -p gsnake-wasm` is the fastest regression pass for move-parsing and contract-error behavior in the WASM wrapper.
 ---
