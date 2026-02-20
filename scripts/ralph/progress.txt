@@ -3,6 +3,7 @@
 - For `gsnake-wasm` in `WasmGameEngine.ts`, import as a namespace and treat the default initializer as optional because generated `pkg/gsnake_wasm.js` may omit a default export while unit-test mocks still provide one.
 - For `gsnake-editor/src/tests/integration.test.ts`, keep live endpoint checks opt-in with `GSNAKE_EDITOR_LIVE_INTEGRATION=1` and use explicit `it.skip` semantics by default, so CI avoids false-green placeholder assertions while enabled runs still enforce real HTTP contract checks.
 - For `e2e/contract.spec.ts`, load deterministic fixture levels through `levelsUrl` using a `data:application/json,...` URL when asserting `CellType` coverage so tests are not coupled to mutable default levels or the editor API test server.
+- In the `gsnake-core` workspace, run package-targeted checks with `cargo ... -p gsnake-core` (hyphenated package name); `gsnake_core` is the Rust crate import path, not the Cargo package ID.
 
 # Ralph Progress Log
 Started: Fri Feb 20 10:55:27 CET 2026
@@ -34,4 +35,14 @@ Started: Fri Feb 20 10:55:27 CET 2026
   - Use `levelsUrl` with a `data:application/json,...` fixture in Playwright when you need deterministic level content without relying on `/api/test-level`.
   - Keep CellType allowlists centralized (for example `ALL_CELL_TYPES`) to prevent partial-contract drift across E2E scenarios.
   - `npx playwright test e2e/contract.spec.ts --project=chromium --reporter=list` is a fast targeted validation loop for contract-grid changes.
+---
+
+## [2026-02-20 11:18:27 CET] - US-004
+- Verified and locked Rust contract coverage for all 10 `CellType` variants in both serialization and round-trip tests (`Empty`, `SnakeHead`, `SnakeBody`, `Food`, `Obstacle`, `Exit`, `FloatingFood`, `FallingFood`, `Stone`, `Spike`).
+- Ran targeted Rust quality checks to confirm this story stays green.
+- Files changed: `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`.
+- **Learnings for future iterations:**
+  - `cargo test --test contract_tests test_celltype_` is a fast targeted check for enum wire-contract coverage in `gsnake-core/engine/core/tests/contract_tests.rs`.
+  - In the workspace, use `cargo check -p gsnake-core` (hyphenated package name) for package-scoped compile checks.
+  - When a PRD story is already implemented in code, still record verification evidence in `progress.txt` before marking `passes: true`.
 ---
