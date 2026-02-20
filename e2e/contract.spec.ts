@@ -119,9 +119,14 @@ test.describe('Error Contract Tests', () => {
 
     await page.waitForFunction(() => (window as any).__gsnakeContract?.frame);
 
-    // Get initial direction
+    const initialMoves = await page.evaluate(() => (window as any).__gsnakeContract.frame.state.moves);
+
+    // Wait for the rightward move to be processed before sending the opposite input.
     await page.keyboard.press('ArrowRight');
-    await page.waitForTimeout(100);
+    await page.waitForFunction(
+      moves => (window as any).__gsnakeContract?.frame?.state?.moves === moves + 1,
+      initialMoves
+    );
 
     // Try opposite direction (180-degree turn)
     await page.keyboard.press('ArrowLeft');

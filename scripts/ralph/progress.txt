@@ -9,6 +9,7 @@
 - For `WasmGameEngine`, treat `loadLevel(levelNumber)` as a 1-based public API and keep regression tests for both `loadLevel(2)` happy path events and `loadLevel(0)` invalid-index rejection (`Invalid level index: -1`) to catch boundary drift.
 - For `CompletionTracker`, treat localStorage as untrusted I/O: parse failures or non-array payloads should resolve to `[]`, and `markCompleted(...)` must catch `setItem` write failures instead of throwing.
 - For Playwright popup flows in `e2e/*`, avoid `waitForTimeout(...)`; wait on `domcontentloaded` plus a deterministic ready selector such as `[data-element-id="game-field"]` and pair it with a positive visibility assertion.
+- For `e2e/contract.spec.ts` keyboard-ordering checks, synchronize opposite-direction keypresses on deterministic frame progress (`frame.state.moves` increment via `waitForFunction`) instead of fixed sleeps to keep CI timing stable.
 
 # Ralph Progress Log
 Started: Fri Feb 20 10:55:27 CET 2026
@@ -102,4 +103,14 @@ Started: Fri Feb 20 10:55:27 CET 2026
   - For E2E progression coverage, pair deterministic fixture levels with explicit per-level solution key arrays; this removes coupling to evolving default level design.
   - If assertions read `[data-element-id=\"level-display\"]`, fixture IDs should align with expected displayed values (the UI shows level IDs, not ordinal index).
   - `npx playwright test e2e/gravity.spec.ts --project=chromium --reporter=list` is a fast validation path for gravity-flow changes.
+---
+
+## [2026-02-20 11:35:53 CET] - US-010
+- Replaced the fixed 100ms sleep in the 180-degree rejection contract test with deterministic frame-state synchronization by waiting for `frame.state.moves` to increment after the first keypress.
+- Preserved the opposite-direction rejection assertion path (`inputRejected`) while removing CI-load-sensitive timing assumptions.
+- Files changed: `e2e/contract.spec.ts`, `CLAUDE.md`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`.
+- **Learnings for future iterations:**
+  - For keyboard sequencing checks, capture `initialMoves` and wait for `moves + 1` before sending a second directional input to avoid flaky ordering caused by variable frame timing.
+  - Root-level `npx playwright test e2e/contract.spec.ts --project=chromium --reporter=list` is a fast validation loop for contract payload and error-path changes.
+  - Pair E2E validation with `npm --prefix gsnake-web run check` so type regressions are caught even when the changed file is test-only.
 ---
