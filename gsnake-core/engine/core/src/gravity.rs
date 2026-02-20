@@ -1,5 +1,10 @@
 use crate::{LevelState, Position};
 
+/// Hard recursion cap for falling-food support checks.
+/// This comfortably exceeds real level dimensions while preventing unbounded
+/// recursive descent on malformed/generated states.
+const MAX_SETTLED_FALLING_FOOD_DEPTH: usize = 1024;
+
 /// Apply gravity to the snake
 /// Returns true if any snake segment touched a spike
 pub fn apply_gravity_to_snake(level_state: &mut LevelState) -> bool {
@@ -91,7 +96,7 @@ fn can_snake_fall(level_state: &LevelState) -> bool {
         // Check food (all types act as platform for snake)
         if is_food(next_pos, level_state)
             || is_floating_food(next_pos, level_state)
-            || is_settled_falling_food(next_pos, level_state)
+            || is_settled_falling_food(next_pos, level_state, 0)
         {
             return false;
         }
@@ -140,7 +145,7 @@ fn can_object_fall(pos: Position, level_state: &LevelState, object_type: ObjectT
             // - Solid exit
             if is_stone(next_pos, level_state)
                 || is_floating_food(next_pos, level_state)
-                || is_settled_falling_food(next_pos, level_state)
+                || is_settled_falling_food(next_pos, level_state, 0)
                 || is_food(next_pos, level_state)
                 || is_snake_segment(next_pos, level_state)
                 || is_spike(next_pos, level_state)
@@ -155,7 +160,13 @@ fn can_object_fall(pos: Position, level_state: &LevelState, object_type: ObjectT
 }
 
 /// Check if a falling food is settled (has solid support below)
-fn is_settled_falling_food(pos: Position, level_state: &LevelState) -> bool {
+fn is_settled_falling_food(pos: Position, level_state: &LevelState, depth: usize) -> bool {
+    if depth >= MAX_SETTLED_FALLING_FOOD_DEPTH {
+        // Fail closed on pathological depth: treat as settled so malformed levels
+        // cannot trigger unbounded recursion/stack growth.
+        return true;
+    }
+
     // Check if this position contains falling food
     if !level_state
         .falling_food
@@ -172,7 +183,7 @@ fn is_settled_falling_food(pos: Position, level_state: &LevelState) -> bool {
     is_obstacle(below, level_state)
         || is_stone(below, level_state)
         || is_floating_food(below, level_state)
-        || is_settled_falling_food(below, level_state)
+        || is_settled_falling_food(below, level_state, depth + 1)
         || is_food(below, level_state)
         || is_snake_segment(below, level_state)
         || is_spike(below, level_state)
@@ -416,7 +427,7 @@ mod tests {
         state.falling_food = vec![Position::new(4, 4)];
         state.obstacles = vec![Position::new(4, 5)];
 
-        assert!(is_settled_falling_food(Position::new(4, 4), &state));
+        assert!(is_settled_falling_food(Position::new(4, 4), &state, 0));
     }
 
     #[test]
@@ -425,6 +436,19 @@ mod tests {
         state.falling_food = vec![Position::new(4, 4)];
         // No obstacle below
 
-        assert!(!is_settled_falling_food(Position::new(4, 4), &state));
+        assert!(!is_settled_falling_food(Position::new(4, 4), &state, 0));
+    }
+
+    #[test]
+    fn test_deep_falling_food_column_hits_depth_cap_without_stack_overflow() {
+        let mut state = create_test_level_state();
+        state.grid_size = GridSize::new(1, (MAX_SETTLED_FALLING_FOOD_DEPTH as i32) + 8);
+        state.falling_food = (0..=(MAX_SETTLED_FALLING_FOOD_DEPTH + 2))
+            .map(|y| Position::new(0, y as i32))
+            .collect();
+
+        // No floor/support under the column. Without a depth cap this requires
+        // traversing the entire chain recursively.
+        assert!(is_settled_falling_food(Position::new(0, 0), &state, 0));
     }
 }
