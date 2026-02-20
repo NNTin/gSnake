@@ -14,6 +14,7 @@ Started: Thu Feb 19 16:54:50 CET 2026
 - In `EditorLayout`, grid reinitialization should happen through explicit `resetGrid(width, height)` calls in load/placement flows; avoid broad reactive resets that can wipe entities after dimension changes.
 - In `EditorLayout`, any edit path that can reduce `snakeSegments` to zero should run through a shared helper that resets `snakeDirection` to the default `'east'` value.
 - In `EditorLayout`, clear/reset helpers should always clear `entity`, `isSnakeSegment`, and `snakeSegmentIndex` together so snake metadata cannot drift on replacements/removals.
+- Keep `LevelDefinition` bounds enforcement split by concern: schema guarantees `snake.minItems >= 1` and non-negative coordinates, while `gsnake-editor` API validation enforces `x < gridSize.width` / `y < gridSize.height`.
 
 ## [2026-02-19 17:00:35 CET] - US-001
 - Implemented US-001 by removing implicit snake auto-clear on snake-tool selection in `EditorLayout`, so selecting Snake no longer destroys existing snake segments outside undo/redo commands.
@@ -143,4 +144,16 @@ Started: Thu Feb 19 16:54:50 CET 2026
   - Keep required-entity checks centralized in a helper (`calculateValidationData` + warnings mapper) so Save modal warnings and Test preflight rules stay aligned.
   - For Test-button validation regressions, `EditorLayout.saveLoad.test.ts` should assert both blocked network behavior (`fetch` not called) and user-facing toast content.
   - `agent-browser snapshot` status text is a reliable signal for toast-driven validation flows in this editor.
+---
+## [2026-02-20 02:26:49 CET] - US-013
+- Tightened the LevelDefinition contract by requiring `snake` to be non-empty and disallowing negative coordinates in the canonical schema and vendored schema copies.
+- Added API-level coordinate upper-bound validation in `gsnake-editor` (`x < gridSize.width`, `y < gridSize.height`) so out-of-grid payloads are rejected at `/api/test-level`.
+- Expanded contract regression coverage: new schema fixtures (`invalid-empty-snake`, `invalid-negative-coordinate`), updated schema fixture runner, and drift tests in both editor and web for the new constraints.
+- Regenerated and synchronized validator artifacts (`contracts/generated` and `gsnake-web/contracts/generated`).
+- Ran `npm run test:level-schema`, `npm --prefix gsnake-editor run check`, `npm --prefix gsnake-editor run lint`, `npm --prefix gsnake-editor run test`, `npm --prefix gsnake-web run check`, `npm --prefix gsnake-web run test`, `act -W .github/workflows/ci.yml -j gsnake-editor-test --container-architecture linux/amd64`, and `act -W .github/workflows/ci.yml -j test --container-architecture linux/amd64` (from `gsnake-web`); refreshed `scripts/test/result.txt`.
+- Files changed: `contracts/level-definition.schema.json`, `contracts/generated/level-definition-validator.ts`, `contracts/fixtures/level-definition.invalid-empty-snake.json`, `contracts/fixtures/level-definition.invalid-negative-coordinate.json`, `contracts/level-definition-semantics.md`, `scripts/contracts/validate-level-definition-schema.mjs`, `gsnake-editor/contracts/level-definition.schema.json`, `gsnake-editor/src/server/levelDefinitionValidator.ts`, `gsnake-editor/src/tests/server.test.ts`, `gsnake-editor/src/tests/levelDefinitionSchemaDrift.test.ts`, `gsnake-web/contracts/level-definition.schema.json`, `gsnake-web/contracts/generated/level-definition-validator.ts`, `gsnake-web/packages/gsnake-web-app/tests/contract/levelDefinitionSchemaDrift.test.ts`, `CLAUDE.md`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`
+- **Learnings for future iterations:**
+  - Keep schema-level constraints focused on shape and absolute bounds (`minItems`, non-negative positions), then enforce grid-relative bounds in API validators where `gridSize` context is available.
+  - Update both drift suites (`gsnake-editor` and `gsnake-web`) whenever LevelDefinition constraints change so consumer parity checks fail fast.
+  - Regenerate canonical validator artifacts first, then mirror to `gsnake-web/contracts/generated` to avoid hidden consumer drift.
 ---

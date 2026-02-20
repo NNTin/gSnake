@@ -1,0 +1,16 @@
+{
+  "id": 203,
+  "name": "Fixture: Invalid empty snake",
+  "gridSize": {
+    "width": 10,
+    "height": 10
+  },
+  "snake": [],
+  "obstacles": [],
+  "food": [
+    { "x": 3, "y": 3 }
+  ],
+  "exit": { "x": 8, "y": 8 },
+  "snakeDirection": "East",
+  "totalFood": 1
+}

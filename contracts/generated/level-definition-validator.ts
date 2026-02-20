@@ -4,8 +4,8 @@
 
 "use strict";
 export const validateLevelDefinition = validate20;
-const schema31 = {"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://gsnake.dev/schemas/level-definition.schema.json","title":"LevelDefinition","description":"Canonical cross-runtime level contract for gSnake.","type":"object","additionalProperties":false,"required":["id","name","gridSize","snake","obstacles","food","exit","snakeDirection","totalFood"],"properties":{"id":{"type":"integer","minimum":0,"maximum":4294967295,"description":"Stable level identifier (u32-compatible)."},"name":{"type":"string","minLength":1},"difficulty":{"type":"string"},"gridSize":{"type":"object","additionalProperties":false,"required":["width","height"],"properties":{"width":{"type":"integer","minimum":1,"maximum":2147483647},"height":{"type":"integer","minimum":1,"maximum":2147483647}}},"snake":{"type":"array","items":{"$ref":"#/$defs/position"}},"obstacles":{"type":"array","items":{"$ref":"#/$defs/position"}},"food":{"type":"array","items":{"$ref":"#/$defs/position"}},"exit":{"$ref":"#/$defs/position"},"snakeDirection":{"$ref":"#/$defs/direction"},"floatingFood":{"type":"array","items":{"$ref":"#/$defs/position"},"default":[]},"fallingFood":{"type":"array","items":{"$ref":"#/$defs/position"},"default":[]},"stones":{"type":"array","items":{"$ref":"#/$defs/position"},"default":[]},"spikes":{"type":"array","items":{"$ref":"#/$defs/position"},"default":[]},"exitIsSolid":{"type":"boolean","default":true},"totalFood":{"type":"integer","minimum":0,"maximum":4294967295,"description":"Total food required for level completion. Expected to reflect food + floatingFood + fallingFood for editor/server round-trip consistency."}},"$defs":{"position":{"type":"object","additionalProperties":false,"required":["x","y"],"properties":{"x":{"type":"integer","minimum":-2147483648,"maximum":2147483647},"y":{"type":"integer","minimum":-2147483648,"maximum":2147483647}}},"direction":{"type":"string","enum":["North","South","East","West"]}}};
-const schema32 = {"type":"object","additionalProperties":false,"required":["x","y"],"properties":{"x":{"type":"integer","minimum":-2147483648,"maximum":2147483647},"y":{"type":"integer","minimum":-2147483648,"maximum":2147483647}}};
+const schema31 = {"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://gsnake.dev/schemas/level-definition.schema.json","title":"LevelDefinition","description":"Canonical cross-runtime level contract for gSnake.","type":"object","additionalProperties":false,"required":["id","name","gridSize","snake","obstacles","food","exit","snakeDirection","totalFood"],"properties":{"id":{"type":"integer","minimum":0,"maximum":4294967295,"description":"Stable level identifier (u32-compatible)."},"name":{"type":"string","minLength":1},"difficulty":{"type":"string"},"gridSize":{"type":"object","additionalProperties":false,"required":["width","height"],"properties":{"width":{"type":"integer","minimum":1,"maximum":2147483647},"height":{"type":"integer","minimum":1,"maximum":2147483647}}},"snake":{"type":"array","minItems":1,"items":{"$ref":"#/$defs/position"}},"obstacles":{"type":"array","items":{"$ref":"#/$defs/position"}},"food":{"type":"array","items":{"$ref":"#/$defs/position"}},"exit":{"$ref":"#/$defs/position"},"snakeDirection":{"$ref":"#/$defs/direction"},"floatingFood":{"type":"array","items":{"$ref":"#/$defs/position"},"default":[]},"fallingFood":{"type":"array","items":{"$ref":"#/$defs/position"},"default":[]},"stones":{"type":"array","items":{"$ref":"#/$defs/position"},"default":[]},"spikes":{"type":"array","items":{"$ref":"#/$defs/position"},"default":[]},"exitIsSolid":{"type":"boolean","default":true},"totalFood":{"type":"integer","minimum":0,"maximum":4294967295,"description":"Total food required for level completion. Expected to reflect food + floatingFood + fallingFood for editor/server round-trip consistency."}},"$defs":{"position":{"type":"object","additionalProperties":false,"required":["x","y"],"properties":{"x":{"type":"integer","minimum":0,"maximum":2147483647},"y":{"type":"integer","minimum":0,"maximum":2147483647}}},"direction":{"type":"string","enum":["North","South","East","West"]}}};
+const schema32 = {"type":"object","additionalProperties":false,"required":["x","y"],"properties":{"x":{"type":"integer","minimum":0,"maximum":2147483647},"y":{"type":"integer","minimum":0,"maximum":2147483647}}};
 const schema36 = {"type":"string","enum":["North","South","East","West"]};
 const func1 = Object.prototype.hasOwnProperty;
 import func2 from "ajv/dist/runtime/ucs2length.js";
@@ -316,12 +316,8 @@ errors++;
 if(data.snake !== undefined){
 let data6 = data.snake;
 if(Array.isArray(data6)){
-const len0 = data6.length;
-for(let i0=0; i0<len0; i0++){
-let data7 = data6[i0];
-if(data7 && typeof data7 == "object" && !Array.isArray(data7)){
-if(data7.x === undefined){
-const err26 = {instancePath:instancePath+"/snake/" + i0,schemaPath:"#/$defs/position/required",keyword:"required",params:{missingProperty: "x"},message:"must have required property '"+"x"+"'"};
+if(data6.length < 1){
+const err26 = {instancePath:instancePath+"/snake",schemaPath:"#/properties/snake/minItems",keyword:"minItems",params:{limit: 1},message:"must NOT have fewer than 1 items"};
 if(vErrors === null){
 vErrors = [err26];
 }
@@ -330,8 +326,12 @@ vErrors.push(err26);
 }
 errors++;
 }
-if(data7.y === undefined){
-const err27 = {instancePath:instancePath+"/snake/" + i0,schemaPath:"#/$defs/position/required",keyword:"required",params:{missingProperty: "y"},message:"must have required property '"+"y"+"'"};
+const len0 = data6.length;
+for(let i0=0; i0<len0; i0++){
+let data7 = data6[i0];
+if(data7 && typeof data7 == "object" && !Array.isArray(data7)){
+if(data7.x === undefined){
+const err27 = {instancePath:instancePath+"/snake/" + i0,schemaPath:"#/$defs/position/required",keyword:"required",params:{missingProperty: "x"},message:"must have required property '"+"x"+"'"};
 if(vErrors === null){
 vErrors = [err27];
 }
@@ -340,9 +340,8 @@ vErrors.push(err27);
 }
 errors++;
 }
-for(const key2 in data7){
-if(!((key2 === "x") || (key2 === "y"))){
-const err28 = {instancePath:instancePath+"/snake/" + i0,schemaPath:"#/$defs/position/additionalProperties",keyword:"additionalProperties",params:{additionalProperty: key2},message:"must NOT have additional properties"};
+if(data7.y === undefined){
+const err28 = {instancePath:instancePath+"/snake/" + i0,schemaPath:"#/$defs/position/required",keyword:"required",params:{missingProperty: "y"},message:"must have required property '"+"y"+"'"};
 if(vErrors === null){
 vErrors = [err28];
 }
@@ -351,11 +350,9 @@ vErrors.push(err28);
 }
 errors++;
 }
-}
-if(data7.x !== undefined){
-let data8 = data7.x;
-if(!(((typeof data8 == "number") && (!(data8 % 1) && !isNaN(data8))) && (isFinite(data8)))){
-const err29 = {instancePath:instancePath+"/snake/" + i0+"/x",schemaPath:"#/$defs/position/properties/x/type",keyword:"type",params:{type: "integer"},message:"must be integer"};
+for(const key2 in data7){
+if(!((key2 === "x") || (key2 === "y"))){
+const err29 = {instancePath:instancePath+"/snake/" + i0,schemaPath:"#/$defs/position/additionalProperties",keyword:"additionalProperties",params:{additionalProperty: key2},message:"must NOT have additional properties"};
 if(vErrors === null){
 vErrors = [err29];
 }
@@ -364,9 +361,11 @@ vErrors.push(err29);
 }
 errors++;
 }
-if((typeof data8 == "number") && (isFinite(data8))){
-if(data8 > 2147483647 || isNaN(data8)){
-const err30 = {instancePath:instancePath+"/snake/" + i0+"/x",schemaPath:"#/$defs/position/properties/x/maximum",keyword:"maximum",params:{comparison: "<=", limit: 2147483647},message:"must be <= 2147483647"};
+}
+if(data7.x !== undefined){
+let data8 = data7.x;
+if(!(((typeof data8 == "number") && (!(data8 % 1) && !isNaN(data8))) && (isFinite(data8)))){
+const err30 = {instancePath:instancePath+"/snake/" + i0+"/x",schemaPath:"#/$defs/position/properties/x/type",keyword:"type",params:{type: "integer"},message:"must be integer"};
 if(vErrors === null){
 vErrors = [err30];
 }
@@ -375,8 +374,9 @@ vErrors.push(err30);
 }
 errors++;
 }
-if(data8 < -2147483648 || isNaN(data8)){
-const err31 = {instancePath:instancePath+"/snake/" + i0+"/x",schemaPath:"#/$defs/position/properties/x/minimum",keyword:"minimum",params:{comparison: ">=", limit: -2147483648},message:"must be >= -2147483648"};
+if((typeof data8 == "number") && (isFinite(data8))){
+if(data8 > 2147483647 || isNaN(data8)){
+const err31 = {instancePath:instancePath+"/snake/" + i0+"/x",schemaPath:"#/$defs/position/properties/x/maximum",keyword:"maximum",params:{comparison: "<=", limit: 2147483647},message:"must be <= 2147483647"};
 if(vErrors === null){
 vErrors = [err31];
 }
@@ -385,12 +385,8 @@ vErrors.push(err31);
 }
 errors++;
 }
-}
-}
-if(data7.y !== undefined){
-let data9 = data7.y;
-if(!(((typeof data9 == "number") && (!(data9 % 1) && !isNaN(data9))) && (isFinite(data9)))){
-const err32 = {instancePath:instancePath+"/snake/" + i0+"/y",schemaPath:"#/$defs/position/properties/y/type",keyword:"type",params:{type: "integer"},message:"must be integer"};
+if(data8 < 0 || isNaN(data8)){
+const err32 = {instancePath:instancePath+"/snake/" + i0+"/x",schemaPath:"#/$defs/position/properties/x/minimum",keyword:"minimum",params:{comparison: ">=", limit: 0},message:"must be >= 0"};
 if(vErrors === null){
 vErrors = [err32];
 }
@@ -399,9 +395,12 @@ vErrors.push(err32);
 }
 errors++;
 }
-if((typeof data9 == "number") && (isFinite(data9))){
-if(data9 > 2147483647 || isNaN(data9)){
-const err33 = {instancePath:instancePath+"/snake/" + i0+"/y",schemaPath:"#/$defs/position/properties/y/maximum",keyword:"maximum",params:{comparison: "<=", limit: 2147483647},message:"must be <= 2147483647"};
+}
+}
+if(data7.y !== undefined){
+let data9 = data7.y;
+if(!(((typeof data9 == "number") && (!(data9 % 1) && !isNaN(data9))) && (isFinite(data9)))){
+const err33 = {instancePath:instancePath+"/snake/" + i0+"/y",schemaPath:"#/$defs/position/properties/y/type",keyword:"type",params:{type: "integer"},message:"must be integer"};
 if(vErrors === null){
 vErrors = [err33];
 }
@@ -410,8 +409,9 @@ vErrors.push(err33);
 }
 errors++;
 }
-if(data9 < -2147483648 || isNaN(data9)){
-const err34 = {instancePath:instancePath+"/snake/" + i0+"/y",schemaPath:"#/$defs/position/properties/y/minimum",keyword:"minimum",params:{comparison: ">=", limit: -2147483648},message:"must be >= -2147483648"};
+if((typeof data9 == "number") && (isFinite(data9))){
+if(data9 > 2147483647 || isNaN(data9)){
+const err34 = {instancePath:instancePath+"/snake/" + i0+"/y",schemaPath:"#/$defs/position/properties/y/maximum",keyword:"maximum",params:{comparison: "<=", limit: 2147483647},message:"must be <= 2147483647"};
 if(vErrors === null){
 vErrors = [err34];
 }
@@ -420,11 +420,8 @@ vErrors.push(err34);
 }
 errors++;
 }
-}
-}
-}
-else {
-const err35 = {instancePath:instancePath+"/snake/" + i0,schemaPath:"#/$defs/position/type",keyword:"type",params:{type: "object"},message:"must be object"};
+if(data9 < 0 || isNaN(data9)){
+const err35 = {instancePath:instancePath+"/snake/" + i0+"/y",schemaPath:"#/$defs/position/properties/y/minimum",keyword:"minimum",params:{comparison: ">=", limit: 0},message:"must be >= 0"};
 if(vErrors === null){
 vErrors = [err35];
 }
@@ -435,13 +432,26 @@ errors++;
 }
 }
 }
+}
 else {
-const err36 = {instancePath:instancePath+"/snake",schemaPath:"#/properties/snake/type",keyword:"type",params:{type: "array"},message:"must be array"};
+const err36 = {instancePath:instancePath+"/snake/" + i0,schemaPath:"#/$defs/position/type",keyword:"type",params:{type: "object"},message:"must be object"};
 if(vErrors === null){
 vErrors = [err36];
 }
 else {
 vErrors.push(err36);
+}
+errors++;
+}
+}
+}
+else {
+const err37 = {instancePath:instancePath+"/snake",schemaPath:"#/properties/snake/type",keyword:"type",params:{type: "array"},message:"must be array"};
+if(vErrors === null){
+vErrors = [err37];
+}
+else {
+vErrors.push(err37);
 }
 errors++;
 }
@@ -454,17 +464,7 @@ for(let i1=0; i1<len1; i1++){
 let data11 = data10[i1];
 if(data11 && typeof data11 == "object" && !Array.isArray(data11)){
 if(data11.x === undefined){
-const err37 = {instancePath:instancePath+"/obstacles/" + i1,schemaPath:"#/$defs/position/required",keyword:"required",params:{missingProperty: "x"},message:"must have required property '"+"x"+"'"};
-if(vErrors === null){
-vErrors = [err37];
-}
-else {
-vErrors.push(err37);
-}
-errors++;
-}
-if(data11.y === undefined){
-const err38 = {instancePath:instancePath+"/obstacles/" + i1,schemaPath:"#/$defs/position/required",keyword:"required",params:{missingProperty: "y"},message:"must have required property '"+"y"+"'"};
+const err38 = {instancePath:instancePath+"/obstacles/" + i1,schemaPath:"#/$defs/position/required",keyword:"required",params:{missingProperty: "x"},message:"must have required property '"+"x"+"'"};
 if(vErrors === null){
 vErrors = [err38];
 }
@@ -473,9 +473,8 @@ vErrors.push(err38);
 }
 errors++;
 }
-for(const key3 in data11){
-if(!((key3 === "x") || (key3 === "y"))){
-const err39 = {instancePath:instancePath+"/obstacles/" + i1,schemaPath:"#/$defs/position/additionalProperties",keyword:"additionalProperties",params:{additionalProperty: key3},message:"must NOT have additional properties"};
+if(data11.y === undefined){
+const err39 = {instancePath:instancePath+"/obstacles/" + i1,schemaPath:"#/$defs/position/required",keyword:"required",params:{missingProperty: "y"},message:"must have required property '"+"y"+"'"};
 if(vErrors === null){
 vErrors = [err39];
 }
@@ -484,11 +483,9 @@ vErrors.push(err39);
 }
 errors++;
 }
-}
-if(data11.x !== undefined){
-let data12 = data11.x;
-if(!(((typeof data12 == "number") && (!(data12 % 1) && !isNaN(data12))) && (isFinite(data12)))){
-const err40 = {instancePath:instancePath+"/obstacles/" + i1+"/x",schemaPath:"#/$defs/position/properties/x/type",keyword:"type",params:{type: "integer"},message:"must be integer"};
+for(const key3 in data11){
+if(!((key3 === "x") || (key3 === "y"))){
+const err40 = {instancePath:instancePath+"/obstacles/" + i1,schemaPath:"#/$defs/position/additionalProperties",keyword:"additionalProperties",params:{additionalProperty: key3},message:"must NOT have additional properties"};
 if(vErrors === null){
 vErrors = [err40];
 }
@@ -497,9 +494,11 @@ vErrors.push(err40);
 }
 errors++;
 }
-if((typeof data12 == "number") && (isFinite(data12))){
-if(data12 > 2147483647 || isNaN(data12)){
-const err41 = {instancePath:instancePath+"/obstacles/" + i1+"/x",schemaPath:"#/$defs/position/properties/x/maximum",keyword:"maximum",params:{comparison: "<=", limit: 2147483647},message:"must be <= 2147483647"};
+}
+if(data11.x !== undefined){
+let data12 = data11.x;
+if(!(((typeof data12 == "number") && (!(data12 % 1) && !isNaN(data12))) && (isFinite(data12)))){
+const err41 = {instancePath:instancePath+"/obstacles/" + i1+"/x",schemaPath:"#/$defs/position/properties/x/type",keyword:"type",params:{type: "integer"},message:"must be integer"};
 if(vErrors === null){
 vErrors = [err41];
 }
@@ -508,8 +507,9 @@ vErrors.push(err41);
 }
 errors++;
 }
-if(data12 < -2147483648 || isNaN(data12)){
-const err42 = {instancePath:instancePath+"/obstacles/" + i1+"/x",schemaPath:"#/$defs/position/properties/x/minimum",keyword:"minimum",params:{comparison: ">=", limit: -2147483648},message:"must be >= -2147483648"};
+if((typeof data12 == "number") && (isFinite(data12))){
+if(data12 > 2147483647 || isNaN(data12)){
+const err42 = {instancePath:instancePath+"/obstacles/" + i1+"/x",schemaPath:"#/$defs/position/properties/x/maximum",keyword:"maximum",params:{comparison: "<=", limit: 2147483647},message:"must be <= 2147483647"};
 if(vErrors === null){
 vErrors = [err42];
 }
@@ -518,12 +518,8 @@ vErrors.push(err42);
 }
 errors++;
 }
-}
-}
-if(data11.y !== undefined){
-let data13 = data11.y;
-if(!(((typeof data13 == "number") && (!(data13 % 1) && !isNaN(data13))) && (isFinite(data13)))){
-const err43 = {instancePath:instancePath+"/obstacles/" + i1+"/y",schemaPath:"#/$defs/position/properties/y/type",keyword:"type",params:{type: "integer"},message:"must be integer"};
+if(data12 < 0 || isNaN(data12)){
+const err43 = {instancePath:instancePath+"/obstacles/" + i1+"/x",schemaPath:"#/$defs/position/properties/x/minimum",keyword:"minimum",params:{comparison: ">=", limit: 0},message:"must be >= 0"};
 if(vErrors === null){
 vErrors = [err43];
 }
@@ -532,9 +528,12 @@ vErrors.push(err43);
 }
 errors++;
 }
-if((typeof data13 == "number") && (isFinite(data13))){
-if(data13 > 2147483647 || isNaN(data13)){
-const err44 = {instancePath:instancePath+"/obstacles/" + i1+"/y",schemaPath:"#/$defs/position/properties/y/maximum",keyword:"maximum",params:{comparison: "<=", limit: 2147483647},message:"must be <= 2147483647"};
+}
+}
+if(data11.y !== undefined){
+let data13 = data11.y;
+if(!(((typeof data13 == "number") && (!(data13 % 1) && !isNaN(data13))) && (isFinite(data13)))){
+const err44 = {instancePath:instancePath+"/obstacles/" + i1+"/y",schemaPath:"#/$defs/position/properties/y/type",keyword:"type",params:{type: "integer"},message:"must be integer"};
 if(vErrors === null){
 vErrors = [err44];
 }
@@ -543,8 +542,9 @@ vErrors.push(err44);
 }
 errors++;
 }
-if(data13 < -2147483648 || isNaN(data13)){
-const err45 = {instancePath:instancePath+"/obstacles/" + i1+"/y",schemaPath:"#/$defs/position/properties/y/minimum",keyword:"minimum",params:{comparison: ">=", limit: -2147483648},message:"must be >= -2147483648"};
+if((typeof data13 == "number") && (isFinite(data13))){
+if(data13 > 2147483647 || isNaN(data13)){
+const err45 = {instancePath:instancePath+"/obstacles/" + i1+"/y",schemaPath:"#/$defs/position/properties/y/maximum",keyword:"maximum",params:{comparison: "<=", limit: 2147483647},message:"must be <= 2147483647"};
 if(vErrors === null){
 vErrors = [err45];
 }
@@ -553,11 +553,8 @@ vErrors.push(err45);
 }
 errors++;
 }
-}
-}
-}
-else {
-const err46 = {instancePath:instancePath+"/obstacles/" + i1,schemaPath:"#/$defs/position/type",keyword:"type",params:{type: "object"},message:"must be object"};
+if(data13 < 0 || isNaN(data13)){
+const err46 = {instancePath:instancePath+"/obstacles/" + i1+"/y",schemaPath:"#/$defs/position/properties/y/minimum",keyword:"minimum",params:{comparison: ">=", limit: 0},message:"must be >= 0"};
 if(vErrors === null){
 vErrors = [err46];
 }
@@ -568,13 +565,26 @@ errors++;
 }
 }
 }
+}
 else {
-const err47 = {instancePath:instancePath+"/obstacles",schemaPath:"#/properties/obstacles/type",keyword:"type",params:{type: "array"},message:"must be array"};
+const err47 = {instancePath:instancePath+"/obstacles/" + i1,schemaPath:"#/$defs/position/type",keyword:"type",params:{type: "object"},message:"must be object"};
 if(vErrors === null){
 vErrors = [err47];
 }
 else {
 vErrors.push(err47);
+}
+errors++;
+}
+}
+}
+else {
+const err48 = {instancePath:instancePath+"/obstacles",schemaPath:"#/properties/obstacles/type",keyword:"type",params:{type: "array"},message:"must be array"};
+if(vErrors === null){
+vErrors = [err48];
+}
+else {
+vErrors.push(err48);
 }
 errors++;
 }
@@ -587,17 +597,7 @@ for(let i2=0; i2<len2; i2++){
 let data15 = data14[i2];
 if(data15 && typeof data15 == "object" && !Array.isArray(data15)){
 if(data15.x === undefined){
-const err48 = {instancePath:instancePath+"/food/" + i2,schemaPath:"#/$defs/position/required",keyword:"required",params:{missingProperty: "x"},message:"must have required property '"+"x"+"'"};
-if(vErrors === null){
-vErrors = [err48];
-}
-else {
-vErrors.push(err48);
-}
-errors++;
-}
-if(data15.y === undefined){
-const err49 = {instancePath:instancePath+"/food/" + i2,schemaPath:"#/$defs/position/required",keyword:"required",params:{missingProperty: "y"},message:"must have required property '"+"y"+"'"};
+const err49 = {instancePath:instancePath+"/food/" + i2,schemaPath:"#/$defs/position/required",keyword:"required",params:{missingProperty: "x"},message:"must have required property '"+"x"+"'"};
 if(vErrors === null){
 vErrors = [err49];
 }
@@ -606,9 +606,8 @@ vErrors.push(err49);
 }
 errors++;
 }
-for(const key4 in data15){
-if(!((key4 === "x") || (key4 === "y"))){
-const err50 = {instancePath:instancePath+"/food/" + i2,schemaPath:"#/$defs/position/additionalProperties",keyword:"additionalProperties",params:{additionalProperty: key4},message:"must NOT have additional properties"};
+if(data15.y === undefined){
+const err50 = {instancePath:instancePath+"/food/" + i2,schemaPath:"#/$defs/position/required",keyword:"required",params:{missingProperty: "y"},message:"must have required property '"+"y"+"'"};
 if(vErrors === null){
 vErrors = [err50];
 }
@@ -617,11 +616,9 @@ vErrors.push(err50);
 }
 errors++;
 }
-}
-if(data15.x !== undefined){
-let data16 = data15.x;
-if(!(((typeof data16 == "number") && (!(data16 % 1) && !isNaN(data16))) && (isFinite(data16)))){
-const err51 = {instancePath:instancePath+"/food/" + i2+"/x",schemaPath:"#/$defs/position/properties/x/type",keyword:"type",params:{type: "integer"},message:"must be integer"};
+for(const key4 in data15){
+if(!((key4 === "x") || (key4 === "y"))){
+const err51 = {instancePath:instancePath+"/food/" + i2,schemaPath:"#/$defs/position/additionalProperties",keyword:"additionalProperties",params:{additionalProperty: key4},message:"must NOT have additional properties"};
 if(vErrors === null){
 vErrors = [err51];
 }
@@ -630,9 +627,11 @@ vErrors.push(err51);
 }
 errors++;
 }
-if((typeof data16 == "number") && (isFinite(data16))){
-if(data16 > 2147483647 || isNaN(data16)){
-const err52 = {instancePath:instancePath+"/food/" + i2+"/x",schemaPath:"#/$defs/position/properties/x/maximum",keyword:"maximum",params:{comparison: "<=", limit: 2147483647},message:"must be <= 2147483647"};
+}
+if(data15.x !== undefined){
+let data16 = data15.x;
+if(!(((typeof data16 == "number") && (!(data16 % 1) && !isNaN(data16))) && (isFinite(data16)))){
+const err52 = {instancePath:instancePath+"/food/" + i2+"/x",schemaPath:"#/$defs/position/properties/x/type",keyword:"type",params:{type: "integer"},message:"must be integer"};
 if(vErrors === null){
 vErrors = [err52];
 }
@@ -641,8 +640,9 @@ vErrors.push(err52);
 }
 errors++;
 }
-if(data16 < -2147483648 || isNaN(data16)){
-const err53 = {instancePath:instancePath+"/food/" + i2+"/x",schemaPath:"#/$defs/position/properties/x/minimum",keyword:"minimum",params:{comparison: ">=", limit: -2147483648},message:"must be >= -2147483648"};
+if((typeof data16 == "number") && (isFinite(data16))){
+if(data16 > 2147483647 || isNaN(data16)){
+const err53 = {instancePath:instancePath+"/food/" + i2+"/x",schemaPath:"#/$defs/position/properties/x/maximum",keyword:"maximum",params:{comparison: "<=", limit: 2147483647},message:"must be <= 2147483647"};
 if(vErrors === null){
 vErrors = [err53];
 }
@@ -651,12 +651,8 @@ vErrors.push(err53);
 }
 errors++;
 }
-}
-}
-if(data15.y !== undefined){
-let data17 = data15.y;
-if(!(((typeof data17 == "number") && (!(data17 % 1) && !isNaN(data17))) && (isFinite(data17)))){
-const err54 = {instancePath:instancePath+"/food/" + i2+"/y",schemaPath:"#/$defs/position/properties/y/type",keyword:"type",params:{type: "integer"},message:"must be integer"};
+if(data16 < 0 || isNaN(data16)){
+const err54 = {instancePath:instancePath+"/food/" + i2+"/x",schemaPath:"#/$defs/position/properties/x/minimum",keyword:"minimum",params:{comparison: ">=", limit: 0},message:"must be >= 0"};
 if(vErrors === null){
 vErrors = [err54];
 }
@@ -665,9 +661,12 @@ vErrors.push(err54);
 }
 errors++;
 }
-if((typeof data17 == "number") && (isFinite(data17))){
-if(data17 > 2147483647 || isNaN(data17)){
-const err55 = {instancePath:instancePath+"/food/" + i2+"/y",schemaPath:"#/$defs/position/properties/y/maximum",keyword:"maximum",params:{comparison: "<=", limit: 2147483647},message:"must be <= 2147483647"};
+}
+}
+if(data15.y !== undefined){
+let data17 = data15.y;
+if(!(((typeof data17 == "number") && (!(data17 % 1) && !isNaN(data17))) && (isFinite(data17)))){
+const err55 = {instancePath:instancePath+"/food/" + i2+"/y",schemaPath:"#/$defs/position/properties/y/type",keyword:"type",params:{type: "integer"},message:"must be integer"};
 if(vErrors === null){
 vErrors = [err55];
 }
@@ -676,8 +675,9 @@ vErrors.push(err55);
 }
 errors++;
 }
-if(data17 < -2147483648 || isNaN(data17)){
-const err56 = {instancePath:instancePath+"/food/" + i2+"/y",schemaPath:"#/$defs/position/properties/y/minimum",keyword:"minimum",params:{comparison: ">=", limit: -2147483648},message:"must be >= -2147483648"};
+if((typeof data17 == "number") && (isFinite(data17))){
+if(data17 > 2147483647 || isNaN(data17)){
+const err56 = {instancePath:instancePath+"/food/" + i2+"/y",schemaPath:"#/$defs/position/properties/y/maximum",keyword:"maximum",params:{comparison: "<=", limit: 2147483647},message:"must be <= 2147483647"};
 if(vErrors === null){
 vErrors = [err56];
 }
@@ -686,11 +686,8 @@ vErrors.push(err56);
 }
 errors++;
 }
-}
-}
-}
-else {
-const err57 = {instancePath:instancePath+"/food/" + i2,schemaPath:"#/$defs/position/type",keyword:"type",params:{type: "object"},message:"must be object"};
+if(data17 < 0 || isNaN(data17)){
+const err57 = {instancePath:instancePath+"/food/" + i2+"/y",schemaPath:"#/$defs/position/properties/y/minimum",keyword:"minimum",params:{comparison: ">=", limit: 0},message:"must be >= 0"};
 if(vErrors === null){
 vErrors = [err57];
 }
@@ -701,8 +698,9 @@ errors++;
 }
 }
 }
+}
 else {
-const err58 = {instancePath:instancePath+"/food",schemaPath:"#/properties/food/type",keyword:"type",params:{type: "array"},message:"must be array"};
+const err58 = {instancePath:instancePath+"/food/" + i2,schemaPath:"#/$defs/position/type",keyword:"type",params:{type: "object"},message:"must be object"};
 if(vErrors === null){
 vErrors = [err58];
 }
@@ -712,11 +710,9 @@ vErrors.push(err58);
 errors++;
 }
 }
-if(data.exit !== undefined){
-let data18 = data.exit;
-if(data18 && typeof data18 == "object" && !Array.isArray(data18)){
-if(data18.x === undefined){
-const err59 = {instancePath:instancePath+"/exit",schemaPath:"#/$defs/position/required",keyword:"required",params:{missingProperty: "x"},message:"must have required property '"+"x"+"'"};
+}
+else {
+const err59 = {instancePath:instancePath+"/food",schemaPath:"#/properties/food/type",keyword:"type",params:{type: "array"},message:"must be array"};
 if(vErrors === null){
 vErrors = [err59];
 }
@@ -725,8 +721,12 @@ vErrors.push(err59);
 }
 errors++;
 }
-if(data18.y === undefined){
-const err60 = {instancePath:instancePath+"/exit",schemaPath:"#/$defs/position/required",keyword:"required",params:{missingProperty: "y"},message:"must have required property '"+"y"+"'"};
+}
+if(data.exit !== undefined){
+let data18 = data.exit;
+if(data18 && typeof data18 == "object" && !Array.isArray(data18)){
+if(data18.x === undefined){
+const err60 = {instancePath:instancePath+"/exit",schemaPath:"#/$defs/position/required",keyword:"required",params:{missingProperty: "x"},message:"must have required property '"+"x"+"'"};
 if(vErrors === null){
 vErrors = [err60];
 }
@@ -735,9 +735,8 @@ vErrors.push(err60);
 }
 errors++;
 }
-for(const key5 in data18){
-if(!((key5 === "x") || (key5 === "y"))){
-const err61 = {instancePath:instancePath+"/exit",schemaPath:"#/$defs/position/additionalProperties",keyword:"additionalProperties",params:{additionalProperty: key5},message:"must NOT have additional properties"};
+if(data18.y === undefined){
+const err61 = {instancePath:instancePath+"/exit",schemaPath:"#/$defs/position/required",keyword:"required",params:{missingProperty: "y"},message:"must have required property '"+"y"+"'"};
 if(vErrors === null){
 vErrors = [err61];
 }
@@ -746,11 +745,9 @@ vErrors.push(err61);
 }
 errors++;
 }
-}
-if(data18.x !== undefined){
-let data19 = data18.x;
-if(!(((typeof data19 == "number") && (!(data19 % 1) && !isNaN(data19))) && (isFinite(data19)))){
-const err62 = {instancePath:instancePath+"/exit/x",schemaPath:"#/$defs/position/properties/x/type",keyword:"type",params:{type: "integer"},message:"must be integer"};
+for(const key5 in data18){
+if(!((key5 === "x") || (key5 === "y"))){
+const err62 = {instancePath:instancePath+"/exit",schemaPath:"#/$defs/position/additionalProperties",keyword:"additionalProperties",params:{additionalProperty: key5},message:"must NOT have additional properties"};
 if(vErrors === null){
 vErrors = [err62];
 }
@@ -759,9 +756,11 @@ vErrors.push(err62);
 }
 errors++;
 }
-if((typeof data19 == "number") && (isFinite(data19))){
-if(data19 > 2147483647 || isNaN(data19)){
-const err63 = {instancePath:instancePath+"/exit/x",schemaPath:"#/$defs/position/properties/x/maximum",keyword:"maximum",params:{comparison: "<=", limit: 2147483647},message:"must be <= 2147483647"};
+}
+if(data18.x !== undefined){
+let data19 = data18.x;
+if(!(((typeof data19 == "number") && (!(data19 % 1) && !isNaN(data19))) && (isFinite(data19)))){
+const err63 = {instancePath:instancePath+"/exit/x",schemaPath:"#/$defs/position/properties/x/type",keyword:"type",params:{type: "integer"},message:"must be integer"};
 if(vErrors === null){
 vErrors = [err63];
 }
@@ -770,8 +769,9 @@ vErrors.push(err63);
 }
 errors++;
 }
-if(data19 < -2147483648 || isNaN(data19)){
-const err64 = {instancePath:instancePath+"/exit/x",schemaPath:"#/$defs/position/properties/x/minimum",keyword:"minimum",params:{comparison: ">=", limit: -2147483648},message:"must be >= -2147483648"};
+if((typeof data19 == "number") && (isFinite(data19))){
+if(data19 > 2147483647 || isNaN(data19)){
+const err64 = {instancePath:instancePath+"/exit/x",schemaPath:"#/$defs/position/properties/x/maximum",keyword:"maximum",params:{comparison: "<=", limit: 2147483647},message:"must be <= 2147483647"};
 if(vErrors === null){
 vErrors = [err64];
 }
@@ -780,12 +780,8 @@ vErrors.push(err64);
 }
 errors++;
 }
-}
-}
-if(data18.y !== undefined){
-let data20 = data18.y;
-if(!(((typeof data20 == "number") && (!(data20 % 1) && !isNaN(data20))) && (isFinite(data20)))){
-const err65 = {instancePath:instancePath+"/exit/y",schemaPath:"#/$defs/position/properties/y/type",keyword:"type",params:{type: "integer"},message:"must be integer"};
+if(data19 < 0 || isNaN(data19)){
+const err65 = {instancePath:instancePath+"/exit/x",schemaPath:"#/$defs/position/properties/x/minimum",keyword:"minimum",params:{comparison: ">=", limit: 0},message:"must be >= 0"};
 if(vErrors === null){
 vErrors = [err65];
 }
@@ -794,9 +790,12 @@ vErrors.push(err65);
 }
 errors++;
 }
-if((typeof data20 == "number") && (isFinite(data20))){
-if(data20 > 2147483647 || isNaN(data20)){
-const err66 = {instancePath:instancePath+"/exit/y",schemaPath:"#/$defs/position/properties/y/maximum",keyword:"maximum",params:{comparison: "<=", limit: 2147483647},message:"must be <= 2147483647"};
+}
+}
+if(data18.y !== undefined){
+let data20 = data18.y;
+if(!(((typeof data20 == "number") && (!(data20 % 1) && !isNaN(data20))) && (isFinite(data20)))){
+const err66 = {instancePath:instancePath+"/exit/y",schemaPath:"#/$defs/position/properties/y/type",keyword:"type",params:{type: "integer"},message:"must be integer"};
 if(vErrors === null){
 vErrors = [err66];
 }
@@ -805,8 +804,9 @@ vErrors.push(err66);
 }
 errors++;
 }
-if(data20 < -2147483648 || isNaN(data20)){
-const err67 = {instancePath:instancePath+"/exit/y",schemaPath:"#/$defs/position/properties/y/minimum",keyword:"minimum",params:{comparison: ">=", limit: -2147483648},message:"must be >= -2147483648"};
+if((typeof data20 == "number") && (isFinite(data20))){
+if(data20 > 2147483647 || isNaN(data20)){
+const err67 = {instancePath:instancePath+"/exit/y",schemaPath:"#/$defs/position/properties/y/maximum",keyword:"maximum",params:{comparison: "<=", limit: 2147483647},message:"must be <= 2147483647"};
 if(vErrors === null){
 vErrors = [err67];
 }
@@ -815,11 +815,8 @@ vErrors.push(err67);
 }
 errors++;
 }
-}
-}
-}
-else {
-const err68 = {instancePath:instancePath+"/exit",schemaPath:"#/$defs/position/type",keyword:"type",params:{type: "object"},message:"must be object"};
+if(data20 < 0 || isNaN(data20)){
+const err68 = {instancePath:instancePath+"/exit/y",schemaPath:"#/$defs/position/properties/y/minimum",keyword:"minimum",params:{comparison: ">=", limit: 0},message:"must be >= 0"};
 if(vErrors === null){
 vErrors = [err68];
 }
@@ -829,10 +826,10 @@ vErrors.push(err68);
 errors++;
 }
 }
-if(data.snakeDirection !== undefined){
-let data21 = data.snakeDirection;
-if(typeof data21 !== "string"){
-const err69 = {instancePath:instancePath+"/snakeDirection",schemaPath:"#/$defs/direction/type",keyword:"type",params:{type: "string"},message:"must be string"};
+}
+}
+else {
+const err69 = {instancePath:instancePath+"/exit",schemaPath:"#/$defs/position/type",keyword:"type",params:{type: "object"},message:"must be object"};
 if(vErrors === null){
 vErrors = [err69];
 }
@@ -841,13 +838,26 @@ vErrors.push(err69);
 }
 errors++;
 }
-if(!((((data21 === "North") || (data21 === "South")) || (data21 === "East")) || (data21 === "West"))){
-const err70 = {instancePath:instancePath+"/snakeDirection",schemaPath:"#/$defs/direction/enum",keyword:"enum",params:{allowedValues: schema36.enum},message:"must be equal to one of the allowed values"};
+}
+if(data.snakeDirection !== undefined){
+let data21 = data.snakeDirection;
+if(typeof data21 !== "string"){
+const err70 = {instancePath:instancePath+"/snakeDirection",schemaPath:"#/$defs/direction/type",keyword:"type",params:{type: "string"},message:"must be string"};
 if(vErrors === null){
 vErrors = [err70];
 }
 else {
 vErrors.push(err70);
+}
+errors++;
+}
+if(!((((data21 === "North") || (data21 === "South")) || (data21 === "East")) || (data21 === "West"))){
+const err71 = {instancePath:instancePath+"/snakeDirection",schemaPath:"#/$defs/direction/enum",keyword:"enum",params:{allowedValues: schema36.enum},message:"must be equal to one of the allowed values"};
+if(vErrors === null){
+vErrors = [err71];
+}
+else {
+vErrors.push(err71);
 }
 errors++;
 }
@@ -860,17 +870,7 @@ for(let i3=0; i3<len3; i3++){
 let data23 = data22[i3];
 if(data23 && typeof data23 == "object" && !Array.isArray(data23)){
 if(data23.x === undefined){
-const err71 = {instancePath:instancePath+"/floatingFood/" + i3,schemaPath:"#/$defs/position/required",keyword:"required",params:{missingProperty: "x"},message:"must have required property '"+"x"+"'"};
-if(vErrors === null){
-vErrors = [err71];
-}
-else {
-vErrors.push(err71);
-}
-errors++;
-}
-if(data23.y === undefined){
-const err72 = {instancePath:instancePath+"/floatingFood/" + i3,schemaPath:"#/$defs/position/required",keyword:"required",params:{missingProperty: "y"},message:"must have required property '"+"y"+"'"};
+const err72 = {instancePath:instancePath+"/floatingFood/" + i3,schemaPath:"#/$defs/position/required",keyword:"required",params:{missingProperty: "x"},message:"must have required property '"+"x"+"'"};
 if(vErrors === null){
 vErrors = [err72];
 }
@@ -879,9 +879,8 @@ vErrors.push(err72);
 }
 errors++;
 }
-for(const key6 in data23){
-if(!((key6 === "x") || (key6 === "y"))){
-const err73 = {instancePath:instancePath+"/floatingFood/" + i3,schemaPath:"#/$defs/position/additionalProperties",keyword:"additionalProperties",params:{additionalProperty: key6},message:"must NOT have additional properties"};
+if(data23.y === undefined){
+const err73 = {instancePath:instancePath+"/floatingFood/" + i3,schemaPath:"#/$defs/position/required",keyword:"required",params:{missingProperty: "y"},message:"must have required property '"+"y"+"'"};
 if(vErrors === null){
 vErrors = [err73];
 }
@@ -890,11 +889,9 @@ vErrors.push(err73);
 }
 errors++;
 }
-}
-if(data23.x !== undefined){
-let data24 = data23.x;
-if(!(((typeof data24 == "number") && (!(data24 % 1) && !isNaN(data24))) && (isFinite(data24)))){
-const err74 = {instancePath:instancePath+"/floatingFood/" + i3+"/x",schemaPath:"#/$defs/position/properties/x/type",keyword:"type",params:{type: "integer"},message:"must be integer"};
+for(const key6 in data23){
+if(!((key6 === "x") || (key6 === "y"))){
+const err74 = {instancePath:instancePath+"/floatingFood/" + i3,schemaPath:"#/$defs/position/additionalProperties",keyword:"additionalProperties",params:{additionalProperty: key6},message:"must NOT have additional properties"};
 if(vErrors === null){
 vErrors = [err74];
 }
@@ -903,9 +900,11 @@ vErrors.push(err74);
 }
 errors++;
 }
-if((typeof data24 == "number") && (isFinite(data24))){
-if(data24 > 2147483647 || isNaN(data24)){
-const err75 = {instancePath:instancePath+"/floatingFood/" + i3+"/x",schemaPath:"#/$defs/position/properties/x/maximum",keyword:"maximum",params:{comparison: "<=", limit: 2147483647},message:"must be <= 2147483647"};
+}
+if(data23.x !== undefined){
+let data24 = data23.x;
+if(!(((typeof data24 == "number") && (!(data24 % 1) && !isNaN(data24))) && (isFinite(data24)))){
+const err75 = {instancePath:instancePath+"/floatingFood/" + i3+"/x",schemaPath:"#/$defs/position/properties/x/type",keyword:"type",params:{type: "integer"},message:"must be integer"};
 if(vErrors === null){
 vErrors = [err75];
 }
@@ -914,8 +913,9 @@ vErrors.push(err75);
 }
 errors++;
 }
-if(data24 < -2147483648 || isNaN(data24)){
-const err76 = {instancePath:instancePath+"/floatingFood/" + i3+"/x",schemaPath:"#/$defs/position/properties/x/minimum",keyword:"minimum",params:{comparison: ">=", limit: -2147483648},message:"must be >= -2147483648"};
+if((typeof data24 == "number") && (isFinite(data24))){
+if(data24 > 2147483647 || isNaN(data24)){
+const err76 = {instancePath:instancePath+"/floatingFood/" + i3+"/x",schemaPath:"#/$defs/position/properties/x/maximum",keyword:"maximum",params:{comparison: "<=", limit: 2147483647},message:"must be <= 2147483647"};
 if(vErrors === null){
 vErrors = [err76];
 }
@@ -924,12 +924,8 @@ vErrors.push(err76);
 }
 errors++;
 }
-}
-}
-if(data23.y !== undefined){
-let data25 = data23.y;
-if(!(((typeof data25 == "number") && (!(data25 % 1) && !isNaN(data25))) && (isFinite(data25)))){
-const err77 = {instancePath:instancePath+"/floatingFood/" + i3+"/y",schemaPath:"#/$defs/position/properties/y/type",keyword:"type",params:{type: "integer"},message:"must be integer"};
+if(data24 < 0 || isNaN(data24)){
+const err77 = {instancePath:instancePath+"/floatingFood/" + i3+"/x",schemaPath:"#/$defs/position/properties/x/minimum",keyword:"minimum",params:{comparison: ">=", limit: 0},message:"must be >= 0"};
 if(vErrors === null){
 vErrors = [err77];
 }
@@ -938,9 +934,12 @@ vErrors.push(err77);
 }
 errors++;
 }
-if((typeof data25 == "number") && (isFinite(data25))){
-if(data25 > 2147483647 || isNaN(data25)){
-const err78 = {instancePath:instancePath+"/floatingFood/" + i3+"/y",schemaPath:"#/$defs/position/properties/y/maximum",keyword:"maximum",params:{comparison: "<=", limit: 2147483647},message:"must be <= 2147483647"};
+}
+}
+if(data23.y !== undefined){
+let data25 = data23.y;
+if(!(((typeof data25 == "number") && (!(data25 % 1) && !isNaN(data25))) && (isFinite(data25)))){
+const err78 = {instancePath:instancePath+"/floatingFood/" + i3+"/y",schemaPath:"#/$defs/position/properties/y/type",keyword:"type",params:{type: "integer"},message:"must be integer"};
 if(vErrors === null){
 vErrors = [err78];
 }
@@ -949,8 +948,9 @@ vErrors.push(err78);
 }
 errors++;
 }
-if(data25 < -2147483648 || isNaN(data25)){
-const err79 = {instancePath:instancePath+"/floatingFood/" + i3+"/y",schemaPath:"#/$defs/position/properties/y/minimum",keyword:"minimum",params:{comparison: ">=", limit: -2147483648},message:"must be >= -2147483648"};
+if((typeof data25 == "number") && (isFinite(data25))){
+if(data25 > 2147483647 || isNaN(data25)){
+const err79 = {instancePath:instancePath+"/floatingFood/" + i3+"/y",schemaPath:"#/$defs/position/properties/y/maximum",keyword:"maximum",params:{comparison: "<=", limit: 2147483647},message:"must be <= 2147483647"};
 if(vErrors === null){
 vErrors = [err79];
 }
@@ -959,11 +959,8 @@ vErrors.push(err79);
 }
 errors++;
 }
-}
-}
-}
-else {
-const err80 = {instancePath:instancePath+"/floatingFood/" + i3,schemaPath:"#/$defs/position/type",keyword:"type",params:{type: "object"},message:"must be object"};
+if(data25 < 0 || isNaN(data25)){
+const err80 = {instancePath:instancePath+"/floatingFood/" + i3+"/y",schemaPath:"#/$defs/position/properties/y/minimum",keyword:"minimum",params:{comparison: ">=", limit: 0},message:"must be >= 0"};
 if(vErrors === null){
 vErrors = [err80];
 }
@@ -974,13 +971,26 @@ errors++;
 }
 }
 }
+}
 else {
-const err81 = {instancePath:instancePath+"/floatingFood",schemaPath:"#/properties/floatingFood/type",keyword:"type",params:{type: "array"},message:"must be array"};
+const err81 = {instancePath:instancePath+"/floatingFood/" + i3,schemaPath:"#/$defs/position/type",keyword:"type",params:{type: "object"},message:"must be object"};
 if(vErrors === null){
 vErrors = [err81];
 }
 else {
 vErrors.push(err81);
+}
+errors++;
+}
+}
+}
+else {
+const err82 = {instancePath:instancePath+"/floatingFood",schemaPath:"#/properties/floatingFood/type",keyword:"type",params:{type: "array"},message:"must be array"};
+if(vErrors === null){
+vErrors = [err82];
+}
+else {
+vErrors.push(err82);
 }
 errors++;
 }
@@ -993,17 +1003,7 @@ for(let i4=0; i4<len4; i4++){
 let data27 = data26[i4];
 if(data27 && typeof data27 == "object" && !Array.isArray(data27)){
 if(data27.x === undefined){
-const err82 = {instancePath:instancePath+"/fallingFood/" + i4,schemaPath:"#/$defs/position/required",keyword:"required",params:{missingProperty: "x"},message:"must have required property '"+"x"+"'"};
-if(vErrors === null){
-vErrors = [err82];
-}
-else {
-vErrors.push(err82);
-}
-errors++;
-}
-if(data27.y === undefined){
-const err83 = {instancePath:instancePath+"/fallingFood/" + i4,schemaPath:"#/$defs/position/required",keyword:"required",params:{missingProperty: "y"},message:"must have required property '"+"y"+"'"};
+const err83 = {instancePath:instancePath+"/fallingFood/" + i4,schemaPath:"#/$defs/position/required",keyword:"required",params:{missingProperty: "x"},message:"must have required property '"+"x"+"'"};
 if(vErrors === null){
 vErrors = [err83];
 }
@@ -1012,9 +1012,8 @@ vErrors.push(err83);
 }
 errors++;
 }
-for(const key7 in data27){
-if(!((key7 === "x") || (key7 === "y"))){
-const err84 = {instancePath:instancePath+"/fallingFood/" + i4,schemaPath:"#/$defs/position/additionalProperties",keyword:"additionalProperties",params:{additionalProperty: key7},message:"must NOT have additional properties"};
+if(data27.y === undefined){
+const err84 = {instancePath:instancePath+"/fallingFood/" + i4,schemaPath:"#/$defs/position/required",keyword:"required",params:{missingProperty: "y"},message:"must have required property '"+"y"+"'"};
 if(vErrors === null){
 vErrors = [err84];
 }
@@ -1023,11 +1022,9 @@ vErrors.push(err84);
 }
 errors++;
 }
-}
-if(data27.x !== undefined){
-let data28 = data27.x;
-if(!(((typeof data28 == "number") && (!(data28 % 1) && !isNaN(data28))) && (isFinite(data28)))){
-const err85 = {instancePath:instancePath+"/fallingFood/" + i4+"/x",schemaPath:"#/$defs/position/properties/x/type",keyword:"type",params:{type: "integer"},message:"must be integer"};
+for(const key7 in data27){
+if(!((key7 === "x") || (key7 === "y"))){
+const err85 = {instancePath:instancePath+"/fallingFood/" + i4,schemaPath:"#/$defs/position/additionalProperties",keyword:"additionalProperties",params:{additionalProperty: key7},message:"must NOT have additional properties"};
 if(vErrors === null){
 vErrors = [err85];
 }
@@ -1036,9 +1033,11 @@ vErrors.push(err85);
 }
 errors++;
 }
-if((typeof data28 == "number") && (isFinite(data28))){
-if(data28 > 2147483647 || isNaN(data28)){
-const err86 = {instancePath:instancePath+"/fallingFood/" + i4+"/x",schemaPath:"#/$defs/position/properties/x/maximum",keyword:"maximum",params:{comparison: "<=", limit: 2147483647},message:"must be <= 2147483647"};
+}
+if(data27.x !== undefined){
+let data28 = data27.x;
+if(!(((typeof data28 == "number") && (!(data28 % 1) && !isNaN(data28))) && (isFinite(data28)))){
+const err86 = {instancePath:instancePath+"/fallingFood/" + i4+"/x",schemaPath:"#/$defs/position/properties/x/type",keyword:"type",params:{type: "integer"},message:"must be integer"};
 if(vErrors === null){
 vErrors = [err86];
 }
@@ -1047,8 +1046,9 @@ vErrors.push(err86);
 }
 errors++;
 }
-if(data28 < -2147483648 || isNaN(data28)){
-const err87 = {instancePath:instancePath+"/fallingFood/" + i4+"/x",schemaPath:"#/$defs/position/properties/x/minimum",keyword:"minimum",params:{comparison: ">=", limit: -2147483648},message:"must be >= -2147483648"};
+if((typeof data28 == "number") && (isFinite(data28))){
+if(data28 > 2147483647 || isNaN(data28)){
+const err87 = {instancePath:instancePath+"/fallingFood/" + i4+"/x",schemaPath:"#/$defs/position/properties/x/maximum",keyword:"maximum",params:{comparison: "<=", limit: 2147483647},message:"must be <= 2147483647"};
 if(vErrors === null){
 vErrors = [err87];
 }
@@ -1057,12 +1057,8 @@ vErrors.push(err87);
 }
 errors++;
 }
-}
-}
-if(data27.y !== undefined){
-let data29 = data27.y;
-if(!(((typeof data29 == "number") && (!(data29 % 1) && !isNaN(data29))) && (isFinite(data29)))){
-const err88 = {instancePath:instancePath+"/fallingFood/" + i4+"/y",schemaPath:"#/$defs/position/properties/y/type",keyword:"type",params:{type: "integer"},message:"must be integer"};
+if(data28 < 0 || isNaN(data28)){
+const err88 = {instancePath:instancePath+"/fallingFood/" + i4+"/x",schemaPath:"#/$defs/position/properties/x/minimum",keyword:"minimum",params:{comparison: ">=", limit: 0},message:"must be >= 0"};
 if(vErrors === null){
 vErrors = [err88];
 }
@@ -1071,9 +1067,12 @@ vErrors.push(err88);
 }
 errors++;
 }
-if((typeof data29 == "number") && (isFinite(data29))){
-if(data29 > 2147483647 || isNaN(data29)){
-const err89 = {instancePath:instancePath+"/fallingFood/" + i4+"/y",schemaPath:"#/$defs/position/properties/y/maximum",keyword:"maximum",params:{comparison: "<=", limit: 2147483647},message:"must be <= 2147483647"};
+}
+}
+if(data27.y !== undefined){
+let data29 = data27.y;
+if(!(((typeof data29 == "number") && (!(data29 % 1) && !isNaN(data29))) && (isFinite(data29)))){
+const err89 = {instancePath:instancePath+"/fallingFood/" + i4+"/y",schemaPath:"#/$defs/position/properties/y/type",keyword:"type",params:{type: "integer"},message:"must be integer"};
 if(vErrors === null){
 vErrors = [err89];
 }
@@ -1082,8 +1081,9 @@ vErrors.push(err89);
 }
 errors++;
 }
-if(data29 < -2147483648 || isNaN(data29)){
-const err90 = {instancePath:instancePath+"/fallingFood/" + i4+"/y",schemaPath:"#/$defs/position/properties/y/minimum",keyword:"minimum",params:{comparison: ">=", limit: -2147483648},message:"must be >= -2147483648"};
+if((typeof data29 == "number") && (isFinite(data29))){
+if(data29 > 2147483647 || isNaN(data29)){
+const err90 = {instancePath:instancePath+"/fallingFood/" + i4+"/y",schemaPath:"#/$defs/position/properties/y/maximum",keyword:"maximum",params:{comparison: "<=", limit: 2147483647},message:"must be <= 2147483647"};
 if(vErrors === null){
 vErrors = [err90];
 }
@@ -1092,11 +1092,8 @@ vErrors.push(err90);
 }
 errors++;
 }
-}
-}
-}
-else {
-const err91 = {instancePath:instancePath+"/fallingFood/" + i4,schemaPath:"#/$defs/position/type",keyword:"type",params:{type: "object"},message:"must be object"};
+if(data29 < 0 || isNaN(data29)){
+const err91 = {instancePath:instancePath+"/fallingFood/" + i4+"/y",schemaPath:"#/$defs/position/properties/y/minimum",keyword:"minimum",params:{comparison: ">=", limit: 0},message:"must be >= 0"};
 if(vErrors === null){
 vErrors = [err91];
 }
@@ -1107,13 +1104,26 @@ errors++;
 }
 }
 }
+}
 else {
-const err92 = {instancePath:instancePath+"/fallingFood",schemaPath:"#/properties/fallingFood/type",keyword:"type",params:{type: "array"},message:"must be array"};
+const err92 = {instancePath:instancePath+"/fallingFood/" + i4,schemaPath:"#/$defs/position/type",keyword:"type",params:{type: "object"},message:"must be object"};
 if(vErrors === null){
 vErrors = [err92];
 }
 else {
 vErrors.push(err92);
+}
+errors++;
+}
+}
+}
+else {
+const err93 = {instancePath:instancePath+"/fallingFood",schemaPath:"#/properties/fallingFood/type",keyword:"type",params:{type: "array"},message:"must be array"};
+if(vErrors === null){
+vErrors = [err93];
+}
+else {
+vErrors.push(err93);
 }
 errors++;
 }
@@ -1126,17 +1136,7 @@ for(let i5=0; i5<len5; i5++){
 let data31 = data30[i5];
 if(data31 && typeof data31 == "object" && !Array.isArray(data31)){
 if(data31.x === undefined){
-const err93 = {instancePath:instancePath+"/stones/" + i5,schemaPath:"#/$defs/position/required",keyword:"required",params:{missingProperty: "x"},message:"must have required property '"+"x"+"'"};
-if(vErrors === null){
-vErrors = [err93];
-}
-else {
-vErrors.push(err93);
-}
-errors++;
-}
-if(data31.y === undefined){
-const err94 = {instancePath:instancePath+"/stones/" + i5,schemaPath:"#/$defs/position/required",keyword:"required",params:{missingProperty: "y"},message:"must have required property '"+"y"+"'"};
+const err94 = {instancePath:instancePath+"/stones/" + i5,schemaPath:"#/$defs/position/required",keyword:"required",params:{missingProperty: "x"},message:"must have required property '"+"x"+"'"};
 if(vErrors === null){
 vErrors = [err94];
 }
@@ -1145,9 +1145,8 @@ vErrors.push(err94);
 }
 errors++;
 }
-for(const key8 in data31){
-if(!((key8 === "x") || (key8 === "y"))){
-const err95 = {instancePath:instancePath+"/stones/" + i5,schemaPath:"#/$defs/position/additionalProperties",keyword:"additionalProperties",params:{additionalProperty: key8},message:"must NOT have additional properties"};
+if(data31.y === undefined){
+const err95 = {instancePath:instancePath+"/stones/" + i5,schemaPath:"#/$defs/position/required",keyword:"required",params:{missingProperty: "y"},message:"must have required property '"+"y"+"'"};
 if(vErrors === null){
 vErrors = [err95];
 }
@@ -1156,11 +1155,9 @@ vErrors.push(err95);
 }
 errors++;
 }
-}
-if(data31.x !== undefined){
-let data32 = data31.x;
-if(!(((typeof data32 == "number") && (!(data32 % 1) && !isNaN(data32))) && (isFinite(data32)))){
-const err96 = {instancePath:instancePath+"/stones/" + i5+"/x",schemaPath:"#/$defs/position/properties/x/type",keyword:"type",params:{type: "integer"},message:"must be integer"};
+for(const key8 in data31){
+if(!((key8 === "x") || (key8 === "y"))){
+const err96 = {instancePath:instancePath+"/stones/" + i5,schemaPath:"#/$defs/position/additionalProperties",keyword:"additionalProperties",params:{additionalProperty: key8},message:"must NOT have additional properties"};
 if(vErrors === null){
 vErrors = [err96];
 }
@@ -1169,9 +1166,11 @@ vErrors.push(err96);
 }
 errors++;
 }
-if((typeof data32 == "number") && (isFinite(data32))){
-if(data32 > 2147483647 || isNaN(data32)){
-const err97 = {instancePath:instancePath+"/stones/" + i5+"/x",schemaPath:"#/$defs/position/properties/x/maximum",keyword:"maximum",params:{comparison: "<=", limit: 2147483647},message:"must be <= 2147483647"};
+}
+if(data31.x !== undefined){
+let data32 = data31.x;
+if(!(((typeof data32 == "number") && (!(data32 % 1) && !isNaN(data32))) && (isFinite(data32)))){
+const err97 = {instancePath:instancePath+"/stones/" + i5+"/x",schemaPath:"#/$defs/position/properties/x/type",keyword:"type",params:{type: "integer"},message:"must be integer"};
 if(vErrors === null){
 vErrors = [err97];
 }
@@ -1180,8 +1179,9 @@ vErrors.push(err97);
 }
 errors++;
 }
-if(data32 < -2147483648 || isNaN(data32)){
-const err98 = {instancePath:instancePath+"/stones/" + i5+"/x",schemaPath:"#/$defs/position/properties/x/minimum",keyword:"minimum",params:{comparison: ">=", limit: -2147483648},message:"must be >= -2147483648"};
+if((typeof data32 == "number") && (isFinite(data32))){
+if(data32 > 2147483647 || isNaN(data32)){
+const err98 = {instancePath:instancePath+"/stones/" + i5+"/x",schemaPath:"#/$defs/position/properties/x/maximum",keyword:"maximum",params:{comparison: "<=", limit: 2147483647},message:"must be <= 2147483647"};
 if(vErrors === null){
 vErrors = [err98];
 }
@@ -1190,12 +1190,8 @@ vErrors.push(err98);
 }
 errors++;
 }
-}
-}
-if(data31.y !== undefined){
-let data33 = data31.y;
-if(!(((typeof data33 == "number") && (!(data33 % 1) && !isNaN(data33))) && (isFinite(data33)))){
-const err99 = {instancePath:instancePath+"/stones/" + i5+"/y",schemaPath:"#/$defs/position/properties/y/type",keyword:"type",params:{type: "integer"},message:"must be integer"};
+if(data32 < 0 || isNaN(data32)){
+const err99 = {instancePath:instancePath+"/stones/" + i5+"/x",schemaPath:"#/$defs/position/properties/x/minimum",keyword:"minimum",params:{comparison: ">=", limit: 0},message:"must be >= 0"};
 if(vErrors === null){
 vErrors = [err99];
 }
@@ -1204,9 +1200,12 @@ vErrors.push(err99);
 }
 errors++;
 }
-if((typeof data33 == "number") && (isFinite(data33))){
-if(data33 > 2147483647 || isNaN(data33)){
-const err100 = {instancePath:instancePath+"/stones/" + i5+"/y",schemaPath:"#/$defs/position/properties/y/maximum",keyword:"maximum",params:{comparison: "<=", limit: 2147483647},message:"must be <= 2147483647"};
+}
+}
+if(data31.y !== undefined){
+let data33 = data31.y;
+if(!(((typeof data33 == "number") && (!(data33 % 1) && !isNaN(data33))) && (isFinite(data33)))){
+const err100 = {instancePath:instancePath+"/stones/" + i5+"/y",schemaPath:"#/$defs/position/properties/y/type",keyword:"type",params:{type: "integer"},message:"must be integer"};
 if(vErrors === null){
 vErrors = [err100];
 }
@@ -1215,8 +1214,9 @@ vErrors.push(err100);
 }
 errors++;
 }
-if(data33 < -2147483648 || isNaN(data33)){
-const err101 = {instancePath:instancePath+"/stones/" + i5+"/y",schemaPath:"#/$defs/position/properties/y/minimum",keyword:"minimum",params:{comparison: ">=", limit: -2147483648},message:"must be >= -2147483648"};
+if((typeof data33 == "number") && (isFinite(data33))){
+if(data33 > 2147483647 || isNaN(data33)){
+const err101 = {instancePath:instancePath+"/stones/" + i5+"/y",schemaPath:"#/$defs/position/properties/y/maximum",keyword:"maximum",params:{comparison: "<=", limit: 2147483647},message:"must be <= 2147483647"};
 if(vErrors === null){
 vErrors = [err101];
 }
@@ -1225,11 +1225,8 @@ vErrors.push(err101);
 }
 errors++;
 }
-}
-}
-}
-else {
-const err102 = {instancePath:instancePath+"/stones/" + i5,schemaPath:"#/$defs/position/type",keyword:"type",params:{type: "object"},message:"must be object"};
+if(data33 < 0 || isNaN(data33)){
+const err102 = {instancePath:instancePath+"/stones/" + i5+"/y",schemaPath:"#/$defs/position/properties/y/minimum",keyword:"minimum",params:{comparison: ">=", limit: 0},message:"must be >= 0"};
 if(vErrors === null){
 vErrors = [err102];
 }
@@ -1240,13 +1237,26 @@ errors++;
 }
 }
 }
+}
 else {
-const err103 = {instancePath:instancePath+"/stones",schemaPath:"#/properties/stones/type",keyword:"type",params:{type: "array"},message:"must be array"};
+const err103 = {instancePath:instancePath+"/stones/" + i5,schemaPath:"#/$defs/position/type",keyword:"type",params:{type: "object"},message:"must be object"};
 if(vErrors === null){
 vErrors = [err103];
 }
 else {
 vErrors.push(err103);
+}
+errors++;
+}
+}
+}
+else {
+const err104 = {instancePath:instancePath+"/stones",schemaPath:"#/properties/stones/type",keyword:"type",params:{type: "array"},message:"must be array"};
+if(vErrors === null){
+vErrors = [err104];
+}
+else {
+vErrors.push(err104);
 }
 errors++;
 }
@@ -1259,17 +1269,7 @@ for(let i6=0; i6<len6; i6++){
 let data35 = data34[i6];
 if(data35 && typeof data35 == "object" && !Array.isArray(data35)){
 if(data35.x === undefined){
-const err104 = {instancePath:instancePath+"/spikes/" + i6,schemaPath:"#/$defs/position/required",keyword:"required",params:{missingProperty: "x"},message:"must have required property '"+"x"+"'"};
-if(vErrors === null){
-vErrors = [err104];
-}
-else {
-vErrors.push(err104);
-}
-errors++;
-}
-if(data35.y === undefined){
-const err105 = {instancePath:instancePath+"/spikes/" + i6,schemaPath:"#/$defs/position/required",keyword:"required",params:{missingProperty: "y"},message:"must have required property '"+"y"+"'"};
+const err105 = {instancePath:instancePath+"/spikes/" + i6,schemaPath:"#/$defs/position/required",keyword:"required",params:{missingProperty: "x"},message:"must have required property '"+"x"+"'"};
 if(vErrors === null){
 vErrors = [err105];
 }
@@ -1278,9 +1278,8 @@ vErrors.push(err105);
 }
 errors++;
 }
-for(const key9 in data35){
-if(!((key9 === "x") || (key9 === "y"))){
-const err106 = {instancePath:instancePath+"/spikes/" + i6,schemaPath:"#/$defs/position/additionalProperties",keyword:"additionalProperties",params:{additionalProperty: key9},message:"must NOT have additional properties"};
+if(data35.y === undefined){
+const err106 = {instancePath:instancePath+"/spikes/" + i6,schemaPath:"#/$defs/position/required",keyword:"required",params:{missingProperty: "y"},message:"must have required property '"+"y"+"'"};
 if(vErrors === null){
 vErrors = [err106];
 }
@@ -1289,11 +1288,9 @@ vErrors.push(err106);
 }
 errors++;
 }
-}
-if(data35.x !== undefined){
-let data36 = data35.x;
-if(!(((typeof data36 == "number") && (!(data36 % 1) && !isNaN(data36))) && (isFinite(data36)))){
-const err107 = {instancePath:instancePath+"/spikes/" + i6+"/x",schemaPath:"#/$defs/position/properties/x/type",keyword:"type",params:{type: "integer"},message:"must be integer"};
+for(const key9 in data35){
+if(!((key9 === "x") || (key9 === "y"))){
+const err107 = {instancePath:instancePath+"/spikes/" + i6,schemaPath:"#/$defs/position/additionalProperties",keyword:"additionalProperties",params:{additionalProperty: key9},message:"must NOT have additional properties"};
 if(vErrors === null){
 vErrors = [err107];
 }
@@ -1302,9 +1299,11 @@ vErrors.push(err107);
 }
 errors++;
 }
-if((typeof data36 == "number") && (isFinite(data36))){
-if(data36 > 2147483647 || isNaN(data36)){
-const err108 = {instancePath:instancePath+"/spikes/" + i6+"/x",schemaPath:"#/$defs/position/properties/x/maximum",keyword:"maximum",params:{comparison: "<=", limit: 2147483647},message:"must be <= 2147483647"};
+}
+if(data35.x !== undefined){
+let data36 = data35.x;
+if(!(((typeof data36 == "number") && (!(data36 % 1) && !isNaN(data36))) && (isFinite(data36)))){
+const err108 = {instancePath:instancePath+"/spikes/" + i6+"/x",schemaPath:"#/$defs/position/properties/x/type",keyword:"type",params:{type: "integer"},message:"must be integer"};
 if(vErrors === null){
 vErrors = [err108];
 }
@@ -1313,8 +1312,9 @@ vErrors.push(err108);
 }
 errors++;
 }
-if(data36 < -2147483648 || isNaN(data36)){
-const err109 = {instancePath:instancePath+"/spikes/" + i6+"/x",schemaPath:"#/$defs/position/properties/x/minimum",keyword:"minimum",params:{comparison: ">=", limit: -2147483648},message:"must be >= -2147483648"};
+if((typeof data36 == "number") && (isFinite(data36))){
+if(data36 > 2147483647 || isNaN(data36)){
+const err109 = {instancePath:instancePath+"/spikes/" + i6+"/x",schemaPath:"#/$defs/position/properties/x/maximum",keyword:"maximum",params:{comparison: "<=", limit: 2147483647},message:"must be <= 2147483647"};
 if(vErrors === null){
 vErrors = [err109];
 }
@@ -1323,12 +1323,8 @@ vErrors.push(err109);
 }
 errors++;
 }
-}
-}
-if(data35.y !== undefined){
-let data37 = data35.y;
-if(!(((typeof data37 == "number") && (!(data37 % 1) && !isNaN(data37))) && (isFinite(data37)))){
-const err110 = {instancePath:instancePath+"/spikes/" + i6+"/y",schemaPath:"#/$defs/position/properties/y/type",keyword:"type",params:{type: "integer"},message:"must be integer"};
+if(data36 < 0 || isNaN(data36)){
+const err110 = {instancePath:instancePath+"/spikes/" + i6+"/x",schemaPath:"#/$defs/position/properties/x/minimum",keyword:"minimum",params:{comparison: ">=", limit: 0},message:"must be >= 0"};
 if(vErrors === null){
 vErrors = [err110];
 }
@@ -1337,9 +1333,12 @@ vErrors.push(err110);
 }
 errors++;
 }
-if((typeof data37 == "number") && (isFinite(data37))){
-if(data37 > 2147483647 || isNaN(data37)){
-const err111 = {instancePath:instancePath+"/spikes/" + i6+"/y",schemaPath:"#/$defs/position/properties/y/maximum",keyword:"maximum",params:{comparison: "<=", limit: 2147483647},message:"must be <= 2147483647"};
+}
+}
+if(data35.y !== undefined){
+let data37 = data35.y;
+if(!(((typeof data37 == "number") && (!(data37 % 1) && !isNaN(data37))) && (isFinite(data37)))){
+const err111 = {instancePath:instancePath+"/spikes/" + i6+"/y",schemaPath:"#/$defs/position/properties/y/type",keyword:"type",params:{type: "integer"},message:"must be integer"};
 if(vErrors === null){
 vErrors = [err111];
 }
@@ -1348,8 +1347,9 @@ vErrors.push(err111);
 }
 errors++;
 }
-if(data37 < -2147483648 || isNaN(data37)){
-const err112 = {instancePath:instancePath+"/spikes/" + i6+"/y",schemaPath:"#/$defs/position/properties/y/minimum",keyword:"minimum",params:{comparison: ">=", limit: -2147483648},message:"must be >= -2147483648"};
+if((typeof data37 == "number") && (isFinite(data37))){
+if(data37 > 2147483647 || isNaN(data37)){
+const err112 = {instancePath:instancePath+"/spikes/" + i6+"/y",schemaPath:"#/$defs/position/properties/y/maximum",keyword:"maximum",params:{comparison: "<=", limit: 2147483647},message:"must be <= 2147483647"};
 if(vErrors === null){
 vErrors = [err112];
 }
@@ -1358,11 +1358,8 @@ vErrors.push(err112);
 }
 errors++;
 }
-}
-}
-}
-else {
-const err113 = {instancePath:instancePath+"/spikes/" + i6,schemaPath:"#/$defs/position/type",keyword:"type",params:{type: "object"},message:"must be object"};
+if(data37 < 0 || isNaN(data37)){
+const err113 = {instancePath:instancePath+"/spikes/" + i6+"/y",schemaPath:"#/$defs/position/properties/y/minimum",keyword:"minimum",params:{comparison: ">=", limit: 0},message:"must be >= 0"};
 if(vErrors === null){
 vErrors = [err113];
 }
@@ -1373,8 +1370,9 @@ errors++;
 }
 }
 }
+}
 else {
-const err114 = {instancePath:instancePath+"/spikes",schemaPath:"#/properties/spikes/type",keyword:"type",params:{type: "array"},message:"must be array"};
+const err114 = {instancePath:instancePath+"/spikes/" + i6,schemaPath:"#/$defs/position/type",keyword:"type",params:{type: "object"},message:"must be object"};
 if(vErrors === null){
 vErrors = [err114];
 }
@@ -1384,9 +1382,9 @@ vErrors.push(err114);
 errors++;
 }
 }
-if(data.exitIsSolid !== undefined){
-if(typeof data.exitIsSolid !== "boolean"){
-const err115 = {instancePath:instancePath+"/exitIsSolid",schemaPath:"#/properties/exitIsSolid/type",keyword:"type",params:{type: "boolean"},message:"must be boolean"};
+}
+else {
+const err115 = {instancePath:instancePath+"/spikes",schemaPath:"#/properties/spikes/type",keyword:"type",params:{type: "array"},message:"must be array"};
 if(vErrors === null){
 vErrors = [err115];
 }
@@ -1396,10 +1394,9 @@ vErrors.push(err115);
 errors++;
 }
 }
-if(data.totalFood !== undefined){
-let data39 = data.totalFood;
-if(!(((typeof data39 == "number") && (!(data39 % 1) && !isNaN(data39))) && (isFinite(data39)))){
-const err116 = {instancePath:instancePath+"/totalFood",schemaPath:"#/properties/totalFood/type",keyword:"type",params:{type: "integer"},message:"must be integer"};
+if(data.exitIsSolid !== undefined){
+if(typeof data.exitIsSolid !== "boolean"){
+const err116 = {instancePath:instancePath+"/exitIsSolid",schemaPath:"#/properties/exitIsSolid/type",keyword:"type",params:{type: "boolean"},message:"must be boolean"};
 if(vErrors === null){
 vErrors = [err116];
 }
@@ -1408,9 +1405,11 @@ vErrors.push(err116);
 }
 errors++;
 }
-if((typeof data39 == "number") && (isFinite(data39))){
-if(data39 > 4294967295 || isNaN(data39)){
-const err117 = {instancePath:instancePath+"/totalFood",schemaPath:"#/properties/totalFood/maximum",keyword:"maximum",params:{comparison: "<=", limit: 4294967295},message:"must be <= 4294967295"};
+}
+if(data.totalFood !== undefined){
+let data39 = data.totalFood;
+if(!(((typeof data39 == "number") && (!(data39 % 1) && !isNaN(data39))) && (isFinite(data39)))){
+const err117 = {instancePath:instancePath+"/totalFood",schemaPath:"#/properties/totalFood/type",keyword:"type",params:{type: "integer"},message:"must be integer"};
 if(vErrors === null){
 vErrors = [err117];
 }
@@ -1419,8 +1418,9 @@ vErrors.push(err117);
 }
 errors++;
 }
-if(data39 < 0 || isNaN(data39)){
-const err118 = {instancePath:instancePath+"/totalFood",schemaPath:"#/properties/totalFood/minimum",keyword:"minimum",params:{comparison: ">=", limit: 0},message:"must be >= 0"};
+if((typeof data39 == "number") && (isFinite(data39))){
+if(data39 > 4294967295 || isNaN(data39)){
+const err118 = {instancePath:instancePath+"/totalFood",schemaPath:"#/properties/totalFood/maximum",keyword:"maximum",params:{comparison: "<=", limit: 4294967295},message:"must be <= 4294967295"};
 if(vErrors === null){
 vErrors = [err118];
 }
@@ -1429,16 +1429,26 @@ vErrors.push(err118);
 }
 errors++;
 }
-}
-}
-}
-else {
-const err119 = {instancePath,schemaPath:"#/type",keyword:"type",params:{type: "object"},message:"must be object"};
+if(data39 < 0 || isNaN(data39)){
+const err119 = {instancePath:instancePath+"/totalFood",schemaPath:"#/properties/totalFood/minimum",keyword:"minimum",params:{comparison: ">=", limit: 0},message:"must be >= 0"};
 if(vErrors === null){
 vErrors = [err119];
 }
 else {
 vErrors.push(err119);
+}
+errors++;
+}
+}
+}
+}
+else {
+const err120 = {instancePath,schemaPath:"#/type",keyword:"type",params:{type: "object"},message:"must be object"};
+if(vErrors === null){
+vErrors = [err120];
+}
+else {
+vErrors.push(err120);
 }
 errors++;
 }

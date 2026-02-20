@@ -142,6 +142,7 @@ See `gsnake-web/packages/gsnake-web-app/engine/CLAUDE.md` for the canonical fram
 - **Vitest mocking** — use stub classes or `vi.fn()`, no external mocking libraries; WASM module is mocked with `vi.hoisted` + a `MockRustEngine` class
 - **Coverage threshold** — 80% line/statement in both `gsnake-web` and `gsnake-editor` (enforced as CI merge gate)
 - **Editor import safety** — `gsnake-editor` load flows must reject out-of-bounds coordinates before placement; never silently clip/drop entities during import.
+- **LevelDefinition API bounds safety** — keep `snake` non-empty (`minItems: 1`) and non-negative coordinates in `contracts/level-definition.schema.json`, and enforce `x < gridSize.width` / `y < gridSize.height` in `gsnake-editor/src/server/levelDefinitionValidator.ts`.
 - **Editor load-validation consistency** — keep level-file required-field and grid-size checks centralized in `gsnake-editor/src/lib/levelFileValidation.ts`; both `App.svelte` and `EditorLayout.svelte` must call the shared helper.
 - **Editor sprite safety** — `gsnake-editor/src/lib/SpriteLoader.svelte` must gate on `response.ok` + `image/svg+xml`, then sanitize parsed SVG before rendering; do not inject raw fetched markup.
 - **Editor API CORS determinism** — resolve `GSNAKE_EDITOR_ALLOWED_ORIGINS` once at startup in `gsnake-editor/server.ts`; do not read env vars per request.

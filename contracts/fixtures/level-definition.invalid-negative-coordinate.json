@@ -1,0 +1,18 @@
+{
+  "id": 204,
+  "name": "Fixture: Invalid negative coordinate",
+  "gridSize": {
+    "width": 10,
+    "height": 10
+  },
+  "snake": [
+    { "x": 5, "y": 5 }
+  ],
+  "obstacles": [],
+  "food": [
+    { "x": -1, "y": 3 }
+  ],
+  "exit": { "x": 8, "y": 8 },
+  "snakeDirection": "East",
+  "totalFood": 1
+}
