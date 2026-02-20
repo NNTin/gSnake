@@ -6,6 +6,7 @@
 - In the `gsnake-core` workspace, run package-targeted checks with `cargo ... -p gsnake-core` (hyphenated package name); `gsnake_core` is the Rust crate import path, not the Cargo package ID.
 - For `KeyboardHandler` unit coverage, set `gameState` per status (`Playing`, `GameOver`, `LevelComplete`, `AllComplete`) and assert side-effect exclusivity (`processMove` vs `restartLevel` vs `loadLevel`) so shortcut regressions are caught at state boundaries.
 - For `WasmGameEngine`, treat `loadLevel(levelNumber)` as a 1-based public API and keep regression tests for both `loadLevel(2)` happy path events and `loadLevel(0)` invalid-index rejection (`Invalid level index: -1`) to catch boundary drift.
+- For `CompletionTracker`, treat localStorage as untrusted I/O: parse failures or non-array payloads should resolve to `[]`, and `markCompleted(...)` must catch `setItem` write failures instead of throwing.
 
 # Ralph Progress Log
 Started: Fri Feb 20 10:55:27 CET 2026
@@ -68,4 +69,14 @@ Started: Fri Feb 20 10:55:27 CET 2026
   - `WasmGameEngine.loadLevel(...)` is intentionally 1-based at the public boundary, so boundary tests should include both valid `2` and invalid `0`.
   - Idempotent-init behavior is externally observable through unchanged `constructedLevels`, one-time wasm init calls, and retained `getLevels()` output.
   - `gsnake-web-app` does not expose a `lint` script; use `npm --prefix gsnake-web/packages/gsnake-web-app run check` plus `npm --prefix gsnake-web/packages/gsnake-web-app test` for package-level quality gates.
+---
+
+## [2026-02-20 11:27:18 CET] - US-007
+- Added explicit `CompletionTracker` regression coverage for non-array JSON payloads (`42`, `{}`, `null`) and malformed JSON to ensure persistence parsing always degrades safely to an empty completed-level list.
+- Hardened `markCompleted(...)` against localStorage write exceptions and verified unit tests assert quota/write failures do not propagate to callers.
+- Files changed: `gsnake-web/packages/gsnake-web-app/engine/CompletionTracker.ts`, `gsnake-web/packages/gsnake-web-app/tests/unit/CompletionTracker.test.ts`, `gsnake-web/packages/gsnake-web-app/engine/CLAUDE.md`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`.
+- **Learnings for future iterations:**
+  - Use `it.each(...)` over serialized payload strings for compact non-array storage regression tests in jsdom-backed unit suites.
+  - For storage-backed helpers, treat reads and writes as independent failure points: parse guards in `getCompletedLevels()` plus `setItem` try/catch in `markCompleted(...)`.
+  - `npm --prefix gsnake-web/packages/gsnake-web-app run check && npm --prefix gsnake-web/packages/gsnake-web-app test` remains the correct package-level gate for `CompletionTracker` changes.
 ---
