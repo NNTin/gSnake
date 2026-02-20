@@ -1,0 +1,17 @@
+## Codebase Patterns
+- For gsnake-web enum contract drift checks, keep runtime enum guard constants in `gsnake-web/packages/gsnake-web-app/contracts/enumGuards.ts` and assert parity against both generated TS unions (`types/models.ts`) and Rust wire enums (`gsnake-core/engine/core/src/models.rs`) so cross-language mismatch fails tests.
+- For `gsnake-wasm` in `WasmGameEngine.ts`, import as a namespace and treat the default initializer as optional because generated `pkg/gsnake_wasm.js` may omit a default export while unit-test mocks still provide one.
+
+# Ralph Progress Log
+Started: Fri Feb 20 10:55:27 CET 2026
+---
+
+## [2026-02-20 11:00:51 CET] - US-001
+- Replaced tautological enum contract tests with runtime assertions backed by production guard arrays and cross-checked against generated TS unions plus Rust enum serialization names.
+- Added reusable runtime enum guard constants/type guards and updated WASM import initialization handling to satisfy package typecheck without relying on a guaranteed default export.
+- Files changed: `gsnake-web/packages/gsnake-web-app/contracts/enumGuards.ts`, `gsnake-web/packages/gsnake-web-app/tests/contract/enums.test.ts`, `gsnake-web/packages/gsnake-web-app/engine/WasmGameEngine.ts`, `gsnake-web/packages/gsnake-web-app/engine/CLAUDE.md`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`.
+- **Learnings for future iterations:**
+  - Runtime enum contract tests are strongest when they compare three sources: production guard arrays, generated TS bindings, and Rust enum wire values.
+  - `gsnake-wasm` module shape can differ between generated artifacts and mocks; default initializer should be feature-detected before calling.
+  - `npm run check` for `gsnake-web-app` catches module-shape/type issues that `vitest` can miss due to mocking.
+---
