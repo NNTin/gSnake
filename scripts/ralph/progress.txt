@@ -13,6 +13,7 @@
 - For Playwright popup flows in `e2e/*`, avoid `waitForTimeout(...)`; wait on `domcontentloaded` plus a deterministic ready selector such as `[data-element-id="game-field"]` and pair it with a positive visibility assertion.
 - For `e2e/contract.spec.ts` keyboard-ordering checks, synchronize opposite-direction keypresses on deterministic frame progress (`frame.state.moves` increment via `waitForFunction`) instead of fixed sleeps to keep CI timing stable.
 - For rendered-grid E2E checks in `e2e/snake-bugs.spec.ts`, extract `SnakeHead`/`SnakeBody` from `[data-element-id="game-field"] .cell use[href]` and map row-major DOM indices back to coordinates (`x = idx % width`, `y = floor(idx / width)`) so tests assert visual state instead of only API payloads.
+- For `gsnake-web-app` store-driven `snakeLength`, count only `SnakeHead` and `SnakeBody`; keep regression tests with mixed extended cell types (`Stone`, `Spike`, `FloatingFood`, `FallingFood`) and a zero-snake frame to prevent accidental overcounting.
 
 # Ralph Progress Log
 Started: Fri Feb 20 10:55:27 CET 2026
@@ -146,4 +147,13 @@ Started: Fri Feb 20 10:55:27 CET 2026
   - In editor grid tests, `has-entity` confirms occupancy only; validate optional entity type by asserting the cell sprite `<use href>` suffix (for example `#FloatingFood`).
   - Keep coordinate assertions row/column explicit (`data-row`, `data-col`) so loaded-entity placement regressions are easy to diagnose.
   - `npm --prefix gsnake-editor run check && npm --prefix gsnake-editor run lint && npm --prefix gsnake-editor test` is the appropriate quality gate for editor test updates.
+---
+## [2026-02-20 11:49:16 CET] - US-014
+- Added unit coverage in `gsnake-web/packages/gsnake-web-app/tests/unit/stores.test.ts` for snake-length derivation using a multi-row five-segment snake frame, a zero-snake frame, and mixed extended non-snake cell variants.
+- Verified `snakeLength` remains based only on `SnakeHead`/`SnakeBody` while `Stone`, `Spike`, `FloatingFood`, and `FallingFood` do not affect the count.
+- Files changed: `gsnake-web/packages/gsnake-web-app/tests/unit/stores.test.ts`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`.
+- **Learnings for future iterations:**
+  - In `connectGameEngineToStores`, snake-length behavior should be validated through emitted `frameChanged` events rather than direct helper access so tests cover store wiring and counting together.
+  - Mixed-cell fixtures should include extended `CellType` variants explicitly to guard against regressions that accidentally treat non-snake entities as snake segments.
+  - `npm --prefix gsnake-web/packages/gsnake-web-app run check && npm --prefix gsnake-web/packages/gsnake-web-app test` is a sufficient package-level gate for `stores` test updates.
 ---
