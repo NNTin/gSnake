@@ -6,6 +6,7 @@ Started: Thu Feb 19 16:54:50 CET 2026
 - In `EditorLayout.handleLoad`, hidden file inputs must use idempotent cleanup and hook both `change` and picker-close signals (`cancel` plus `window` focus fallback) so canceled dialogs do not leak DOM nodes.
 - In `EditorLayout`, both export and test payloads should be built via `buildLevelExportPayload(...)` to keep `difficulty`, `snakeDirection`, and `totalFood` serialization rules aligned.
 - In `EditorLayout.handleTest`, build the test upload URL from `VITE_GSNAKE_API_URL` (fallback `http://localhost:3001`) and trim trailing slashes before appending `/api/test-level`.
+- In `EditorLayout`, calculate required-entity validation once (snake, any food variant, exit) and reuse it in both Save and Test flows so preflight rules cannot drift.
 - In `EditorLayout` import paths, validate all entity coordinates against current grid bounds before mutating editor state so unsupported coordinates fail loudly instead of partially loading.
 - In `SpriteLoader`, treat `spritesUrl` as trusted only after validating `response.ok` and `content-type: image/svg+xml`, then sanitize parsed SVG content before rendering via `{@html}`.
 - In `gsnake-editor/server.ts`, resolve `GSNAKE_EDITOR_ALLOWED_ORIGINS` once at startup and keep per-request CORS checks bound to that frozen allowlist for deterministic policy behavior.
@@ -131,4 +132,15 @@ Started: Thu Feb 19 16:54:50 CET 2026
   - Snake metadata cleanup should be centralized in a helper so any future clear/replacement path cannot forget `snakeSegmentIndex` resets.
   - `GridCanvas`-level metadata attributes can provide lightweight observability for regression tests that need to verify internal per-cell state.
   - `EditorLayout.gridInteractions.test.ts` is the correct place for metadata-consistency regressions tied to interactive placement/replacement flows.
+---
+## [2026-02-20 01:38:40 CET] - US-012
+- Added shared required-entity validation helpers in `EditorLayout` and applied them to both Save and Test paths; `handleTest` now blocks uploads when snake/food/exit requirements are missing and shows user-facing validation feedback before any POST.
+- Added regression coverage that verifies Test is blocked with missing required entities (no network request), and updated existing test-upload specs to satisfy the new preflight requirements.
+- Verified in browser with `agent-browser` on `http://localhost:3003`: clicking Test on an empty level now surfaces the full validation message; screenshot saved at `artifacts/images/us-012-test-validation.png`.
+- Ran `npm --prefix gsnake-editor run check`, `npm --prefix gsnake-editor run lint`, `npm --prefix gsnake-editor run test`, and `act -W .github/workflows/ci.yml -j gsnake-editor-test --container-architecture linux/amd64` (success); refreshed `scripts/test/result.txt`.
+- Files changed: `gsnake-editor/src/lib/EditorLayout.svelte`, `gsnake-editor/src/tests/EditorLayout.saveLoad.test.ts`, `artifacts/images/us-012-test-validation.png`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`
+- **Learnings for future iterations:**
+  - Keep required-entity checks centralized in a helper (`calculateValidationData` + warnings mapper) so Save modal warnings and Test preflight rules stay aligned.
+  - For Test-button validation regressions, `EditorLayout.saveLoad.test.ts` should assert both blocked network behavior (`fetch` not called) and user-facing toast content.
+  - `agent-browser snapshot` status text is a reliable signal for toast-driven validation flows in this editor.
 ---

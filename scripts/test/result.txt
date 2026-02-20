@@ -1,5 +1,5 @@
 === Act CI Test Results ===
-Started: Fri Feb 20 00:52:10 CET 2026
+Started: Fri Feb 20 01:37:57 CET 2026
 Mode: job
 
 ## Summary
@@ -9,8 +9,9 @@ Mode: job
 **Total: 1 passed, 0 failed**
 
 ---
-Completed: Fri Feb 20 00:53:03 CET 2026
-Duration: 00:00:53
+Completed: Fri Feb 20 01:38:40 CET 2026
+Duration: 00:00:43
 Result: 1 passed, 0 failed
 Command: act -W .github/workflows/ci.yml -j gsnake-editor-test --container-architecture linux/amd64
 Result file: /home/nntin/git/gSnake/scripts/test/result.txt
+Temp dir: /home/nntin/git/gSnake/scripts/test/tmp_act_results
