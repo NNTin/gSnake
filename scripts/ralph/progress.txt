@@ -20,6 +20,7 @@
 - For editor API contract E2E coverage, keep shared `POST`/`GET` `/api/test-level` assertions centralized in `e2e/workflow.spec.ts` and add only non-overlapping checks elsewhere to avoid duplicate maintenance and CI runtime.
 - For root Playwright startup, run `gsnake-editor` UI/API as separate `webServer` entries (`dev:editor` + `dev:server`) and keep a global `/health` preflight (`e2e/global-setup.ts`) so API-dependent specs fail early with service-specific diagnostics.
 - For `Cell` opacity coverage in `gsnake-web/packages/gsnake-web-app/tests/unit/Cell.test.ts`, keep an explicit table for all 10 `CellType` variants so style checks catch both default-opacity and special-opacity regressions.
+- For `gsnake-editor` API coordinate contracts, enforce non-negative coordinates at schema level (`minimum: 0` in `contracts/level-definition.schema.json`) and keep grid-relative upper bounds in `validateCoordinateBounds(...)` so server tests can assert stable `minimum` vs `maximum` error keywords.
 
 # Ralph Progress Log
 Started: Fri Feb 20 10:55:27 CET 2026
@@ -217,4 +218,13 @@ Started: Fri Feb 20 10:55:27 CET 2026
   - When a contract test claims key-format validation, assert `Object.keys(...)` against a naming regex instead of only asserting value types.
   - Keeping value-type assertions alongside key-format assertions preserves fixture schema coverage without weakening naming checks.
   - `npm --prefix gsnake-web/packages/gsnake-web-app run check && npm --prefix gsnake-web/packages/gsnake-web-app test` is the correct local gate for `gsnake-web-app` contract test updates.
+---
+## [2026-02-20 15:44:33 CET] - US-021
+- Verified the negative-coordinate contract is intentionally tightened: schema-level `minimum: 0` rejects negatives, and server tests assert structured `minimum` errors for `snake`, `food`, and `exit` coordinates.
+- Ran editor quality gates to confirm the contract stays green (`npm --prefix gsnake-editor run check`, `npm --prefix gsnake-editor run lint`, `npm --prefix gsnake-editor test`).
+- Files changed: `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`.
+- **Learnings for future iterations:**
+  - Coordinate validation is intentionally split: JSON schema enforces non-negative/type constraints, while `validateCoordinateBounds(...)` enforces grid-relative maximums.
+  - Keep `server.test.ts` keyword assertions explicit (`minimum` for negatives, `maximum` for out-of-bounds) so schema/validator drift is caught quickly.
+  - For editor server contract updates, `check + lint + test` at `gsnake-editor` scope is a sufficient local quality gate before committing.
 ---
