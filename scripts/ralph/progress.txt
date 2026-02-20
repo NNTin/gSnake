@@ -4,6 +4,7 @@
 - For `gsnake-editor/src/tests/integration.test.ts`, keep live endpoint checks opt-in with `GSNAKE_EDITOR_LIVE_INTEGRATION=1` and use explicit `it.skip` semantics by default, so CI avoids false-green placeholder assertions while enabled runs still enforce real HTTP contract checks.
 - For `e2e/contract.spec.ts`, load deterministic fixture levels through `levelsUrl` using a `data:application/json,...` URL when asserting `CellType` coverage so tests are not coupled to mutable default levels or the editor API test server.
 - In the `gsnake-core` workspace, run package-targeted checks with `cargo ... -p gsnake-core` (hyphenated package name); `gsnake_core` is the Rust crate import path, not the Cargo package ID.
+- For `KeyboardHandler` unit coverage, set `gameState` per status (`Playing`, `GameOver`, `LevelComplete`, `AllComplete`) and assert side-effect exclusivity (`processMove` vs `restartLevel` vs `loadLevel`) so shortcut regressions are caught at state boundaries.
 
 # Ralph Progress Log
 Started: Fri Feb 20 10:55:27 CET 2026
@@ -45,4 +46,14 @@ Started: Fri Feb 20 10:55:27 CET 2026
   - `cargo test --test contract_tests test_celltype_` is a fast targeted check for enum wire-contract coverage in `gsnake-core/engine/core/tests/contract_tests.rs`.
   - In the workspace, use `cargo check -p gsnake-core` (hyphenated package name) for package-scoped compile checks.
   - When a PRD story is already implemented in code, still record verification evidence in `progress.txt` before marking `passes: true`.
+---
+
+## [2026-02-20 11:20:26 CET] - US-005
+- Added missing `KeyboardHandler` unit coverage for `Playing` shortcuts (`r` -> `restartLevel`, `q` -> `loadLevel(1)`) and `LevelComplete` no-op behavior.
+- Verified keyboard tests assert no unintended side effects across `processMove`, `restartLevel`, and `loadLevel` for the new scenarios.
+- Files changed: `gsnake-web/packages/gsnake-web-app/tests/unit/KeyboardHandler.test.ts`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`.
+- **Learnings for future iterations:**
+  - In keyboard-state tests, always set `gameState` explicitly before dispatch to avoid relying on prior test status.
+  - Shortcut coverage should assert both the expected engine call and the absence of the other two engine actions.
+  - For `gsnake-web-app` test-only updates, `npm --prefix gsnake-web/packages/gsnake-web-app run check && npm --prefix gsnake-web/packages/gsnake-web-app test` is a fast, sufficient quality gate.
 ---
