@@ -15,6 +15,7 @@ Started: Thu Feb 19 16:54:50 CET 2026
 - In `EditorLayout`, grid reinitialization should happen through explicit `resetGrid(width, height)` calls in load/placement flows; avoid broad reactive resets that can wipe entities after dimension changes.
 - In `EditorLayout`, any edit path that can reduce `snakeSegments` to zero should run through a shared helper that resets `snakeDirection` to the default `'east'` value.
 - In `EditorLayout`, clear/reset helpers should always clear `entity`, `isSnakeSegment`, and `snakeSegmentIndex` together so snake metadata cannot drift on replacements/removals.
+- In `EditorLayout.handleNewLevel`, treat `undoStack.length > 0` as unsaved editor state and gate `newLevel` dispatch behind `window.confirm(...)` so cancel paths preserve in-progress work.
 - Keep `LevelDefinition` bounds enforcement split by concern: schema guarantees `snake.minItems >= 1` and non-negative coordinates, while `gsnake-editor` API validation enforces `x < gridSize.width` / `y < gridSize.height`.
 - Keep `LevelDefinition.difficulty` constrained as schema enum (`easy|medium|hard`) to match TypeScript unions, and include an explicit invalid-difficulty drift/fixture case so downstream validator mismatches fail fast.
 - In `EntityPalette.handleDragStart`, build drag-preview SVG nodes via `createElementNS` + `setAttribute` (no `innerHTML`) and preserve `dataTransfer.setData('entityType', ...)` / `setDragImage(..., 16, 16)` behavior with dedicated tests.
@@ -190,4 +191,15 @@ Started: Thu Feb 19 16:54:50 CET 2026
   - Drag-preview visuals in `EntityPalette` should be constructed with DOM APIs and validated through behavior-level tests (`setData`, `setDragImage`, cleanup), not HTML-string snapshots.
   - For this editor UI, `agent-browser eval` is a reliable fallback for verifying drag-event internals when ref-based drag commands are flaky.
   - Keep targeted root CI validation on `ci.yml::gsnake-editor-test` after editor-only UI/security changes.
+---
+## [2026-02-20 05:34:12 CET] - US-017
+- Added unsaved-change protection to `EditorLayout.handleNewLevel`: when edit history exists (`undoStack.length > 0`), New Level now prompts for confirmation and aborts navigation when canceled.
+- Added regression coverage asserting New Level shows the unsaved-changes confirmation and canceling keeps current grid edits intact while preventing the `newLevel` event dispatch.
+- Ran `npm --prefix gsnake-editor run check`, `npm --prefix gsnake-editor run lint`, `npm --prefix gsnake-editor run test`, and `act -W .github/workflows/ci.yml -j gsnake-editor-test --container-architecture linux/amd64` (success); refreshed `scripts/test/result.txt`.
+- Attempted browser verification with `agent-browser` against `http://localhost:3003`; session connected to Vite but rendered an empty interactive tree, so manual browser verification is still recommended. Screenshot saved at `artifacts/images/us-017-browser.png`.
+- Files changed: `gsnake-editor/src/lib/EditorLayout.svelte`, `gsnake-editor/src/tests/EditorLayout.gridInteractions.test.ts`, `CLAUDE.md`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`
+- **Learnings for future iterations:**
+  - Destructive toolbar navigation in `EditorLayout` should treat non-empty undo history as unsaved work and require explicit user confirmation before leaving.
+  - For Svelte 5 tests, subscribe to component events in `render(...)` via mount `events` options (not `component.$on`, which is deprecated).
+  - Keep New-Level confirmation regressions in `EditorLayout.gridInteractions.test.ts` so UI prompt behavior and cancel-state preservation stay covered together.
 ---
