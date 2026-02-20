@@ -4,6 +4,7 @@ Started: Thu Feb 19 16:54:50 CET 2026
 ## Codebase Patterns
 - In `gsnake-editor`, tool-selection handlers should stay side-effect free for grid data; any state mutation that changes placed entities should go through the command/undo pipeline.
 - In `EditorLayout.handleLoad`, hidden file inputs must use idempotent cleanup and hook both `change` and picker-close signals (`cancel` plus `window` focus fallback) so canceled dialogs do not leak DOM nodes.
+- In `EditorLayout.handleLoad`, guard hidden-input `appendChild` + `input.click()` with try/catch and call shared cleanup in the failure path so blocked picker launches cannot leak transient inputs/listeners.
 - In `EditorLayout`, both export and test payloads should be built via `buildLevelExportPayload(...)` to keep `difficulty`, `snakeDirection`, and `totalFood` serialization rules aligned.
 - In `EditorLayout.handleTest`, build the test upload URL from `VITE_GSNAKE_API_URL` (fallback `http://localhost:3001`) and trim trailing slashes before appending `/api/test-level`.
 - In `EditorLayout`, calculate required-entity validation once (snake, any food variant, exit) and reuse it in both Save and Test flows so preflight rules cannot drift.
@@ -214,4 +215,15 @@ Started: Thu Feb 19 16:54:50 CET 2026
   - Keep sprite-load failure UX explicit in `SpriteLoader` by pairing console diagnostics with a visible in-app fallback signal.
   - `data-sprite-load-error` is a stable, testable hook for asserting diagnostics without coupling tests to exact visual styling.
   - `agent-browser` network interception can blank the Vite app shell in this flow; when that happens, rely on regression tests and note manual browser follow-up.
+---
+## [2026-02-20 07:06:02 CET] - US-019
+- Hardened `EditorLayout.handleLoad` by wrapping hidden input `appendChild` + `click()` in guarded error handling that always triggers shared cleanup when picker launch fails.
+- Added regression coverage that forces `input.click()` to throw and verifies the temporary file input is removed plus user-facing error feedback is shown.
+- Ran `npm --prefix gsnake-editor run check`, `npm --prefix gsnake-editor run lint`, `npm --prefix gsnake-editor run test`, and `act -W .github/workflows/ci.yml -j gsnake-editor-test --container-architecture linux/amd64` (success); refreshed `scripts/test/result.txt`.
+- Browser automation was not rerun for this low-level picker-launch exception path; manual browser verification is still recommended if this flow needs end-to-end confirmation.
+- Files changed: `gsnake-editor/src/lib/EditorLayout.svelte`, `gsnake-editor/src/tests/EditorLayout.saveLoad.test.ts`, `CLAUDE.md`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `scripts/test/result.txt`
+- **Learnings for future iterations:**
+  - For transient DOM controls in `EditorLayout`, keep one shared cleanup helper and call it from both normal and exceptional launch paths.
+  - `EditorLayout.saveLoad.test.ts` can simulate browser picker-launch failures by stubbing `HTMLInputElement.prototype.click` for `type="file"` inputs.
+  - Keep targeted `act` validation on root `ci.yml::gsnake-editor-test` for editor-only regressions in the Ralph loop.
 ---
