@@ -49,18 +49,13 @@ test.describe('Level Editor Test Workflow', () => {
     await testButton.click();
 
     const popup = await popupPromise;
-    await popup.waitForLoadState('networkidle');
+    await popup.waitForLoadState('domcontentloaded');
 
     expect(popup.url()).toContain('http://localhost:3000');
     expect(popup.url()).toContain('test=true');
 
-    await popup.waitForTimeout(2000);
-
-    const errorText = 'Failed to load test level';
-    const bodyText = await popup.textContent('body');
-    if (bodyText && bodyText.includes(errorText)) {
-      throw new Error(`Found error message: "${errorText}"`);
-    }
+    await expect(popup.locator('[data-element-id="game-field"]')).toBeVisible({ timeout: 10000 });
+    await expect(popup.locator('text=/Failed to load test level/i')).toHaveCount(0);
 
     const corsErrors = consoleMessages.filter(msg =>
       msg.toLowerCase().includes('cors') ||

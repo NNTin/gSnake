@@ -7,6 +7,7 @@
 - For `KeyboardHandler` unit coverage, set `gameState` per status (`Playing`, `GameOver`, `LevelComplete`, `AllComplete`) and assert side-effect exclusivity (`processMove` vs `restartLevel` vs `loadLevel`) so shortcut regressions are caught at state boundaries.
 - For `WasmGameEngine`, treat `loadLevel(levelNumber)` as a 1-based public API and keep regression tests for both `loadLevel(2)` happy path events and `loadLevel(0)` invalid-index rejection (`Invalid level index: -1`) to catch boundary drift.
 - For `CompletionTracker`, treat localStorage as untrusted I/O: parse failures or non-array payloads should resolve to `[]`, and `markCompleted(...)` must catch `setItem` write failures instead of throwing.
+- For Playwright popup flows in `e2e/*`, avoid `waitForTimeout(...)`; wait on `domcontentloaded` plus a deterministic ready selector such as `[data-element-id="game-field"]` and pair it with a positive visibility assertion.
 
 # Ralph Progress Log
 Started: Fri Feb 20 10:55:27 CET 2026
@@ -79,4 +80,14 @@ Started: Fri Feb 20 10:55:27 CET 2026
   - Use `it.each(...)` over serialized payload strings for compact non-array storage regression tests in jsdom-backed unit suites.
   - For storage-backed helpers, treat reads and writes as independent failure points: parse guards in `getCompletedLevels()` plus `setItem` try/catch in `markCompleted(...)`.
   - `npm --prefix gsnake-web/packages/gsnake-web-app run check && npm --prefix gsnake-web/packages/gsnake-web-app test` remains the correct package-level gate for `CompletionTracker` changes.
+---
+
+## [2026-02-20 11:30:29 CET] - US-008
+- Removed fixed popup sleep in editor integration E2E and replaced it with deterministic, event-driven synchronization (`domcontentloaded` + `[data-element-id="game-field"]` readiness).
+- Replaced body-text inversion logic with explicit positive and negative assertions (`game-field` visible and no `Failed to load test level` error marker) so load success is directly validated.
+- Files changed: `e2e/editor-integration.spec.ts`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`.
+- **Learnings for future iterations:**
+  - In popup-based Playwright flows, fixed sleeps are less reliable than selector-driven readiness checks tied to stable `data-element-id` hooks.
+  - Keep one positive readiness assertion (`toBeVisible`) in addition to error-absence checks to avoid vacuous passes.
+  - `npx playwright test e2e/editor-integration.spec.ts --project=chromium --reporter=list` is a fast targeted validation loop for this integration path.
 ---
