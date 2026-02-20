@@ -8,6 +8,7 @@ Started: Fri Feb 20 09:53:43 CET 2026
 - In `gsnake-core/engine/bindings/wasm`, keep `on_frame` callback registration non-throwing for JS by preserving `()` return type and logging initial `emit_frame` failures via `web_sys::console::error_1`.
 - In `gsnake-core` level definitions, keep `total_food` typed as `Option<u32>` where `None` auto-counts all food vectors and `Some(0)` is an explicit zero-food requirement.
 - In `gsnake-core`, use `GameEngine::new_with_total_levels(...)` from host/binding multi-level flows so the final-level exit can emit `GameStatus::AllComplete`; keep `GameEngine::new(...)` for single-level or host-managed progression.
+- In `gsnake-core/engine/core/tests/contract_tests.rs`, keep `CellType` wire-format tests exhaustive: serialization and roundtrip suites must include all enum variants with explicit expected JSON names.
 ---
 ## [2026-02-20 09:55:34 CET] - US-001
 - Implemented US-001 by updating `stone_mechanics::is_space_available` to block stone pushes into regular food, floating food, falling food, and the exit tile.
@@ -60,4 +61,14 @@ Started: Fri Feb 20 09:53:43 CET 2026
   - `GameStatus::AllComplete` is now an opt-in engine behavior tied to host-provided total level count; without that configuration, completion remains `LevelComplete`.
   - Multi-level bindings should centralize engine construction to avoid inconsistent `total_levels` wiring between initial load, reset, and level transitions.
   - `cargo test -p gsnake-core -p gsnake-cli` is the fastest combined regression pass for engine status transitions plus CLI flow integration.
+---
+## [2026-02-20 10:13:27 CET] - US-006
+- Implemented US-006 by extending `CellType` contract coverage to all 10 variants in both `test_celltype_serialization` and `test_celltype_roundtrip`.
+- Added explicit expected JSON-name assertions for every `CellType` variant, including `FloatingFood`, `FallingFood`, `Stone`, and `Spike`.
+- Ran quality checks in `gsnake-core`: `cargo fmt --all`, `cargo clippy -p gsnake-core --all-targets -- -D warnings`, and `cargo test -p gsnake-core`.
+- Files changed: `gsnake-core/engine/core/tests/contract_tests.rs`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `CLAUDE.md`
+- **Learnings for future iterations:**
+  - `CellType` wire-format contract tests should be treated as exhaustive snapshots of enum variants; missing a variant weakens frontend compatibility guarantees.
+  - Pair explicit serialization-string assertions with roundtrip coverage so rename regressions are caught before TS/Svelte integrations consume changed values.
+  - `cargo test -p gsnake-core` is sufficient to validate these contract-test changes because it runs `contract_tests.rs` and fixture generation checks.
 ---

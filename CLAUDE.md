@@ -163,6 +163,7 @@ See `gsnake-web/packages/gsnake-web-app/engine/CLAUDE.md` for the canonical fram
 - **Stone push occupancy parity** — in `gsnake-core/engine/core/src/stone_mechanics.rs`, keep `is_space_available` aligned with gravity semantics by treating `food`, `floating_food`, `falling_food`, and the `exit` tile as blocking cells for horizontal stone pushes.
 - **WASM pkg sync** — when changing `gsnake-core/engine/bindings/wasm` Rust code or dependencies, run `wasm-pack build --target bundler` so checked-in `engine/bindings/wasm/pkg/*` artifacts remain in sync.
 - **WASM onFrame diagnostics** — in `gsnake-core/engine/bindings/wasm/src/lib.rs`, keep `on_frame` returning `()` for JS compatibility, but log initial `emit_frame` failures with `web_sys::console::error_1` instead of discarding errors.
+- **CellType contract exhaustiveness** — in `gsnake-core/engine/core/tests/contract_tests.rs`, keep `test_celltype_serialization` and `test_celltype_roundtrip` aligned with all `CellType` enum variants and explicit JSON string expectations.
 
 ## CI / Merge Gates
 

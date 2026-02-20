@@ -26,24 +26,24 @@ fn test_direction_serialization() {
 
 #[test]
 fn test_celltype_serialization() {
-    assert_eq!(
-        serde_json::to_string(&CellType::Empty).unwrap(),
-        "\"Empty\""
-    );
-    assert_eq!(
-        serde_json::to_string(&CellType::SnakeHead).unwrap(),
-        "\"SnakeHead\""
-    );
-    assert_eq!(
-        serde_json::to_string(&CellType::SnakeBody).unwrap(),
-        "\"SnakeBody\""
-    );
-    assert_eq!(serde_json::to_string(&CellType::Food).unwrap(), "\"Food\"");
-    assert_eq!(
-        serde_json::to_string(&CellType::Obstacle).unwrap(),
-        "\"Obstacle\""
-    );
-    assert_eq!(serde_json::to_string(&CellType::Exit).unwrap(), "\"Exit\"");
+    for (cell_type, expected) in [
+        (CellType::Empty, "\"Empty\""),
+        (CellType::SnakeHead, "\"SnakeHead\""),
+        (CellType::SnakeBody, "\"SnakeBody\""),
+        (CellType::Food, "\"Food\""),
+        (CellType::Obstacle, "\"Obstacle\""),
+        (CellType::Exit, "\"Exit\""),
+        (CellType::FloatingFood, "\"FloatingFood\""),
+        (CellType::FallingFood, "\"FallingFood\""),
+        (CellType::Stone, "\"Stone\""),
+        (CellType::Spike, "\"Spike\""),
+    ] {
+        assert_eq!(
+            serde_json::to_string(&cell_type).unwrap(),
+            expected,
+            "CellType serialization mismatch for {cell_type:?}"
+        );
+    }
 }
 
 #[test]
@@ -239,6 +239,10 @@ fn test_celltype_roundtrip() {
         CellType::Food,
         CellType::Obstacle,
         CellType::Exit,
+        CellType::FloatingFood,
+        CellType::FallingFood,
+        CellType::Stone,
+        CellType::Spike,
     ] {
         let json = serde_json::to_string(&cell_type).unwrap();
         let deserialized: CellType = serde_json::from_str(&json).unwrap();
