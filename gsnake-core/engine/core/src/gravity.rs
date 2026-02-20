@@ -177,11 +177,7 @@ fn is_settled_falling_food(pos: Position, level_state: &LevelState, depth: usize
     }
 
     // Check if this position contains falling food
-    if !level_state
-        .falling_food
-        .iter()
-        .any(|f| f.x == pos.x && f.y == pos.y)
-    {
+    if !level_state.falling_food.contains(&pos) {
         return false;
     }
 
@@ -210,50 +206,31 @@ enum ObjectType {
 // Helper functions to check object positions
 
 fn is_obstacle(pos: Position, level_state: &LevelState) -> bool {
-    level_state
-        .obstacles
-        .iter()
-        .any(|o| o.x == pos.x && o.y == pos.y)
+    level_state.obstacles.contains(&pos)
 }
 
 fn is_food(pos: Position, level_state: &LevelState) -> bool {
-    level_state
-        .food
-        .iter()
-        .any(|f| f.x == pos.x && f.y == pos.y)
+    level_state.food.contains(&pos)
 }
 
 fn is_floating_food(pos: Position, level_state: &LevelState) -> bool {
-    level_state
-        .floating_food
-        .iter()
-        .any(|f| f.x == pos.x && f.y == pos.y)
+    level_state.floating_food.contains(&pos)
 }
 
 fn is_stone(pos: Position, level_state: &LevelState) -> bool {
-    level_state
-        .stones
-        .iter()
-        .any(|s| s.x == pos.x && s.y == pos.y)
+    level_state.stones.contains(&pos)
 }
 
 fn is_spike(pos: Position, level_state: &LevelState) -> bool {
-    level_state
-        .spikes
-        .iter()
-        .any(|s| s.x == pos.x && s.y == pos.y)
+    level_state.spikes.contains(&pos)
 }
 
 fn is_snake_segment(pos: Position, level_state: &LevelState) -> bool {
-    level_state
-        .snake
-        .segments
-        .iter()
-        .any(|s| s.x == pos.x && s.y == pos.y)
+    level_state.snake.segments.contains(&pos)
 }
 
 fn is_exit(pos: Position, level_state: &LevelState) -> bool {
-    level_state.exit.x == pos.x && level_state.exit.y == pos.y
+    level_state.exit == pos
 }
 
 fn snake_touches_spike(level_state: &LevelState) -> bool {

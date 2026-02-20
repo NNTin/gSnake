@@ -16,6 +16,7 @@ Started: Fri Feb 20 09:53:43 CET 2026
 - In `gsnake-core` movement flow, keep food consumption tied to `GameEngine::check_and_eat_food` during deliberate `process_move` input only; gravity (`can_snake_fall`) treats food as support and must not auto-consume adjacent body-segment food.
 - In `gsnake-core/engine/core/src/engine.rs`, keep `process_move` stone handling ordered before `check_collision`; `check_collision` intentionally omits stones because `try_push_stone` rejects any move where the head would occupy an unpushable stone.
 - In `gsnake-core/engine/core/src/engine.rs`, treat runtime-invalid `grid_size` in `generate_frame` as a non-panicking empty-grid fallback and keep the rustdoc contract aligned with `test_frame_generation_invalid_runtime_grid_is_safe`.
+- In `gsnake-core` position-collection membership checks, prefer `.contains(&pos)` (or direct `==` on `Position`) over field-by-field `x/y` comparisons to stay aligned with `PartialEq` semantics and `clippy::manual_contains`.
 ---
 ## [2026-02-20 09:55:34 CET] - US-001
 - Implemented US-001 by updating `stone_mechanics::is_space_available` to block stone pushes into regular food, floating food, falling food, and the exit tile.
@@ -149,4 +150,14 @@ Started: Fri Feb 20 09:53:43 CET 2026
   - For defensive runtime fallbacks in core engine paths, document the contract in rustdoc and point to the guarding regression test to prevent accidental behavior changes.
   - `generate_frame` is intentionally fail-safe for mutated/invalid runtime `grid_size`; consumers that care about this path should check `frame.grid.is_empty()`.
   - Comment-only engine changes should still pass the standard `cargo fmt/clippy/test` quality gate.
+---
+## [2026-02-20 10:38:32 CET] - US-014
+- Implemented US-014 by replacing explicit `Position` field equality checks (`x/y`) with `PartialEq`-based comparisons across `engine.rs`, `gravity.rs`, and `stone_mechanics.rs`, using `.contains(&pos)`, direct `==`, and equivalent `position(...)` updates.
+- Kept behavior unchanged while updating all in-scope call sites to avoid future equality drift if `Position` grows additional fields.
+- Ran quality checks in `gsnake-core`: `cargo fmt --all`, `cargo clippy -p gsnake-core --all-targets -- -D warnings`, and `cargo test -p gsnake-core`.
+- Files changed: `gsnake-core/engine/core/src/engine.rs`, `gsnake-core/engine/core/src/gravity.rs`, `gsnake-core/engine/core/src/stone_mechanics.rs`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `CLAUDE.md`
+- **Learnings for future iterations:**
+  - Prefer `.contains(&pos)` for `Vec<Position>` membership checks; it is clearer, uses `PartialEq`, and satisfies `clippy::manual_contains` under `-D warnings`.
+  - For `Position` equality in predicates and loops, direct `==` keeps comparisons forward-compatible with future `Position` field additions.
+  - `cargo clippy -p gsnake-core --all-targets -- -D warnings` quickly surfaces style constraints that affect implementation choices even in behavior-preserving refactors.
 ---

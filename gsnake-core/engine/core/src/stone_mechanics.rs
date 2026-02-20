@@ -103,12 +103,12 @@ fn get_next_position(pos: Position, direction: Direction) -> Position {
 
 /// Check if there's a stone at the given position
 fn is_stone_at(pos: Position, stones: &[Position]) -> bool {
-    stones.iter().any(|s| s.x == pos.x && s.y == pos.y)
+    stones.contains(&pos)
 }
 
 /// Check if there's a spike at the given position
 fn is_spike_at(pos: Position, spikes: &[Position]) -> bool {
-    spikes.iter().any(|s| s.x == pos.x && s.y == pos.y)
+    spikes.contains(&pos)
 }
 
 /// Check if a position is available (empty and within bounds)
@@ -123,11 +123,7 @@ fn is_space_available(pos: Position, level_state: &LevelState) -> bool {
     }
 
     // Check for obstacles
-    if level_state
-        .obstacles
-        .iter()
-        .any(|o| o.x == pos.x && o.y == pos.y)
-    {
+    if level_state.obstacles.contains(&pos) {
         return false;
     }
 
@@ -137,34 +133,20 @@ fn is_space_available(pos: Position, level_state: &LevelState) -> bool {
     }
 
     // Check for food items
-    if level_state
-        .food
-        .iter()
-        .any(|f| f.x == pos.x && f.y == pos.y)
-        || level_state
-            .floating_food
-            .iter()
-            .any(|f| f.x == pos.x && f.y == pos.y)
-        || level_state
-            .falling_food
-            .iter()
-            .any(|f| f.x == pos.x && f.y == pos.y)
+    if level_state.food.contains(&pos)
+        || level_state.floating_food.contains(&pos)
+        || level_state.falling_food.contains(&pos)
     {
         return false;
     }
 
     // Exit tile is always blocked for horizontal stone pushes
-    if level_state.exit.x == pos.x && level_state.exit.y == pos.y {
+    if level_state.exit == pos {
         return false;
     }
 
     // Check for snake segments
-    if level_state
-        .snake
-        .segments
-        .iter()
-        .any(|s| s.x == pos.x && s.y == pos.y)
-    {
+    if level_state.snake.segments.contains(&pos) {
         return false;
     }
 

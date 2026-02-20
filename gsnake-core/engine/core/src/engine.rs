@@ -281,7 +281,7 @@ impl GameEngine {
             .level_state
             .floating_food
             .iter()
-            .position(|f| f.x == pos.x && f.y == pos.y)
+            .position(|f| *f == pos)
         {
             self.level_state.floating_food.remove(idx);
             self.game_state.food_collected += 1;
@@ -289,12 +289,7 @@ impl GameEngine {
         }
 
         // Check falling food
-        if let Some(idx) = self
-            .level_state
-            .falling_food
-            .iter()
-            .position(|f| f.x == pos.x && f.y == pos.y)
-        {
+        if let Some(idx) = self.level_state.falling_food.iter().position(|f| *f == pos) {
             self.level_state.falling_food.remove(idx);
             self.game_state.food_collected += 1;
             return true;
@@ -327,7 +322,7 @@ impl GameEngine {
 
         // Check self collision (skip first segment which is the head)
         for segment in self.level_state.snake.segments.iter().skip(1) {
-            if segment.x == head.x && segment.y == head.y {
+            if *segment == head {
                 return true;
             }
         }
@@ -354,39 +349,27 @@ impl GameEngine {
 
     /// Checks if a position contains an obstacle
     fn is_obstacle(&self, pos: Position) -> bool {
-        self.level_state
-            .obstacles
-            .iter()
-            .any(|o| o.x == pos.x && o.y == pos.y)
+        self.level_state.obstacles.contains(&pos)
     }
 
     /// Checks if a position contains a stone
     fn is_stone(&self, pos: Position) -> bool {
-        self.level_state
-            .stones
-            .iter()
-            .any(|s| s.x == pos.x && s.y == pos.y)
+        self.level_state.stones.contains(&pos)
     }
 
     /// Checks if a position contains a spike
     fn is_spike(&self, pos: Position) -> bool {
-        self.level_state
-            .spikes
-            .iter()
-            .any(|s| s.x == pos.x && s.y == pos.y)
+        self.level_state.spikes.contains(&pos)
     }
 
     /// Checks if the head has reached the exit
     fn check_exit(&self, head: Position) -> bool {
-        head.x == self.level_state.exit.x && head.y == self.level_state.exit.y
+        head == self.level_state.exit
     }
 
     /// Gets the index of food at the given position, if any
     fn get_food_index(&self, pos: Position) -> Option<usize> {
-        self.level_state
-            .food
-            .iter()
-            .position(|f| f.x == pos.x && f.y == pos.y)
+        self.level_state.food.iter().position(|f| *f == pos)
     }
 
     /// Calculates the new head position based on direction
