@@ -9,6 +9,7 @@ Started: Fri Feb 20 09:53:43 CET 2026
 - In `gsnake-core/engine/bindings/wasm`, keep `on_frame` callback registration non-throwing for JS by preserving `()` return type and logging initial `emit_frame` failures via `web_sys::console::error_1`.
 - In `gsnake-core/engine/bindings/wasm/src/lib.rs`, prefer borrowing `&JsValue` where ownership is unnecessary so `cargo clippy -D warnings` stays clean without no-op early-drop patterns.
 - In `gsnake-core` level definitions, keep `total_food` typed as `Option<u32>` where `None` auto-counts all food vectors and `Some(0)` is an explicit zero-food requirement.
+- In `gsnake-core` level definitions, keep `LevelDefinition::new()` setting `exit_is_solid: None` and resolve the default in `LevelState::from_definition` with `unwrap_or(true)` so constructor-created and JSON-deserialized levels follow the same default semantics.
 - In `gsnake-core`, use `GameEngine::new_with_total_levels(...)` from host/binding multi-level flows so the final-level exit can emit `GameStatus::AllComplete`; keep `GameEngine::new(...)` for single-level or host-managed progression.
 - In `gsnake-core/engine/core/tests/contract_tests.rs`, keep `CellType` wire-format tests exhaustive: serialization and roundtrip suites must include all enum variants with explicit expected JSON names.
 - In `gsnake-core/engine/core/src/gravity.rs`, keep `is_settled_falling_food` recursion bounded (`depth` + `MAX_SETTLED_FALLING_FOOD_DEPTH`) and fail closed at the cap so malformed deep columns cannot cause stack overflows.
@@ -116,4 +117,14 @@ Started: Fri Feb 20 09:53:43 CET 2026
   - In wasm-bindgen entrypoints, prefer borrowing `&JsValue` when the value is only inspected; this avoids no-op explicit drops and keeps `clippy::needless_pass_by_value` from failing `-D warnings` builds.
   - Even tiny Rust binding changes should run `wasm-pack build --target bundler` so committed `pkg/` outputs stay synchronized with generated glue.
   - `cargo test -p gsnake-wasm` is the fastest regression pass for move-parsing and contract-error behavior in the WASM wrapper.
+---
+## [2026-02-20 10:29:38 CET] - US-011
+- Implemented US-011 by aligning `LevelDefinition::new()` with deserialization defaults: `exit_is_solid` now initializes to `None` and runtime behavior continues to default to solid exit via `unwrap_or(true)`.
+- Added regression tests covering missing `exitIsSolid` deserialization (`None`) and parity between `None` and `Some(true)` in `LevelState::from_definition`.
+- Ran quality checks in `gsnake-core`: `cargo fmt --all`, `cargo clippy -p gsnake-core --all-targets -- -D warnings`, and `cargo test -p gsnake-core`.
+- Files changed: `gsnake-core/engine/core/src/models.rs`, `gsnake-core/engine/core/tests/fixtures/level.json`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `CLAUDE.md`
+- **Learnings for future iterations:**
+  - Optional level-definition fields with serde defaults should be initialized as `None` in constructors when runtime logic already applies `unwrap_or(...)`, so constructor and JSON paths cannot drift.
+  - `cargo test -p gsnake-core` runs `generate_contract_fixtures`; constructor default changes can intentionally update committed fixture JSON.
+  - Keep `exitIsSolid` omitted in fixture JSON unless a level explicitly overrides the default behavior.
 ---

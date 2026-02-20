@@ -43,6 +43,5 @@
   "floatingFood": [],
   "fallingFood": [],
   "stones": [],
-  "spikes": [],
-  "exitIsSolid": true
+  "spikes": []
 }

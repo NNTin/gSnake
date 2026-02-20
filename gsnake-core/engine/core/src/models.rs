@@ -179,7 +179,7 @@ impl LevelDefinition {
             falling_food: Vec::new(),
             stones: Vec::new(),
             spikes: Vec::new(),
-            exit_is_solid: Some(true),
+            exit_is_solid: None,
             total_food: None,
         }
     }
@@ -402,12 +402,54 @@ mod tests {
         );
 
         assert_eq!(level.total_food, None);
+        assert_eq!(level.exit_is_solid, None);
 
         let json = serde_json::to_value(&level).unwrap();
         assert!(
             json.get("totalFood").is_none(),
             "totalFood should be omitted when unset"
         );
+        assert!(
+            json.get("exitIsSolid").is_none(),
+            "exitIsSolid should be omitted when unset"
+        );
+    }
+
+    #[test]
+    fn test_level_definition_deserializes_missing_exit_is_solid_as_none() {
+        let json = r#"{
+            "id": 1,
+            "name": "Test Level",
+            "gridSize": { "width": 5, "height": 5 },
+            "snake": [{ "x": 1, "y": 1 }],
+            "obstacles": [],
+            "food": [{ "x": 2, "y": 2 }],
+            "exit": { "x": 4, "y": 4 },
+            "snakeDirection": "East"
+        }"#;
+
+        let level: LevelDefinition = serde_json::from_str(json).unwrap();
+        assert_eq!(level.exit_is_solid, None);
+    }
+
+    #[test]
+    fn test_level_state_from_definition_defaults_exit_is_solid_to_true() {
+        let mut level = LevelDefinition::new(
+            1,
+            "Test Level".to_string(),
+            GridSize::new(5, 5),
+            vec![Position::new(1, 1)],
+            vec![],
+            vec![Position::new(2, 2)],
+            Position::new(4, 4),
+            Direction::East,
+        );
+
+        level.exit_is_solid = None;
+        assert!(LevelState::from_definition(&level).exit_is_solid);
+
+        level.exit_is_solid = Some(true);
+        assert!(LevelState::from_definition(&level).exit_is_solid);
     }
 
     #[test]
