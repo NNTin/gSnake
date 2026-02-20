@@ -138,6 +138,7 @@ See `gsnake-web/packages/gsnake-web-app/engine/CLAUDE.md` for the canonical fram
 - **TypeScript strict mode** — no implicit any; use `import type` for type-only imports
 - **Error type** — errors are normalized to `ContractError { kind, message, context? }` and emitted as `engineError` events
 - **Test pattern** — `beforeEach` creates fresh instances; `afterEach` detaches listeners and restores mocks; use factory functions (`createLevel()`, `createFrame()`) for test data
+- **Fixture context-key contract checks** — in `gsnake-web/packages/gsnake-web-app/tests/contract/fixtures.test.ts`, validate `error.context` key names with a camelCase regex (`^[a-z][a-zA-Z0-9]*$`) rather than only checking value types.
 - **E2E custom-level determinism** — for Playwright coverage of specific `CellType` variants, load fixture levels through `levelsUrl` with a `data:application/json,...` URL in `e2e/contract.spec.ts` so tests are independent of mutable default levels and editor API availability.
 - **E2E progression determinism** — for gameplay-flow specs, drive completion with fixture-owned key sequences (for example `LEVEL_ONE_SOLUTION_KEYS`) and assert move totals from that sequence length so tests validate behavior against controlled level data instead of mutable defaults.
 - **E2E all-complete flow determinism** — for terminal-state coverage in `e2e/gravity.spec.ts`, use a single-level `levelsUrl` fixture, assert `All Levels Complete!`, then verify keyboard recovery (`q`) resets level/move counters to a playable level-1 state.
