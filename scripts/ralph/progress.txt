@@ -5,6 +5,7 @@
 - For `e2e/contract.spec.ts`, load deterministic fixture levels through `levelsUrl` using a `data:application/json,...` URL when asserting `CellType` coverage so tests are not coupled to mutable default levels or the editor API test server.
 - In the `gsnake-core` workspace, run package-targeted checks with `cargo ... -p gsnake-core` (hyphenated package name); `gsnake_core` is the Rust crate import path, not the Cargo package ID.
 - For `KeyboardHandler` unit coverage, set `gameState` per status (`Playing`, `GameOver`, `LevelComplete`, `AllComplete`) and assert side-effect exclusivity (`processMove` vs `restartLevel` vs `loadLevel`) so shortcut regressions are caught at state boundaries.
+- For `WasmGameEngine`, treat `loadLevel(levelNumber)` as a 1-based public API and keep regression tests for both `loadLevel(2)` happy path events and `loadLevel(0)` invalid-index rejection (`Invalid level index: -1`) to catch boundary drift.
 
 # Ralph Progress Log
 Started: Fri Feb 20 10:55:27 CET 2026
@@ -56,4 +57,15 @@ Started: Fri Feb 20 10:55:27 CET 2026
   - In keyboard-state tests, always set `gameState` explicitly before dispatch to avoid relying on prior test status.
   - Shortcut coverage should assert both the expected engine call and the absence of the other two engine actions.
   - For `gsnake-web-app` test-only updates, `npm --prefix gsnake-web/packages/gsnake-web-app run check && npm --prefix gsnake-web/packages/gsnake-web-app test` is a fast, sufficient quality gate.
+---
+
+## [2026-02-20 11:23:22 CET] - US-006
+- Added `WasmGameEngine` unit coverage for the public `loadLevel()` API, including a successful `loadLevel(2)` transition with `levelChanged`/`frameChanged` event assertions.
+- Added `init()` idempotency coverage to confirm a second `init()` call is a no-op that does not reinitialize the WASM bridge or replace loaded levels.
+- Added out-of-range boundary coverage to assert `loadLevel(0)` rejects via the expected invalid-index error path.
+- Files changed: `gsnake-web/packages/gsnake-web-app/tests/unit/WasmGameEngine.test.ts`, `gsnake-web/packages/gsnake-web-app/engine/CLAUDE.md`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`.
+- **Learnings for future iterations:**
+  - `WasmGameEngine.loadLevel(...)` is intentionally 1-based at the public boundary, so boundary tests should include both valid `2` and invalid `0`.
+  - Idempotent-init behavior is externally observable through unchanged `constructedLevels`, one-time wasm init calls, and retained `getLevels()` output.
+  - `gsnake-web-app` does not expose a `lint` script; use `npm --prefix gsnake-web/packages/gsnake-web-app run check` plus `npm --prefix gsnake-web/packages/gsnake-web-app test` for package-level quality gates.
 ---
