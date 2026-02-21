@@ -47,3 +47,8 @@ scripts/ralph/archive/
 
 .playwright-mcp/
 scripts/test/result.txt
+
+diff.txt
+
+tmp/
+.planning/
