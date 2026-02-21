@@ -1,7 +1,7 @@
 {
   "name": "gsnake-root",
   "private": true,
-  "version": "0.2.4",
+  "version": "0.2.5",
   "scripts": {
     "dev": "concurrently -n editor,web -c blue,green \"npm --prefix gsnake-editor run dev\" \"npm --prefix gsnake-web run dev\"",
     "generate:level-validator": "node scripts/contracts/generate-level-definition-validator.mjs",
