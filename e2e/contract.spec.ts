@@ -51,9 +51,13 @@ function getFixtureLevelsUrl(levels: LevelDefinition[]): string {
   return `data:application/json,${payload}`;
 }
 
+const CONTRACT_TEST_URL = `/?level=1&contractTest=1&levelsUrl=${encodeURIComponent(
+  getFixtureLevelsUrl([EXTENDED_VARIANT_FIXTURE_LEVEL])
+)}`;
+
 test.describe('Contract Payloads', () => {
   test('Cell types are strict enum strings', async ({ page }) => {
-    await page.goto('/?level=2&contractTest=1');
+    await page.goto(CONTRACT_TEST_URL);
 
     await page.waitForSelector('.cell');
 
@@ -75,7 +79,7 @@ test.describe('Contract Payloads', () => {
   });
 
   test('processMove updates frame payloads', async ({ page }) => {
-    await page.goto('/?level=2&contractTest=1');
+    await page.goto(CONTRACT_TEST_URL);
 
     await page.waitForFunction(() => (window as any).__gsnakeContract?.frame);
 
@@ -95,7 +99,7 @@ test.describe('Contract Payloads', () => {
   });
 
   test('Contract errors surface as typed payloads', async ({ page }) => {
-    await page.goto('/?level=2&contractTest=1');
+    await page.goto(CONTRACT_TEST_URL);
 
     await page.waitForFunction(() => (window as any).__gsnakeContract?.frame);
 
@@ -115,7 +119,7 @@ test.describe('Contract Payloads', () => {
 
 test.describe('Error Contract Tests', () => {
   test('inputRejected error on 180-degree turn', async ({ page }) => {
-    await page.goto('/?level=2&contractTest=1');
+    await page.goto(CONTRACT_TEST_URL);
 
     await page.waitForFunction(() => (window as any).__gsnakeContract?.frame);
 
@@ -140,7 +144,7 @@ test.describe('Error Contract Tests', () => {
   });
 
   test('error structure includes all required fields', async ({ page }) => {
-    await page.goto('/?level=2&contractTest=1');
+    await page.goto(CONTRACT_TEST_URL);
 
     await page.waitForFunction(() => (window as any).__gsnakeContract?.frame);
 
@@ -164,7 +168,7 @@ test.describe('Error Contract Tests', () => {
   });
 
   test('error uses camelCase for kind field', async ({ page }) => {
-    await page.goto('/?level=2&contractTest=1');
+    await page.goto(CONTRACT_TEST_URL);
 
     await page.waitForFunction(() => (window as any).__gsnakeContract?.frame);
 
@@ -192,7 +196,7 @@ test.describe('Error Contract Tests', () => {
 
 test.describe('Boundary Tests', () => {
   test('grid boundaries are respected', async ({ page }) => {
-    await page.goto('/?level=2&contractTest=1');
+    await page.goto(CONTRACT_TEST_URL);
 
     await page.waitForFunction(() => (window as any).__gsnakeContract?.frame);
 
@@ -209,7 +213,7 @@ test.describe('Boundary Tests', () => {
   });
 
   test('all grid cells contain valid CellType values', async ({ page }) => {
-    await page.goto('/?level=2&contractTest=1');
+    await page.goto(CONTRACT_TEST_URL);
 
     await page.waitForFunction(() => (window as any).__gsnakeContract?.frame);
 
@@ -224,8 +228,7 @@ test.describe('Boundary Tests', () => {
   });
 
   test('fixture level renders all extended CellType variants', async ({ page }) => {
-    const levelsUrl = encodeURIComponent(getFixtureLevelsUrl([EXTENDED_VARIANT_FIXTURE_LEVEL]));
-    await page.goto(`/?level=1&contractTest=1&levelsUrl=${levelsUrl}`);
+    await page.goto(CONTRACT_TEST_URL);
 
     await page.waitForFunction(() => (window as any).__gsnakeContract?.frame);
 
@@ -239,7 +242,7 @@ test.describe('Boundary Tests', () => {
   });
 
   test('GameState uses camelCase field names', async ({ page }) => {
-    await page.goto('/?level=2&contractTest=1');
+    await page.goto(CONTRACT_TEST_URL);
 
     await page.waitForFunction(() => (window as any).__gsnakeContract?.frame);
 
@@ -259,7 +262,7 @@ test.describe('Boundary Tests', () => {
   });
 
   test('GameState has valid number values', async ({ page }) => {
-    await page.goto('/?level=2&contractTest=1');
+    await page.goto(CONTRACT_TEST_URL);
 
     await page.waitForFunction(() => (window as any).__gsnakeContract?.frame);
 
@@ -278,7 +281,7 @@ test.describe('Boundary Tests', () => {
   });
 
   test('GameStatus enum uses PascalCase', async ({ page }) => {
-    await page.goto('/?level=2&contractTest=1');
+    await page.goto(CONTRACT_TEST_URL);
 
     await page.waitForFunction(() => (window as any).__gsnakeContract?.frame);
 
@@ -292,7 +295,7 @@ test.describe('Boundary Tests', () => {
   });
 
   test('Frame structure remains consistent across moves', async ({ page }) => {
-    await page.goto('/?level=2&contractTest=1');
+    await page.goto(CONTRACT_TEST_URL);
 
     await page.waitForFunction(() => (window as any).__gsnakeContract?.frame);
 
@@ -321,7 +324,7 @@ test.describe('Boundary Tests', () => {
   });
 
   test('exactly one SnakeHead exists in grid', async ({ page }) => {
-    await page.goto('/?level=2&contractTest=1');
+    await page.goto(CONTRACT_TEST_URL);
 
     await page.waitForFunction(() => (window as any).__gsnakeContract?.frame);
 
