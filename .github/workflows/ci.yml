@@ -84,8 +84,10 @@ jobs:
     name: WASM Build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout repository with submodules
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
@@ -113,9 +115,13 @@ jobs:
           path: gsnake-core/target
           key: ${{ runner.os }}-wasm-build-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Build WASM
-        run: wasm-pack build
-        working-directory: gsnake-core/engine/bindings/wasm
+      - name: Regenerate levels and build WASM
+        run: python3 scripts/build_wasm.py
+
+      - name: Verify generated artifacts are committed
+        run: |
+          git diff --exit-code -- gsnake-core/engine/core/data/levels.json
+          node scripts/verify_wasm_levels_sync.mjs
 
   gsnake-editor-test:
     name: gsnake-editor Tests

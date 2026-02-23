@@ -115,6 +115,7 @@ git clone --recurse-submodules https://github.com/nntin/gSnake.git
 
 # Build WASM
 python3 scripts/build_wasm.py
+# (Regenerates gsnake-core/engine/core/data/levels.json from gsnake-levels first)
 
 # Build web UI
 cd gsnake-web
