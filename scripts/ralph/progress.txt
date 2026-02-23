@@ -4,6 +4,7 @@
 - In `gsnake-levels` generation, normalize `LevelDefinition.total_food` during load so `generate-levels-json` always emits `totalFood` even when legacy source JSON omits it.
 - For `gsnake-levels generate-levels-json`, treat missing `totalFood` as a migration target: derive it, persist it back into the source level JSON, and keep explicit `totalFood` values unchanged.
 - For WASM/levels sync checks in CI, validate behavior (`getLevels()` equals `engine/core/data/levels.json`) instead of raw `pkg/*` diffs, because wasm-bindgen output can vary across toolchain environments.
+- For root-load E2E coverage, keep `e2e/fixtures/levels.json` schema-valid with per-level `totalFood`, because `scripts/build_fixture_wasm.sh` embeds it directly into fixture WASM used by CI.
 
 ## [2026-02-23 22:50:17 CET] - US-001
 - Implemented `totalFood` normalization in `gsnake-levels` generation: when a level omits `totalFood`, generator now derives it as `food.len() + floating_food.len() + falling_food.len()`; explicit values are preserved.
@@ -32,4 +33,13 @@
   - Treat `python3 scripts/build_wasm.py` as the canonical root flow when level data and WASM artifacts must stay aligned.
   - CI drift checks should assert functional parity (`getLevels()` vs `levels.json`) rather than byte-level pkg diffs across heterogeneous wasm-bindgen toolchains.
   - Browser verification is not required for this story because no UI code changed.
+---
+## [2026-02-23 23:26:04 CET] - US-004
+- Added a deterministic root-load Playwright guard in `e2e/root-startup.spec.ts` that visits `/`, polls for playable readiness (`game-field` cells + numeric level), and asserts startup error UI text is absent.
+- Migrated `e2e/fixtures/levels.json` to include `totalFood` for all fixture levels so fixture WASM startup on `/` matches schema requirements and no longer triggers `Level Load Failed` in CI.
+- Files changed: `e2e/root-startup.spec.ts`, `e2e/fixtures/levels.json`, `CLAUDE.md`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`.
+- **Learnings for future iterations:**
+  - Root-load E2E assertions are only trustworthy when fixture WASM source levels are contract-valid; missing `totalFood` in fixture levels causes deterministic startup failure.
+  - Deterministic startup checks should combine readiness signals and explicit absence checks for known failure UI text to keep regressions actionable.
+  - Browser verification was covered by Playwright in CI (`act -W .github/workflows/ci.yml -j e2e-test --container-architecture linux/amd64`), including the new root-load spec.
 ---

@@ -92,7 +92,8 @@
       "x": 13,
       "y": 13
     },
-    "snakeDirection": "East"
+    "snakeDirection": "East",
+    "totalFood": 1
   },
   {
     "id": 2,
@@ -227,7 +228,8 @@
       "x": 13,
       "y": 13
     },
-    "snakeDirection": "East"
+    "snakeDirection": "East",
+    "totalFood": 1
   },
   {
     "id": 3,
@@ -366,7 +368,8 @@
       "x": 13,
       "y": 13
     },
-    "snakeDirection": "East"
+    "snakeDirection": "East",
+    "totalFood": 5
   },
   {
     "id": 4,
@@ -649,7 +652,8 @@
       "x": 0,
       "y": 13
     },
-    "snakeDirection": "East"
+    "snakeDirection": "East",
+    "totalFood": 4
   },
   {
     "id": 5,
@@ -820,6 +824,7 @@
       "x": 7,
       "y": 3
     },
-    "snakeDirection": "East"
+    "snakeDirection": "East",
+    "totalFood": 4
   }
 ]
