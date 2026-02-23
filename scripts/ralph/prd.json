@@ -14,7 +14,7 @@
         "Tests pass"
       ],
       "priority": 1,
-      "passes": false,
+      "passes": true,
       "notes": "",
       "additionalInformation": {
         "Severity": "High",
@@ -38,7 +38,7 @@
         "Tests pass"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "",
       "additionalInformation": {
         "Severity": "Medium",
@@ -62,7 +62,7 @@
         "Tests pass"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "",
       "additionalInformation": {
         "Severity": "High",
@@ -87,7 +87,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "",
       "additionalInformation": {
         "Severity": "High",
@@ -111,7 +111,7 @@
         "Tests pass"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "",
       "additionalInformation": {
         "Severity": "Medium",
@@ -136,7 +136,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "",
       "additionalInformation": {
         "Severity": "Medium",
@@ -160,7 +160,7 @@
         "Tests pass"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": "",
       "additionalInformation": {
         "Severity": "Low",
@@ -184,7 +184,7 @@
         "Tests pass"
       ],
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "notes": "",
       "additionalInformation": {
         "Severity": "Medium",
@@ -206,7 +206,7 @@
         "Typecheck passes"
       ],
       "priority": 9,
-      "passes": false,
+      "passes": true,
       "notes": "",
       "additionalInformation": {
         "Severity": "Medium",
@@ -229,7 +229,7 @@
         "Tests pass"
       ],
       "priority": 10,
-      "passes": false,
+      "passes": true,
       "notes": "",
       "additionalInformation": {
         "Severity": "Medium",
@@ -253,7 +253,7 @@
         "Tests pass"
       ],
       "priority": 11,
-      "passes": false,
+      "passes": true,
       "notes": "",
       "additionalInformation": {
         "Severity": "Low",
@@ -275,7 +275,7 @@
         "Typecheck passes"
       ],
       "priority": 12,
-      "passes": false,
+      "passes": true,
       "notes": "",
       "additionalInformation": {
         "Severity": "Low",
@@ -297,7 +297,7 @@
         "Typecheck passes"
       ],
       "priority": 13,
-      "passes": false,
+      "passes": true,
       "notes": "",
       "additionalInformation": {
         "Severity": "Low",
@@ -319,7 +319,7 @@
         "Typecheck passes"
       ],
       "priority": 14,
-      "passes": false,
+      "passes": true,
       "notes": "",
       "additionalInformation": {
         "Severity": "Low",
