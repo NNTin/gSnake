@@ -2,6 +2,7 @@
 - For `gsnake-levels validate-levels-toml`, keep validation output aggregated and deterministic (`[io]`, `[parse]`, `[validation]` with numbered lines) so one run reports all actionable issues and tests can assert stable CLI output.
 - For `gsnake-levels` playback generation, keep `sync-metadata` and `solve_level` aligned through `solver::solve_level_to_playback(...)` so playback JSON format cannot drift and per-level `cargo` subprocess overhead is avoided.
 - In `gsnake-levels` generation, normalize `LevelDefinition.total_food` during load so `generate-levels-json` always emits `totalFood` even when legacy source JSON omits it.
+- For `gsnake-levels generate-levels-json`, treat missing `totalFood` as a migration target: derive it, persist it back into the source level JSON, and keep explicit `totalFood` values unchanged.
 
 ## [2026-02-23 22:50:17 CET] - US-001
 - Implemented `totalFood` normalization in `gsnake-levels` generation: when a level omits `totalFood`, generator now derives it as `food.len() + floating_food.len() + falling_food.len()`; explicit values are preserved.
@@ -10,5 +11,14 @@
 - **Learnings for future iterations:**
   - `generate-levels-json` contract safety belongs in the load/normalization path so every downstream consumer (stdout JSON and redirected `levels.json`) gets consistent data.
   - Regenerating `gsnake-core/engine/core/data/levels.json` from `gsnake-levels` can produce a large diff when the source level set has diverged; validate schema after regeneration before committing.
+  - Browser verification is not required for this story because no UI code changed.
+---
+## [2026-02-23 22:54:58 CET] - US-002
+- Implemented legacy `totalFood` migration in `gsnake-levels` generation: when a source level omits `totalFood`, generator derives it and writes the field back into the source JSON while keeping aggregated output normalized.
+- Preserved explicit `totalFood` values without source rewrites; extended generator tests to assert migrated source files for missing-field input and no-op behavior for explicit-field input.
+- Files changed: `gsnake-levels/src/generate.rs`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`, `CLAUDE.md`.
+- **Learnings for future iterations:**
+  - Keep missing-field normalization and source migration in the same load path so contract output and source hygiene do not drift.
+  - For explicit-value preservation, file-content before/after assertions are a simple guard against unintended rewrites.
   - Browser verification is not required for this story because no UI code changed.
 ---
