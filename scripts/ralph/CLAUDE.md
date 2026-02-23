@@ -93,6 +93,7 @@ If no browser tools are available, note in your progress report that manual brow
 
 - For `gsnake-levels validate-levels-toml`, keep validation output aggregated and deterministic (`[io]`, `[parse]`, `[validation]` with numbered lines) so one run reports all actionable issues and tests can assert stable CLI output.
 - For `gsnake-levels` playback generation, keep `sync-metadata` and `solve_level` aligned through `solver::solve_level_to_playback(...)` so playback JSON format cannot drift and per-level `cargo` subprocess overhead is avoided.
+- For `gsnake-levels generate-levels-json`, ensure `totalFood` is normalized at load time (`food + floatingFood + fallingFood` fallback) so generated `levels.json` always satisfies contract-required `totalFood`.
 
 ## Tooling for Agents
 

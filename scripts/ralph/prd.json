@@ -1,335 +1,68 @@
 {
   "project": "gSnake",
-  "description": "Remediate TypeScript engine-layer code review findings from gsnake-specs/tasks/code-review-ts-engine.md, prioritizing initialization safety, event lifecycle correctness, keyboard state handling, and robustness improvements.",
+  "description": "Align the level-generation contract across gsnake-levels, Rust/WASM, and gsnake-web so generated default levels always include valid totalFood data, startup on / works reliably, and regressions are blocked by E2E coverage.",
   "userStories": [
     {
       "id": "US-001",
-      "title": "Prevent concurrent WasmGameEngine init race conditions",
-      "description": "As a maintainer, I want `init()` to be concurrency-safe so duplicate initialization cannot run in parallel and leave engine state non-deterministic.",
+      "title": "Generate schema-compliant levels with totalFood",
+      "description": "As a game runtime consumer, I want generated levels to always include totalFood so startup validation succeeds across web and WASM consumers.",
       "acceptanceCriteria": [
-        "`WasmGameEngine.init()` sets an in-progress or initialized guard before the first await",
-        "A second `init()` call during in-flight initialization is rejected or returns early without re-running wasm setup",
-        "Guard state is reset correctly when initialization fails",
-        "Typecheck passes",
-        "Tests pass"
+        "gsnake-levels generator outputs totalFood for every generated level in gsnake-core/engine/core/data/levels.json",
+        "When source totalFood is missing, generator computes totalFood as food.length + floatingFood.length + fallingFood.length",
+        "Generated output remains valid against contracts/level-definition.schema.json",
+        "Tests pass",
+        "Typecheck passes"
       ],
       "priority": 1,
       "passes": true,
-      "notes": "",
-      "additionalInformation": {
-        "Severity": "High",
-        "File": [
-          "/home/nntin/git/gSnake/gsnake-web/packages/gsnake-web-app/engine/WasmGameEngine.ts:26-78"
-        ],
-        "Issue": "The initialized guard is checked before async work but `this.initialized = true` is set only after the await chain, allowing a second concurrent `init()` call to pass the guard and run in parallel.",
-        "Impact": "Parallel init calls can create multiple wasm engines, duplicate event emissions, leaked instances, and last-writer-wins store corruption.",
-        "Suggestion": "Set initialized or initInProgress immediately before the first await and clear it on failure."
-      }
+      "notes": ""
     },
     {
       "id": "US-002",
-      "title": "Validate getLevels wasm payload at runtime before use",
-      "description": "As a maintainer, I want `getLevels()` output validated with runtime guards so wasm/type drift fails fast with a clear contract error.",
+      "title": "Preserve explicit totalFood while migrating old level sources",
+      "description": "As a level author, I want old source definitions without totalFood to be updated automatically while preserving explicit values when already defined.",
       "acceptanceCriteria": [
-        "`WasmGameEngine.init()` no longer relies on `as unknown as LevelDefinition[]` without runtime validation",
-        "`getLevels()` output is validated with `isLevelArray` (or equivalent guard) before assignment",
-        "Invalid payload emits a clear initialization/contract error path",
-        "Typecheck passes",
-        "Tests pass"
+        "Generator keeps explicit source totalFood values unchanged",
+        "Generator auto-derives totalFood only for sources that omit the field",
+        "Legacy level sources without totalFood are updated as part of generation or migration workflow",
+        "Generator tests cover explicit and missing totalFood paths",
+        "Tests pass",
+        "Typecheck passes"
       ],
       "priority": 2,
-      "passes": true,
-      "notes": "",
-      "additionalInformation": {
-        "Severity": "Medium",
-        "File": [
-          "/home/nntin/git/gSnake/gsnake-web/packages/gsnake-web-app/engine/WasmGameEngine.ts:52"
-        ],
-        "Issue": "`getLevels() as unknown as LevelDefinition[]` bypasses type checking and trusts wasm output shape with no runtime guard.",
-        "Impact": "Schema drift between Rust and TS can surface as opaque runtime failures instead of explicit contract violations.",
-        "Suggestion": "Run `getLevels()` through `isLevelArray` and emit an initialization error when validation fails."
-      }
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-003",
-      "title": "Harden level-switch callback lifecycle for replaced RustEngine instances",
-      "description": "As a maintainer, I want stale `onFrame` callbacks from previous RustEngine instances to be ignored or cleaned up so old levels cannot overwrite current frame state.",
+      "title": "Synchronize WASM embedded levels after generation updates",
+      "description": "As a web player user, I want embedded default levels in WASM to match regenerated levels so startup behavior is deterministic.",
       "acceptanceCriteria": [
-        "`loadLevelByIndex` prevents stale callbacks from previously replaced engine instances from mutating stores",
-        "Old engine instance is explicitly cleaned up or safely detached when replaced",
-        "Level transitions cannot emit frame updates from prior generations",
-        "Typecheck passes",
-        "Tests pass"
+        "Workflow rebuilds WASM artifacts after generated levels update",
+        "gsnake-core/engine/bindings/wasm/pkg artifacts reflect regenerated level data",
+        "No manual patching of generated levels.json is required",
+        "Tests pass",
+        "Typecheck passes"
       ],
       "priority": 3,
-      "passes": true,
-      "notes": "",
-      "additionalInformation": {
-        "Severity": "High",
-        "File": [
-          "/home/nntin/git/gSnake/gsnake-web/packages/gsnake-web-app/engine/WasmGameEngine.ts:98-130"
-        ],
-        "Issue": "Old RustEngine `onFrame` callbacks are not unregistered before replacing `this.wasmEngine`, relying on a behavioral wasm assumption.",
-        "Impact": "Stale callbacks can inject wrong-level frames and potentially leak old engine resources.",
-        "Suggestion": "Detach/free old engine when available, or gate frame callbacks with a generation token so obsolete callbacks become no-ops."
-      }
+      "passes": false,
+      "notes": ""
     },
     {
       "id": "US-004",
-      "title": "Handle LevelComplete keyboard state with exhaustive status switching",
-      "description": "As a player, I want keyboard input to work in `LevelComplete` state so I can continue/reset consistently after finishing a level.",
+      "title": "Add root-load E2E guard for startup initialization errors",
+      "description": "As a QA engineer, I want an E2E test that validates root startup does not show initialization failure so this regression is caught in CI.",
       "acceptanceCriteria": [
-        "`KeyboardHandler.handleKeyPress` adds explicit `LevelComplete` behavior",
-        "Switch on `GameStatus` includes an exhaustiveness guard to fail compile-time on missing cases",
-        "Keyboard behavior for LevelComplete is covered by unit tests",
-        "Typecheck passes",
+        "E2E suite includes a test that visits / and waits for playable game readiness using deterministic checks",
+        "Test asserts startup error UI is absent, including text Level Load Failed",
+        "Test asserts startup error UI is absent, including text Failed to initialize game engine. Please reload and try again.",
         "Tests pass",
+        "Typecheck passes",
         "Verify in browser using dev-browser skill"
       ],
       "priority": 4,
-      "passes": true,
-      "notes": "",
-      "additionalInformation": {
-        "Severity": "High",
-        "File": [
-          "/home/nntin/git/gSnake/gsnake-web/packages/gsnake-web-app/engine/KeyboardHandler.ts:62-73"
-        ],
-        "Issue": "`GameStatus` includes `LevelComplete` but the keyboard switch has no `case \"LevelComplete\"`, so keypresses are silently dropped in that state.",
-        "Impact": "Players can become unable to proceed via keyboard after level completion in normal gameplay flows.",
-        "Suggestion": "Add a `LevelComplete` case and include a `never` exhaustiveness guard for future statuses."
-      }
-    },
-    {
-      "id": "US-005",
-      "title": "Add store-bridge listener cleanup to avoid duplicate subscriptions",
-      "description": "As a maintainer, I want `connectGameEngineToStores` to support teardown so repeated calls do not accumulate listeners and duplicate updates.",
-      "acceptanceCriteria": [
-        "`WasmGameEngine` exposes listener removal or equivalent deduplication behavior",
-        "`connectGameEngineToStores` returns or uses cleanup so repeated connects do not stack listeners",
-        "Repeated connection flows no longer cause duplicate frame/state store writes",
-        "Typecheck passes",
-        "Tests pass"
-      ],
-      "priority": 5,
-      "passes": true,
-      "notes": "",
-      "additionalInformation": {
-        "Severity": "Medium",
-        "File": [
-          "/home/nntin/git/gSnake/gsnake-web/packages/gsnake-web-app/stores/stores.ts:49-68"
-        ],
-        "Issue": "`connectGameEngineToStores` always adds listeners and there is no remove API, so reconnects stack handlers.",
-        "Impact": "HMR or repeated setup can cause multi-fire store updates, re-render churn, and inconsistent derived values.",
-        "Suggestion": "Add `removeEventListener` and return cleanup from the store bridge, or move to a single-listener model."
-      }
-    },
-    {
-      "id": "US-006",
-      "title": "Cancel engine-to-store side effects when App.svelte unmounts during init",
-      "description": "As a maintainer, I want mount lifecycle cancellation around initialization so unmounted components cannot leave zombie engines mutating global stores.",
-      "acceptanceCriteria": [
-        "`App.svelte` tracks cancellation or abort for in-flight init",
-        "Engine/store listeners are detached or made inert after `onDestroy`",
-        "Unmount during initialization does not leave ongoing frame/level store writes",
-        "Typecheck passes",
-        "Tests pass",
-        "Verify in browser using dev-browser skill"
-      ],
-      "priority": 6,
-      "passes": true,
-      "notes": "",
-      "additionalInformation": {
-        "Severity": "Medium",
-        "File": [
-          "/home/nntin/git/gSnake/gsnake-web/packages/gsnake-web-app/components/App.svelte:17-71"
-        ],
-        "Issue": "If destroy occurs before `init()` resolves, local UI state guard is respected but engine/store side effects can continue after unmount.",
-        "Impact": "Hot-reload or interrupted mount can leave zombie engine instances writing to global stores until refresh.",
-        "Suggestion": "Use abort/cancel signaling and ensure the engine-to-store listener path is torn down on destroy."
-      }
-    },
-    {
-      "id": "US-007",
-      "title": "Route async loadLevel/restartLevel failures through engine error handling",
-      "description": "As a maintainer, I want public async keyboard-triggered actions to handle rejections consistently so failures do not become unhandled promise rejections.",
-      "acceptanceCriteria": [
-        "`loadLevel` and `restartLevel` error paths are awaited/handled or internally normalized",
-        "Failures from invalid level requests are routed through engine error event flow",
-        "No unhandled promise rejection occurs from keyboard-triggered level actions",
-        "Typecheck passes",
-        "Tests pass"
-      ],
-      "priority": 7,
-      "passes": true,
-      "notes": "",
-      "additionalInformation": {
-        "Severity": "Low",
-        "File": [
-          "/home/nntin/git/gSnake/gsnake-web/packages/gsnake-web-app/engine/WasmGameEngine.ts:81-87"
-        ],
-        "Issue": "`loadLevel`/`restartLevel` are async wrappers called by keyboard code without await/catch, allowing silent rejected promises.",
-        "Impact": "Range or other async failures can bypass structured engine error reporting and surface only as console-level unhandled rejections.",
-        "Suggestion": "Either await and catch in keyboard flows or catch internally in wrappers and forward via `handleContractError`."
-      }
-    },
-    {
-      "id": "US-008",
-      "title": "Guard CompletionTracker writes against localStorage setItem exceptions",
-      "description": "As a maintainer, I want `markCompleted` to handle write failures safely so storage quota/private-mode errors do not crash reactive updates.",
-      "acceptanceCriteria": [
-        "`CompletionTracker.markCompleted` wraps `localStorage.setItem` in try/catch",
-        "When persistence fails, method behavior is deterministic and does not throw uncaught errors",
-        "Storage write-failure path is covered by unit tests",
-        "Typecheck passes",
-        "Tests pass"
-      ],
-      "priority": 8,
-      "passes": true,
-      "notes": "",
-      "additionalInformation": {
-        "Severity": "Medium",
-        "File": [
-          "/home/nntin/git/gSnake/gsnake-web/packages/gsnake-web-app/engine/CompletionTracker.ts:23-30"
-        ],
-        "Issue": "`markCompleted` calls `setItem` without try/catch even though `getCompletedLevels` already treats storage access as fallible.",
-        "Impact": "Quota/private-mode failures can produce uncaught DOMExceptions and destabilize reactive update flows.",
-        "Suggestion": "Wrap `setItem` in try/catch consistent with read-path error handling."
-      }
-    },
-    {
-      "id": "US-009",
-      "title": "Simplify normalizeStartLevel behavior documentation and branch clarity",
-      "description": "As a maintainer, I want explicit normalization intent for numeric vs string start-level inputs so fractional and non-positive handling is unsurprising.",
-      "acceptanceCriteria": [
-        "`normalizeStartLevel` behavior for fractional numeric input is documented inline",
-        "Implementation or comments explain parity between numeric and string validation branches",
-        "Typecheck passes"
-      ],
-      "priority": 9,
-      "passes": true,
-      "notes": "",
-      "additionalInformation": {
-        "Severity": "Medium",
-        "File": [
-          "/home/nntin/git/gSnake/gsnake-web/packages/gsnake-web-app/engine/WasmGameEngine.ts:140-156"
-        ],
-        "Issue": "Numeric and string normalization paths are correct but subtly different and under-documented, especially for fractional numeric values.",
-        "Impact": "Future callers may misinterpret accepted inputs and introduce maintenance bugs around start-level parsing.",
-        "Suggestion": "Add comments clarifying intentional rejection of fractional numeric input and optionally consolidate parsing strategy."
-      }
-    },
-    {
-      "id": "US-010",
-      "title": "Remove unreachable fallback branch in handleContractError",
-      "description": "As a maintainer, I want `handleContractError` control flow to match normalization guarantees so logging behavior is clear and dead code is eliminated.",
-      "acceptanceCriteria": [
-        "Unreachable fallback branch in `handleContractError` is removed or made meaningfully reachable by documented behavior",
-        "Error emission and logging behavior remains intentional and covered by tests",
-        "Typecheck passes",
-        "Tests pass"
-      ],
-      "priority": 10,
-      "passes": true,
-      "notes": "",
-      "additionalInformation": {
-        "Severity": "Medium",
-        "File": [
-          "/home/nntin/git/gSnake/gsnake-web/packages/gsnake-web-app/engine/WasmGameEngine.ts:221-240"
-        ],
-        "Issue": "`normalizeContractError` always returns a value, making the `contractError === null` console fallback branch dead code.",
-        "Impact": "Dead code obscures true error-handling behavior and confuses future maintenance.",
-        "Suggestion": "Remove the unreachable branch or explicitly support/document a null-return scenario."
-      }
-    },
-    {
-      "id": "US-011",
-      "title": "Make keyboard preventDefault flow explicit for movement keys",
-      "description": "As a maintainer, I want movement key prevention logic to be simple and explicit so future changes do not leave redundant or dead branches.",
-      "acceptanceCriteria": [
-        "Movement key `preventDefault` behavior is defined in one clear path",
-        "Redundant conditional prevent-default branch in `handlePlayingState` is simplified",
-        "Keyboard movement behavior remains unchanged in tests",
-        "Typecheck passes",
-        "Tests pass"
-      ],
-      "priority": 11,
-      "passes": true,
-      "notes": "",
-      "additionalInformation": {
-        "Severity": "Low",
-        "File": [
-          "/home/nntin/git/gSnake/gsnake-web/packages/gsnake-web-app/engine/KeyboardHandler.ts:89-95"
-        ],
-        "Issue": "WASD and arrow-key preventDefault handling is split between unconditional and conditional paths, creating unnecessary complexity.",
-        "Impact": "Not explicitly stated in the source review; inferred impact is maintainability risk and potential dead-branch confusion in future edits.",
-        "Suggestion": "Include WASD in the unconditional prevent-default list and simplify to an unconditional call in playing-state handling."
-      }
-    },
-    {
-      "id": "US-012",
-      "title": "Document intentional keyboard-to-store coupling in KeyboardHandler",
-      "description": "As a maintainer, I want the direct store subscription in `KeyboardHandler` to be explicitly documented so architectural coupling is understood and test setup assumptions stay clear.",
-      "acceptanceCriteria": [
-        "`KeyboardHandler` includes a concise comment documenting why it subscribes to `gameState` directly",
-        "Comment explains tradeoff and test implication for `currentStatus` source",
-        "Typecheck passes"
-      ],
-      "priority": 12,
-      "passes": true,
-      "notes": "",
-      "additionalInformation": {
-        "Severity": "Low",
-        "File": [
-          "/home/nntin/git/gSnake/gsnake-web/packages/gsnake-web-app/engine/KeyboardHandler.ts:28-31"
-        ],
-        "Issue": "Engine layer class directly depends on store module subscription, creating tight coupling and test sensitivity to store defaults.",
-        "Impact": "Low-risk architectural coupling can cause brittle tests and hidden assumptions if store defaults change.",
-        "Suggestion": "Keep current design but add explicit inline rationale for direct store subscription."
-      }
-    },
-    {
-      "id": "US-013",
-      "title": "Plan direct snakeLength exposure from engine state to avoid grid scans",
-      "description": "As a maintainer, I want snake length exposed directly from engine state so UI updates avoid full-grid scans each frame as levels scale.",
-      "acceptanceCriteria": [
-        "A documented implementation path exists to provide snake length directly from engine/game state",
-        "Store derivation path can consume direct snake length when available",
-        "Typecheck passes"
-      ],
-      "priority": 13,
-      "passes": true,
-      "notes": "",
-      "additionalInformation": {
-        "Severity": "Low",
-        "File": [
-          "/home/nntin/git/gSnake/gsnake-web/packages/gsnake-web-app/stores/stores.ts:70-79"
-        ],
-        "Issue": "`snakeLength` is derived by scanning all grid cells on each frame instead of reading a direct engine-provided value.",
-        "Impact": "Current impact is negligible on small grids but introduces avoidable per-frame CPU overhead for larger grids.",
-        "Suggestion": "Expose `snakeLength` in `GameState` from Rust and consume it directly in stores."
-      }
-    },
-    {
-      "id": "US-014",
-      "title": "Reduce repeated localStorage parse churn in CompletionTracker.isCompleted",
-      "description": "As a maintainer, I want `isCompleted` lookups to avoid repeated full storage reads/parses so completion checks remain efficient and aligned with store state.",
-      "acceptanceCriteria": [
-        "`CompletionTracker.isCompleted` avoids repeated parse-on-every-call behavior or explicitly defers UI callers to store state",
-        "Two-source-of-truth behavior between localStorage and store is documented or reduced",
-        "Typecheck passes"
-      ],
-      "priority": 14,
-      "passes": true,
-      "notes": "",
-      "additionalInformation": {
-        "Severity": "Low",
-        "File": [
-          "/home/nntin/git/gSnake/gsnake-web/packages/gsnake-web-app/engine/CompletionTracker.ts:19-21"
-        ],
-        "Issue": "`isCompleted` re-reads and parses localStorage on every call even though a completion store already exists in UI state.",
-        "Impact": "Minor performance overhead and maintainability risk from duplicated sources of truth.",
-        "Suggestion": "Memoize reads or prefer store-driven UI checks where appropriate."
-      }
+      "passes": false,
+      "notes": ""
     }
   ]
 }

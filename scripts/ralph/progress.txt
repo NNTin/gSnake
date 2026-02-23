@@ -1,0 +1,14 @@
+## Codebase Patterns
+- For `gsnake-levels validate-levels-toml`, keep validation output aggregated and deterministic (`[io]`, `[parse]`, `[validation]` with numbered lines) so one run reports all actionable issues and tests can assert stable CLI output.
+- For `gsnake-levels` playback generation, keep `sync-metadata` and `solve_level` aligned through `solver::solve_level_to_playback(...)` so playback JSON format cannot drift and per-level `cargo` subprocess overhead is avoided.
+- In `gsnake-levels` generation, normalize `LevelDefinition.total_food` during load so `generate-levels-json` always emits `totalFood` even when legacy source JSON omits it.
+
+## [2026-02-23 22:50:17 CET] - US-001
+- Implemented `totalFood` normalization in `gsnake-levels` generation: when a level omits `totalFood`, generator now derives it as `food.len() + floating_food.len() + falling_food.len()`; explicit values are preserved.
+- Added generator unit coverage for both derived and explicit `totalFood` paths; regenerated `gsnake-core/engine/core/data/levels.json`; validated generated levels against `contracts/level-definition.schema.json`.
+- Files changed: `gsnake-levels/src/generate.rs`, `gsnake-core/engine/core/data/levels.json`, `scripts/ralph/prd.json`, `scripts/ralph/progress.txt`.
+- **Learnings for future iterations:**
+  - `generate-levels-json` contract safety belongs in the load/normalization path so every downstream consumer (stdout JSON and redirected `levels.json`) gets consistent data.
+  - Regenerating `gsnake-core/engine/core/data/levels.json` from `gsnake-levels` can produce a large diff when the source level set has diverged; validate schema after regeneration before committing.
+  - Browser verification is not required for this story because no UI code changed.
+---
