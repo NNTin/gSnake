@@ -11,8 +11,8 @@ type SnakeRenderSnapshot = {
 
 const CELL_SELECTOR = '[data-element-id="game-field"] .cell';
 
-async function uploadTestLevel(request: APIRequestContext, levelData: LevelDefinition) {
-  const response = await request.post('http://localhost:3001/api/test-level', {
+async function uploadTestLevel(request: APIRequestContext, levelData: LevelDefinition, runId: string) {
+  const response = await request.post(`http://localhost:3001/api/test-level?run=${encodeURIComponent(runId)}`, {
     data: levelData,
     headers: {
       Origin: 'http://localhost:3003'
@@ -121,7 +121,7 @@ test.describe('Snake drawing bug fixes', () => {
     };
 
     await test.step('Upload and render first snake', async () => {
-      await uploadTestLevel(request, firstSnake);
+      await uploadTestLevel(request, firstSnake, 'first');
       await openTestLevel(page, 'first');
       const firstSnapshot = await expectRenderedSnake(page, firstSnake);
       expect(firstSnapshot.snake).toEqual(sortPositions(firstSnake.snake));
@@ -150,7 +150,7 @@ test.describe('Snake drawing bug fixes', () => {
     };
 
     await test.step('Upload second snake and ensure stale cells are cleared', async () => {
-      await uploadTestLevel(request, secondSnake);
+      await uploadTestLevel(request, secondSnake, 'second');
       await openTestLevel(page, 'second');
 
       const secondSnapshot = await expectRenderedSnake(page, secondSnake);
