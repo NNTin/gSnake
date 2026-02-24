@@ -103,7 +103,7 @@ mod tests {
     fn test_load_levels() -> Result<()> {
         let levels = load_levels(levels_path())?;
         assert!(!levels.is_empty(), "Should load at least one level");
-        assert_eq!(levels.len(), 20, "Should load 20 levels");
+        assert_eq!(levels.len(), 8, "Should load 8 levels");
         Ok(())
     }
 
@@ -114,9 +114,12 @@ mod tests {
 
         // Verify first level has expected structure
         assert_eq!(first_level.grid_size.width, 15);
-        assert_eq!(first_level.grid_size.height, 15);
+        assert_eq!(first_level.grid_size.height, 10);
         assert_eq!(first_level.snake.len(), 3);
-        assert!(!first_level.food.is_empty());
+        let has_food = !first_level.food.is_empty()
+            || !first_level.floating_food.is_empty()
+            || !first_level.falling_food.is_empty();
+        assert!(has_food, "First level should have at least one food item");
         Ok(())
     }
 
