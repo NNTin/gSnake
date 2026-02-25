@@ -460,8 +460,8 @@ jobs:
             fi
           done
 
-  gsnake-web-code-quality:
-    name: gsnake-web Code Quality Badges
+  gsnake-code-quality:
+    name: Code Quality Badges
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
@@ -477,19 +477,34 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: gsnake-web/package-lock.json
+          cache-dependency-path: |
+            gsnake-web/package-lock.json
+            gsnake-editor/package-lock.json
 
       - name: Install gsnake-web dependencies
         run: npm ci
         working-directory: gsnake-web
 
-      - name: Run knip (JSON output)
+      - name: Install gsnake-editor dependencies
+        run: npm ci
+        working-directory: gsnake-editor
+
+      - name: Run knip on gsnake-web (JSON output)
         working-directory: gsnake-web
         run: |
-          npx knip --reporter json --no-exit-code > /tmp/knip-output.json 2>/dev/null || true
+          npx knip --reporter json --no-exit-code > /tmp/web-knip.json 2>/dev/null || true
 
-      - name: Run jscpd (JSON output)
+      - name: Run jscpd on gsnake-web (JSON output)
         working-directory: gsnake-web
+        run: npm run jscpd
+
+      - name: Run knip on gsnake-editor (JSON output)
+        working-directory: gsnake-editor
+        run: |
+          npx knip --reporter json --no-exit-code > /tmp/editor-knip.json 2>/dev/null || true
+
+      - name: Run jscpd on gsnake-editor (JSON output)
+        working-directory: gsnake-editor
         run: npm run jscpd
 
       - name: Compute badge metrics and push to badges branch
@@ -498,33 +513,43 @@ jobs:
         run: |
           set -euo pipefail
 
-          # --- knip: count all array-typed issue categories ---
-          KNIP_ISSUES=$(jq '[to_entries[] | .value | if type == "array" then length else 0 end] | add // 0' /tmp/knip-output.json)
+          badge_color_knip() {
+            local n="$1"
+            if   [ "$n" -eq 0 ]; then echo "brightgreen"
+            elif [ "$n" -le 5 ]; then echo "yellow"
+            elif [ "$n" -le 20 ]; then echo "orange"
+            else echo "red"
+            fi
+          }
 
-          if   [ "$KNIP_ISSUES" -eq 0 ]; then KNIP_COLOR="brightgreen"
-          elif [ "$KNIP_ISSUES" -le 5 ]; then KNIP_COLOR="yellow"
-          elif [ "$KNIP_ISSUES" -le 20 ]; then KNIP_COLOR="orange"
-          else KNIP_COLOR="red"
-          fi
+          badge_color_jscpd() {
+            local pct_int="$1"
+            if   [ "$pct_int" -lt 3  ]; then echo "brightgreen"
+            elif [ "$pct_int" -lt 10 ]; then echo "yellow"
+            elif [ "$pct_int" -lt 20 ]; then echo "orange"
+            else echo "red"
+            fi
+          }
 
-          # --- jscpd: extract duplication percentage ---
-          JSCPD_JSON="gsnake-web/jscpd-report/jscpd-report.json"
-          JSCPD_PCT=$(jq '.statistics.total.percentage // 0' "$JSCPD_JSON")
-          JSCPD_DISPLAY=$(printf "%.1f%%" "$JSCPD_PCT")
-          JSCPD_INT=$(printf "%.0f" "$JSCPD_PCT")
-
-          if   [ "$JSCPD_INT" -lt 3  ]; then JSCPD_COLOR="brightgreen"
-          elif [ "$JSCPD_INT" -lt 10 ]; then JSCPD_COLOR="yellow"
-          elif [ "$JSCPD_INT" -lt 20 ]; then JSCPD_COLOR="orange"
-          else JSCPD_COLOR="red"
-          fi
-
-          # --- Write badge JSON files ---
           mkdir -p /tmp/badges
-          printf '{"schemaVersion":1,"label":"dead code","message":"%s issues","color":"%s"}\n' \
-            "$KNIP_ISSUES" "$KNIP_COLOR" > /tmp/badges/dead-code.json
-          printf '{"schemaVersion":1,"label":"duplication","message":"%s","color":"%s"}\n' \
-            "$JSCPD_DISPLAY" "$JSCPD_COLOR" > /tmp/badges/duplication.json
+
+          for pkg in web editor; do
+            KNIP_JSON="/tmp/${pkg}-knip.json"
+            JSCPD_JSON="gsnake-${pkg}/jscpd-report/jscpd-report.json"
+
+            KNIP_N=$(jq '[to_entries[] | .value | if type == "array" then length else 0 end] | add // 0' "$KNIP_JSON")
+            KNIP_COLOR=$(badge_color_knip "$KNIP_N")
+
+            JSCPD_PCT=$(jq '.statistics.total.percentage // 0' "$JSCPD_JSON")
+            JSCPD_DISPLAY=$(printf "%.1f%%" "$JSCPD_PCT")
+            JSCPD_INT=$(printf "%.0f" "$JSCPD_PCT")
+            JSCPD_COLOR=$(badge_color_jscpd "$JSCPD_INT")
+
+            printf '{"schemaVersion":1,"label":"dead code","message":"%s issues","color":"%s"}\n' \
+              "$KNIP_N" "$KNIP_COLOR" > "/tmp/badges/${pkg}-dead-code.json"
+            printf '{"schemaVersion":1,"label":"duplication","message":"%s","color":"%s"}\n' \
+              "$JSCPD_DISPLAY" "$JSCPD_COLOR" > "/tmp/badges/${pkg}-duplication.json"
+          done
 
           # --- Force-push orphaned badges branch (no history) ---
           cd /tmp/badges

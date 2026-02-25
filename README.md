@@ -2,8 +2,8 @@
 
 [![Deploy](https://github.com/NNTin/gSnake/actions/workflows/deploy.yml/badge.svg)](https://github.com/NNTin/gSnake/actions/workflows/deploy.yml)
 [![License](https://img.shields.io/badge/license-All%20Rights%20Reserved-red.svg)](LICENSE)
-[![Dead Code](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/NNTin/gSnake/badges/dead-code.json)](https://github.com/NNTin/gSnake/actions/workflows/ci.yml)
-[![Duplication](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/NNTin/gSnake/badges/duplication.json)](https://github.com/NNTin/gSnake/actions/workflows/ci.yml)
+**gsnake-web** [![Dead Code](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/NNTin/gSnake/badges/web-dead-code.json)](https://github.com/NNTin/gSnake/actions/workflows/ci.yml) [![Duplication](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/NNTin/gSnake/badges/web-duplication.json)](https://github.com/NNTin/gSnake/actions/workflows/ci.yml)
+**gsnake-editor** [![Dead Code](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/NNTin/gSnake/badges/editor-dead-code.json)](https://github.com/NNTin/gSnake/actions/workflows/ci.yml) [![Duplication](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/NNTin/gSnake/badges/editor-duplication.json)](https://github.com/NNTin/gSnake/actions/workflows/ci.yml)
 
 **Play now:** [nntin.xyz/gSnake](http://nntin.xyz/gSnake/)
 
