@@ -460,6 +460,82 @@ jobs:
             fi
           done
 
+  gsnake-web-code-quality:
+    name: gsnake-web Code Quality Badges
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout repository with submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: gsnake-web/package-lock.json
+
+      - name: Install gsnake-web dependencies
+        run: npm ci
+        working-directory: gsnake-web
+
+      - name: Run knip (JSON output)
+        working-directory: gsnake-web
+        run: |
+          npx knip --reporter json --no-exit-code > /tmp/knip-output.json 2>/dev/null || true
+
+      - name: Run jscpd (JSON output)
+        working-directory: gsnake-web
+        run: npm run jscpd
+
+      - name: Compute badge metrics and push to badges branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          # --- knip: count all array-typed issue categories ---
+          KNIP_ISSUES=$(jq '[to_entries[] | .value | if type == "array" then length else 0 end] | add // 0' /tmp/knip-output.json)
+
+          if   [ "$KNIP_ISSUES" -eq 0 ]; then KNIP_COLOR="brightgreen"
+          elif [ "$KNIP_ISSUES" -le 5 ]; then KNIP_COLOR="yellow"
+          elif [ "$KNIP_ISSUES" -le 20 ]; then KNIP_COLOR="orange"
+          else KNIP_COLOR="red"
+          fi
+
+          # --- jscpd: extract duplication percentage ---
+          JSCPD_JSON="gsnake-web/jscpd-report/jscpd-report.json"
+          JSCPD_PCT=$(jq '.statistics.total.percentage // 0' "$JSCPD_JSON")
+          JSCPD_DISPLAY=$(printf "%.1f%%" "$JSCPD_PCT")
+          JSCPD_INT=$(printf "%.0f" "$JSCPD_PCT")
+
+          if   [ "$JSCPD_INT" -lt 3  ]; then JSCPD_COLOR="brightgreen"
+          elif [ "$JSCPD_INT" -lt 10 ]; then JSCPD_COLOR="yellow"
+          elif [ "$JSCPD_INT" -lt 20 ]; then JSCPD_COLOR="orange"
+          else JSCPD_COLOR="red"
+          fi
+
+          # --- Write badge JSON files ---
+          mkdir -p /tmp/badges
+          printf '{"schemaVersion":1,"label":"dead code","message":"%s issues","color":"%s"}\n' \
+            "$KNIP_ISSUES" "$KNIP_COLOR" > /tmp/badges/dead-code.json
+          printf '{"schemaVersion":1,"label":"duplication","message":"%s","color":"%s"}\n' \
+            "$JSCPD_DISPLAY" "$JSCPD_COLOR" > /tmp/badges/duplication.json
+
+          # --- Force-push orphaned badges branch (no history) ---
+          cd /tmp/badges
+          git init
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git checkout --orphan badges
+          git add .
+          git commit -m "Update badges [skip ci]"
+          git push --force \
+            "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}" \
+            HEAD:badges
+
   required-merge-gates:
     name: Required Merge Gates
     if: ${{ always() && github.event_name == 'pull_request' }}
