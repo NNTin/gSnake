@@ -464,6 +464,8 @@ jobs:
     name: gsnake-web Code Quality Badges
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
     steps:
       - name: Checkout repository with submodules
         uses: actions/checkout@v4
